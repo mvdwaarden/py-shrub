@@ -1,0 +1,1 @@
+call .\sbin\format.cmd SHRUB_util SHRUB_mgmt SHRUB_batch SHRUB_sec

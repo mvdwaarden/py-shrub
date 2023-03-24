@@ -1,0 +1,13 @@
+parameters:
+- name: project
+  type: string
+- name: artefact_package
+  type: string
+
+steps:
+- bash: |
+    python -m shrub_devops.main -get-version "${{ parameters.project }}"
+    export TMP_VAL=$(cat shrub_devops.out)
+    echo "##vso[task.setvariable variable=version;isOutput=true]$TMP_VAL"
+  name: artefact_info
+  displayName: "Determine artefact info for ${{ parameters.artefact_package }} using version from project ${{ parameters.project }})"

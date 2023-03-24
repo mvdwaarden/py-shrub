@@ -1,0 +1,4 @@
+template_dir: init_repo
+name: SHRUB_test_repo
+description: Shrubbery test repository
+dry_run: true

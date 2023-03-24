@@ -1,0 +1,46 @@
+parameters:
+- name: python_projects
+  type: object
+  default: []
+- name: tarball
+  type: string
+- name: artefact_feed
+  type: string
+- name: artefact_package
+  type: string
+- name: artefact_version
+  type: string
+
+steps:
+- ${{ each python_project in parameters.python_projects }}:
+    - bash: |
+        mkdir dist
+        cd "${{ python_project }}"
+        python setup.py sdist bdist_wheel
+        pip wheel --wheel-dir=./dist -r ./requirements/default.txt
+        cp ./dist/*.* ../dist
+        cd ..      
+      displayName: "Collect ${{ python_project }} distribution"
+- bash: |
+    tar -czvf "${{ parameters.tarball }}" ./dist
+  name: distribution_create_tarball
+  displayName: "Create distribution tarball ${{ parameters.tarball }}"
+
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: '${{ parameters.tarball }}'
+    artifactName: '${{ parameters.artefact_package }} tarball'
+  displayName: 'Publish tarball ${{ parameters.tarball }} to pipeline'
+
+- task: UniversalPackages@0
+  inputs:
+    command: 'publish'
+    publishDirectory: './dist'
+    feedsToUsePublish: 'internal'
+    vstsFeedPublish: '${{ parameters.artefact_feed }}'
+    vstsFeedPackagePublish: '${{  parameters.artefact_package }}'
+    versionOption: 'custom'
+    versionPublish: '${{ parameters.artefact_version }}'
+    packagePublishDescription: 'Tarball for ${{ parameters.artefact_package }}'
+    verbosity: 'debug'
+  displayName: 'Publish  ${{ parameters.artefact_package }} artefact'

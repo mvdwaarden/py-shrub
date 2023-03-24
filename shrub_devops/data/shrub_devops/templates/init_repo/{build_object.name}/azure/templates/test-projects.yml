@@ -1,0 +1,12 @@
+parameters:
+- name: python_projects
+  type: object
+  default: []
+
+steps:
+- ${{ each python_project in parameters.python_projects }}:
+  - script: |
+      cd "${{ python_project }}"
+      pytest tests --doctest-modules --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+      cd ..
+    displayName: 'Test project ${{ python_project}}'

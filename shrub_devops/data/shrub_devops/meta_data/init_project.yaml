@@ -1,0 +1,7 @@
+template_dir: init_project
+name: SHRUB_test
+description: Shrubbery test project
+author: Shrubbery support team
+author-email: mvdwaarden@gmail.com
+version: 1.1.2
+dry_run: true

@@ -1,0 +1,1 @@
+call ..\sbin\init_project.cmd shrub_util

@@ -1,0 +1,20 @@
+# Generic project distribution batch file
+# - From project folder call ..\sbin\distribute.cmd <main project name> [list of dependent projects names]
+#   f.e. ..\sbin\distribute.cmd shrub_devops shrub_util
+echo "consolidate into dist folder"
+mkdir dist
+rm -rf dist/* 
+for folder in shrub_util shrub_devops; do
+    echo "change to $folder"
+    cd $folder
+    mkdir dist
+    rm -rf dist/* 
+    python setup.py sdist bdist_wheel
+    pip wheel --wheel-dir=./dist -r ./requirements/default.txt
+    echo "consolidate into dist folder"
+    cp dist/* ../dist
+    rm -rf dist/*
+    rmdir dist
+    cd ..
+done
+

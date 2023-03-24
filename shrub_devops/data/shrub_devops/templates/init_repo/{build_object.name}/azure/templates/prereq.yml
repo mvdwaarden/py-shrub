@@ -1,0 +1,16 @@
+parameters:
+  python_version: '3.6'
+steps:
+- checkout: self
+
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '$(python_version)'
+  displayName: 'Use Python $(python_version)'
+
+- script: |
+    pip install pytest
+    pip install pytest-cov
+    pip install twine keyring artifacts-keyring
+    pip install wheel
+  displayName: 'Install Python dependencies'

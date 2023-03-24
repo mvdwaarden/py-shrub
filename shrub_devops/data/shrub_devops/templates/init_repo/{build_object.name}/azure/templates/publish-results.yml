@@ -1,0 +1,17 @@
+parameters:
+  python_version: '3.6'
+  
+steps:
+- task: PublishTestResults@2
+  condition: succeededOrFailed()
+  inputs:
+    testResultsFiles: '**/test-*.xml'
+    testRunTitle: 'Publish test results for Python $(python_version)'
+  displayName: 'Publish test results for Python $(python_version)'
+
+- task: PublishCodeCoverageResults@1
+  inputs:
+    codeCoverageTool: Cobertura
+    summaryFileLocation: '**/coverage.xml'
+    reportDirectory: '**/htmlcov'
+  displayName: 'Publish code coverage for Python $(python_version)'

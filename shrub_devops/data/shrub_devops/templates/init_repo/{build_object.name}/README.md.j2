@@ -1,0 +1,295 @@
+# [{{ build_object.name }}] - {{ build_object.description }}
+## Introduction 
+This GIT repo is a multi project MONO repository. This readme contains \
+the following sections: 
+- Prerequisites
+- Manifest - WoW
+- Choices
+- Overview
+- Generic project structure
+- Modules
+- Virtual Environments
+
+## Prerequisites
+### Minimal versions : 
+- Python version 3.6
+- pip version 20.1
+- Stay calm
+
+### Configuration
+Make sure that you can run pip commands. Otherwise check pip configuration at https://pip.pypa.io/en/stable/user_guide/#configuration
+<br>
+Default pip.ini located at:
+- Windows: at %APPDATA%\pip
+- Linux/macOS: $HOME/.pip/pip.conf 
+The configuration below fixes the certificate problems for standard
+pip locations
+```
+[global]
+trusted-host = 
+	https://pypi.org
+	https://files.pythonhosted.org
+	http://pypi.org
+	http://files.pythonhosted.org
+	files.pythonhosted.org
+	pypi.org
+```
+
+Check pip version
+```
+pip --version
+```
+
+Update pip version
+```
+python -m pip install --upgrade pip
+```
+
+## Manifest - WoW
+- We want to develop fast
+- We want to delivery high quality software
+- We want maintainable code
+
+## Choices
+#### We use Python **virtual environments**:
+* Allow composition of projects into ONE virtual environment.   
+* Fast switching between different python and pip module versions. 
+#### We use a multi project MONO repository:
+* ```pip install -e .``` on a repository allows fast development and testing. 
+The _-e_  option allows **inplace** code editing **WITHOUT** reinstalling a project as a module.
+* A the start of the project, structure may change. Smooth refactoring is done easiest in a 
+MONO repository, since the whole repository can be opened from ONE IDE project (f.e. PyCharm, VCode). 
+#### We separate source and test artifacts: 
+* The production code is NOT _poluted_ with test code.
+* In the future we might distribute a project as **pip** module. 
+
+## Overview
+![](README_overview.png)
+
+## Generic structure **per** project 
+The generic projects structure looks like this:
+```
+/mono repo/
+├── azure
+│   ├── templates
+│   │   ├── <template 1>
+│   │   └── <template n>
+│   └── <project>_azure_pipelines.yaml
+├── sbin
+│   ├── init_project.cmd (generic project initialization)
+│   └── distribute.cmd (generic project initialization)
+├── project
+│   ├── sbin
+│   │   ├── init_project.cmd (optional, should call ../sbin/init_project.cmd)
+│   │   └── distribute.cmd (optional, should call ../sbin/distribute.cmd)
+│   ├── src
+│   │   └── <project name>
+│   ├── tests
+│   ├── data
+│   │   └── <project name>
+│   ├── requirements
+│   │   ├── default.txt (optional)
+│   │   └── install.txt (optional)
+│   ├── README.md
+│   └── setup.py
+└── <other projects> ... etc...
+```
+
+In detail :
+```
+/this repo/
+├── azure
+│   ├── templates
+│   │   ├── prereq-steps.yml
+│   │   ├── report-steps.yml
+│   │   ├── test-steps.yml
+│   │   └── tox-steps.yml
+│   └── <project>_azure_pipelines.yaml
+├── sbin
+│   ├── init_project.cmd (generic project initialization)
+│   └── distribute.cmd (generic project distribution)
+├── project - generic structure
+│   ├── sbin
+│   │   ├── init_project.cmd (optional, typically calls ../sbin/init_project.cmd)
+│   │   └── distribute.cmd (optional, typicall calls ../sbin/distribute.cmd)
+│   ├── src
+│   │   └── <project name>
+│   │       ├── __init__.py
+│   │       ├── package_info.py
+│   │       ├── package1
+│   │       │   ├── subpackage_a
+│   │       │   │   ├── __init__.py
+│   │       │   │   ├── file1.py
+│   │       │   │   └── file2.py
+│   │       │   └── subpackage_b
+│   │       │       ├── __init__.py
+│   │       │       ├── file3.py
+│   │       │       └── file4.py
+│   │       └── package2
+│   │           ├── subpackage_c
+│   │           │   ├── __init__.py
+│   │           │   ├── file5.py
+│   │           │   └── file6.py
+│   │           └── subpackage_d
+│   │               ├── __init__.py
+│   │               ├── file7.py
+│   │               └── file8.py
+│   ├── tests
+│   │   ├── __init__.py
+│   │   ├── package1
+│   │   │   ├── subpackage_a
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── test_file1.py
+│   │   │   │   └── test_file2.py
+│   │   │   └── subpackage_b
+│   │   │       ├── __init__.py
+│   │   │       ├── test_file3.py
+│   │   │       └── test_file4.py
+│   │   └── package2
+│   │       ├── subpackage_c
+│   │       │   ├── __init__.py
+│   │       │   ├── test_file5.py
+│   │       │   └── test_file6.py
+│   │       └── subpackage_d
+│   │           ├── __init__.py
+│   │           ├── test_file7.py
+│   │           └── test_file8.py
+│   ├── data
+│   │   └── <project name>
+│   ├── requirements
+│   │   ├── default.txt
+│   │   └── install.txt
+│   ├── README.md
+│   └── setup.py
+└── another project - generic structure ... etc...
+```
+- _sbin_ : script files (startup folder is the project folder)
+- init_project.cmd (optional): initialize the project on Windows
+- distribute.cmd (optional): create distribution on Windows
+- _src_ : source files, use hierarchy to group and order code
+- package_info.py, file to contain package info (used by setup.py)
+- _tests_ : unit test files. Mirror the _src_ hierarchy - **_WITHOUT_ the projectname** -  and prefix all 
+filenames with **test_** 
+- _data_ : data files, like configuration and resources
+- _requirements_
+- default.txt : project **pip** dependencies
+- install.txt : installation **pip** dependencies
+- README.md : something like 'this'
+- setup.py : contains information for packaging and ```pip install -e .```
+
+### Example for package.info
+```
+"""Package metadata."""
+__title__ = "<project_name>"
+
+__package_name__ = __title__
+
+__author__ = "ex parrot"
+
+__description__ = "<some nice description>"
+
+__author_email__ = "ex_parrot@python.org"
+
+# The following numbers are overriden by the build process.
+
+__version__ = "2.4.0"
+__build__ = "000001"
+```
+### Exampe for setup.py
+```
+from setuptools import setup, find_namespace_packages
+from pathlib import Path
+parent_dir = Path(__file__).parent
+
+# Get the version info in package_info.py
+full_filename = parent_dir / "src" / project / "package_info.py"
+install_requirements = parent_dir / "requirements" / "install.txt"
+
+package_info_vars = {}
+with full_filename.open("r", encoding="utf-8") as f:
+    exec(f.read(), package_info_vars)
+
+with install_requirements.open("r", encoding="utf-8") as f:
+    requires = f.read().splitlines()
+
+setup(
+    name=package_info_vars["__title__"],
+    version=package_info_vars["__version__"],
+    description=package_info_vars["__description__"],
+    author=package_info_vars["__author__"],
+    install_requires=requires,
+    data_files=[
+        (f"data/{project}", [
+            f"data/{package_info_vars['__package_name__']}/config.ini",
+            f"data/{package_info_vars['__package_name__']}/log-config.yaml"])
+    ],    
+    author_email=package_info_vars["__author_email__"],
+    package_dir={"": "src"},
+    include_package_data=True,
+    packages=find_namespace_packages(where="src"),
+    # disable until setuptools_scm version check is fixed or we have implemented a work-around
+    # use_scm_version={
+    #    "root": "..",
+    #    "relative_to": __file__
+    # },
+    # setup_requires=['setuptools_scm'],
+    classifiers=[
+        "Programming Language :: Python :: 3"
+    ],
+    python_requires='>=3.6'
+)
+```
+
+### References and good reads
+We cherry picked information from : 
+- https://realpython.com/python-application-layouts/
+- https://realpython.com/python-code-quality/#
+- https://realpython.com/python-cli-testing/py
+- https://docs.pytest.org/en/latest/goodpractices.html
+- https://blog.ionelmc.ro/2014/05/25/python-packaging/#the-structure
+- https://hynek.me/articles/testing-packaging/
+
+## Directory structure 
+- {{ build_object.name }}  : {{ build_object.description }}
+- [project] : [description]
+
+## Modules
+### Overview
+
+### build_object.name - [build_object.name]
+{{ build_object.description }}
+
+
+## Virtual Environment
+Use either _PyCharm_ or **virtualenv** to creat a _virtual environment_. You can have
+multiple virtual environments. You should use sbin\init_project.cmd to initialize 
+the projects virtual environment
+
+### DYI
+From terminal window run :
+```
+virtualenv venv-<project component name without archi>
+```
+You should then have an extra folder called venv.
+### Activate the virtual environment
+For PyCharm it works out of the box.
+
+For Visual Studio Code it works out of the box, when configured properly.
+
+For Windows/DOS run:
+```
+venv-<...>\Scripts\activate.cmd
+```
+For PowerShell run: 
+```
+venv-<...>\Scripts\activate.cmd
+```
+For Linux/Bash  (MacOSX) run:
+```
+source ./venv-<...>/bin/activate
+```
+### Deactivate the virtual environment
+All environments
+```
+deactivate
+```

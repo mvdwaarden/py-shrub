@@ -1,0 +1,19 @@
+parameters:
+  version: 0.1.0
+  feed: 'py-archi/shrub_devops'
+steps:
+- task: UniversalPackages@0
+  inputs:
+    command: 'download'
+    downloadDirectory: 'downloads/shrub_devops'
+    feedsToUsePublish: 'internal'
+    vstsFeed: ${{ parameters.feed }}
+    vstsFeedPackage: 'shrub_devops-release'
+    vstsPackageVersion: ${{ parameters.version }}
+    verbosity: 'debug'
+  displayName: 'Download Python repository artefact'
+
+- script: |
+    python -m pip install --upgrade pip
+    pip install pyrepo --find-links ./downloads/pyrepo --no-index
+  displayName: 'Install Architecture devops artefact'

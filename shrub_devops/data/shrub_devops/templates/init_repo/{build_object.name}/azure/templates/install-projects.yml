@@ -1,0 +1,12 @@
+parameters:
+- name: python_projects
+  type: object
+  default: []
+
+steps:
+- ${{ each python_project in parameters.python_projects }}:
+  - script: |
+      cd ../"${{ python_project }}"
+      pip install -e .
+      cd ..
+    displayName: 'Install project ${{ python_project}}'

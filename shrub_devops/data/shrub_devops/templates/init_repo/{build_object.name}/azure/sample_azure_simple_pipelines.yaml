@@ -1,0 +1,72 @@
+# Python package
+# Create and test a Python package on multiple Python versions.
+# Add steps that analyze code, save the dist with the build record, publish to a PyPI-compatible index, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/python
+
+   
+trigger:
+- develop
+
+pool:
+  vmImage: 'ubuntu-latest'
+strategy:
+  matrix:
+    python36:
+      python_version: '3.6'
+      shrub-devops-version: 0.1.0
+      main_project: SHRUB_main
+      publish_artifact_feed: 'CDD/archi'
+      publish_artifact_package: SHRUB_main
+
+steps:
+- template: ./templates/prereq.yml
+  parameters:
+    python_version: $(python_version)
+
+- template: ./templates/install-shrub_devops.yml
+  parameters:
+    version: $(shrub-devops-version)
+
+- template: ./templates/install-projects.yml
+  parameters:
+    python_projects:
+    - SHRUB_main
+    - SHRUB_sub1
+    - SHRUB_sub2
+
+- template: ./templates/test-projects.yml
+  parameters:
+    python_projects:
+    - SHRUB_main
+    - SHRUB_sub1
+    - SHRUB_sub2
+
+- template: ./templates/publish-results.yml
+  parameters:
+    python_version: $(python_version)
+
+- template: ./templates/determine-artefact-info.yml
+  parameters:
+    project: $(main_project)
+    artefact_package: $(publish_artifact_package)
+
+- template: ./templates/create-distribution.yml
+  parameters:
+    python_projects:
+    - SHRUB_main
+    - SHRUB_sub1
+    - SHRUB_sub2
+    tarball:  $(publish_artifact_package).tar.gz
+    artefact_feed: $(publish_artifact_feed)
+    artefact_package: $(publish_artifact_package)
+    artefact_version: $(artefact_info.version)
+
+- task: TwineAuthenticate@1
+  inputs:
+    artifactFeed: $(publish_artifact_feed)
+
+- script: |
+    twine upload -r archi --skip-existing --config-file $(PYPIRC_PATH) ./dist/$(main_project)*
+  displayName: 'Upload $(main_project) to Python repository'
+
+

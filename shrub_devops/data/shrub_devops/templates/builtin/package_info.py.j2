@@ -1,0 +1,17 @@
+"""Package metadata."""
+
+__title__ = "{{ build_object.name }}"
+
+__package_name__ = __title__
+
+__author__ = "{{ build_object.author }}"
+
+__description__ = "{{ build_object.description }}"
+
+__author_email__ = "{{ build_object.author_email }}"
+
+# The following numbers are overriden by the build process.
+
+__version__ = "{{ build_object.version.major }}.{{ build_object.version.minor }}.{{ build_object.version.patch }}"
+
+__build__ = "{{ build_object.version.build }}"
