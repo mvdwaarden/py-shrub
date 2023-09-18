@@ -1,0 +1,3 @@
+xmlschema
+owlready2
+rdflib

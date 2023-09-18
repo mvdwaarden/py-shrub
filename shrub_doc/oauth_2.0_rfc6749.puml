@@ -1,0 +1,56 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+participant cln [
+    =Client<confidential|public>
+    ----
+    Has registration
+    with authorization server. It
+    typically has a registration with
+    the authorization server
+]
+participant res_owner [
+    =Resource Owner
+    ----
+    An entity capable of granting access
+    to a protected resource. When the
+    resource owner is a person, it is
+    referred to as an end-user
+]
+participant auth_svc [
+    =Authorization Server
+    ----
+    The server issuing access tokens to
+    the client after successfully
+    authenticating the resource owner
+    and obtaining authorization.
+]
+participant res_svc [
+    =Resource Server
+    ----
+    The server hosting the protected resources,
+    capable of accepting and responding to
+    protected resource requests using
+    access tokens.
+]
+
+' autonumber
+
+alt Abstract Protocol Flow
+    cln -> res_owner: Authorization Request
+    res_owner -> cln: Authorization Grant (code, implicit, password credential, client credential)
+    cln -> auth_svc : Authorization Grant
+    auth_svc -> cln : Access Token
+    cln -> res_svc: Access Token
+    res_svc -> cln: Protected Resource
+else Refresh an Expired Access Token (with Grant)
+    cln -> auth_svc : Authorization Grant
+    auth_svc -> cln : Access Token & Refresh Token
+    cln -> res_svc : Access Token
+    res_svc -> cln : Protected Resource
+    cln -> res_svc : Access Token
+    res_svc -> cln : Invalid Token Error
+    cln -> auth_svc : Refresh Token
+    auth_svc -> cln : Access Token & Optional Refresh Token
+end
+@enduml

@@ -1,0 +1,671 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://mando/technology/oauth#"
+     xml:base="http://mando/technology/oauth"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:oauth="http://mando/technology/oauth#">
+    <owl:Ontology rdf:about="http://mando/technology/oauth"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://mando/technology/oauth#approved_by -->
+
+    <owl:ObjectProperty rdf:about="http://mando/technology/oauth#approved_by">
+        <rdfs:subPropertyOf rdf:resource="http://mando/technology/oauth#definitions"/>
+        <rdfs:domain rdf:resource="http://mando/technology/oauth#Access_Token"/>
+        <rdfs:range rdf:resource="http://mando/technology/oauth#Resource_Owner"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://mando/technology/oauth#authenticates_with -->
+
+    <owl:ObjectProperty rdf:about="http://mando/technology/oauth#authenticates_with">
+        <rdfs:subPropertyOf rdf:resource="http://mando/technology/oauth#definitions"/>
+        <rdfs:domain rdf:resource="http://mando/technology/oauth#Resource_Owner"/>
+        <rdfs:range rdf:resource="http://mando/technology/oauth#Authentication_Server"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://mando/technology/oauth#controlled_by -->
+
+    <owl:ObjectProperty rdf:about="http://mando/technology/oauth#controlled_by">
+        <rdfs:subPropertyOf rdf:resource="http://mando/technology/oauth#definitions"/>
+        <rdfs:domain rdf:resource="http://mando/technology/oauth#Resources"/>
+        <rdfs:range rdf:resource="http://mando/technology/oauth#Resource_Owner"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://mando/technology/oauth#definitions -->
+
+    <owl:ObjectProperty rdf:about="http://mando/technology/oauth#definitions">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://mando/technology/oauth#delegates_authentication_to -->
+
+    <owl:ObjectProperty rdf:about="http://mando/technology/oauth#delegates_authentication_to">
+        <rdfs:subPropertyOf rdf:resource="http://mando/technology/oauth#definitions"/>
+        <rdfs:domain rdf:resource="http://mando/technology/oauth#Authorization_Server"/>
+        <rdfs:range rdf:resource="http://mando/technology/oauth#Authentication_Server"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://mando/technology/oauth#flow -->
+
+    <owl:ObjectProperty rdf:about="http://mando/technology/oauth#flow"/>
+    
+
+
+    <!-- http://mando/technology/oauth#gives -->
+
+    <owl:ObjectProperty rdf:about="http://mando/technology/oauth#gives">
+        <rdfs:subPropertyOf rdf:resource="http://mando/technology/oauth#definitions"/>
+        <rdfs:domain rdf:resource="http://mando/technology/oauth#Access_Token"/>
+        <rdfs:range rdf:resource="http://mando/technology/oauth#Access"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://mando/technology/oauth#gives_access_to -->
+
+    <owl:ObjectProperty rdf:about="http://mando/technology/oauth#gives_access_to">
+        <rdfs:subPropertyOf rdf:resource="http://mando/technology/oauth#definitions"/>
+        <rdfs:domain rdf:resource="http://mando/technology/oauth#Access"/>
+        <rdfs:range rdf:resource="http://mando/technology/oauth#Resources"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://mando/technology/oauth#granted_to -->
+
+    <owl:ObjectProperty rdf:about="http://mando/technology/oauth#granted_to">
+        <rdfs:subPropertyOf rdf:resource="http://mando/technology/oauth#definitions"/>
+        <rdfs:domain rdf:resource="http://mando/technology/oauth#Access"/>
+        <rdfs:range rdf:resource="http://mando/technology/oauth#Client"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://mando/technology/oauth#grants -->
+
+    <owl:ObjectProperty rdf:about="http://mando/technology/oauth#grants">
+        <rdfs:subPropertyOf rdf:resource="http://mando/technology/oauth#definitions"/>
+        <rdfs:domain rdf:resource="http://mando/technology/oauth#Resource_Owner"/>
+        <rdfs:range rdf:resource="http://mando/technology/oauth#Access"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://mando/technology/oauth#hosted_on -->
+
+    <owl:ObjectProperty rdf:about="http://mando/technology/oauth#hosted_on">
+        <rdfs:subPropertyOf rdf:resource="http://mando/technology/oauth#definitions"/>
+        <rdfs:domain rdf:resource="http://mando/technology/oauth#Resources"/>
+        <rdfs:range rdf:resource="http://mando/technology/oauth#Resource_Server"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://mando/technology/oauth#involves -->
+
+    <owl:ObjectProperty rdf:about="http://mando/technology/oauth#involves">
+        <rdfs:subPropertyOf rdf:resource="http://mando/technology/oauth#definitions"/>
+        <rdfs:domain rdf:resource="http://mando/technology/oauth#Approval_Interaction"/>
+        <rdfs:range>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://mando/technology/oauth#Resource_Owner"/>
+                    <rdf:Description rdf:about="http://mando/technology/oauth#Resource_Server"/>
+                </owl:intersectionOf>
+            </owl:Class>
+        </rdfs:range>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://mando/technology/oauth#is_trusted_by -->
+
+    <owl:ObjectProperty rdf:about="http://mando/technology/oauth#is_trusted_by">
+        <rdfs:subPropertyOf rdf:resource="http://mando/technology/oauth#definitions"/>
+        <rdfs:domain rdf:resource="http://mando/technology/oauth#Authorization_Server"/>
+        <rdfs:range rdf:resource="http://mando/technology/oauth#Resource_Server"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://mando/technology/oauth#issued_by -->
+
+    <owl:ObjectProperty rdf:about="http://mando/technology/oauth#issued_by">
+        <rdfs:subPropertyOf rdf:resource="http://mando/technology/oauth#definitions"/>
+        <rdfs:domain rdf:resource="http://mando/technology/oauth#Access_Token"/>
+        <rdfs:range rdf:resource="http://mando/technology/oauth#Authorization_Server"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://mando/technology/oauth#issued_to -->
+
+    <owl:ObjectProperty rdf:about="http://mando/technology/oauth#issued_to">
+        <rdfs:subPropertyOf rdf:resource="http://mando/technology/oauth#definitions"/>
+        <rdfs:domain rdf:resource="http://mando/technology/oauth#Access_Token"/>
+        <rdfs:range rdf:resource="http://mando/technology/oauth#Client"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://mando/technology/oauth#obtains -->
+
+    <owl:ObjectProperty rdf:about="http://mando/technology/oauth#obtains">
+        <rdfs:subPropertyOf rdf:resource="http://mando/technology/oauth#definitions"/>
+        <rdfs:domain rdf:resource="http://mando/technology/oauth#Third_Party_Application"/>
+        <rdfs:range rdf:resource="http://mando/technology/oauth#Access"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://mando/technology/oauth#orchestrates -->
+
+    <owl:ObjectProperty rdf:about="http://mando/technology/oauth#orchestrates">
+        <rdfs:subPropertyOf rdf:resource="http://mando/technology/oauth#definitions"/>
+        <rdfs:domain rdf:resource="http://mando/technology/oauth#OAuth_2.0_Authorization_Framework"/>
+        <rdfs:range rdf:resource="http://mando/technology/oauth#Approval_Interaction"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://mando/technology/oauth#receive_protected_resource_request -->
+
+    <owl:ObjectProperty rdf:about="http://mando/technology/oauth#receive_protected_resource_request">
+        <rdfs:subPropertyOf rdf:resource="http://mando/technology/oauth#receives"/>
+        <rdfs:domain rdf:resource="http://mando/technology/oauth#Client"/>
+        <rdfs:range rdf:resource="http://mando/technology/oauth#Protected_Resource_Request"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://mando/technology/oauth#receives -->
+
+    <owl:ObjectProperty rdf:about="http://mando/technology/oauth#receives">
+        <rdfs:subPropertyOf rdf:resource="http://mando/technology/oauth#flow"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://mando/technology/oauth#receives_access_token -->
+
+    <owl:ObjectProperty rdf:about="http://mando/technology/oauth#receives_access_token">
+        <rdfs:subPropertyOf rdf:resource="http://mando/technology/oauth#receives"/>
+        <rdfs:domain rdf:resource="http://mando/technology/oauth#Client"/>
+        <rdfs:range rdf:resource="http://mando/technology/oauth#Access_Token"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://mando/technology/oauth#receives_authorization_request -->
+
+    <owl:ObjectProperty rdf:about="http://mando/technology/oauth#receives_authorization_request">
+        <rdfs:subPropertyOf rdf:resource="http://mando/technology/oauth#receives"/>
+        <rdfs:domain>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://mando/technology/oauth#Authorization_Server"/>
+                    <rdf:Description rdf:about="http://mando/technology/oauth#Resource_Owner"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:domain>
+        <rdfs:range rdf:resource="http://mando/technology/oauth#Authorization_Request"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://mando/technology/oauth#receives_authorization_response -->
+
+    <owl:ObjectProperty rdf:about="http://mando/technology/oauth#receives_authorization_response">
+        <rdfs:subPropertyOf rdf:resource="http://mando/technology/oauth#receives"/>
+        <rdfs:domain rdf:resource="http://mando/technology/oauth#Client"/>
+        <rdfs:range rdf:resource="http://mando/technology/oauth#Authorization_Grant"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://mando/technology/oauth#receives_request_access_token -->
+
+    <owl:ObjectProperty rdf:about="http://mando/technology/oauth#receives_request_access_token">
+        <rdfs:subPropertyOf rdf:resource="http://mando/technology/oauth#receives"/>
+        <rdfs:domain rdf:resource="http://mando/technology/oauth#Authorization_Server"/>
+        <rdfs:range rdf:resource="http://mando/technology/oauth#Request_Access_Token"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://mando/technology/oauth#request_access_to -->
+
+    <owl:ObjectProperty rdf:about="http://mando/technology/oauth#request_access_to">
+        <rdfs:subPropertyOf rdf:resource="http://mando/technology/oauth#definitions"/>
+        <rdfs:domain rdf:resource="http://mando/technology/oauth#Client"/>
+        <rdfs:range rdf:resource="http://mando/technology/oauth#Resources"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://mando/technology/oauth#request_authorization_from -->
+
+    <owl:ObjectProperty rdf:about="http://mando/technology/oauth#request_authorization_from">
+        <rdfs:subPropertyOf rdf:resource="http://mando/technology/oauth#flow"/>
+        <rdfs:domain rdf:resource="http://mando/technology/oauth#Client"/>
+        <rdfs:range rdf:resource="http://mando/technology/oauth#Resource_Owner"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://mando/technology/oauth#send_protected_resource_response -->
+
+    <owl:ObjectProperty rdf:about="http://mando/technology/oauth#send_protected_resource_response">
+        <rdfs:subPropertyOf rdf:resource="http://mando/technology/oauth#sends"/>
+        <rdfs:domain rdf:resource="http://mando/technology/oauth#Resource_Server"/>
+        <rdfs:range rdf:resource="http://mando/technology/oauth#Protected_Resource_Response"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://mando/technology/oauth#sends -->
+
+    <owl:ObjectProperty rdf:about="http://mando/technology/oauth#sends">
+        <rdfs:subPropertyOf rdf:resource="http://mando/technology/oauth#flow"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://mando/technology/oauth#sends_access_token -->
+
+    <owl:ObjectProperty rdf:about="http://mando/technology/oauth#sends_access_token">
+        <rdfs:subPropertyOf rdf:resource="http://mando/technology/oauth#sends"/>
+        <rdfs:domain rdf:resource="http://mando/technology/oauth#Authorization_Server"/>
+        <rdfs:range rdf:resource="http://mando/technology/oauth#Access_Token"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://mando/technology/oauth#sends_authorization_request -->
+
+    <owl:ObjectProperty rdf:about="http://mando/technology/oauth#sends_authorization_request">
+        <rdfs:subPropertyOf rdf:resource="http://mando/technology/oauth#sends"/>
+        <rdfs:domain rdf:resource="http://mando/technology/oauth#Client"/>
+        <rdfs:range rdf:resource="http://mando/technology/oauth#Authorization_Request"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://mando/technology/oauth#sends_authorization_response -->
+
+    <owl:ObjectProperty rdf:about="http://mando/technology/oauth#sends_authorization_response">
+        <rdfs:subPropertyOf rdf:resource="http://mando/technology/oauth#sends"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://mando/technology/oauth#sends_request_access_token -->
+
+    <owl:ObjectProperty rdf:about="http://mando/technology/oauth#sends_request_access_token">
+        <rdfs:subPropertyOf rdf:resource="http://mando/technology/oauth#sends"/>
+        <rdfs:domain rdf:resource="http://mando/technology/oauth#Client"/>
+        <rdfs:range rdf:resource="http://mando/technology/oauth#Authorization_Server"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://mando/technology/oauth#uses -->
+
+    <owl:ObjectProperty rdf:about="http://mando/technology/oauth#uses">
+        <rdfs:subPropertyOf rdf:resource="http://mando/technology/oauth#definitions"/>
+        <rdfs:domain rdf:resource="http://mando/technology/oauth#Client"/>
+        <rdfs:range rdf:resource="http://mando/technology/oauth#Access_Token"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://mando/technology/oauth#Access -->
+
+    <owl:Class rdf:about="http://mando/technology/oauth#Access">
+        <rdfs:comment>The OAuth 2.0 authorization framework enables a third-party application to obtain limited access to an HTTP service, either on behalf of a resource owner by orchestrating an approval interaction between the resource owner and the HTTP service, or by allowing the third-party application to obtain access on its own behalf.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://mando/technology/oauth#Access_Token -->
+
+    <owl:Class rdf:about="http://mando/technology/oauth#Access_Token">
+        <rdfs:subClassOf rdf:resource="http://mando/technology/oauth#Response"/>
+        <rdfs:comment>A string denoting a specific scope, lifetime, and other access attributes.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://mando/technology/oauth#Approval_Interaction -->
+
+    <owl:Class rdf:about="http://mando/technology/oauth#Approval_Interaction">
+        <rdfs:comment>The OAuth 2.0 authorization framework enables a third-party application to obtain limited access to an HTTP service, either on behalf of a resource owner by orchestrating an approval interaction between the resource owner and the HTTP service, or by allowing the third-party application to obtain access on its own behalf.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://mando/technology/oauth#Authentication_Server -->
+
+    <owl:Class rdf:about="http://mando/technology/oauth#Authentication_Server"/>
+    
+
+
+    <!-- http://mando/technology/oauth#Authorization_Grant -->
+
+    <owl:Class rdf:about="http://mando/technology/oauth#Authorization_Grant">
+        <rdfs:subClassOf rdf:resource="http://mando/technology/oauth#Response"/>
+    </owl:Class>
+    
+
+
+    <!-- http://mando/technology/oauth#Authorization_Request -->
+
+    <owl:Class rdf:about="http://mando/technology/oauth#Authorization_Request">
+        <rdfs:subClassOf rdf:resource="http://mando/technology/oauth#Requests"/>
+    </owl:Class>
+    
+
+
+    <!-- http://mando/technology/oauth#Authorization_Server -->
+
+    <owl:Class rdf:about="http://mando/technology/oauth#Authorization_Server">
+        <rdfs:subClassOf rdf:resource="http://mando/technology/oauth#OAuth_Role"/>
+        <rdfs:comment>The server issuing access tokens to the client after successfully authenticating the resource owner and obtaining authorization.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://mando/technology/oauth#Client -->
+
+    <owl:Class rdf:about="http://mando/technology/oauth#Client">
+        <rdfs:subClassOf rdf:resource="http://mando/technology/oauth#OAuth_Role"/>
+        <rdfs:comment>A client may be implemented as a distributed set of components, each with a different client type and security context (e.g., a distributed client with both a confidential server-based component and a public browser-based component).  If the authorization server does not provide support for such clients or does not provide guidance with regard to their registration, the client SHOULD register each component as a separate client.</rdfs:comment>
+        <rdfs:comment>An application making protected resource requests on behalf of the resource owner and with its authorization.  The term &quot;client&quot; does not imply any particular implementation characteristics (e.g., whether the application executes on a server, a desktop, or other devices).</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://mando/technology/oauth#Client_Identifier -->
+
+    <owl:Class rdf:about="http://mando/technology/oauth#Client_Identifier">
+        <rdfs:comment>The authorization server issues the registered client a client identifier -- a unique string representing the registration information provided by the client.  The client identifier is not a secret; it is exposed to the resource owner and MUST NOT be used alone for client authentication.  The client identifier is unique to the authorization server.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://mando/technology/oauth#Confidential_Client -->
+
+    <owl:Class rdf:about="http://mando/technology/oauth#Confidential_Client">
+        <rdfs:subClassOf rdf:resource="http://mando/technology/oauth#Client"/>
+        <rdfs:comment>Clients capable of maintaining the confidentiality of their credentials (e.g., client implemented on a secure server with restricted access to the client credentials), or capable of secure client authentication using other means.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://mando/technology/oauth#End_User -->
+
+    <owl:Class rdf:about="http://mando/technology/oauth#End_User">
+        <rdfs:subClassOf rdf:resource="http://mando/technology/oauth#Resource_Owner"/>
+    </owl:Class>
+    
+
+
+    <!-- http://mando/technology/oauth#HTTP_Service -->
+
+    <owl:Class rdf:about="http://mando/technology/oauth#HTTP_Service">
+        <rdfs:subClassOf rdf:resource="http://mando/technology/oauth#Resource_Server"/>
+        <rdfs:comment>The OAuth 2.0 authorization framework enables a third-party application to obtain limited access to an HTTP service, either on behalf of a resource owner by orchestrating an approval interaction between the resource owner and the HTTP service, or by allowing the third-party application to obtain access on its own behalf.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://mando/technology/oauth#Limited_Access -->
+
+    <owl:Class rdf:about="http://mando/technology/oauth#Limited_Access">
+        <rdfs:subClassOf rdf:resource="http://mando/technology/oauth#Access"/>
+    </owl:Class>
+    
+
+
+    <!-- http://mando/technology/oauth#Native_Application -->
+
+    <owl:Class rdf:about="http://mando/technology/oauth#Native_Application">
+        <rdfs:subClassOf rdf:resource="http://mando/technology/oauth#Public_Client"/>
+        <rdfs:comment>A native application is a public client installed and executed on the device used by the resource owner.  Protocol data and credentials are accessible to the resource owner.  It is assumed that any client authentication credentials included in the application can be extracted.  On the other hand, dynamically issued credentials such as access tokens or refresh tokens can receive an acceptable level of protection.  At a minimum, these credentials are protected from hostile servers with which the application may interact.  On some platforms, these credentials might be protected from other applications residing on the same device.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://mando/technology/oauth#OAuth_2.0_Authorization_Framework -->
+
+    <owl:Class rdf:about="http://mando/technology/oauth#OAuth_2.0_Authorization_Framework">
+        <rdfs:comment>The OAuth 2.0 authorization framework enables a third-party application to obtain limited access to an HTTP service, either on behalf of a resource owner by orchestrating an approval interaction between the resource owner and the HTTP service, or by allowing the third-party application to obtain access on its own behalf.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="https://datatracker.ietf.org/doc/html/rfc6749"/>
+    </owl:Class>
+    
+
+
+    <!-- http://mando/technology/oauth#OAuth_Role -->
+
+    <owl:Class rdf:about="http://mando/technology/oauth#OAuth_Role"/>
+    
+
+
+    <!-- http://mando/technology/oauth#PhotoSharing_Service -->
+
+    <owl:Class rdf:about="http://mando/technology/oauth#PhotoSharing_Service">
+        <rdfs:subClassOf rdf:resource="http://mando/technology/oauth#Resource_Server"/>
+    </owl:Class>
+    
+
+
+    <!-- http://mando/technology/oauth#Printing_Service -->
+
+    <owl:Class rdf:about="http://mando/technology/oauth#Printing_Service">
+        <rdfs:subClassOf rdf:resource="http://mando/technology/oauth#Client"/>
+    </owl:Class>
+    
+
+
+    <!-- http://mando/technology/oauth#Protected_Photos -->
+
+    <owl:Class rdf:about="http://mando/technology/oauth#Protected_Photos">
+        <rdfs:subClassOf rdf:resource="http://mando/technology/oauth#Resources"/>
+    </owl:Class>
+    
+
+
+    <!-- http://mando/technology/oauth#Protected_Resource_Request -->
+
+    <owl:Class rdf:about="http://mando/technology/oauth#Protected_Resource_Request">
+        <rdfs:subClassOf rdf:resource="http://mando/technology/oauth#Requests"/>
+    </owl:Class>
+    
+
+
+    <!-- http://mando/technology/oauth#Protected_Resource_Response -->
+
+    <owl:Class rdf:about="http://mando/technology/oauth#Protected_Resource_Response">
+        <rdfs:subClassOf rdf:resource="http://mando/technology/oauth#Response"/>
+    </owl:Class>
+    
+
+
+    <!-- http://mando/technology/oauth#Public_Client -->
+
+    <owl:Class rdf:about="http://mando/technology/oauth#Public_Client">
+        <rdfs:subClassOf rdf:resource="http://mando/technology/oauth#Client"/>
+        <rdfs:comment>Clients incapable of maintaining the confidentiality of their credentials (e.g., clients executing on the device used by the resource owner, such as an installed native application or a web browser-based application), and incapable of secure client authentication via any other means.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://mando/technology/oauth#Request_Access_Token -->
+
+    <owl:Class rdf:about="http://mando/technology/oauth#Request_Access_Token">
+        <rdfs:subClassOf rdf:resource="http://mando/technology/oauth#Requests"/>
+    </owl:Class>
+    
+
+
+    <!-- http://mando/technology/oauth#Requests -->
+
+    <owl:Class rdf:about="http://mando/technology/oauth#Requests"/>
+    
+
+
+    <!-- http://mando/technology/oauth#Resource_Owner -->
+
+    <owl:Class rdf:about="http://mando/technology/oauth#Resource_Owner">
+        <rdfs:subClassOf rdf:resource="http://mando/technology/oauth#OAuth_Role"/>
+        <rdfs:comment>An entity capable of granting access to a protected resource. When the resource owner is a person, it is referred to as an end-user.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://mando/technology/oauth#Resource_Server -->
+
+    <owl:Class rdf:about="http://mando/technology/oauth#Resource_Server">
+        <rdfs:subClassOf rdf:resource="http://mando/technology/oauth#OAuth_Role"/>
+        <rdfs:comment>The server hosting the protected resources, capable of accepting and responding to protected resource requests using access tokens.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://mando/technology/oauth#Resources -->
+
+    <owl:Class rdf:about="http://mando/technology/oauth#Resources"/>
+    
+
+
+    <!-- http://mando/technology/oauth#Response -->
+
+    <owl:Class rdf:about="http://mando/technology/oauth#Response"/>
+    
+
+
+    <!-- http://mando/technology/oauth#Third_Party_Application -->
+
+    <owl:Class rdf:about="http://mando/technology/oauth#Third_Party_Application">
+        <rdfs:subClassOf rdf:resource="http://mando/technology/oauth#Client"/>
+        <rdfs:comment>The OAuth 2.0 authorization framework enables a third-party application to obtain limited access to an HTTP service, either on behalf of a resource owner by orchestrating an approval interaction between the resource owner and the HTTP service, or by allowing the third-party application to obtain access on its own behalf.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://mando/technology/oauth#User_Agent_Based_Application -->
+
+    <owl:Class rdf:about="http://mando/technology/oauth#User_Agent_Based_Application">
+        <rdfs:subClassOf rdf:resource="http://mando/technology/oauth#Public_Client"/>
+        <rdfs:comment>A user-agent-based application is a public client in which the client code is downloaded from a web server and executes within a user-agent (e.g., web browser) on the device used by the resource owner.  Protocol data and credentials are easily accessible (and often visible) to the resource owner.  Since such applications reside within the user-agent, they can make seamless use of the user-agent capabilities when requesting authorization.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://mando/technology/oauth#Web_Application -->
+
+    <owl:Class rdf:about="http://mando/technology/oauth#Web_Application">
+        <rdfs:subClassOf rdf:resource="http://mando/technology/oauth#Confidential_Client"/>
+        <rdfs:comment>A web application is a confidential client running on a web server.  Resource owners access the client via an HTML user interface rendered in a user-agent on the device used by the resource owner.  The client credentials as well as any access token issued to the client are stored on the web server and are not exposed to or accessible by the resource owner.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://mando/technology/oauth#Hema_Print_Service -->
+
+    <owl:NamedIndividual rdf:about="http://mando/technology/oauth#Hema_Print_Service">
+        <rdf:type rdf:resource="http://mando/technology/oauth#Printing_Service"/>
+        <sends_authorization_request rdf:resource="http://mando/technology/oauth#Photo_Authorization_Request"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://mando/technology/oauth#Mando -->
+
+    <owl:NamedIndividual rdf:about="http://mando/technology/oauth#Mando">
+        <rdf:type rdf:resource="http://mando/technology/oauth#End_User"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://mando/technology/oauth#Photo_Authorization_Request -->
+
+    <owl:NamedIndividual rdf:about="http://mando/technology/oauth#Photo_Authorization_Request"/>
+    
+
+
+    <!-- http://mando/technology/oauth#Printing_Authorization_Grant -->
+
+    <owl:NamedIndividual rdf:about="http://mando/technology/oauth#Printing_Authorization_Grant">
+        <receives_authorization_response rdf:resource="http://mando/technology/oauth#Printing_Authorization_Grant"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://mando/technology/oauth#Printing_Service_Authorization_Service -->
+
+    <owl:NamedIndividual rdf:about="http://mando/technology/oauth#Printing_Service_Authorization_Service">
+        <is_trusted_by rdf:resource="http://mando/technology/oauth#Mando&apos;s_iCloud"/>
+        <receives_authorization_request rdf:resource="http://mando/technology/oauth#Photo_Authorization_Request"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://mando/technology/oauth#Mando&apos;s_iCloud -->
+
+    <owl:NamedIndividual rdf:about="http://mando/technology/oauth#Mando&apos;s_iCloud">
+        <rdf:type rdf:resource="http://mando/technology/oauth#PhotoSharing_Service"/>
+    </owl:NamedIndividual>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi -->
+

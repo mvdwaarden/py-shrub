@@ -1,0 +1,43 @@
+@startuml oauth
+
+participant cln [
+    =Client
+    ----
+
+]
+participant res_owner [
+    =Resource Owner
+    ----
+]
+participant auth_svc_auth [
+    =Authorization Server
+    ----
+    Authorization Endpoint
+]
+participant auth_svc_token [
+    =Authorization Server
+    ----
+    Authorization Token Endpoint
+]
+participant auth_svc_cln [
+    =Authorization Server
+    ----
+    Client Endpoint
+]
+participant res_svc [
+    =Resource Server
+    ----
+]
+res_owner -> auth_svc_auth : is authenticated with authorization grant [not  in specification]
+cln -> auth_svc_auth : unknown how client get the endpoint?
+auth_svc_auth -> cln : credentials
+
+auth_svc_auth -> auth_svc_auth : verify identity of resource owner
+
+
+
+
+
+
+
+@enduml
