@@ -1,0 +1,38 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>XML Tree Viewer</title>
+</head>
+<body>
+    <h1>Upload an XML File</h1>
+    <form id="xmlForm" enctype="multipart/form-data" method="post">
+        <input type="file" name="xmlFile" id="fileInput" accept=".xml">
+        <button type="submit">Upload</button>
+    </form>
+    <div id="xmlTree"></div>
+
+    <script>
+        const xmlForm = document.getElementById('xmlForm');
+        const fileInput = document.getElementById('fileInput');
+        const xmlTree = document.getElementById('xmlTree');
+
+        xmlForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData();
+            formData.append('xmlFile', fileInput.files[0]);
+
+            fetch('/upload-xml', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display the XML tree structure
+                xmlTree.innerHTML = JSON.stringify(data, null, 2);
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>
