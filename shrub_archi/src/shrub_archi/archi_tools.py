@@ -1,9 +1,12 @@
+import concurrent.futures
+
 from defusedxml import ElementTree
 from dataclasses import dataclass
 from typing import Dict, List, Tuple
 from difflib import SequenceMatcher
 import itertools
 import os
+from concurrent.futures import ThreadPoolExecutor
 
 
 MAX_RESOLVED_SCORE: int = 100
@@ -56,27 +59,19 @@ class IdentityRepository:
 
 class IdentityResolver:
     def __init__(self, resolved_cutoff_score: int):
-        self._resolved_ids: List[ResolvedIdentity] = []
+        self.cache_resolved_ids: List[ResolvedIdentity] = []
         self.resolved_cutoff_score = resolved_cutoff_score
 
-    def register(self, id1: Identity, id2: Identity, score, rule_name):
-        self._resolved_ids.append(
-            ResolvedIdentity(identity1=id1, identity2=id2, score=score,
-                             rule_name=rule_name))
-
-    def resolve(self, repo1: IdentityRepository, repo2: IdentityRepository):
+    def resolve(self, repo1: IdentityRepository, repo2: IdentityRepository, cache=True):
         for id1, id2 in [(repo1.identities[id1], repo2.identities[id2]) for id1, id2 in
                          itertools.product(repo1.identities, repo2.identities)]:
             score, rule_name = id1.is_identical_to(id2)
             if score >= self.resolved_cutoff_score:
-                self.register(id1, id2, score, rule_name)
-        return self._resolved_ids
-
-    def lookup(self, check_4_resolved_id: str) -> ResolvedIdentity:
-        resolved_identity = next(
-            filter(lambda o: o.identity1.unique_id == check_4_resolved_id),
-            self._resolved_ids)
-        return resolved_identity
+                resolved_id = ResolvedIdentity(identity1=id1, identity2=id2, score=score,
+                                 rule_name=rule_name)
+                if cache:
+                    self.cache_resolved_ids.append(resolved_id)
+                yield resolved_id
 
 
 def test():
@@ -93,30 +88,67 @@ def test():
         print(resolved_identity)
 
 
-def extract_identities(archi_repo_folder: str) -> IdentityRepository:
-    result = IdentityRepository()
+def extract_identities(archi_repo_folder: str, repo: IdentityRepository = None) -> IdentityRepository:
+    result = repo if repo else IdentityRepository()
+    count = 0
     for dirpath, dir, files in os.walk(archi_repo_folder):
-        for file in files:
+        def read_identity(dirpath, file):
+            result = None
+            full_filename = os.path.join(dirpath, file)
+            # print(f"start reading id from {full_filename}")
             try:
-                full_filename = os.path.join(dirpath, file)
                 et = ElementTree.parse(full_filename)
                 root = et.getroot()
-                identity = Identity(unique_id=root.get("id"), name=root.get("name"), description=None, classification=root.tag)
+                identity = Identity(unique_id=root.get("id"), name=root.get("name"), description=None,
+                                    classification=root.tag)
                 if identity.unique_id and identity.name:
-                    result.add(identity)
+                    result =  identity
             except Exception as ex:
                 print(f"problem with file {full_filename}", ex)
+            return result
+
+        with ThreadPoolExecutor(max_workers=128) as exec:
+            futures = {exec.submit(read_identity, dirpath, file) : file for file in files }
+            for future in concurrent.futures.as_completed(futures):
+                identity = future.result()
+                if identity:
+                    result.add(identity)
+                count += 1
+                print(f"{count}")
 
     return result
 
 
 
 if __name__ == "__main__":
-    test()
-    result = extract_identities("/Users/mwa17610/Library/Application Support/Archi4/model-repository/hasuki_archi")
-    for id, oid in result.identities.items():
-        print(id, oid)
-    print(len(result.identities))
+    repos = []
+    if True:
 
-    for resolved_identity in IdentityResolver(60).resolve(result, result):
-        print(resolved_identity)
+        with ThreadPoolExecutor() as exec:
+            futures = {
+                exec.submit(extract_identities, file, repo): (file, repo) for file, repo in [
+                    ("C:/projects/model-repository/tribe_20kyc_20tech_20-_20secure_20designs", IdentityRepository()),
+                    ("C:/projects/model-repository/tribe_20kyc_20tech_20-_20rdt_20area", IdentityRepository()),
+                    #("C:/projects/model-repository/tech_and_compliance_model", IdentityRepository()),
+                ]
+            }
+            for future in concurrent.futures.as_completed(futures):
+                result = future.result()
+                repos.append(result)
+                print(f"finished {futures[future]} identities {len(result.identities)}")
+    else:
+        for repo in [
+            extract_identities("C:/projects/model-repository/tribe_20kyc_20tech_20-_20rdt_20area"),
+            extract_identities("C:/projects/model-repository/tribe_20kyc_20tech_20-_20secure_20designs"),
+            #extract_identities("C:/projects/model-repository/tech_and_compliance_model")
+        ]:
+            repos.append(repo)
+            print(f"finished identities {len(repo.identities.items())}")
+
+    idr = IdentityResolver(80)
+    for resolved_identity in idr.resolve(repos[0], repos[1]):
+        if resolved_identity.score < 100:
+            print(resolved_identity)
+
+    for key, group in itertools.groupby(sorted(idr.cache_resolved_ids, key=lambda x: x.score), lambda x: x.score):
+        print (key, len(list(group)))
