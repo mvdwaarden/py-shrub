@@ -7,7 +7,8 @@ from defusedxml import ElementTree
 from shrub_archi.identity_resolver import IdentityRepository, Identity
 
 
-def extract_identities_from_collaboration_folder(archi_repo_folder: str, repo: IdentityRepository = None) -> IdentityRepository:
+def extract_identities_from_collaboration_folder(archi_repo_folder: str,
+                                                 repo: IdentityRepository = None) -> IdentityRepository:
     result = repo if repo else IdentityRepository()
     count = 0
     for dirpath, dir, files in os.walk(archi_repo_folder):
@@ -18,16 +19,17 @@ def extract_identities_from_collaboration_folder(archi_repo_folder: str, repo: I
             try:
                 et = ElementTree.parse(full_filename)
                 root = et.getroot()
-                identity = Identity(unique_id=root.get("id"), name=root.get("name"), description=None,
+                identity = Identity(unique_id=root.get("id"), name=root.get("name"),
                                     classification=root.tag)
                 if identity.unique_id and identity.name:
-                    result =  identity
+                    result = identity
             except Exception as ex:
                 print(f"problem with file {full_filename}", ex)
             return result
 
         with ThreadPoolExecutor(max_workers=128) as exec:
-            futures = {exec.submit(read_identity, dirpath, file) : file for file in files }
+            futures = {exec.submit(read_identity, dirpath, file): file for file in
+                       files}
             for future in concurrent.futures.as_completed(futures):
                 identity = future.result()
                 if identity:
