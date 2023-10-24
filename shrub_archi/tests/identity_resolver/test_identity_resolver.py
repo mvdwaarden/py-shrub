@@ -11,5 +11,5 @@ def test_identity_resolver():
     repo2.add(
         Identity(unique_id="22", name="klaasj", classification="", description=""))
 
-    for resolved_identity in IdentityResolver(0).resolve(repo1, repo2):
+    for resolved_identity in IdentityResolver().resolve(repo1, repo2):
         print(resolved_identity)

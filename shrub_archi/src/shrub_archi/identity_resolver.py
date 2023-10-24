@@ -6,7 +6,7 @@ from difflib import SequenceMatcher
 import itertools
 from abc import ABC, abstractmethod
 
-
+100 = 100
 
 
 @dataclass
@@ -38,7 +38,10 @@ class Comparator(ABC):
         return IdentityCompareResult(0,"")
 
 
+
 class NaiveIdentityComparator(Comparator):
+    def __init__(self,cutoff_score: int = 80):
+        self.cutoff_score = cutoff_score
     def compare(self, identity1: Identity, identity2: Identity) -> Optional[IdentityCompareResult]:
         result: Optional[IdentityCompareResult] = None
         if identity1.unique_id == identity2.unique_id:
@@ -58,7 +61,7 @@ class NaiveIdentityComparator(Comparator):
                 elif description_score > 0:
                     result = IdentityCompareResult(score=description_score, rule="DESCRIPTION_CLASS_RULE")
 
-        return result
+        return result if result and result.score >= self.cutoff_score else None
 
 
 class IdentityRepository:
@@ -70,16 +73,15 @@ class IdentityRepository:
 
 
 class IdentityResolver:
-    def __init__(self, resolved_cutoff_score: int):
+    def __init__(self):
         self.cache_resolved_ids: List[ResolvedIdentity] = []
-        self.resolved_cutoff_score = resolved_cutoff_score
 
     def resolve(self, repo1: IdentityRepository, repo2: IdentityRepository, cache=True, comparator: Comparator = None):
         comparator = comparator if comparator else NaiveIdentityComparator()
         for id1, id2 in [(repo1.identities[id1], repo2.identities[id2]) for id1, id2 in
                          itertools.product(repo1.identities, repo2.identities)]:
             compare_result = comparator.compare(id1, id2)
-            if compare_result and compare_result.score >= self.resolved_cutoff_score:
+            if compare_result:
                 resolved_id = ResolvedIdentity(identity1=id1, identity2=id2, compare_result=compare_result)
                 if cache:
                     self.cache_resolved_ids.append(resolved_id)
