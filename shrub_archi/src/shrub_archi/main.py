@@ -7,8 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 
 
-from shrub_archi.identity_resolver import IdentityRepository, IdentityResolver
-from shrub_archi.archi_tools import extract_identities_from_collaboration_folder
+from shrub_archi.identity_resolver import IdentityResolver, NaiveIdentityComparator, Repository
 
 
 usage = """
@@ -26,22 +25,22 @@ usage = """
 """
 
 def do_test():
-    repos = []
+    repos = [
+        Repository(
+            "/Users/mwa17610/Library/Application Support/Archi4/model-repository/entrmo_archi/model"),
+        Repository(
+            "/Users/mwa17610/Library/Application Support/Archi4/model-repository/entrmo_archi/model")
+    ]
     with ThreadPoolExecutor() as exec:
         futures = {
-            exec.submit(extract_identities_from_collaboration_folder, file, repo): (file, repo) for file, repo in [
-                ("/Users/mwa17610/Library/Application Support/Archi4/model-repository/gemma-archi-repository/model", IdentityRepository()),
-                ("/Users/mwa17610/Library/Application Support/Archi4/model-repository/gemma-archi-repository/model", IdentityRepository()),
-                #("C:/projects/model-repository/tech_and_compliance_model", IdentityRepository()),
-            ]
+            exec.submit(repo.read):  repo for repo in repos
         }
         for future in concurrent.futures.as_completed(futures):
-            result = future.result()
-            repos.append(result)
-            print(f"finished {futures[future]} identities {len(result.identities)}")
+            repo = future.result()
+            print(f"finished {futures[future]} identities {len(repo.identities)}")
 
-    idr = IdentityResolver(80)
-    resolved_ids = list(idr.resolve(repos[0], repos[1]))
+    idr = IdentityResolver()
+    resolved_ids = list(idr.resolve(repos[0], repos[1], comparator=NaiveIdentityComparator(cutoff_score=0)))
     print(f"resolved ids: {len(resolved_ids)}")
     # for resolved_identity in idr.resolve(repos[0], repos[1]):
     #     if resolved_identity.compare_result.score < 100:
