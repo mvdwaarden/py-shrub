@@ -2,6 +2,7 @@ import concurrent.futures
 import os
 from concurrent.futures import ThreadPoolExecutor
 from enum import Enum
+from typing import Optional, List
 
 from defusedxml import ElementTree
 from shrub_archi.identity import Identity, Identities
@@ -10,11 +11,14 @@ from shrub_archi.identity import Identity, Identities
 class Repository:
     def __init__(self, location: str):
         self.location = location
-        self._identities: Identities = {}
+        self._identities: Optional[Identities] = None
 
 
     def read(self) -> "Repository":
-        count = 0
+        if self._identities is None:
+            self._identities = {}
+        else:
+            return self
         with ThreadPoolExecutor(max_workers=128) as exec:
             futures = {}
             for dirpath, dir, file in RepositoryIterator(self):
@@ -23,8 +27,6 @@ class Repository:
                 identity = future.result()
                 if identity:
                     self._identities[identity.unique_id] = identity
-                count += 1
-                print(f"{count}")
 
         return self
 
@@ -44,8 +46,8 @@ class Repository:
             print(f"problem with file {full_filename}", ex)
         return result
     @property
-    def identities(self):
-        return self._identities.values()
+    def identities(self) -> List[Identity]:
+        return self._identities.values() if self._identities else {}
 
 class IteratorMode(Enum):
     MODE_FILES = 1

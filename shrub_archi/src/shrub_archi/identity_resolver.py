@@ -52,7 +52,7 @@ class ResolutionStore:
     def resolutions(self, resolved_identities: List[ResolvedIdentity]):
         self._resolutions = {}
         for res_id in resolved_identities:
-            if res_id.compare_result.has_max_score() or res_id.compare_result.verified or res_id.compare_result.score == IdentityCompareResult.MAX_RESOLVED_SCORE:
+            if res_id.compare_result.verified:
                 self._resolutions[res_id.identity1.unique_id] = res_id.identity2.unique_id
 
     def _get_resolution_file(self, name) -> str:

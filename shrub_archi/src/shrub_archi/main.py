@@ -2,6 +2,7 @@ import shrub_util.core.logging as logging
 from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
 from shrub_archi.repository_merger import RepositoryMerger
+from shrub_archi.resolve_ui import do_show_resolve_ui
 
 
 
@@ -25,8 +26,9 @@ usage = """
 def do_create_resolution_file(repo1, repo2, resolution_store_location):
     merger = RepositoryMerger(Repository(repo1), Repository(repo2), resolution_store_location)
 
-    merger.do_merge()
+    merger.do_resolve()
     res_store = ResolutionStore(resolution_store_location)
+    do_show_resolve_ui(merger.identity_resolver.resolved_ids)
     res_store.resolutions = merger.identity_resolver.resolved_ids
     res_store.write("dry_run")
 
@@ -52,4 +54,4 @@ if __name__ == "__main__":
     elif dry_run:
         do_create_resolution_file(repo1, repo2, resolution_store_location=resolution_store_location)
     else:
-        do_create_resolution_file(repo1, repo2)
+        do_show_resolve_ui()

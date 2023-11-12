@@ -27,6 +27,10 @@ class RepositoryMerger:
 
         #self.merge()
 
+    def do_resolve(self):
+        self.read_repositories()
+        self.resolve_identities()
+
     def read_repositories(self):
         with ThreadPoolExecutor() as exec:
             futures = {
