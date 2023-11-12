@@ -3,7 +3,7 @@ import concurrent.futures
 from concurrent.futures import ThreadPoolExecutor
 from enum import Enum
 from typing import Optional, List
-
+import os
 import shrub_util.core.logging as logging
 from shrub_archi.identity import Identities
 from shrub_archi.identity_resolver import ResolvedIdentity, \
@@ -80,6 +80,7 @@ class RepositoryMerger:
         # not resolved : copy, make sure to replace all resolved ID's with repo 1 UUID
         for dirpath, dirs, file in RepositoryIterator(self.repo2,
                                                       IteratorMode.MODE_FILE):
+            filename = os.path.join(dirpath,file)
             identity = self.repo2.read_identity(dirpath, file)
             if identity:
                 resolved_result = self.resolution_store.is_resolved(identity.unique_id)
@@ -87,12 +88,12 @@ class RepositoryMerger:
                 resolved_result = False
             if resolved_result is False:
                 try:
-                    with open(identity.source, "r", encoding='utf-8') as ifp:
+                    with open(filename, "r", encoding='utf-8') as ifp:
                         content = ifp.read()
                     content = self.update_uuids(content)
-                    print(f"copied {identity.source}")
+                    print(f"copied {filename}")
                 except Exception as ex:
-                    logging.get_logger().error(f"proflem readding {identity.source}",
+                    logging.get_logger().error(f"problem readding {filename}",
                                                ex=ex)
 
 
