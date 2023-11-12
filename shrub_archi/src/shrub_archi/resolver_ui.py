@@ -96,7 +96,7 @@ class ResolverUI(QWidget):
             checkbox = QCheckBox()
             checkbox.setText(f"{resolved_id.compare_result.score}")
             checkbox.setTristate(True)
-            match resolved_id.compare_result.verified_check_result:
+            match resolved_id.compare_result.resolved_result:
                 case True:
                     checkbox.setCheckState(Qt.Checked)
                 case False:
@@ -134,13 +134,13 @@ class ResolverUI(QWidget):
                 match checkbox.checkState():
                     case Qt.PartiallyChecked:
                         self.resolved_ids[
-                            row].compare_result.verified_check_result = None
+                            row].compare_result.resolved_result = None
                     case Qt.Checked:
                         self.resolved_ids[
-                            row].compare_result.verified_check_result = True
+                            row].compare_result.resolved_result = True
                     case Qt.Unchecked:
                         self.resolved_ids[
-                            row].compare_result.verified_check_result = False
+                            row].compare_result.resolved_result = False
 
     def save_data(self):
         # Implement the save logic here

@@ -7,13 +7,13 @@ from typing import Optional, List
 import shrub_util.core.logging as logging
 from shrub_archi.identity import Identities
 from shrub_archi.identity_resolver import ResolvedIdentity, \
-    IdentityResolver, Comparator, NaiveIdentityComparator, ResolutionStore
+    IdentityResolver, Comparator, NaiveIdentityComparator, CompareResolutionStore
 from shrub_archi.repository import Repository, RepositoryIterator, IteratorMode
 
 
 class RepositoryMerger:
     def __init__(self, repo1: Repository, repo2: Repository,
-                 resolution_store: ResolutionStore = None):
+                 resolution_store: CompareResolutionStore = None):
         self.repo1 = repo1
         self.repo2 = repo2
         self.identity_repo1: Optional[Identities] = None
@@ -22,7 +22,7 @@ class RepositoryMerger:
         self._identity_resolver: Optional[IdentityResolver] = None
         self._identity_comparator: Optional[Comparator] = None
         self._resolution_store: Optional[
-            ResolutionStore] = resolution_store if resolution_store else None
+            CompareResolutionStore] = resolution_store if resolution_store else None
 
     def do_merge(self):
         self.read_repositories([self.repo2])
@@ -66,11 +66,11 @@ class RepositoryMerger:
         return self._identity_comparator
 
     @property
-    def resolution_store(self) -> ResolutionStore:
+    def resolution_store(self) -> CompareResolutionStore:
         return self._resolution_store
 
     @resolution_store.setter
-    def resolution_store(self, resolution_store: ResolutionStore):
+    def resolution_store(self, resolution_store: CompareResolutionStore):
         self._resolution_store = resolution_store
 
     def merge(self):
@@ -81,8 +81,11 @@ class RepositoryMerger:
         for dirpath, dirs, file in RepositoryIterator(self.repo2,
                                                       IteratorMode.MODE_FILE):
             identity = self.repo2.read_identity(dirpath, file)
-            verified = self.resolution_store.is_resolved(identity.unique_id)
-            if verified is False:
+            if identity:
+                resolved_result = self.resolution_store.is_resolved(identity.unique_id)
+            else:
+                resolved_result = False
+            if resolved_result is False:
                 try:
                     with open(identity.source, "r", encoding='utf-8') as ifp:
                         content = ifp.read()

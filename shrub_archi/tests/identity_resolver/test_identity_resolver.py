@@ -1,4 +1,4 @@
-from shrub_archi.identity_resolver import IdentityResolver, ResolvedIdentityAction, ResolutionStore, NaiveIdentityComparator
+from shrub_archi.identity_resolver import IdentityResolver, ResolvedIdentityAction, CompareResolutionStore, NaiveIdentityComparator
 from shrub_archi.identity import Identity, Identities
 
 
@@ -32,7 +32,7 @@ def test_identity_resolver_with_resolutions():
     ids2["11"] = Identity(unique_id="11", name="pieto", classification="")
     ids2["22"] = Identity(unique_id="22", name="klaasj", classification="")
 
-    res_store = ResolutionStore()
+    res_store = CompareResolutionStore()
     res_store.read_from_string(
         """{
             "1": "11"

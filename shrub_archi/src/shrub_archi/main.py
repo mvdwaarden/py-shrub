@@ -1,5 +1,5 @@
 import shrub_util.core.logging as logging
-from shrub_archi.identity_resolver import ResolutionStore
+from shrub_archi.identity_resolver import CompareResolutionStore
 from shrub_archi.repository import Repository
 from shrub_archi.repository_merger import RepositoryMerger
 from shrub_archi.resolver_ui import do_show_resolve_ui
@@ -24,7 +24,7 @@ usage = """
 def do_create_resolution_file(repo1, repo2, resolution_store_location,
                               resolution_name="dry_run"):
     merger = RepositoryMerger(Repository(repo1), Repository(repo2))
-    res_store = ResolutionStore(resolution_store_location)
+    res_store = CompareResolutionStore(resolution_store_location)
     res_store.read(resolution_name)
     merger.do_resolve()
     res_store.apply_to(merger.resolved_identities)
@@ -34,7 +34,7 @@ def do_create_resolution_file(repo1, repo2, resolution_store_location,
 
 
 def do_merge(repo1, repo2, resolution_store_location, resolution_name="dry_run"):
-    res_store = ResolutionStore(resolution_store_location)
+    res_store = CompareResolutionStore(resolution_store_location)
     res_store.read(resolution_name)
 
     merger = RepositoryMerger(Repository(repo1), Repository(repo2),

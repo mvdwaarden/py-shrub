@@ -27,24 +27,24 @@ class ResolvedIdentityAction(Enum):
 class ResolvedIdentity:
     identity1: "Identity"
     identity2: "Identity"
-    compare_result: "IdentityCompareResult"
+    compare_result: "CompareResult"
 
 
 @dataclass
-class IdentityCompareResult:
+class CompareResult:
     score: int
     rule: str
     # can be True, False or None
-    verified_check_result: bool = False
-    MAX_RESOLVED_SCORE: int = 100
+    resolved_result: bool = False
+    MAX_EQUAL_SCORE: int = 100
 
     def has_max_score(self):
-        return self.score == self.MAX_RESOLVED_SCORE
+        return self.score >= self.MAX_EQUAL_SCORE
 
 
-class ResolutionStore:
+class CompareResolutionStore:
     def __init__(self, location: str):
-        self.resolution_store_location = location
+        self.location = location
         self._resolutions: Dict[str, Tuple[str, bool]] = None
 
     @property
@@ -56,10 +56,10 @@ class ResolutionStore:
         self._resolutions = {}
         for res_id in resolved_identities:
             self._resolutions[res_id.identity1.unique_id] = (
-                res_id.identity2.unique_id, res_id.compare_result.verified_check_result)
+                res_id.identity2.unique_id, res_id.compare_result.resolved_result)
 
     def _get_resolution_file(self, name) -> str:
-        return os.path.join(self.resolution_store_location,
+        return os.path.join(self.location,
                             f"{name if name else 'resolved_identities'}.json")
 
     def read_from_string(self, resolutions: str):
@@ -116,8 +116,8 @@ class ResolutionStore:
             res_id = next(res_id for res_id in resolved_ids if
                           res_id.identity1.unique_id == id1 and res_id.identity2.unique_id == id2)
             if res_id:
-                res_id.compare_result.verified_check_result = verified_check_result
-                res_id.compare_result.rule = ResolutionStoreComparator.RULE
+                res_id.compare_result.resolved_result = verified_check_result
+                res_id.compare_result.rule = CompareResolutionStoreComparator.RULE
 
 
 class Comparator(ABC):
@@ -127,7 +127,7 @@ class Comparator(ABC):
             self.compare_chain.append(*parent.compare_chain)
 
     def compare(self, identity1: Identity,
-                identity2: Identity) -> IdentityCompareResult:
+                identity2: Identity) -> CompareResult:
         result = None
         for cmp in self.compare_chain:
             result = cmp.do_compare(identity1, identity2)
@@ -138,28 +138,28 @@ class Comparator(ABC):
 
     @abstractmethod
     def do_compare(self, identity1: Identity,
-                   identity2: Identity) -> IdentityCompareResult:
+                   identity2: Identity) -> CompareResult:
         pass
 
 
-class ResolutionStoreComparator(Comparator):
+class CompareResolutionStoreComparator(Comparator):
     RULE = "ID_RESOLUTION_FILE"
 
-    def __init__(self, resolution_store: ResolutionStore):
+    def __init__(self, resolution_store: CompareResolutionStore):
         super().__init__()
         self.resolution_store = resolution_store
 
     def do_compare(self, identity1: Identity,
-                   identity2: Identity) -> IdentityCompareResult:
-        result: Optional[IdentityCompareResult] = None
+                   identity2: Identity) -> CompareResult:
+        result: Optional[CompareResult] = None
         if self.resolution_store:
             resolved = self.resolution_store.resolution(
                 identity1.unique_id, identity2.unique_id)
             if resolved is not None:
-                result = IdentityCompareResult(
-                    score=IdentityCompareResult.MAX_RESOLVED_SCORE,
+                result = CompareResult(
+                    score=CompareResult.MAX_EQUAL_SCORE,
                     rule=self.RULE,
-                    verified_check_result=True)
+                    resolved_result=True)
         return result
 
 
@@ -169,31 +169,31 @@ class NaiveIdentityComparator(Comparator):
         self.cutoff_score = cutoff_score
 
     def do_compare(self, identity1: Identity, identity2: Identity) -> Optional[
-        IdentityCompareResult]:
+        CompareResult]:
         result = None
         if identity1.unique_id == identity2.unique_id:
-            result = IdentityCompareResult(
-                score=IdentityCompareResult.MAX_RESOLVED_SCORE, rule="ID_EXACT_RULE",
-                verified_check_result=True)
+            result = CompareResult(
+                score=CompareResult.MAX_EQUAL_SCORE, rule="ID_EXACT_RULE",
+                resolved_result=True)
         elif identity1.classification == identity2.classification:
             if identity1.name == identity2.name:
-                result = IdentityCompareResult(
-                    score=IdentityCompareResult.MAX_RESOLVED_SCORE + 10,
+                result = CompareResult(
+                    score=CompareResult.MAX_EQUAL_SCORE + 10,
                     rule="NAME_EXACT_RULE")
             else:
                 name_score = int(SequenceMatcher(a=identity1.name,
-                                                 b=identity2.name).ratio() * IdentityCompareResult.MAX_RESOLVED_SCORE)
+                                                 b=identity2.name).ratio() * CompareResult.MAX_EQUAL_SCORE)
                 description_score = 0
                 if identity1.description and identity2.description and len(
                         identity1.description) > 10 and len(identity2.description) > 10:
                     description_score = int(SequenceMatcher(a=identity1.description,
-                                                            b=identity2.description).ratio() * IdentityCompareResult.MAX_RESOLVED_SCORE)
+                                                            b=identity2.description).ratio() * CompareResult.MAX_EQUAL_SCORE)
                 if name_score > 0 and name_score > description_score:
-                    result = IdentityCompareResult(score=name_score,
-                                                   rule="NAME_CLASS_RULE")
+                    result = CompareResult(score=name_score,
+                                           rule="NAME_CLASS_RULE")
                 elif description_score > 0:
-                    result = IdentityCompareResult(score=description_score,
-                                                   rule="DESCRIPTION_CLASS_RULE")
+                    result = CompareResult(score=description_score,
+                                           rule="DESCRIPTION_CLASS_RULE")
 
         return result if result and result.score >= self.cutoff_score else None
 
