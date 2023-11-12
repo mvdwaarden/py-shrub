@@ -25,8 +25,8 @@ class ResolverUI(QWidget):
         # Create list widget
         # Create table widget
         self.table_widget = QTableWidget(self)
-        self.table_widget.setColumnCount(3)
-        self.table_widget.setHorizontalHeaderLabels(['Verified', 'Identity1', 'Identity2'])
+        self.table_widget.setColumnCount(4)
+        self.table_widget.setHorizontalHeaderLabels(['Verified', 'Rule','Identity1', 'Identity2'])
         layout.addWidget(self.table_widget)
         # Buttons layout
         buttons_layout = QHBoxLayout()
@@ -80,18 +80,23 @@ class ResolverUI(QWidget):
         self.table_widget.setRowCount(len(self.resolved_ids))
         for resolved_id in self.resolved_ids:            # Checkbox
             checkbox = QCheckBox()
+            checkbox.setText(f"{resolved_id.compare_result.score}")
             checkbox.setChecked(resolved_id.compare_result.verified or resolved_id.compare_result.has_max_score())
             self.table_widget.setCellWidget(i, 0, checkbox)
 
             # Label 1
-            label1 = QTableWidgetItem(f'{resolved_id.identity1.name}')
-            label1.setToolTip(f"{resolved_id.identity1.description}")
+            label1 = QTableWidgetItem(f'{resolved_id.compare_result.rule}')
             self.table_widget.setItem(i, 1, label1)
 
             # Label 2
-            label2 = QTableWidgetItem(f'{resolved_id.identity2.name}')
-            label2.setToolTip(f"{resolved_id.identity2.description}")
+            label2 = QTableWidgetItem(f'{resolved_id.identity1.name}')
+            label2.setToolTip(f"{resolved_id.identity1.description}")
             self.table_widget.setItem(i, 2, label2)
+
+            # Label 3
+            label3 = QTableWidgetItem(f'{resolved_id.identity2.name}')
+            label3.setToolTip(f"{resolved_id.identity2.description}")
+            self.table_widget.setItem(i, 3, label3)
             i += 1
 
     def fromUI(self):
