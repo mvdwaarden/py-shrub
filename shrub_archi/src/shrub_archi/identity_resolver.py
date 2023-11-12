@@ -1,15 +1,16 @@
-from dataclasses import dataclass
-from typing import Dict
-from difflib import SequenceMatcher
 import itertools
-from abc import ABC, abstractmethod
-from enum import Enum
-import os
-from typing import Optional, List
 import json
+import os
+from abc import ABC, abstractmethod
+from difflib import SequenceMatcher
+from enum import Enum
+from typing import Dict
+from typing import Optional, List, Tuple
+
+from dataclasses import dataclass
+
 import shrub_util.core.logging as logging
 from shrub_archi.identity import Identity
-
 from shrub_archi.repository import Repository
 
 
@@ -17,10 +18,9 @@ class ResolvedIdentityAction(Enum):
     REPLACE_TARGET_ID = 1
     REPLACE_TARGET_NAME = 2
     REPLACE_TARGET_DESCRIPTION = 4
-    def part_of(self,stacked_action: int):
+
+    def part_of(self, stacked_action: int):
         return stacked_action & self.value > 0
-
-
 
 
 @dataclass
@@ -34,29 +34,33 @@ class ResolvedIdentity:
 class IdentityCompareResult:
     score: int
     rule: str
-    verified: bool = False
+    # can be True, False or None
+    verified_check_result: bool = False
     MAX_RESOLVED_SCORE: int = 100
 
     def has_max_score(self):
         return self.score == self.MAX_RESOLVED_SCORE
 
+
 class ResolutionStore:
     def __init__(self, location: str):
         self.resolution_store_location = location
-        self._resolutions : Dict[str, str] = None
+        self._resolutions: Dict[str, Tuple[str, bool]] = None
 
     @property
     def resolutions(self):
         return self._resolutions
+
     @resolutions.setter
     def resolutions(self, resolved_identities: List[ResolvedIdentity]):
         self._resolutions = {}
         for res_id in resolved_identities:
-            if res_id.compare_result.verified:
-                self._resolutions[res_id.identity1.unique_id] = res_id.identity2.unique_id
+            self._resolutions[res_id.identity1.unique_id] = (
+                res_id.identity2.unique_id, res_id.compare_result.verified_check_result)
 
     def _get_resolution_file(self, name) -> str:
-        return os.path.join(self.resolution_store_location, f"{name if name else 'resolved_identities'}.json")
+        return os.path.join(self.resolution_store_location,
+                            f"{name if name else 'resolved_identities'}.json")
 
     def read_from_string(self, resolutions: str):
         if not self.resolutions:
@@ -75,7 +79,9 @@ class ResolutionStore:
                 with open(self._get_resolution_file(name), "r") as ifp:
                     self._resolutions = json.load(ifp)
             except Exception as ex:
-                logging.get_logger().error(f"problem reading resolution file {self._get_resolution_file(name)}", ex=ex)
+                logging.get_logger().error(
+                    f"problem reading resolution file {self._get_resolution_file(name)}",
+                    ex=ex)
                 self.resolutions = {}
         return self.resolutions
 
@@ -87,36 +93,88 @@ class ResolutionStore:
             logging.get_logger().error(
                 f"problem writing resolution file {self._get_resolution_file}", ex=ex)
 
-
-    def contains_resolved_pair(self, id1, id2):
-        return self.resolutions and id1 in self.resolutions and self.resolutions[id1] == id2
+    def resolution(self, id1, id2):
+        if self.resolutions and id1 in self.resolutions and id == self.resolutions[id1][
+            0]:
+            return self.resolutions[id1][1]
+        else:
+            return None
 
     def is_resolved(self, id2):
-        return self.resolutions and id2 in self.resolutions.values()
+        if self.resolutions:
+            result = None
+            for verified in [value[1] for value in self.resolutions.values() if
+                             value[0] == id2]:
+                result = verified
+                break
+        else:
+            result = None
+        return result
+
+    def apply_to(self, resolved_ids: List[ResolvedIdentity]):
+        for id1, (id2, verified_check_result) in self.resolutions.items():
+            res_id = next(res_id for res_id in resolved_ids if
+                          res_id.identity1.unique_id == id1 and res_id.identity2.unique_id == id2)
+            if res_id:
+                res_id.compare_result.verified_check_result = verified_check_result
+                res_id.compare_result.rule = ResolutionStoreComparator.RULE
 
 
 class Comparator(ABC):
+    def __init__(self, parent: "Comparator" = None):
+        self.compare_chain: List[Comparator] = [self]
+        if parent:
+            self.compare_chain.append(*parent.compare_chain)
+
+    def compare(self, identity1: Identity,
+                identity2: Identity) -> IdentityCompareResult:
+        result = None
+        for cmp in self.compare_chain:
+            result = cmp.do_compare(identity1, identity2)
+            if result:
+                break
+
+        return result
+
     @abstractmethod
-    def compare(self, identity: Identity, identity2: Identity) -> IdentityCompareResult:
-        return IdentityCompareResult(0, "")
+    def do_compare(self, identity1: Identity,
+                   identity2: Identity) -> IdentityCompareResult:
+        pass
+
+
+class ResolutionStoreComparator(Comparator):
+    RULE = "ID_RESOLUTION_FILE"
+
+    def __init__(self, resolution_store: ResolutionStore):
+        super().__init__()
+        self.resolution_store = resolution_store
+
+    def do_compare(self, identity1: Identity,
+                   identity2: Identity) -> IdentityCompareResult:
+        result: Optional[IdentityCompareResult] = None
+        if self.resolution_store:
+            resolved = self.resolution_store.resolution(
+                identity1.unique_id, identity2.unique_id)
+            if resolved is not None:
+                result = IdentityCompareResult(
+                    score=IdentityCompareResult.MAX_RESOLVED_SCORE,
+                    rule=self.RULE,
+                    verified_check_result=True)
+        return result
 
 
 class NaiveIdentityComparator(Comparator):
-    def __init__(self, cutoff_score: int = 80, resolution_store: ResolutionStore = None):
+    def __init__(self, cutoff_score: int = 80, parent: Comparator = None):
+        super().__init__(parent)
         self.cutoff_score = cutoff_score
-        self.resolution_store = resolution_store
 
-    def compare(self, identity1: Identity, identity2: Identity) -> Optional[
+    def do_compare(self, identity1: Identity, identity2: Identity) -> Optional[
         IdentityCompareResult]:
-        result: Optional[IdentityCompareResult] = None
-        if self.resolution_store and self.resolution_store.contains_resolved_pair(identity1.unique_id, identity2.unique_id):
-            result = IdentityCompareResult(
-                score=IdentityCompareResult.MAX_RESOLVED_SCORE, rule="ID_RESOLUTION_FILE",
-                verified=True)
-        elif identity1.unique_id == identity2.unique_id:
+        result = None
+        if identity1.unique_id == identity2.unique_id:
             result = IdentityCompareResult(
                 score=IdentityCompareResult.MAX_RESOLVED_SCORE, rule="ID_EXACT_RULE",
-                verified=True)
+                verified_check_result=True)
         elif identity1.classification == identity2.classification:
             if identity1.name == identity2.name:
                 result = IdentityCompareResult(
@@ -147,9 +205,9 @@ class IdentityResolver:
     @property
     def resolved_ids(self) -> List[ResolvedIdentity]:
         return self.cache_resolved_ids
+
     def resolve(self, ids1: Repository, ids2: Repository, cache=True,
                 comparator: Comparator = None):
-        comparator = comparator if comparator else NaiveIdentityComparator()
         for id1, id2 in [(id1, id2) for id1, id2 in
                          itertools.product(ids1.identities, ids2.identities)]:
             compare_result = comparator.compare(id1, id2)
@@ -159,5 +217,3 @@ class IdentityResolver:
                 if cache:
                     self.cache_resolved_ids.append(resolved_id)
                 yield resolved_id
-
-

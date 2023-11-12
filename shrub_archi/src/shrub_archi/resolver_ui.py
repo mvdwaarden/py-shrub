@@ -1,11 +1,16 @@
+import sys
+from typing import List
+
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLineEdit, \
     QCheckBox, QTableWidget, QTableWidgetItem, QHBoxLayout, QPushButton
+
 from identity_resolver import ResolvedIdentity
-from typing import List
-import sys
+
 
 class ResolverUI(QWidget):
     COL_COUNT: int = 5
+
     def __init__(self, resolved_ids: List[ResolvedIdentity]):
         super().__init__()
         self.resolved_ids = resolved_ids
@@ -27,7 +32,8 @@ class ResolverUI(QWidget):
         # Create table widget
         self.table_widget = QTableWidget(self)
         self.table_widget.setColumnCount(self.COL_COUNT)
-        self.table_widget.setHorizontalHeaderLabels(['Equal[score]', 'Rule','Class', 'Identity1', 'Identity2'])
+        self.table_widget.setHorizontalHeaderLabels(
+            ['Equal[score]', 'Rule', 'Class', 'Identity1', 'Identity2'])
         layout.addWidget(self.table_widget)
         # Buttons layout
         buttons_layout = QHBoxLayout()
@@ -72,19 +78,32 @@ class ResolverUI(QWidget):
                 # Check if the row is visible before toggling the checkbox
                 if not self.table_widget.isRowHidden(row):
                     checkbox = self.table_widget.cellWidget(row, 0)
-                    if checkbox:
-                        checkbox.setChecked(not checkbox.isChecked())
+                    match checkbox.checkState():
+                        case Qt.PartiallyChecked:
+                            checkbox.setCheckState(Qt.Checked)
+                        case Qt.Checked:
+                            checkbox.setCheckState(Qt.Unchecked)
+                        case Qt.Unchecked:
+                            checkbox.setCheckState(Qt.PartiallyChecked)
 
     def toUI(self):
         # Add items with checkboxes and labels
         i = 0
         self.table_widget.setRowCount(len(self.resolved_ids))
-        for resolved_id in self.resolved_ids:            # Checkbox
+        for resolved_id in self.resolved_ids:  # Checkbox
             column = 0
             # Checkbox
             checkbox = QCheckBox()
             checkbox.setText(f"{resolved_id.compare_result.score}")
-            checkbox.setChecked(resolved_id.compare_result.verified or resolved_id.compare_result.has_max_score())
+            checkbox.setTristate(True)
+            match resolved_id.compare_result.verified_check_result:
+                case True:
+                    checkbox.setCheckState(Qt.Checked)
+                case False:
+                    checkbox.setCheckState(Qt.Unchecked)
+                case _:
+                    checkbox.setCheckState(Qt.PartiallyChecked)
+
             self.table_widget.setCellWidget(i, column, checkbox)
             column += 1
             # Equals rule
@@ -112,12 +131,22 @@ class ResolverUI(QWidget):
             # Check if the row is visible before toggling the checkbox
             checkbox = self.table_widget.cellWidget(row, 0)
             if checkbox:
-                self.resolved_ids[row].compare_result.verified = checkbox.isChecked()
+                match checkbox.checkState():
+                    case Qt.PartiallyChecked:
+                        self.resolved_ids[
+                            row].compare_result.verified_check_result = None
+                    case Qt.Checked:
+                        self.resolved_ids[
+                            row].compare_result.verified_check_result = True
+                    case Qt.Unchecked:
+                        self.resolved_ids[
+                            row].compare_result.verified_check_result = False
 
     def save_data(self):
         # Implement the save logic here
         self.fromUI()
         self.close()
+
 
 def do_show_resolve_ui(resolved_ids: List[ResolvedIdentity]):
     # Initialize and run the application

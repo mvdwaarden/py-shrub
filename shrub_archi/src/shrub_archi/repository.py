@@ -5,6 +5,7 @@ from enum import Enum
 from typing import Optional, List
 
 from defusedxml import ElementTree
+
 from shrub_archi.identity import Identity, Identities
 
 
@@ -12,7 +13,6 @@ class Repository:
     def __init__(self, location: str):
         self.location = location
         self._identities: Optional[Identities] = None
-
 
     def read(self) -> "Repository":
         if self._identities is None:
@@ -45,13 +45,16 @@ class Repository:
         except Exception as ex:
             print(f"problem with file {full_filename}", ex)
         return result
+
     @property
     def identities(self) -> List[Identity]:
         return self._identities.values() if self._identities else {}
 
+
 class IteratorMode(Enum):
     MODE_FILES = 1
     MODE_FILE = 2
+
 
 class RepositoryIterator:
     def __init__(self, repo: "Repository", mode: "" = IteratorMode.MODE_FILE):
@@ -61,6 +64,7 @@ class RepositoryIterator:
         self.root = None
         self.dir = None
         self.mode: IteratorMode = mode
+
     def __iter__(self):
         self.walker = os.walk(self.repo.location)
         return self
@@ -74,6 +78,3 @@ class RepositoryIterator:
             return self.root, self.dirs, file
         else:
             return next(self.walker)
-
-
-
