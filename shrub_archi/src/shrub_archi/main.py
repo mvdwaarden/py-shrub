@@ -2,11 +2,11 @@ import shrub_util.core.logging as logging
 from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
 from shrub_archi.repository_merger import RepositoryMerger
-from shrub_archi.resolve_ui import do_show_resolve_ui
+from shrub_archi.resolver_ui import do_show_resolve_ui
 
 
 
-from shrub_archi.identity_resolver import IdentityResolver, NaiveIdentityComparator, ResolutionStore
+from shrub_archi.identity_resolver import ResolutionStore
 from shrub_archi.repository import Repository
 
 usage = """
@@ -23,14 +23,25 @@ usage = """
     - <param1>: <description>
 """
 
-def do_create_resolution_file(repo1, repo2, resolution_store_location):
-    merger = RepositoryMerger(Repository(repo1), Repository(repo2), resolution_store_location)
+def do_create_resolution_file(repo1, repo2, resolution_store_location, resolution_name = "dry_run"):
+    merger = RepositoryMerger(Repository(repo1), Repository(repo2))
 
     merger.do_resolve()
-    res_store = ResolutionStore(resolution_store_location)
     do_show_resolve_ui(merger.identity_resolver.resolved_ids)
+    res_store = ResolutionStore(resolution_store_location)
     res_store.resolutions = merger.identity_resolver.resolved_ids
-    res_store.write("dry_run")
+    res_store.write(resolution_name)
+
+def do_merge(repo1, repo2, resolution_store_location, resolution_name = "dry_run"):
+    res_store = ResolutionStore(resolution_store_location)
+    res_store.read(resolution_name)
+
+    merger = RepositoryMerger(Repository(repo1), Repository(repo2),
+                              res_store)
+
+
+    merger.do_merge()
+
 
 
 logging.configure_console()
@@ -52,6 +63,11 @@ if __name__ == "__main__":
     if help:
         do_print_usage()
     elif dry_run:
-        do_create_resolution_file(repo1, repo2, resolution_store_location=resolution_store_location)
+        do_create_resolution_file(repo1, repo2,
+                                  resolution_store_location=resolution_store_location)
+        do_merge(repo1, repo2,
+                 resolution_store_location=resolution_store_location)
     else:
-        do_show_resolve_ui()
+        do_create_resolution_file(repo1, repo2,
+                                  resolution_store_location=resolution_store_location)
+

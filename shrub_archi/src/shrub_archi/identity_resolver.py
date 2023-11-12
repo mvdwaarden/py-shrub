@@ -73,7 +73,7 @@ class ResolutionStore:
         if not self.resolutions:
             try:
                 with open(self._get_resolution_file(name), "r") as ifp:
-                    self.resolutions  = json.load(ifp)
+                    self._resolutions = json.load(ifp)
             except Exception as ex:
                 logging.get_logger().error(f"problem reading resolution file {self._get_resolution_file(name)}", ex=ex)
                 self.resolutions = {}
@@ -88,8 +88,11 @@ class ResolutionStore:
                 f"problem writing resolution file {self._get_resolution_file}", ex=ex)
 
 
-    def is_resolved(self, id1, id2):
+    def contains_resolved_pair(self, id1, id2):
         return self.resolutions and id1 in self.resolutions and self.resolutions[id1] == id2
+
+    def is_resolved(self, id2):
+        return self.resolutions and id2 in self.resolutions.values()
 
 
 class Comparator(ABC):
@@ -106,9 +109,9 @@ class NaiveIdentityComparator(Comparator):
     def compare(self, identity1: Identity, identity2: Identity) -> Optional[
         IdentityCompareResult]:
         result: Optional[IdentityCompareResult] = None
-        if self.resolution_store and self.resolution_store.is_resolved(identity1.unique_id, identity2.unique_id):
+        if self.resolution_store and self.resolution_store.contains_resolved_pair(identity1.unique_id, identity2.unique_id):
             result = IdentityCompareResult(
-                score=IdentityCompareResult.MAX_RESOLVED_SCORE, rule="ID_RESOLUTION",
+                score=IdentityCompareResult.MAX_RESOLVED_SCORE, rule="ID_RESOLUTION_FILE",
                 verified=True)
         elif identity1.unique_id == identity2.unique_id:
             result = IdentityCompareResult(

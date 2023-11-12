@@ -6,35 +6,37 @@ import concurrent.futures
 from shrub_archi.identity_resolver import ResolvedIdentity, \
     IdentityResolver, Comparator, NaiveIdentityComparator, ResolutionStore
 from shrub_archi.identity import Identities
-from shrub_archi.repository import Repository, RepositoryIterator
+from shrub_archi.repository import Repository, RepositoryIterator, IteratorMode
 
 
 class RepositoryMerger:
-    def __init__(self, repo1: Repository, repo2: Repository, resolution_store_location: str):
+    def __init__(self, repo1: Repository, repo2: Repository, resolution_store: ResolutionStore = None):
         self.repo1 = repo1
         self.repo2 = repo2
         self.identity_repo1: Optional[Identities] = None
         self.identity_repo2: Optional[Identities] = None
         self.resolved_identities: List[ResolvedIdentity] = []
-        self.resolution_store_location = resolution_store_location if resolution_store_location else "/tmp"
         self._identity_resolver: Optional[IdentityResolver] = None
         self._identity_comparator: Optional[Comparator] = None
-        self._resolution_store: Optional[ResolutionStore] = None
+        self._resolution_store: Optional[ResolutionStore] = resolution_store if resolution_store else None
 
     def do_merge(self):
-        self.read_repositories()
-        self.resolve_identities()
-
-        #self.merge()
+        self.read_repositories([self.repo2])
+        self.merge()
 
     def do_resolve(self):
-        self.read_repositories()
+        self.read_repositories([self.repo1, self.repo2])
         self.resolve_identities()
 
-    def read_repositories(self):
+    def update_uuids(self, content) -> str:
+        for key, value in self.resolution_store.resolutions:
+            content = content.replace(value, key)
+
+
+    def read_repositories(self, repos: List[Repository]):
         with ThreadPoolExecutor() as exec:
             futures = {
-                exec.submit(repo.read): repo for repo in [self.repo1, self.repo2]
+                exec.submit(repo.read): repo for repo in repos
             }
             for future in concurrent.futures.as_completed(futures):
                 repo = future.result()
@@ -60,15 +62,25 @@ class RepositoryMerger:
 
     @property
     def resolution_store(self) -> ResolutionStore:
-        if not self._resolution_store:
-            self._resolution_store = ResolutionStore(
-                location=self.resolution_store_location)
         return self._resolution_store
-    def merge(self):
-        for root, dirpath, files in RepositoryIterator(self.repo1):
-            for file in files:
-                full_filename = os.path.join(dirpath, file)
+    @resolution_store.setter
+    def resolution_store(self, resolution_store: ResolutionStore):
+        self._resolution_store = resolution_store
 
+    def merge(self):
+        # use repo1 items, and copy everything which is in repo2 but not in 1
+        # read ID from repo 2, check if it is not resolved
+        # resolved: do not copy
+        # not resolved : copy, make sure to replace all resolved ID's with repo 1 UUID
+        for dirpath, dirs, file in RepositoryIterator(self.repo2,
+                                                      IteratorMode.MODE_FILE):
+            identity = self.repo2.read_identity(dirpath, file)
+            copy = not self.resolution_store.is_resolved(identity.unique_id)
+            if copy:
+                with open(identity.source) as ifp:
+                    content = ifp.read()
+                content = self.update_uuids(content)
+                print(f"copied {identity.source}")
 
 class MergingMode(Enum):
     ONLY_NEW = 1

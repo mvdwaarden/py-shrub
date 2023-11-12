@@ -21,7 +21,7 @@ class Repository:
             return self
         with ThreadPoolExecutor(max_workers=128) as exec:
             futures = {}
-            for dirpath, dir, file in RepositoryIterator(self):
+            for dirpath, dirs, file in RepositoryIterator(self):
                 futures[exec.submit(self.read_identity, dirpath, file)] = file
             for future in concurrent.futures.as_completed(futures):
                 identity = future.result()
@@ -68,10 +68,10 @@ class RepositoryIterator:
     def __next__(self):
         if self.mode == IteratorMode.MODE_FILE:
             if len(self.files) == 0:
-                self.root, self.dir, self.files = next(self.walker)
+                self.root, self.dirs, self.files = next(self.walker)
             file = self.files[0]
             self.files = self.files[1:]
-            return self.root, self.dir, file
+            return self.root, self.dirs, file
         else:
             return next(self.walker)
 

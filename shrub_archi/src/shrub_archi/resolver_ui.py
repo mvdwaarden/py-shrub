@@ -1,10 +1,11 @@
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QListWidget, QLineEdit, \
-    QCheckBox, QListWidgetItem, QTableWidget, QTableWidgetItem, QHBoxLayout, QPushButton
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLineEdit, \
+    QCheckBox, QTableWidget, QTableWidgetItem, QHBoxLayout, QPushButton
 from identity_resolver import ResolvedIdentity
 from typing import List
 import sys
 
 class ResolverUI(QWidget):
+    COL_COUNT: int = 5
     def __init__(self, resolved_ids: List[ResolvedIdentity]):
         super().__init__()
         self.resolved_ids = resolved_ids
@@ -25,8 +26,8 @@ class ResolverUI(QWidget):
         # Create list widget
         # Create table widget
         self.table_widget = QTableWidget(self)
-        self.table_widget.setColumnCount(4)
-        self.table_widget.setHorizontalHeaderLabels(['Verified', 'Rule','Identity1', 'Identity2'])
+        self.table_widget.setColumnCount(self.COL_COUNT)
+        self.table_widget.setHorizontalHeaderLabels(['Equal[score]', 'Rule','Class', 'Identity1', 'Identity2'])
         layout.addWidget(self.table_widget)
         # Buttons layout
         buttons_layout = QHBoxLayout()
@@ -58,7 +59,7 @@ class ResolverUI(QWidget):
     def filter_table(self, text):
         for row in range(self.table_widget.rowCount()):
             match = False
-            for col in range(1, 3):
+            for col in range(1, self.COL_COUNT):
                 item = self.table_widget.item(row, col)
                 if item and text.lower() in item.text().lower():
                     match = True
@@ -79,24 +80,31 @@ class ResolverUI(QWidget):
         i = 0
         self.table_widget.setRowCount(len(self.resolved_ids))
         for resolved_id in self.resolved_ids:            # Checkbox
+            column = 0
+            # Checkbox
             checkbox = QCheckBox()
             checkbox.setText(f"{resolved_id.compare_result.score}")
             checkbox.setChecked(resolved_id.compare_result.verified or resolved_id.compare_result.has_max_score())
-            self.table_widget.setCellWidget(i, 0, checkbox)
-
-            # Label 1
-            label1 = QTableWidgetItem(f'{resolved_id.compare_result.rule}')
-            self.table_widget.setItem(i, 1, label1)
-
-            # Label 2
-            label2 = QTableWidgetItem(f'{resolved_id.identity1.name}')
-            label2.setToolTip(f"{resolved_id.identity1.description}")
-            self.table_widget.setItem(i, 2, label2)
-
-            # Label 3
-            label3 = QTableWidgetItem(f'{resolved_id.identity2.name}')
-            label3.setToolTip(f"{resolved_id.identity2.description}")
-            self.table_widget.setItem(i, 3, label3)
+            self.table_widget.setCellWidget(i, column, checkbox)
+            column += 1
+            # Equals rule
+            rule = QTableWidgetItem(f'{resolved_id.compare_result.rule}')
+            self.table_widget.setItem(i, column, rule)
+            column += 1
+            # Class
+            classification = QTableWidgetItem(f'{resolved_id.identity1.classification}')
+            self.table_widget.setItem(i, column, classification)
+            column += 1
+            # Identity 1 label
+            id1_label = QTableWidgetItem(f'{resolved_id.identity1.name}')
+            id1_label.setToolTip(f"{resolved_id.identity1.description}")
+            self.table_widget.setItem(i, column, id1_label)
+            column += 1
+            # Identity 2 label
+            id2_label = QTableWidgetItem(f'{resolved_id.identity2.name}')
+            id2_label.setToolTip(f"{resolved_id.identity2.description}")
+            self.table_widget.setItem(i, column, id2_label)
+            column += 1
             i += 1
 
     def fromUI(self):
