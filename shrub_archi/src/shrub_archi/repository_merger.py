@@ -7,7 +7,7 @@ from shrub_archi.identity_resolver import ResolvedIdentity, \
     IdentityResolver, Comparator, NaiveIdentityComparator, ResolutionStore
 from shrub_archi.identity import Identities
 from shrub_archi.repository import Repository, RepositoryIterator, IteratorMode
-
+import shrub_util.core.logging as logging
 
 class RepositoryMerger:
     def __init__(self, repo1: Repository, repo2: Repository, resolution_store: ResolutionStore = None):
@@ -29,7 +29,7 @@ class RepositoryMerger:
         self.resolve_identities()
 
     def update_uuids(self, content) -> str:
-        for key, value in self.resolution_store.resolutions:
+        for key, value in self.resolution_store.resolutions.items():
             content = content.replace(value, key)
 
 
@@ -77,10 +77,13 @@ class RepositoryMerger:
             identity = self.repo2.read_identity(dirpath, file)
             copy = not self.resolution_store.is_resolved(identity.unique_id)
             if copy:
-                with open(identity.source) as ifp:
-                    content = ifp.read()
-                content = self.update_uuids(content)
-                print(f"copied {identity.source}")
+                try:
+                    with open(identity.source, "r", encoding='utf-8') as ifp:
+                        content = ifp.read()
+                    content = self.update_uuids(content)
+                    print(f"copied {identity.source}")
+                except Exception as ex:
+                    logging.get_logger().error(f"proflem readding {identity.source}", ex=ex)
 
 class MergingMode(Enum):
     ONLY_NEW = 1
