@@ -6,13 +6,18 @@ from typing import Optional, List
 
 from defusedxml import ElementTree
 
-from shrub_archi.identity import Identity, Identities
+from shrub_archi.merge.identity import Identity, Identities
 
 
 class Repository:
     def __init__(self, location: str):
-        self.location = location
+        self.location = os.path.normpath(location)
         self._identities: Optional[Identities] = None
+
+    def get_relative_location(self, artifact_location: str):
+        resposity_path = os.path.split(self.location)
+        artifact_path = os.path.split(artifact_location)
+
 
     def read(self) -> "Repository":
         if self._identities is None:
@@ -71,7 +76,7 @@ class RepositoryIterator:
 
     def __next__(self):
         if self.mode == IteratorMode.MODE_FILE:
-            if len(self.files) == 0:
+            while len(self.files) == 0:
                 self.root, self.dirs, self.files = next(self.walker)
             file = self.files[0]
             self.files = self.files[1:]

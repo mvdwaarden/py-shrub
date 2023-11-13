@@ -1,8 +1,8 @@
 import shrub_util.core.logging as logging
-from shrub_archi.identity_resolver import CompareResolutionStore
-from shrub_archi.repository import Repository
-from shrub_archi.repository_merger import RepositoryMerger
-from shrub_archi.resolver_ui import do_show_resolve_ui
+from shrub_archi.merge.identity_resolver import ResolutionStore
+from shrub_archi.merge.repository import Repository
+from shrub_archi.merge.repository_merger import RepositoryMerger
+from shrub_archi.merge.resolver_ui import do_show_resolve_ui
 from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
 
@@ -24,17 +24,17 @@ usage = """
 def do_create_resolution_file(repo1, repo2, resolution_store_location,
                               resolution_name="dry_run"):
     merger = RepositoryMerger(Repository(repo1), Repository(repo2), compare_cutoff_score=70)
-    res_store = CompareResolutionStore(resolution_store_location)
+    res_store = ResolutionStore(resolution_store_location)
     res_store.read(resolution_name)
     merger.do_resolve()
-    res_store.apply_to(merger.resolved_identities)
-    do_show_resolve_ui(merger.resolved_identities)
-    res_store.resolutions = merger.resolved_identities
+    res_store.apply_to(merger.resolutions)
+    do_show_resolve_ui(merger.resolutions)
+    res_store.resolutions = merger.resolutions
     res_store.write(resolution_name)
 
 
 def do_merge(repo1, repo2, resolution_store_location, resolution_name="dry_run"):
-    res_store = CompareResolutionStore(resolution_store_location)
+    res_store = ResolutionStore(resolution_store_location)
     res_store.read(resolution_name)
 
     merger = RepositoryMerger(Repository(repo1), Repository(repo2),
@@ -58,7 +58,7 @@ if __name__ == "__main__":
     repo1 = args.get_arg("repo1",
                          "/Users/mwa17610/Library/Application Support/Archi4/model-repository/entrmo_archi/model")
     repo2 = args.get_arg("repo2",
-                         "/Users/mwa17610/Library/Application Support/Archi4/model-repository/entrmo_archi/model")
+                         "/Users/mwa17610/Library/Application Support/Archi4/model-repository/gemma-archi-repository/model")
     resolution_store_location = args.get_arg("folder", "/tmp")
 
     if help:
