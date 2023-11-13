@@ -18,7 +18,6 @@ class Repository:
         resposity_path = os.path.split(self.location)
         artifact_path = os.path.split(artifact_location)
 
-
     def read(self) -> "Repository":
         if self._identities is None:
             self._identities = {}
@@ -75,10 +74,10 @@ class Repository:
                     return self.root, self.dirs, file
                 else:
                     return next(self.walker)
+
         return RepositoryIterator(self, mode=IteratorMode.MODE_FILE)
 
 
 class IteratorMode(Enum):
     MODE_FILES = 1
     MODE_FILE = 2
-

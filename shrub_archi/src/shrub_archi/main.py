@@ -54,19 +54,21 @@ if __name__ == "__main__":
     args = Arguments()
     help = args.has_arg("help")
     dry_run = args.has_arg("dry-run") or False
-    repo1 = args.get_arg("repo1", "/Users/mwa17610/Library/Application Support/Archi4/model-repository/gemma-archi-repository/model")
-    repo2 = args.get_arg("repo2", "/Users/mwa17610/Library/Application Support/Archi4/model-repository/gemma-archi-repository/model" )
+    repo1 = args.get_arg("repo1",
+                         "/Users/mwa17610/Library/Application Support/Archi4/model-repository/gemma-archi-repository/model")
+    repo2 = args.get_arg("repo2",
+                         "/Users/mwa17610/Library/Application Support/Archi4/model-repository/gemma-archi-repository/model")
     # repo1 = args.get_arg("repo1",
-    #                      "/Users/mwa17610/Library/Application Support/Archi4/model-repository/archi_1/model")
+    #                       "/Users/mwa17610/Library/Application Support/Archi4/model-repository/archi_1/model")
     # repo2 = args.get_arg("repo2",
-    #                      "/tmp/test/archi/model")
+    #                       "/tmp/test/archi/model")
     resolution_store_location = args.get_arg("folder", "/tmp")
 
     if help:
         do_print_usage()
     elif dry_run:
         if do_create_resolution_file(repo1, repo2,
-                                  resolution_store_location=resolution_store_location):
+                                     resolution_store_location=resolution_store_location):
             do_merge(repo1, repo2,
                      resolution_store_location=resolution_store_location)
     else:

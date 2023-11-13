@@ -1,11 +1,103 @@
 import sys
 from typing import List
 
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QAbstractTableModel, QModelIndex
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLineEdit, \
-    QCheckBox, QTableWidget, QTableWidgetItem, QHBoxLayout, QPushButton
+    QHBoxLayout, QPushButton, QTableView
 
 from .identity_resolver import ResolvedIdentity
+
+
+class ResolutionTableModel(QAbstractTableModel):
+    def __init__(self, resolutions: List[ResolvedIdentity]):
+        super(ResolutionTableModel, self).__init__()
+        self.resolutions = resolutions
+        self._filtered_data = resolutions
+
+    def rowCount(self, parent=None):
+        return len(self.resolutions)
+
+    def columnCount(self, parent=None):
+        return 6  # Number of columns (checkbox, label1, label2)
+
+    def data(self, index: QModelIndex, role: int = ...):
+        if not index.isValid() or index.row() >= len(self._filtered_data):
+            return None
+        if role == Qt.ItemDataRole.DisplayRole:
+            res_id = self._filtered_data[index.row()]
+            match index.column():
+                case 0:
+                    return ''  # Checkbox column
+                case 1:
+                    return res_id.resolver_result.score
+                case 2:
+                    return res_id.resolver_result.rule
+                case 3:
+                    return res_id.identity1.classification
+                case 4:
+                    return res_id.identity1.name
+                case 5:
+                    return res_id.identity2.name
+                case _:
+                    return "?"
+        if role == Qt.ItemDataRole.CheckStateRole and index.column() == 0:
+            res_id = self._filtered_data[index.row()]
+            match res_id.resolver_result.manual_verification:
+                case True:
+                    return Qt.CheckState.Checked
+                case False:
+                    return Qt.CheckState.Unchecked
+                case _:
+                    return Qt.CheckState.PartiallyChecked
+
+        return None
+
+    def setHeaderData(self, section, orientation, value, role=...):
+        if role == Qt.ItemDataRole.DisplayRole:
+            if orientation == Qt.ItemDataRole.Horizontal:
+                return ['Equal', 'Score', 'Rule', 'Class', 'Identity1', 'Identity2'][
+                    section]
+
+    def flags(self, index):
+        flags = super(ResolutionTableModel, self).flags(index)
+        if index.column() == 0:
+            flags |= Qt.ItemFlag.ItemIsUserCheckable
+        return flags
+
+    def filter_data(self, search_text):
+        if not search_text:
+            self._filtered_data = self.resolutions
+        else:
+            search_text_lower = search_text.lower()
+
+            def hit(res_id: ResolvedIdentity):
+                def hit_identity(identity):
+                    return (
+                            identity.name and search_text_lower in identity.name.lower()) or (
+                            identity.description and search_text_lower in identity.description.lower()) or (
+                            identity.classification and search_text_lower in identity.classification.lower())
+
+                def hit_resolve_result(res):
+                    return search_text in str(res.score) or search_text_lower in str(
+                        res.rule.lower())
+
+                result = hit_identity(res_id.identity1) or hit_identity(
+                    res_id.identity2) or hit_resolve_result(res_id.resolver_result)
+                return result
+
+            self._filtered_data = [res_id for res_id in self.resolutions if hit(res_id)]
+        self.layoutChanged.emit()
+
+    def toggle_manual_verification(self):
+        for res_id in self._filtered_data:
+            match res_id.resolver_result.manual_verification:
+                case True:
+                    res_id.resolver_result.manual_verification = False
+                case False:
+                    res_id.resolver_result.manual_verification = None
+                case _:
+                    res_id.resolver_result.manual_verification = True
+        self.layoutChanged.emit()
 
 
 class ResolverUI(QWidget):
@@ -14,6 +106,7 @@ class ResolverUI(QWidget):
     def __init__(self, resolutions: List[ResolvedIdentity]):
         super().__init__()
         self.resolutions = resolutions
+        self.model = ResolutionTableModel(self.resolutions)
         self.initUI()
         self.ok = False
 
@@ -28,13 +121,9 @@ class ResolverUI(QWidget):
         self.search_box = QLineEdit(self)
         self.search_box.setPlaceholderText('Search...')
         layout.addWidget(self.search_box)
-
         # Create list widget
         # Create table widget
-        self.table_widget = QTableWidget(self)
-        self.table_widget.setColumnCount(self.COL_COUNT)
-        self.table_widget.setHorizontalHeaderLabels(
-            ['Equal', 'Score', 'Rule', 'Class', 'Identity1', 'Identity2'])
+        self.table_widget = QTableView(self)
         layout.addWidget(self.table_widget)
         # Buttons layout
         buttons_layout = QHBoxLayout()
@@ -61,95 +150,17 @@ class ResolverUI(QWidget):
         # Connect header click signal to toggle checkboxes function
         self.table_widget.horizontalHeader().sectionClicked.connect(
             self.toggle_checkboxes)
-        self.toUI()
+
+        self.table_widget.setModel(self.model)
 
     def filter_table(self, text):
-        for row in range(self.table_widget.rowCount()):
-            match = False
-            for col in range(1, self.COL_COUNT):
-                item = self.table_widget.item(row, col)
-                cell_text = item.text().lower() if item else None
-                if item and text.lower() in cell_text:
-                    match = True
-                    break
-            self.table_widget.setRowHidden(row, not match)
+        self.model.filter_data(text)
 
     def toggle_checkboxes(self, column):
-        if column == 0:
-            for row in range(self.table_widget.rowCount()):
-                # Check if the row is visible before toggling the checkbox
-                if not self.table_widget.isRowHidden(row):
-                    checkbox = self.table_widget.cellWidget(row, 0)
-                    match checkbox.checkState():
-                        case Qt.CheckState.PartiallyChecked:
-                            checkbox.setCheckState(Qt.CheckState.Checked)
-                        case Qt.CheckState.Checked:
-                            checkbox.setCheckState(Qt.CheckState.Unchecked)
-                        case Qt.CheckState.Unchecked:
-                            checkbox.setCheckState(Qt.CheckState.PartiallyChecked)
-
-    def toUI(self):
-        # Add items with checkboxes and labels
-        i = 0
-        self.table_widget.setRowCount(len(self.resolutions))
-        for resolved_id in self.resolutions:  # Checkbox
-            column = 0
-            # Checkbox
-            checkbox = QCheckBox()
-            checkbox.setTristate(True)
-            match resolved_id.resolver_result.manual_verification:
-                case True:
-                    checkbox.setCheckState(Qt.CheckState.Checked)
-                case False:
-                    checkbox.setCheckState(Qt.CheckState.Unchecked)
-                case _:
-                    checkbox.setCheckState(Qt.CheckState.PartiallyChecked)
-
-            self.table_widget.setCellWidget(i, column, checkbox)
-            column += 1
-            # Score
-            score = QTableWidgetItem(f'{resolved_id.resolver_result.score}')
-            self.table_widget.setItem(i, column, score)
-            column += 1
-            # Equals rule
-            rule = QTableWidgetItem(f'{resolved_id.resolver_result.rule}')
-            self.table_widget.setItem(i, column, rule)
-            column += 1
-            # Class
-            classification = QTableWidgetItem(f'{resolved_id.identity1.classification}')
-            self.table_widget.setItem(i, column, classification)
-            column += 1
-            # Identity 1 label
-            id1_label = QTableWidgetItem(f'{resolved_id.identity1.name}')
-            id1_label.setToolTip(f"{resolved_id.identity1.description}")
-            self.table_widget.setItem(i, column, id1_label)
-            column += 1
-            # Identity 2 label
-            id2_label = QTableWidgetItem(f'{resolved_id.identity2.name}')
-            id2_label.setToolTip(f"{resolved_id.identity2.description}")
-            self.table_widget.setItem(i, column, id2_label)
-            column += 1
-            i += 1
-
-    def fromUI(self):
-        for row in range(self.table_widget.rowCount()):
-            # Check if the row is visible before toggling the checkbox
-            checkbox = self.table_widget.cellWidget(row, 0)
-            if checkbox:
-                match checkbox.checkState():
-                    case Qt.CheckState.PartiallyChecked:
-                        self.resolutions[
-                            row].resolver_result.manual_verification = None
-                    case Qt.CheckState.Checked:
-                        self.resolutions[
-                            row].resolver_result.manual_verification = True
-                    case Qt.CheckState.Unchecked:
-                        self.resolutions[
-                            row].resolver_result.manual_verification = False
+        self.model.toggle_manual_verification()
 
     def save_data(self):
         # Implement the save logic here
-        self.fromUI()
         self.close()
         self.ok = True
 

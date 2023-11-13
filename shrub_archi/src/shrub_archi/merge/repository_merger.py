@@ -17,6 +17,7 @@ class RepositoryMerger:
         - if identities in repo1 already exists, the copied identity is ignored
         - if an artefact is copied, all resolved id's that exist in repo 1 are replaced
      """
+
     def __init__(self, repo1: Repository, repo2: Repository,
                  resolution_store: ResolutionStore = None,
                  compare_cutoff_score=None):
@@ -54,7 +55,8 @@ class RepositoryMerger:
             self.resolver.resolve(repo1=self.repo1,
                                   repo2=self.repo2,
                                   comparator=self.identity_comparator))
-        print(f"took {time.time() - st} seconds to determine {len(self.resolutions)} resolutions")
+        print(
+            f"took {time.time() - st} seconds to determine {len(self.resolutions)} resolutions")
 
     @property
     def resolver(self) -> RepositoryResolver:
@@ -87,7 +89,8 @@ class RepositoryMerger:
             filename = os.path.join(dirpath, file)
             identity = self.repo2.read_identity(dirpath, file)
             if identity:
-                found, resolved_result = self.resolution_store.is_resolved(identity.unique_id)
+                found, resolved_result = self.resolution_store.is_resolved(
+                    identity.unique_id)
             else:
                 found = resolved_result = False
             if not found or resolved_result is not True:
@@ -95,11 +98,11 @@ class RepositoryMerger:
                     with open(filename, "r", encoding='utf-8') as ifp:
                         content = ifp.read()
                     content = self.update_uuids(content)
-                    self.copy(filename, self.repo2.location, self.repo1.location, content)
+                    self.copy(filename, self.repo2.location, self.repo1.location,
+                              content)
                 except Exception as ex:
                     logging.get_logger().error(f"problem readding {filename}",
                                                ex=ex)
-
 
     def update_uuids(self, content) -> str:
         for key, value in self.resolution_store.resolutions.items():
@@ -107,20 +110,18 @@ class RepositoryMerger:
                 content = content.replace(value[0], key)
         return content
 
-
     def copy(self, filename: str, base_path: str, target_base_path: str, content: str):
         norm_filename = os.path.normpath(filename)
-        relative_filename =norm_filename[len(base_path) + 1:]
-        target_filename = os.path.join(target_base_path, relative_filename + "_delete_me")
+        relative_filename = norm_filename[len(base_path) + 1:]
+        target_filename = os.path.join(target_base_path,
+                                       relative_filename + "_delete_me")
         drive, tmp = os.path.splitdrive(target_filename)
         path, tmp = os.path.split(tmp)
         if not os.path.exists(path):
             os.makedirs(path)
         print(f"copy {filename} -> {target_filename}")
         with open(target_filename, "w", encoding='utf-8') as ofp:
-             ofp.write(content)
-
-
+            ofp.write(content)
 
 
 class MergingMode(Enum):
