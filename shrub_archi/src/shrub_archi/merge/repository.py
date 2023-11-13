@@ -26,7 +26,7 @@ class Repository:
             return self
         with ThreadPoolExecutor(max_workers=128) as exec:
             futures = {}
-            for dirpath, dirs, file in RepositoryIterator(self):
+            for dirpath, dirs, file in self:
                 futures[exec.submit(self.read_identity, dirpath, file)] = file
             for future in concurrent.futures.as_completed(futures):
                 identity = future.result()
@@ -55,31 +55,30 @@ class Repository:
     def identities(self) -> List[Identity]:
         return self._identities.values() if self._identities else {}
 
+    def __iter__(self):
+        class RepositoryIterator:
+            def __init__(self, repo: "Repository", mode: "" = IteratorMode.MODE_FILE):
+                self.repo: Repository = repo
+                self.walker = None
+                self.files = []
+                self.root = None
+                self.dir = None
+                self.mode: IteratorMode = mode
+                self.walker = os.walk(self.repo.location)
+
+            def __next__(self):
+                if self.mode == IteratorMode.MODE_FILE:
+                    while len(self.files) == 0:
+                        self.root, self.dirs, self.files = next(self.walker)
+                    file = self.files[0]
+                    self.files = self.files[1:]
+                    return self.root, self.dirs, file
+                else:
+                    return next(self.walker)
+        return RepositoryIterator(self, mode=IteratorMode.MODE_FILE)
+
 
 class IteratorMode(Enum):
     MODE_FILES = 1
     MODE_FILE = 2
 
-
-class RepositoryIterator:
-    def __init__(self, repo: "Repository", mode: "" = IteratorMode.MODE_FILE):
-        self.repo: Repository = repo
-        self.walker = None
-        self.files = []
-        self.root = None
-        self.dir = None
-        self.mode: IteratorMode = mode
-
-    def __iter__(self):
-        self.walker = os.walk(self.repo.location)
-        return self
-
-    def __next__(self):
-        if self.mode == IteratorMode.MODE_FILE:
-            while len(self.files) == 0:
-                self.root, self.dirs, self.files = next(self.walker)
-            file = self.files[0]
-            self.files = self.files[1:]
-            return self.root, self.dirs, file
-        else:
-            return next(self.walker)

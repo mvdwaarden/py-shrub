@@ -1,3 +1,4 @@
+import concurrent.futures
 import itertools
 import json
 import os
@@ -101,21 +102,19 @@ class ResolutionStore:
             return None
 
     def is_resolved(self, id2):
+        result = False, None
         if self.resolutions:
-            result = None
             for verified in [value[1] for value in self.resolutions.values() if
                              value[0] == id2]:
-                result = verified
+                result = True, verified
                 break
-        else:
-            result = None
         return result
 
     def apply_to(self, resolved_ids: List[ResolvedIdentity]):
-        for id1, (id2, verified_check_result) in self.resolutions.items():
+        for id1, (id2, manual_verification) in self.resolutions.items():
             for res_id in [res_id for res_id in resolved_ids if
                            res_id.identity1.unique_id == id1 and res_id.identity2.unique_id == id2]:
-                res_id.resolver_result.manual_verification = verified_check_result
+                res_id.resolver_result.manual_verification = manual_verification
                 res_id.resolver_result.rule = "ID_RESOLUTION_FILE"
                 break
 
@@ -152,8 +151,7 @@ class NaiveIdentityResolver(IdentityResolver):
         result = None
         if identity1.unique_id == identity2.unique_id:
             result = ResolverResult(
-                score=ResolverResult.MAX_EQUAL_SCORE, rule="ID_EXACT_RULE",
-                manual_verification=True)
+                score=ResolverResult.MAX_EQUAL_SCORE + 10, rule="ID_EXACT_RULE")
         elif identity1.classification == identity2.classification:
             if identity1.name == identity2.name:
                 result = ResolverResult(
@@ -178,12 +176,45 @@ class NaiveIdentityResolver(IdentityResolver):
 
 
 class RepositoryResolver:
-    def resolve(self, ids1: Repository, ids2: Repository,
-                comparator: IdentityResolver = None):
+    def classification_resolve(self, ids1: List[ResolvedIdentity],
+                               ids2: List[ResolvedIdentity],
+                               comparator: IdentityResolver):
+        result = []
         for id1, id2 in [(id1, id2) for id1, id2 in
-                         itertools.product(ids1.identities, ids2.identities)]:
+                         itertools.product(ids1, ids2)]:
             compare_result = comparator.resolve(id1, id2)
             if compare_result:
-                resolved_id = ResolvedIdentity(identity1=id1, identity2=id2,
+                resolved_id = ResolvedIdentity(identity1=id1,
+                                               identity2=id2,
                                                resolver_result=compare_result)
-                yield resolved_id
+                result.append(resolved_id)
+        return result
+
+    def resolve(self, repo1: Repository, repo2: Repository,
+                comparator: IdentityResolver = None):
+        naive = False
+        result = []
+
+        def to_map(repository: Repository):
+            map_ids1 = {}
+            for k, g in itertools.groupby(repo1.identities,
+                                          lambda id: id.classification):
+                if k not in map_ids1:
+                    map_ids1[k] = list(g)
+                else:
+                    map_ids1[k] += list(g)
+            return map_ids1
+
+        map1 = to_map(repo1)
+        map2 = to_map(repo2)
+        with concurrent.futures.ProcessPoolExecutor() as exec:
+            futures = []
+            for group1 in map1:
+                if group1 in map2:
+                    futures.append(
+                        exec.submit(self.classification_resolve, map1[group1],
+                                    map2[group1],
+                                    comparator))
+            for future in concurrent.futures.as_completed(futures):
+                result += future.result()
+        return result

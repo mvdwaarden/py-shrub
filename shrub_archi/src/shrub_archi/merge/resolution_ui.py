@@ -1,20 +1,21 @@
 import sys
 from typing import List
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLineEdit, \
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLineEdit, \
     QCheckBox, QTableWidget, QTableWidgetItem, QHBoxLayout, QPushButton
 
-from identity_resolver import ResolvedIdentity
+from .identity_resolver import ResolvedIdentity
 
 
 class ResolverUI(QWidget):
-    COL_COUNT: int = 5
+    COL_COUNT: int = 6
 
-    def __init__(self, resolved_ids: List[ResolvedIdentity]):
+    def __init__(self, resolutions: List[ResolvedIdentity]):
         super().__init__()
-        self.resolved_ids = resolved_ids
+        self.resolutions = resolutions
         self.initUI()
+        self.ok = False
 
     def initUI(self):
         # Set window title
@@ -33,7 +34,7 @@ class ResolverUI(QWidget):
         self.table_widget = QTableWidget(self)
         self.table_widget.setColumnCount(self.COL_COUNT)
         self.table_widget.setHorizontalHeaderLabels(
-            ['Equal[score]', 'Rule', 'Class', 'Identity1', 'Identity2'])
+            ['Equal', 'Score', 'Rule', 'Class', 'Identity1', 'Identity2'])
         layout.addWidget(self.table_widget)
         # Buttons layout
         buttons_layout = QHBoxLayout()
@@ -67,7 +68,8 @@ class ResolverUI(QWidget):
             match = False
             for col in range(1, self.COL_COUNT):
                 item = self.table_widget.item(row, col)
-                if item and text.lower() in item.text().lower():
+                cell_text = item.text().lower() if item else None
+                if item and text.lower() in cell_text:
                     match = True
                     break
             self.table_widget.setRowHidden(row, not match)
@@ -79,32 +81,35 @@ class ResolverUI(QWidget):
                 if not self.table_widget.isRowHidden(row):
                     checkbox = self.table_widget.cellWidget(row, 0)
                     match checkbox.checkState():
-                        case Qt.PartiallyChecked:
-                            checkbox.setCheckState(Qt.Checked)
-                        case Qt.Checked:
-                            checkbox.setCheckState(Qt.Unchecked)
-                        case Qt.Unchecked:
-                            checkbox.setCheckState(Qt.PartiallyChecked)
+                        case Qt.CheckState.PartiallyChecked:
+                            checkbox.setCheckState(Qt.CheckState.Checked)
+                        case Qt.CheckState.Checked:
+                            checkbox.setCheckState(Qt.CheckState.Unchecked)
+                        case Qt.CheckState.Unchecked:
+                            checkbox.setCheckState(Qt.CheckState.PartiallyChecked)
 
     def toUI(self):
         # Add items with checkboxes and labels
         i = 0
-        self.table_widget.setRowCount(len(self.resolved_ids))
-        for resolved_id in self.resolved_ids:  # Checkbox
+        self.table_widget.setRowCount(len(self.resolutions))
+        for resolved_id in self.resolutions:  # Checkbox
             column = 0
             # Checkbox
             checkbox = QCheckBox()
-            checkbox.setText(f"{resolved_id.resolver_result.score}")
             checkbox.setTristate(True)
             match resolved_id.resolver_result.manual_verification:
                 case True:
-                    checkbox.setCheckState(Qt.Checked)
+                    checkbox.setCheckState(Qt.CheckState.Checked)
                 case False:
-                    checkbox.setCheckState(Qt.Unchecked)
+                    checkbox.setCheckState(Qt.CheckState.Unchecked)
                 case _:
-                    checkbox.setCheckState(Qt.PartiallyChecked)
+                    checkbox.setCheckState(Qt.CheckState.PartiallyChecked)
 
             self.table_widget.setCellWidget(i, column, checkbox)
+            column += 1
+            # Score
+            score = QTableWidgetItem(f'{resolved_id.resolver_result.score}')
+            self.table_widget.setItem(i, column, score)
             column += 1
             # Equals rule
             rule = QTableWidgetItem(f'{resolved_id.resolver_result.rule}')
@@ -132,25 +137,27 @@ class ResolverUI(QWidget):
             checkbox = self.table_widget.cellWidget(row, 0)
             if checkbox:
                 match checkbox.checkState():
-                    case Qt.PartiallyChecked:
-                        self.resolved_ids[
+                    case Qt.CheckState.PartiallyChecked:
+                        self.resolutions[
                             row].resolver_result.manual_verification = None
-                    case Qt.Checked:
-                        self.resolved_ids[
+                    case Qt.CheckState.Checked:
+                        self.resolutions[
                             row].resolver_result.manual_verification = True
-                    case Qt.Unchecked:
-                        self.resolved_ids[
+                    case Qt.CheckState.Unchecked:
+                        self.resolutions[
                             row].resolver_result.manual_verification = False
 
     def save_data(self):
         # Implement the save logic here
         self.fromUI()
         self.close()
+        self.ok = True
 
 
-def do_show_resolve_ui(resolved_ids: List[ResolvedIdentity]):
+def do_show_resolve_ui(resolved_ids: List[ResolvedIdentity]) -> bool:
     # Initialize and run the application
     app = QApplication(sys.argv)
     widget = ResolverUI(resolved_ids)
     widget.show()
-    app.exec_()
+    app.exec()
+    return widget.ok

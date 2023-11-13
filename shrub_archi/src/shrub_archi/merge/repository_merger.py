@@ -1,5 +1,6 @@
 import concurrent.futures
 import os
+import time
 from concurrent.futures import ThreadPoolExecutor
 from enum import Enum
 from typing import Optional, List
@@ -8,7 +9,7 @@ import shrub_util.core.logging as logging
 from shrub_archi.merge.identity import Identities
 from shrub_archi.merge.identity_resolver import ResolvedIdentity, \
     RepositoryResolver, IdentityResolver, NaiveIdentityResolver, ResolutionStore
-from shrub_archi.merge.repository import Repository, RepositoryIterator, IteratorMode
+from shrub_archi.merge.repository import Repository
 
 
 class RepositoryMerger:
@@ -48,10 +49,12 @@ class RepositoryMerger:
                 print(f"finished {futures[future]} identities {len(repo.identities)}")
 
     def resolve_identities(self):
+        st = time.time()
         self.resolutions = list(
-            self.resolver.resolve(ids1=self.repo1,
-                                  ids2=self.repo2,
+            self.resolver.resolve(repo1=self.repo1,
+                                  repo2=self.repo2,
                                   comparator=self.identity_comparator))
+        print(f"took {time.time() - st} seconds to determine {len(self.resolutions)} resolutions")
 
     @property
     def resolver(self) -> RepositoryResolver:
@@ -80,15 +83,14 @@ class RepositoryMerger:
         # read ID from repo 2, check if it is resolved
         # resolved: do not copy
         # not resolved : copy, make sure to replace all resolved ID's with repo 1 UUID
-        for dirpath, dirs, file in RepositoryIterator(self.repo2,
-                                                      IteratorMode.MODE_FILE):
+        for dirpath, dirs, file in self.repo2:
             filename = os.path.join(dirpath, file)
             identity = self.repo2.read_identity(dirpath, file)
             if identity:
-                resolved_result = self.resolution_store.is_resolved(identity.unique_id)
+                found, resolved_result = self.resolution_store.is_resolved(identity.unique_id)
             else:
-                resolved_result = False
-            if resolved_result is not True:
+                found = resolved_result = False
+            if not found or resolved_result is not True:
                 try:
                     with open(filename, "r", encoding='utf-8') as ifp:
                         content = ifp.read()
