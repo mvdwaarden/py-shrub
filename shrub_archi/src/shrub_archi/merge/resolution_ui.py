@@ -15,7 +15,7 @@ class ResolutionTableModel(QAbstractTableModel):
         self._filtered_data = resolutions
 
     def rowCount(self, parent=None):
-        return len(self.resolutions)
+        return len(self._filtered_data)
 
     def columnCount(self, parent=None):
         return 6  # Number of columns (checkbox, label1, label2)
@@ -52,9 +52,9 @@ class ResolutionTableModel(QAbstractTableModel):
 
         return None
 
-    def setHeaderData(self, section, orientation, value, role=...):
+    def headerData(self, section, orientation, role):
         if role == Qt.ItemDataRole.DisplayRole:
-            if orientation == Qt.ItemDataRole.Horizontal:
+            if orientation == Qt.Orientation.Horizontal:
                 return ['Equal', 'Score', 'Rule', 'Class', 'Identity1', 'Identity2'][
                     section]
 
