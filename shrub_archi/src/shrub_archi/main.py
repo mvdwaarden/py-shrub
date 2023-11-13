@@ -23,7 +23,7 @@ usage = """
 
 def do_create_resolution_file(repo1, repo2, resolution_store_location,
                               resolution_name="dry_run"):
-    merger = RepositoryMerger(Repository(repo1), Repository(repo2))
+    merger = RepositoryMerger(Repository(repo1), Repository(repo2), compare_cutoff_score=70)
     res_store = CompareResolutionStore(resolution_store_location)
     res_store.read(resolution_name)
     merger.do_resolve()

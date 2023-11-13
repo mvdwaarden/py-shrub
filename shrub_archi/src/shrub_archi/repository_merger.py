@@ -1,9 +1,9 @@
-from enum import Enum
 import concurrent.futures
+import os
 from concurrent.futures import ThreadPoolExecutor
 from enum import Enum
 from typing import Optional, List
-import os
+
 import shrub_util.core.logging as logging
 from shrub_archi.identity import Identities
 from shrub_archi.identity_resolver import ResolvedIdentity, \
@@ -13,7 +13,8 @@ from shrub_archi.repository import Repository, RepositoryIterator, IteratorMode
 
 class RepositoryMerger:
     def __init__(self, repo1: Repository, repo2: Repository,
-                 resolution_store: CompareResolutionStore = None):
+                 resolution_store: CompareResolutionStore = None,
+                 compare_cutoff_score=None):
         self.repo1 = repo1
         self.repo2 = repo2
         self.identity_repo1: Optional[Identities] = None
@@ -23,6 +24,7 @@ class RepositoryMerger:
         self._identity_comparator: Optional[Comparator] = None
         self._resolution_store: Optional[
             CompareResolutionStore] = resolution_store if resolution_store else None
+        self.compare_cutoff_score = compare_cutoff_score if compare_cutoff_score else 85
 
     def do_merge(self):
         self.read_repositories([self.repo2])
@@ -62,7 +64,8 @@ class RepositoryMerger:
     @property
     def identity_comparator(self) -> Comparator:
         if not self._identity_comparator:
-            self._identity_comparator = NaiveIdentityComparator(cutoff_score=85)
+            self._identity_comparator = NaiveIdentityComparator(
+                cutoff_score=self.compare_cutoff_score)
         return self._identity_comparator
 
     @property
@@ -80,7 +83,7 @@ class RepositoryMerger:
         # not resolved : copy, make sure to replace all resolved ID's with repo 1 UUID
         for dirpath, dirs, file in RepositoryIterator(self.repo2,
                                                       IteratorMode.MODE_FILE):
-            filename = os.path.join(dirpath,file)
+            filename = os.path.join(dirpath, file)
             identity = self.repo2.read_identity(dirpath, file)
             if identity:
                 resolved_result = self.resolution_store.is_resolved(identity.unique_id)
