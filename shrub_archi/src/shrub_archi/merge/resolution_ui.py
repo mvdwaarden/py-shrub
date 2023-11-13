@@ -57,6 +57,8 @@ class ResolutionTableModel(QAbstractTableModel):
             if orientation == Qt.Orientation.Horizontal:
                 return ['Equal', 'Score', 'Rule', 'Class', 'Identity1', 'Identity2'][
                     section]
+            elif orientation == Qt.Orientation.Vertical:
+                return section + 1
 
     def flags(self, index):
         flags = super(ResolutionTableModel, self).flags(index)
