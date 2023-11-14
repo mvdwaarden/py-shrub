@@ -14,17 +14,14 @@ class Repository:
     def __init__(self, location: str):
         self.location = os.path.normpath(location)
         self._identities: Optional[Identities] = None
+        self._elements: Optional[Identities] = None
         self._relations: Optional[Relations] = None
         self._relations_lookup: Optional[RelationsLookup] = None
 
-
-    def get_relative_location(self, artifact_location: str):
-        resposity_path = os.path.split(self.location)
-        artifact_path = os.path.split(artifact_location)
-
     def read(self) -> "Repository":
-        if self._identities is None or self._relations is None:
+        if self._identities is None:
             self._identities = {}
+            self._elements = {}
             self._relations = {}
         else:
             return self
@@ -43,6 +40,7 @@ class Repository:
                         # relation can also be a target
                         self._identities[result.unique_id] = result
                     case Identity():
+                        self._elements[result.unique_id] = result
                         self._identities[result.unique_id] = result
         self._create_relations_lookup()
         return self
@@ -55,7 +53,7 @@ class Repository:
                 relation.source = self._identities[relation.source_id]
             if relation.target_id in self._identities:
                 relation.target = self._identities[relation.target_id]
-            self._relations_lookup [i] = relation
+            self._relations_lookup[i] = relation
             i += 1
             self._relations_lookup[(relation.source_id, relation.target_id)] = relation
         return self._relations_lookup
@@ -68,7 +66,8 @@ class Repository:
             et = ElementTree.parse(full_filename)
             root = et.getroot()
             identity = Identity(unique_id=root.get("id"), name=root.get("name"),
-                                description=root.get("documentation"), classification=root.tag,
+                                description=root.get("documentation"),
+                                classification=root.tag,
                                 source=full_filename)
             if identity.unique_id and identity.name:
                 result = identity
@@ -91,8 +90,10 @@ class Repository:
                         target = child
 
             relation = Relation(unique_id=root.get("id"), name=root.get('name'),
-                                description=root.get("documentation"), classification=root.tag,
-                                source_id=source.get("href").split("#")[1], target_id=target.get("href").split("#")[1],
+                                description=root.get("documentation"),
+                                classification=root.tag,
+                                source_id=source.get("href").split("#")[1],
+                                target_id=target.get("href").split("#")[1],
                                 source=full_filename)
             if relation.unique_id:
                 result = relation
@@ -103,6 +104,12 @@ class Repository:
     @property
     def identities(self) -> List[Identity]:
         return self._identities.values() if self._identities else {}
+
+    def relations(self) -> List[Relation]:
+        return self._identities.values() if self._relations else {}
+
+    def elements(self) -> List[Identity]:
+        return self._elements.values() if self._elements else {}
 
     def __iter__(self):
         class RepositoryIterator:

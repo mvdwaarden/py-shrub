@@ -153,13 +153,17 @@ class NaiveIdentityResolver(IdentityResolver):
             result = ResolverResult(
                 score=ResolverResult.MAX_EQUAL_SCORE + 10, rule="ID_EXACT_RULE")
         elif identity1.classification == identity2.classification:
-            if identity1.name == identity2.name:
+            if not identity1.name or not identity2.name:
+                ...
+            elif identity1.name == identity2.name:
                 result = ResolverResult(
                     score=ResolverResult.MAX_EQUAL_SCORE + 10,
                     rule="NAME_EXACT_RULE")
             else:
-                name_score = int(SequenceMatcher(a=identity1.name,
-                                                 b=identity2.name).ratio() * ResolverResult.MAX_EQUAL_SCORE)
+                name_score = 0
+                if len(identity1.name) > 10 and len(identity2.name) > 10:
+                    name_score = int(SequenceMatcher(a=identity1.name,
+                                                     b=identity2.name).ratio() * ResolverResult.MAX_EQUAL_SCORE)
                 description_score = 0
                 if identity1.description and identity2.description and len(
                         identity1.description) > 10 and len(identity2.description) > 10:
