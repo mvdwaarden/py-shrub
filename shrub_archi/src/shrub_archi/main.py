@@ -55,12 +55,12 @@ if __name__ == "__main__":
     args = Arguments()
     help = args.has_arg("help")
     dry_run = args.has_arg("dry-run") or False
-    # repo1 = args.get_arg("repo1",
-    #                      "/Users/mwa17610/Library/Application Support/Archi4/model-repository/gemma-archi-repository/model")
+    repo1 = args.get_arg("repo1",
+                         "/Users/mwa17610/Library/Application Support/Archi4/model-repository/gemma-archi-repository/model")
     # repo2 = args.get_arg("repo2",
     #                      "/Users/mwa17610/Library/Application Support/Archi4/model-repository/gemma-archi-repository/model")
-    repo1 = args.get_arg("repo1",
-                         "/Users/mwa17610/Library/Application Support/Archi4/model-repository/archi_1/model")
+    # repo1 = args.get_arg("repo1",
+    #                      "/Users/mwa17610/Library/Application Support/Archi4/model-repository/archi_1/model")
     repo2 = args.get_arg("repo2",
                          "/tmp/test/archi/model")
     resolution_store_location = args.get_arg("folder", "/tmp")
