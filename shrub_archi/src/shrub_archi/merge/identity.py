@@ -11,5 +11,8 @@ class Identity:
     description: Optional[str] = None
     source: Optional[str] = None
 
+    def __hash__(self):
+        return super().__hash__()
+
 
 Identities = Dict[str, Identity]

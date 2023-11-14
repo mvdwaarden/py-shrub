@@ -2,6 +2,7 @@ import shrub_util.core.logging as logging
 from shrub_archi.merge.identity_resolver import ResolutionStore
 from shrub_archi.merge.repository import Repository
 from shrub_archi.merge.repository_merger import RepositoryMerger
+from shrub_archi.merge.repository_graph import RepositoryGrapher
 from shrub_archi.merge.resolution_ui import do_show_resolve_ui
 from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
@@ -59,9 +60,9 @@ if __name__ == "__main__":
     # repo2 = args.get_arg("repo2",
     #                      "/Users/mwa17610/Library/Application Support/Archi4/model-repository/gemma-archi-repository/model")
     repo1 = args.get_arg("repo1",
-                          "/Users/mwa17610/Library/Application Support/Archi4/model-repository/archi_1/model")
+                         "/Users/mwa17610/Library/Application Support/Archi4/model-repository/archi_1/model")
     repo2 = args.get_arg("repo2",
-                          "/tmp/test/archi/model")
+                         "/tmp/test/archi/model")
     resolution_store_location = args.get_arg("folder", "/tmp")
 
     if help:
@@ -74,3 +75,4 @@ if __name__ == "__main__":
     else:
         do_create_resolution_file(repo1, repo2,
                                   resolution_store_location=resolution_store_location)
+        RepositoryGrapher.create_graph(Repository(repo1).read())

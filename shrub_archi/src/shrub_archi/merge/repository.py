@@ -103,13 +103,15 @@ class Repository:
 
     @property
     def identities(self) -> List[Identity]:
-        return self._identities.values() if self._identities else {}
+        return self._identities.values() if self._identities else []
 
+    @property
     def relations(self) -> List[Relation]:
-        return self._identities.values() if self._relations else {}
+        return self._relations.values() if self._relations else []
 
+    @property
     def elements(self) -> List[Identity]:
-        return self._elements.values() if self._elements else {}
+        return self._elements.values() if self._elements else []
 
     def __iter__(self):
         class RepositoryIterator:
