@@ -11,7 +11,7 @@ from typing import Optional, List, Tuple
 from dataclasses import dataclass
 
 import shrub_util.core.logging as logging
-from shrub_archi.merge.identity import Identity
+from shrub_archi.merge.model import Identity
 from shrub_archi.merge.repository import CoArchiRepository
 
 

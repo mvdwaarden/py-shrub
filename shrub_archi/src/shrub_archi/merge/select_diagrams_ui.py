@@ -1,7 +1,6 @@
-from typing import List, Optional, Dict
+from typing import List
 
-from shrub_archi.merge.identity import Identity
-from .identity_resolver import ResolvedIdentity
+from .model import Identity
 from .select_ui import SelectModel, do_show_select_ui
 
 
@@ -10,7 +9,7 @@ class ViewTableModel(SelectModel):
     HEADER_LABELS: List[str] = ['Select', 'ID', 'Classification', 'Name', 'Description',
                                 'Source']
 
-    def __init__(self, data: List[ResolvedIdentity]):
+    def __init__(self, data: List[Identity]):
         super().__init__(data=data)
 
     def get_column_value_for(self, row: Identity, column: int):
@@ -40,7 +39,7 @@ class ViewTableModel(SelectModel):
         return result
 
 
-def do_select_diagrams_ui(views: List[Identity]) -> Dict[Identity, Optional[bool]]:
+def do_select_diagrams_ui(views: List[Identity]) -> List[Identity]:
     model = ViewTableModel(views)
     return [row for row, selected in do_show_select_ui(model=model, ok_text="Select",
                                                        title="Select Diagrams").items()

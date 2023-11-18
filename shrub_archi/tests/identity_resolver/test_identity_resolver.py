@@ -1,5 +1,5 @@
 from shrub_archi.merge.identity_resolver import RepositoryResolver, ResolvedIdentityAction, ResolutionStore, NaiveIdentityResolver
-from shrub_archi.merge.identity import Identity, Identities
+from shrub_archi.merge.model import Identity, Identities
 
 
 def test_identity_resolver():

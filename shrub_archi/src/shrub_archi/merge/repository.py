@@ -2,12 +2,12 @@ import concurrent.futures
 import os
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
-from typing import Optional, List
+from typing import Optional, List, Tuple
 
 from defusedxml import ElementTree
 
-from shrub_archi.merge.identity import Identity, Identities
-from shrub_archi.merge.relation import Relation, Relations, RelationsLookup
+from shrub_archi.merge.model import View, Relation, Relations, RelationsLookup, \
+    Identity, Identities
 from shrub_util.core.file import FileLocationIterator, FileLocationIteratorMode
 
 
@@ -66,18 +66,28 @@ class XmiArchiRepository(Repository):
         try:
             et: ElementTree = ElementTree.parse(self.location)
             root = et.getroot()
-            namespaces = {
-                "xsi": "http://www.w3.org/2001/XMLSchema-instance",
-                "xmi": "http://www.opengroup.org/xsd/archimate/3.0/"
-            }
+            namespaces = {"xsi": "http://www.w3.org/2001/XMLSchema-instance",
+                          "xmi": "http://www.opengroup.org/xsd/archimate/3.0/"}
             for el in root.findall("xmi:elements/xmi:element", namespaces=namespaces):
-                identity = self.read_identity_from_xml_element(el, namespaces)
+                identity: Identity = self._read_identity_from_xml_element(el,
+                                                                          namespaces,
+                                                                          Identity)
                 if identity and identity.unique_id:
                     self._identities[identity.unique_id] = identity
                     self._elements[identity.unique_id] = identity
+            for el in root.findall("xmi:views/xmi:diagrams/xmi:view",
+                                   namespaces=namespaces):
+                view: View = self._read_identity_from_xml_element(el, namespaces, View)
+                if view and view.unique_id:
+                    view.referenced_elements, view.referenced_relations = self._read_referenced_elements_and_relations_from_xml_element(
+                        el, namespaces)
+                    self._identities[view.unique_id] = view
+                    self._elements[view.unique_id] = view
+
             for el in root.findall("xmi:relationships/xmi:relationship",
                                    namespaces=namespaces):
-                relation = self.read_relation_from_xml_element(el, namespaces)
+                relation: Relation = self._read_relation_from_xml_element(el,
+                                                                          namespaces)
                 if relation and relation.unique_id:
                     self._identities[relation.unique_id] = relation
                     self._relations[relation.unique_id] = relation
@@ -88,7 +98,8 @@ class XmiArchiRepository(Repository):
         self._create_relations_lookup()
         return self
 
-    def read_identity_from_xml_element(self, el, namespaces) -> Identity:
+    def _read_identity_from_xml_element(self, el, namespaces,
+                                        specialization) -> Identity | View:
         result = None
         try:
             name = documentation = None
@@ -97,17 +108,16 @@ class XmiArchiRepository(Repository):
                     name = child.text
                 elif child.tag.endswith("documentation"):
                     documentation = child.text
-            result = identity = Identity(
-                unique_id=el.get("identifier"),
-                name=name,
-                description=documentation,
-                classification=el.get(f"{{{namespaces['xsi']}}}type"),
-                source=self.location)
+            result = identity = specialization(unique_id=el.get("identifier"),
+                                               name=name, description=documentation,
+                                               classification=el.get(
+                                                   f"{{{namespaces['xsi']}}}type"),
+                                               source=self.location)
         except Exception as ex:
             print(f"problem reading element {el}", ex)
         return result
 
-    def read_relation_from_xml_element(self, el, namespaces) -> Relation:
+    def _read_relation_from_xml_element(self, el, namespaces) -> Relation:
         result = None
         try:
             name = documentation = None
@@ -117,18 +127,32 @@ class XmiArchiRepository(Repository):
                 elif child.tag.endswith("documentation"):
                     documentation = child.text
             xsi_type = el.get(f"{{{namespaces['xsi']}}}type")
-            result = relation = Relation(
-                unique_id=el.get("identifier"),
-                name=name,
-                description=documentation,
-                classification=f"{xsi_type}Relationship",
-                source=self.location,
-                source_id=el.get("source"),
-                target_id=el.get("target")
-            )
+            result = relation = Relation(unique_id=el.get("identifier"), name=name,
+                                         description=documentation,
+                                         classification=f"{xsi_type}Relationship",
+                                         source=self.location,
+                                         source_id=el.get("source"),
+                                         target_id=el.get("target"))
         except Exception as ex:
             print(f"problem reading element {el}", ex)
         return result
+
+    def _read_referenced_elements_and_relations_from_xml_element(self, el,
+                                                                 namespaces) -> Tuple[
+        List[str], List[str]]:
+        element_refs = []
+        relation_refs = []
+        try:
+            xsi_type = f"{{{namespaces['xsi']}}}type"
+            for child in el.findall(f".//xmi:node[@{xsi_type}='Element']",
+                                    namespaces=namespaces):
+                element_refs.append(child.get("elementRef"))
+            for child in el.findall(f".//xmi:connection[@{xsi_type}='Relationship']",
+                                    namespaces=namespaces):
+                relation_refs.append(child.get("relationshipRef"))
+        except Exception as ex:
+            print(f"problem reading element {el}", ex)
+        return element_refs, relation_refs
 
 
 class CoArchiRepository(Repository):

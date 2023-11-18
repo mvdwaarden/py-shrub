@@ -6,7 +6,7 @@ from enum import Enum
 from typing import Optional, List
 
 import shrub_util.core.logging as logging
-from shrub_archi.merge.identity import Identities
+from shrub_archi.merge.model import Identities
 from shrub_archi.merge.identity_resolver import ResolvedIdentity, \
     RepositoryResolver, IdentityResolver, NaiveIdentityResolver, ResolutionStore
 from shrub_archi.merge.repository import Repository

@@ -74,8 +74,7 @@ if __name__ == "__main__":
     #                      "/tmp/test/archi/model")
     # repo1 = repo2 = args.get_arg("repo1",
     #                       "/tmp/GEMMA 2.xml")
-    # repo1 = repo2 = args.get_arg("repo1",
-    #                              "/tmp/archi_src.xml")
+    repo1 = repo2 = args.get_arg("repo1", "/tmp/archi_src.xml")
     resolution_store_location = args.get_arg("folder", "/tmp")
 
     if help:
@@ -87,9 +86,10 @@ if __name__ == "__main__":
     else:
         view_repo = create_repository(repo1)
         view_repo.read()
-        identities = do_select_diagrams_ui([identity for identity in view_repo.identities if
-                         len([check for check in ["diagram", "diagrammodel"] if identity.classification.lower().endswith(check)]) > 0])
-        # do_select_diagrams_ui([identity for identity in view_repo.identities])
-        # do_create_resolution_file(repo1, repo2,
-        #                           resolution_store_location=resolution_store_location)
+        identities = do_select_diagrams_ui(
+            [identity for identity in view_repo.identities if
+             len([check for check in ["diagram", "diagrammodel"] if
+                  identity.classification.lower().endswith(check)]) > 0])
+        do_create_resolution_file(repo1, repo2,
+                                  resolution_store_location=resolution_store_location)
         RepositoryGrapher.create_graph(create_repository(repo1).read())

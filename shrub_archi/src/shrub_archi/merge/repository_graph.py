@@ -1,7 +1,6 @@
 import networkx as nx
 
-from shrub_archi.merge.identity import Identity
-from shrub_archi.merge.relation import Relation
+from shrub_archi.merge.model import Relation, Identity
 from shrub_archi.merge.repository import CoArchiRepository
 
 
