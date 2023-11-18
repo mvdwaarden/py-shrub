@@ -12,7 +12,7 @@ from dataclasses import dataclass
 
 import shrub_util.core.logging as logging
 from shrub_archi.merge.model import Identity
-from shrub_archi.merge.repository import CoArchiRepository
+from shrub_archi.merge.repository import Repository
 
 
 class ResolvedIdentityAction(Enum):
@@ -49,7 +49,7 @@ class ResolverResult:
 class ResolutionStore:
     def __init__(self, location: str):
         self.location = location
-        self._resolutions: Dict[Tuple[str, str], bool] = None
+        self._resolutions: Optional[List[Tuple[str, str, bool]]] = None
 
     @property
     def resolutions(self):
@@ -195,12 +195,12 @@ class RepositoryResolver:
                 result.append(resolved_id)
         return result
 
-    def resolve(self, repo1: CoArchiRepository, repo2: CoArchiRepository,
+    def resolve(self, repo1: Repository, repo2: Repository,
                 comparator: IdentityResolver = None):
         naive = False
         result = []
 
-        def to_map(repository: CoArchiRepository):
+        def to_map(repository: Repository):
             map_ids1 = {}
             for k, g in itertools.groupby(repo1.identities,
                                           lambda id: id.classification):

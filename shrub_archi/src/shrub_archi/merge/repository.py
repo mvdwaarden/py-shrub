@@ -189,9 +189,14 @@ class CoArchiRepository(Repository):
         try:
             et = ElementTree.parse(full_filename)
             root = et.getroot()
-            identity = Identity(unique_id=root.get("id"), name=root.get("name"),
+            classification=root.tag.split("}")[-1]
+            if classification.lower().endswith("diagrammodel"):
+                constructor = View
+            else:
+                constructor = Identity
+            identity = constructor(unique_id=root.get("id"), name=root.get("name"),
                                 description=root.get("documentation"),
-                                classification=root.tag.split("}")[-1],
+                                classification=classification,
                                 source=full_filename)
             if identity.unique_id and identity.name:
                 result = identity
