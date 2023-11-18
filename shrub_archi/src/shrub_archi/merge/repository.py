@@ -1,13 +1,14 @@
 import concurrent.futures
 import os
-from concurrent.futures import ThreadPoolExecutor
-from shrub_util.core.file import FileLocationIterator, FileLocationIteratorMode
-from typing import Optional, List
 from abc import ABC, abstractmethod
+from concurrent.futures import ThreadPoolExecutor
+from typing import Optional, List
+
 from defusedxml import ElementTree
 
 from shrub_archi.merge.identity import Identity, Identities
 from shrub_archi.merge.relation import Relation, Relations, RelationsLookup
+from shrub_util.core.file import FileLocationIterator, FileLocationIteratorMode
 
 
 class Repository(ABC):

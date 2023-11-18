@@ -1,6 +1,8 @@
-from dataclasses import dataclass
-from .identity import Identity
 from typing import Dict, Tuple, Optional
+
+from dataclasses import dataclass
+
+from .identity import Identity
 
 
 @dataclass

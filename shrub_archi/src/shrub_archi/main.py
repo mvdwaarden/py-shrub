@@ -2,8 +2,8 @@ import shrub_util.core.logging as logging
 from shrub_archi.merge.identity_resolver import ResolutionStore
 from shrub_archi.merge.repository import Repository, XmiArchiRepository, \
     CoArchiRepository
-from shrub_archi.merge.repository_merger import RepositoryMerger
 from shrub_archi.merge.repository_graph import RepositoryGrapher
+from shrub_archi.merge.repository_merger import RepositoryMerger
 from shrub_archi.merge.resolution_ui import do_show_resolve_ui
 from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
@@ -28,7 +28,6 @@ def createRepository(location: str) -> Repository:
         return XmiArchiRepository(location)
     else:
         return CoArchiRepository(location)
-
 
 
 def do_create_resolution_file(repo1, repo2, resolution_store_location,
@@ -75,7 +74,7 @@ if __name__ == "__main__":
     # repo1 = repo2 = args.get_arg("repo1",
     #                       "/tmp/GEMMA 2.xml")
     repo1 = repo2 = args.get_arg("repo1",
-                          "/tmp/archi_src.xml")
+                                 "/tmp/archi_src.xml")
     resolution_store_location = args.get_arg("folder", "/tmp")
 
     if help:

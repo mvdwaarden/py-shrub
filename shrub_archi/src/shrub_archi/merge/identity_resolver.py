@@ -56,7 +56,8 @@ class ResolutionStore:
     def resolutions(self, resolved_identities: List[ResolvedIdentity]):
         self._resolutions = {}
         for res_id in resolved_identities:
-            self._resolutions[res_id.identity1.unique_id, res_id.identity2.unique_id] = res_id.resolver_result.manual_verification
+            self._resolutions[
+                res_id.identity1.unique_id, res_id.identity2.unique_id] = res_id.resolver_result.manual_verification
 
     def _get_resolution_file(self, name) -> str:
         return os.path.join(self.location,
@@ -101,22 +102,23 @@ class ResolutionStore:
                 f"problem writing resolution file {self._get_resolution_file}", ex=ex)
 
     def resolution(self, id1, id2):
-        if self.resolutions and (id1,id2) in self.resolutions:
-            return self.resolutions[id1,id2]
+        if self.resolutions and (id1, id2) in self.resolutions:
+            return self.resolutions[id1, id2]
         else:
             return None
 
     def is_resolved(self, id2):
         result = False, None
         if self.resolutions:
-            for verified in [value for (_, id2_check), value in self.resolutions.items() if
+            for verified in [value for (_, id2_check), value in self.resolutions.items()
+                             if
                              id2 == id2_check]:
                 result = True, verified
                 break
         return result
 
     def apply_to(self, resolved_ids: List[ResolvedIdentity]):
-        for (id1, id2) ,manual_verification in self.resolutions.items():
+        for (id1, id2), manual_verification in self.resolutions.items():
             for res_id in [res_id for res_id in resolved_ids if
                            res_id.identity1.unique_id == id1 and res_id.identity2.unique_id == id2]:
                 res_id.resolver_result.manual_verification = manual_verification

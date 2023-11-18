@@ -105,7 +105,7 @@ class RepositoryMerger:
                                                ex=ex)
 
     def update_uuids(self, content) -> str:
-        for (id1, id2) , value in self.resolution_store.resolutions.items():
+        for (id1, id2), value in self.resolution_store.resolutions.items():
             if value is True:
                 content = content.replace(id2, id1)
         return content
