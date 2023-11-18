@@ -1,7 +1,7 @@
-from typing import List, Optional
+from typing import List
 
-from .select_ui import SelectModel, do_show_select_ui
 from .identity_resolver import ResolvedIdentity
+from .select_ui import SelectModel, do_show_select_ui
 
 
 class ResolutionTableModel(SelectModel):
@@ -11,6 +11,8 @@ class ResolutionTableModel(SelectModel):
 
     def __init__(self, data: List[ResolvedIdentity]):
         super().__init__(data=data)
+        for row in data:
+            self.set_selected(row, row.resolver_result.manual_verification)
 
     def get_column_value_for(self, row: ResolvedIdentity, column: int):
         match column:
@@ -29,27 +31,26 @@ class ResolutionTableModel(SelectModel):
             case _:
                 return "?"
 
-    def is_selected(self, row: ResolvedIdentity) -> Optional[bool]:
-        return row.resolver_result.manual_verification
-
     def hit_row(self, row: ResolvedIdentity, search_text: str):
         def hit_identity(identity):
-            return (
-                    identity.name and search_text in identity.name.lower()) or (
+            return (identity.name and search_text in identity.name.lower()) or (
                     identity.description and search_text in identity.description.lower()) or (
                     identity.classification and search_text in identity.classification.lower())
 
         def hit_resolve_result(res):
-            return search_text in str(res.score) or search_text in str(
-                res.rule.lower())
+            return search_text in str(res.score) or search_text in str(res.rule.lower())
 
         result = hit_identity(row.identity1) or hit_identity(
             row.identity2) or hit_resolve_result(row.resolver_result)
         return result
 
-    def toggle_row(self, row: ResolvedIdentity, status):
-        row.resolver_result.manual_verification = status
-
 
 def do_show_resolve_ui(resolved_ids: List[ResolvedIdentity]) -> bool:
-    return do_show_select_ui(model=ResolutionTableModel(resolved_ids))
+    selection = do_show_select_ui(model=ResolutionTableModel(resolved_ids),
+                                  ok_text="Resolve")
+    saved = False
+    for row, selected in selection.items():
+        row.resolver_result.manual_verification = selected
+        saved = True
+
+    return saved

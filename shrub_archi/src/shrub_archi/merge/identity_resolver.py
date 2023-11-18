@@ -30,6 +30,9 @@ class ResolvedIdentity:
     identity2: "Identity"
     resolver_result: "ResolverResult"
 
+    def __hash__(self):
+        return hash((self.identity1.unique_id, self.identity2.unique_id))
+
 
 @dataclass
 class ResolverResult:
@@ -73,9 +76,7 @@ class ResolutionStore:
             try:
                 self._read_from_string(resolutions)
             except Exception as ex:
-                logging.get_logger().error(
-                    f"problem reading resolutions",
-                    ex=ex)
+                logging.get_logger().error(f"problem reading resolutions", ex=ex)
         return self.resolutions
 
     def read(self, name: str):
@@ -111,8 +112,7 @@ class ResolutionStore:
         result = False, None
         if self.resolutions:
             for verified in [value for (_, id2_check), value in self.resolutions.items()
-                             if
-                             id2 == id2_check]:
+                             if id2 == id2_check]:
                 result = True, verified
                 break
         return result
@@ -132,8 +132,7 @@ class IdentityResolver(ABC):
         if parent:
             self.resolver_chain.append(*parent.resolver_chain)
 
-    def resolve(self, identity1: Identity,
-                identity2: Identity) -> ResolverResult:
+    def resolve(self, identity1: Identity, identity2: Identity) -> ResolverResult:
         result = None
         for cmp in self.resolver_chain:
             result = cmp.do_resolve(identity1, identity2)
@@ -143,8 +142,7 @@ class IdentityResolver(ABC):
         return result
 
     @abstractmethod
-    def do_resolve(self, identity1: Identity,
-                   identity2: Identity) -> ResolverResult:
+    def do_resolve(self, identity1: Identity, identity2: Identity) -> ResolverResult:
         pass
 
 
@@ -157,14 +155,13 @@ class NaiveIdentityResolver(IdentityResolver):
         ResolverResult]:
         result = None
         if identity1.unique_id == identity2.unique_id:
-            result = ResolverResult(
-                score=ResolverResult.MAX_EQUAL_SCORE + 10, rule="ID_EXACT_RULE")
+            result = ResolverResult(score=ResolverResult.MAX_EQUAL_SCORE + 10,
+                rule="ID_EXACT_RULE")
         elif identity1.classification == identity2.classification:
             if not identity1.name or not identity2.name:
                 ...
             elif identity1.name == identity2.name:
-                result = ResolverResult(
-                    score=ResolverResult.MAX_EQUAL_SCORE + 10,
+                result = ResolverResult(score=ResolverResult.MAX_EQUAL_SCORE + 10,
                     rule="NAME_EXACT_RULE")
             else:
                 name_score = 0
@@ -177,8 +174,7 @@ class NaiveIdentityResolver(IdentityResolver):
                     description_score = int(SequenceMatcher(a=identity1.description,
                                                             b=identity2.description).ratio() * ResolverResult.MAX_EQUAL_SCORE)
                 if name_score > 0 and name_score > description_score:
-                    result = ResolverResult(score=name_score,
-                                            rule="NAME_CLASS_RULE")
+                    result = ResolverResult(score=name_score, rule="NAME_CLASS_RULE")
                 elif description_score > 0:
                     result = ResolverResult(score=description_score,
                                             rule="DESCRIPTION_CLASS_RULE")
@@ -191,12 +187,10 @@ class RepositoryResolver:
                                ids2: List[ResolvedIdentity],
                                comparator: IdentityResolver):
         result = []
-        for id1, id2 in [(id1, id2) for id1, id2 in
-                         itertools.product(ids1, ids2)]:
+        for id1, id2 in [(id1, id2) for id1, id2 in itertools.product(ids1, ids2)]:
             compare_result = comparator.resolve(id1, id2)
             if compare_result:
-                resolved_id = ResolvedIdentity(identity1=id1,
-                                               identity2=id2,
+                resolved_id = ResolvedIdentity(identity1=id1, identity2=id2,
                                                resolver_result=compare_result)
                 result.append(resolved_id)
         return result
@@ -224,8 +218,7 @@ class RepositoryResolver:
                 if group1 in map2:
                     futures.append(
                         exec.submit(self.classification_resolve, map1[group1],
-                                    map2[group1],
-                                    comparator))
+                                    map2[group1], comparator))
             for future in concurrent.futures.as_completed(futures):
                 result += future.result()
         return result

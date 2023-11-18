@@ -11,6 +11,8 @@ class Relation(Identity):
     target_id: Optional[str] = None
     source: Optional[Identity] = None
     target: Optional[Identity] = None
+    def __hash__(self):
+        return super().__hash__()
 
 
 Relations = Dict[str, Relation]
