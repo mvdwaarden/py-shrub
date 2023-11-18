@@ -1,6 +1,7 @@
 import shrub_util.core.logging as logging
 from shrub_archi.merge.identity_resolver import ResolutionStore
-from shrub_archi.merge.repository import Repository
+from shrub_archi.merge.repository import Repository, XmiArchiRepository, \
+    CoArchiRepository
 from shrub_archi.merge.repository_merger import RepositoryMerger
 from shrub_archi.merge.repository_graph import RepositoryGrapher
 from shrub_archi.merge.resolution_ui import do_show_resolve_ui
@@ -22,10 +23,15 @@ usage = """
 """
 
 
+def createRepository(location: str) -> Repository:
+    return CoArchiRepository(location)
+    # return XmiArchiRepository(location)
+
+
 def do_create_resolution_file(repo1, repo2, resolution_store_location,
                               resolution_name="dry_run") -> bool:
     created = False
-    merger = RepositoryMerger(Repository(repo1), Repository(repo2))
+    merger = RepositoryMerger(createRepository(repo1), createRepository(repo2))
     res_store = ResolutionStore(resolution_store_location)
     res_store.read(resolution_name)
     merger.do_resolve()
@@ -40,7 +46,7 @@ def do_create_resolution_file(repo1, repo2, resolution_store_location,
 def do_merge(repo1, repo2, resolution_store_location, resolution_name="dry_run"):
     res_store = ResolutionStore(resolution_store_location)
     res_store.read(resolution_name)
-    merger = RepositoryMerger(Repository(repo1), Repository(repo2),
+    merger = RepositoryMerger(createRepository(repo1), createRepository(repo2),
                               res_store)
     merger.do_merge()
 
@@ -57,12 +63,14 @@ if __name__ == "__main__":
     dry_run = args.has_arg("dry-run") or False
     repo1 = args.get_arg("repo1",
                          "/Users/mwa17610/Library/Application Support/Archi4/model-repository/gemma-archi-repository/model")
-    # repo2 = args.get_arg("repo2",
-    #                      "/Users/mwa17610/Library/Application Support/Archi4/model-repository/gemma-archi-repository/model")
+    repo2 = args.get_arg("repo2",
+                         "/Users/mwa17610/Library/Application Support/Archi4/model-repository/gemma-archi-repository/model")
     # repo1 = args.get_arg("repo1",
     #                      "/Users/mwa17610/Library/Application Support/Archi4/model-repository/archi_1/model")
-    repo2 = args.get_arg("repo2",
-                         "/tmp/test/archi/model")
+    # repo2 = args.get_arg("repo2",
+    #                      "/tmp/test/archi/model")
+    # repo1 = repo2 = args.get_arg("repo1",
+    #                       "/tmp/GEMMA 2.xml")
     resolution_store_location = args.get_arg("folder", "/tmp")
 
     if help:
@@ -75,4 +83,4 @@ if __name__ == "__main__":
     else:
         do_create_resolution_file(repo1, repo2,
                                   resolution_store_location=resolution_store_location)
-        RepositoryGrapher.create_graph(Repository(repo1).read())
+        RepositoryGrapher.create_graph(createRepository(repo1).read())

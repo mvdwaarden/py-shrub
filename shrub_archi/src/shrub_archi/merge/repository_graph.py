@@ -9,7 +9,7 @@ import shrub_util.core.logging as logging
 from shrub_archi.merge.identity import  Identity
 from shrub_archi.merge.relation import  Relation
 import networkx as nx
-from shrub_archi.merge.repository import Repository
+from shrub_archi.merge.repository import CoArchiRepository
 
 
 class RepositoryGrapher:
@@ -18,7 +18,7 @@ class RepositoryGrapher:
         - if an artefact is copied, all resolved id's that exist in repo 1 are replaced
      """
 
-    def create_graph(repo: Repository) -> nx.Graph:
+    def create_graph(repo: CoArchiRepository) -> nx.Graph:
         g = nx.DiGraph()
         for elem in repo.elements:
             g.add_node(elem)

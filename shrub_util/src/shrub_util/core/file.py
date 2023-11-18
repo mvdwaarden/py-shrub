@@ -1,6 +1,7 @@
 import os
 
 import shrub_util.core.logging as logging
+from enum import Enum
 
 
 def file_exists(context, filename):
@@ -24,3 +25,29 @@ def file_read_file(context, filename):
         raise ex
 
     return result
+
+
+class FileLocationIteratorMode(Enum):
+    MODE_FILES = 1
+    MODE_FILE = 2
+
+
+class FileLocationIterator:
+    def __init__(self, location: str, mode: "" = FileLocationIteratorMode.MODE_FILE):
+        self.location = location
+        self.walker = None
+        self.files = []
+        self.root = None
+        self.dir = None
+        self.mode: FileLocationIteratorMode = mode
+        self.walker = os.walk(self.location)
+
+    def __next__(self):
+        if self.mode == FileLocationIteratorMode.MODE_FILE:
+            while len(self.files) == 0:
+                self.root, self.dirs, self.files = next(self.walker)
+            file = self.files[0]
+            self.files = self.files[1:]
+            return self.root, self.dirs, file
+        else:
+            return next(self.walker)
