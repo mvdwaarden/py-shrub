@@ -1,13 +1,5 @@
-import concurrent.futures
-import os
-import time
-from concurrent.futures import ThreadPoolExecutor
-from enum import Enum
-from typing import Optional, List
-
-import shrub_util.core.logging as logging
-from shrub_archi.merge.identity import  Identity
-from shrub_archi.merge.relation import  Relation
+from shrub_archi.merge.identity import Identity
+from shrub_archi.merge.relation import Relation
 import networkx as nx
 from shrub_archi.merge.repository import CoArchiRepository
 
@@ -24,11 +16,14 @@ class RepositoryGrapher:
             g.add_node(elem)
         for rel in repo.relations:
             g.add_edge(rel.source, rel.target)
+
         def to_stringer(thingy):
             match thingy:
                 case Identity():
                     return thingy.name
                 case Relation():
                     return thingy.name if thingy.name else ""
-                case _: return "?"
+                case _:
+                    return "?"
+
         nx.write_gml(g, "/tmp/graph.gml", to_stringer)

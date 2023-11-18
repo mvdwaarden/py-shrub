@@ -24,8 +24,11 @@ usage = """
 
 
 def createRepository(location: str) -> Repository:
-    return CoArchiRepository(location)
-    # return XmiArchiRepository(location)
+    if location.lower().endswith(".xml"):
+        return XmiArchiRepository(location)
+    else:
+        return CoArchiRepository(location)
+
 
 
 def do_create_resolution_file(repo1, repo2, resolution_store_location,
@@ -61,16 +64,18 @@ if __name__ == "__main__":
     args = Arguments()
     help = args.has_arg("help")
     dry_run = args.has_arg("dry-run") or False
-    repo1 = args.get_arg("repo1",
-                         "/Users/mwa17610/Library/Application Support/Archi4/model-repository/gemma-archi-repository/model")
-    repo2 = args.get_arg("repo2",
-                         "/Users/mwa17610/Library/Application Support/Archi4/model-repository/gemma-archi-repository/model")
+    # repo1 = args.get_arg("repo1",
+    #                      "/Users/mwa17610/Library/Application Support/Archi4/model-repository/gemma-archi-repository/model")
+    # repo2 = args.get_arg("repo2",
+    #                      "/Users/mwa17610/Library/Application Support/Archi4/model-repository/gemma-archi-repository/model")
     # repo1 = args.get_arg("repo1",
     #                      "/Users/mwa17610/Library/Application Support/Archi4/model-repository/archi_1/model")
     # repo2 = args.get_arg("repo2",
     #                      "/tmp/test/archi/model")
     # repo1 = repo2 = args.get_arg("repo1",
     #                       "/tmp/GEMMA 2.xml")
+    repo1 = repo2 = args.get_arg("repo1",
+                          "/tmp/archi_src.xml")
     resolution_store_location = args.get_arg("folder", "/tmp")
 
     if help:

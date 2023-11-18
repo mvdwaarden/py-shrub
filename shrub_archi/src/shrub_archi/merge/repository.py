@@ -115,11 +115,12 @@ class XmiArchiRepository(Repository):
                     name = child.text
                 elif child.tag.endswith("documentation"):
                     documentation = child.text
+            xsi_type = el.get(f"{{{namespaces['xsi']}}}type")
             result = relation = Relation(
                 unique_id=el.get("identifier"),
                 name=name,
                 description=documentation,
-                classification=el.get(f"{{{namespaces['xsi']}}}type"),
+                classification=f"{xsi_type}Relationship",
                 source=self.location,
                 source_id=el.get("source"),
                 target_id=el.get("target")
@@ -165,7 +166,7 @@ class CoArchiRepository(Repository):
             root = et.getroot()
             identity = Identity(unique_id=root.get("id"), name=root.get("name"),
                                 description=root.get("documentation"),
-                                classification=root.tag,
+                                classification=root.tag.split("}")[-1],
                                 source=full_filename)
             if identity.unique_id and identity.name:
                 result = identity
@@ -186,10 +187,9 @@ class CoArchiRepository(Repository):
                         source = child
                     case "target":
                         target = child
-
             relation = Relation(unique_id=root.get("id"), name=root.get('name'),
                                 description=root.get("documentation"),
-                                classification=root.tag,
+                                classification=root.tag.split("}")[-1],
                                 source_id=source.get("href").split("#")[1],
                                 target_id=target.get("href").split("#")[1],
                                 source=full_filename)

@@ -105,9 +105,9 @@ class RepositoryMerger:
                                                ex=ex)
 
     def update_uuids(self, content) -> str:
-        for key, value in self.resolution_store.resolutions.items():
-            if value[1] is True:
-                content = content.replace(value[0], key)
+        for (id1, id2) , value in self.resolution_store.resolutions.items():
+            if value is True:
+                content = content.replace(id2, id1)
         return content
 
     def copy(self, filename: str, base_path: str, target_base_path: str, content: str):
