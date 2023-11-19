@@ -40,3 +40,4 @@ class Relation(Identity):
 Relations = Dict[str, Relation]
 RelationsLookup = Dict[Tuple[str, str], Relation]
 Identities = Dict[str, Identity]
+Views = Dict[str, View]

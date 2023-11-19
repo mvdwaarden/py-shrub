@@ -6,8 +6,8 @@ from typing import Optional, List, Tuple
 
 from defusedxml import ElementTree
 
-from shrub_archi.merge.model import View, Relation, Relations, RelationsLookup, \
-    Identity, Identities
+from shrub_archi.model.model import View, Relation, Relations, RelationsLookup, \
+    Identity, Identities, Views
 from shrub_util.core.file import FileLocationIterator, FileLocationIteratorMode
 
 
@@ -18,12 +18,14 @@ class Repository(ABC):
         self._relations_lookup: Optional[RelationsLookup] = None
         self._relations: Optional[Relations] = None
         self._elements: Optional[Identities] = None
+        self._views: Optional[Views] = None
 
     def read(self) -> "Repository":
         if self._identities is None:
             self._identities = {}
             self._elements = {}
             self._relations = {}
+            self._views = {}
         else:
             return self
         return self.do_read()
@@ -34,15 +36,32 @@ class Repository(ABC):
 
     @property
     def identities(self) -> List[Identity]:
-        return self._identities.values() if self._identities else []
+        return list(self._identities.values()) if self._identities else []
+
+    @property
+    def views(self) -> List[View]:
+        result = list(self._views.values()) if self._views else []
+        return result
+
+    def view_referenced_identies(self, views) -> List[Identity]:
+        if views:
+            aggregate_filter = ()
+            for view in views:
+                aggregate_filter += tuple(view.referenced_elements if view.referenced_elements else [])
+                aggregate_filter += tuple(view.referenced_relations if view.referenced_relations else [])
+            result = list(
+                [identity for identity in self.identities if identity.unique_id in aggregate_filter])
+            return result
+        else:
+            return self.identities
 
     @property
     def relations(self) -> List[Relation]:
-        return self._relations.values() if self._relations else []
+        return list(self._relations.values()) if self._relations else []
 
     @property
     def elements(self) -> List[Identity]:
-        return self._elements.values() if self._elements else []
+        return list(self._elements.values()) if self._elements else []
 
     def _create_relations_lookup(self):
         self._relations_lookup = {}
@@ -82,7 +101,7 @@ class XmiArchiRepository(Repository):
                     view.referenced_elements, view.referenced_relations = self._read_referenced_elements_and_relations_from_xml_element(
                         el, namespaces)
                     self._identities[view.unique_id] = view
-                    self._elements[view.unique_id] = view
+                    self._views[view.unique_id] = view
 
             for el in root.findall("xmi:relationships/xmi:relationship",
                                    namespaces=namespaces):
@@ -176,28 +195,31 @@ class CoArchiRepository(Repository):
                         self._relations[result.unique_id] = result
                         # relation can also be a target
                         self._identities[result.unique_id] = result
+                    case View():
+                        self._views[result.unique_id] = result
+                        self._identities[result.unique_id] = result
                     case Identity():
                         self._elements[result.unique_id] = result
                         self._identities[result.unique_id] = result
+
         self._create_relations_lookup()
         return self
 
-    def _read_identity_from_file(self, dirpath, file) -> Identity:
+    def _read_identity_from_file(self, dirpath, file) -> Identity | View:
         result = None
         full_filename = os.path.join(dirpath, file)
         # print(f"start reading id from {full_filename}")
         try:
             et = ElementTree.parse(full_filename)
             root = et.getroot()
-            classification=root.tag.split("}")[-1]
+            classification = root.tag.split("}")[-1]
             if classification.lower().endswith("diagrammodel"):
                 constructor = View
             else:
                 constructor = Identity
             identity = constructor(unique_id=root.get("id"), name=root.get("name"),
-                                description=root.get("documentation"),
-                                classification=classification,
-                                source=full_filename)
+                                   description=root.get("documentation"),
+                                   classification=classification, source=full_filename)
             if identity.unique_id and identity.name:
                 result = identity
         except Exception as ex:

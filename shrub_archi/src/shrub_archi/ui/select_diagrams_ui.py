@@ -1,13 +1,13 @@
 from typing import List
 
-from .model import View
+from shrub_archi.model.model import View
 from .select_ui import SelectModel, do_show_select_ui
 
 
 class ViewTableModel(SelectModel):
     COL_COUNT: int = 8
     HEADER_LABELS: List[str] = ['Select', 'ID', 'Classification', 'Name', 'Description',
-                                'Source', 'Elements','Relations']
+                                'Source', 'Elements', 'Relations']
 
     def __init__(self, data: List[View]):
         super().__init__(data=data)

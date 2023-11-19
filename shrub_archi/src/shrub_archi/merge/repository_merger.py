@@ -6,10 +6,10 @@ from enum import Enum
 from typing import Optional, List
 
 import shrub_util.core.logging as logging
-from shrub_archi.merge.model import Identities
-from shrub_archi.merge.identity_resolver import ResolvedIdentity, \
-    RepositoryResolver, IdentityResolver, NaiveIdentityResolver, ResolutionStore
-from shrub_archi.merge.repository import Repository
+from shrub_archi.merge.identity_resolver import ResolvedIdentity, RepositoryResolver, \
+    IdentityResolver, NaiveIdentityResolver, ResolutionStore
+from shrub_archi.model.model import Identities, Views
+from shrub_archi.model.repository import Repository
 
 
 class RepositoryMerger:
@@ -18,11 +18,11 @@ class RepositoryMerger:
         - if an artefact is copied, all resolved id's that exist in repo 1 are replaced
      """
 
-    def __init__(self, repo1: Repository, repo2: Repository,
-                 resolution_store: ResolutionStore = None,
-                 compare_cutoff_score=None):
+    def __init__(self, repo1: Repository, repo2: Repository, repo2_filter: Views,
+                 resolution_store: ResolutionStore = None, compare_cutoff_score=None):
         self.repo1 = repo1
         self.repo2 = repo2
+        self.repo2_filter = repo2_filter
         self.identity_repo1: Optional[Identities] = None
         self.identity_repo2: Optional[Identities] = None
         self.resolutions: List[ResolvedIdentity] = []
@@ -38,22 +38,20 @@ class RepositoryMerger:
 
     def do_resolve(self):
         self.read_repositories([self.repo1, self.repo2])
-        self.resolve_identities()
+        self.resolve_identities(repo2_filter=self.repo2_filter)
 
     def read_repositories(self, repos: List[Repository]):
         with ThreadPoolExecutor() as exec:
-            futures = {
-                exec.submit(repo.read): repo for repo in repos
-            }
+            futures = {exec.submit(repo.read): repo for repo in repos}
             for future in concurrent.futures.as_completed(futures):
                 repo = future.result()
                 print(f"finished {futures[future]} identities {len(repo.identities)}")
 
-    def resolve_identities(self):
+    def resolve_identities(self, repo2_filter: Views = None):
         st = time.time()
         self.resolutions = list(
-            self.resolver.resolve(repo1=self.repo1,
-                                  repo2=self.repo2,
+            self.resolver.resolve(repo1=self.repo1, repo2=self.repo2,
+                                  repo2_filter=repo2_filter,
                                   comparator=self.identity_comparator))
         print(
             f"took {time.time() - st} seconds to determine {len(self.resolutions)} resolutions")
@@ -101,8 +99,7 @@ class RepositoryMerger:
                     self.copy(filename, self.repo2.location, self.repo1.location,
                               content)
                 except Exception as ex:
-                    logging.get_logger().error(f"problem readding {filename}",
-                                               ex=ex)
+                    logging.get_logger().error(f"problem readding {filename}", ex=ex)
 
     def update_uuids(self, content) -> str:
         for (id1, id2), value in self.resolution_store.resolutions.items():

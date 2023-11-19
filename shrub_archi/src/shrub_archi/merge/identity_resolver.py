@@ -5,14 +5,13 @@ import os
 from abc import ABC, abstractmethod
 from difflib import SequenceMatcher
 from enum import Enum
-from typing import Dict
 from typing import Optional, List, Tuple
 
 from dataclasses import dataclass
 
 import shrub_util.core.logging as logging
-from shrub_archi.merge.model import Identity
-from shrub_archi.merge.repository import Repository
+from shrub_archi.model.model import Identity, Views
+from shrub_archi.model.repository import Repository
 
 
 class ResolvedIdentityAction(Enum):
@@ -156,13 +155,13 @@ class NaiveIdentityResolver(IdentityResolver):
         result = None
         if identity1.unique_id == identity2.unique_id:
             result = ResolverResult(score=ResolverResult.MAX_EQUAL_SCORE + 10,
-                rule="ID_EXACT_RULE")
+                                    rule="ID_EXACT_RULE")
         elif identity1.classification == identity2.classification:
             if not identity1.name or not identity2.name:
                 ...
             elif identity1.name == identity2.name:
                 result = ResolverResult(score=ResolverResult.MAX_EQUAL_SCORE + 10,
-                    rule="NAME_EXACT_RULE")
+                                        rule="NAME_EXACT_RULE")
             else:
                 name_score = 0
                 if len(identity1.name) > 10 and len(identity2.name) > 10:
@@ -195,15 +194,16 @@ class RepositoryResolver:
                 result.append(resolved_id)
         return result
 
-    def resolve(self, repo1: Repository, repo2: Repository,
+    def resolve(self, repo1: Repository, repo2: Repository, repo2_filter: Views = None,
                 comparator: IdentityResolver = None):
         naive = False
         result = []
 
-        def to_map(repository: Repository):
+        def to_map(repository: Repository, repo_filter: Views = None):
             map_ids1 = {}
-            for k, g in itertools.groupby(repo1.identities,
-                                          lambda id: id.classification):
+            for k, g in itertools.groupby(
+                    repository.view_referenced_identies(repo_filter),
+                    lambda id: id.classification):
                 if k not in map_ids1:
                     map_ids1[k] = list(g)
                 else:
@@ -211,7 +211,7 @@ class RepositoryResolver:
             return map_ids1
 
         map1 = to_map(repo1)
-        map2 = to_map(repo2)
+        map2 = to_map(repo2, repo2_filter)
         with concurrent.futures.ProcessPoolExecutor() as exec:
             futures = []
             for group1 in map1:
