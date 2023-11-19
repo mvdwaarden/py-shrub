@@ -31,10 +31,10 @@ def create_repository(location: str) -> Repository:
         return CoArchiRepository(location)
 
 
-def do_create_resolution_file(repo1, repo2, repo2_views, resolution_store_location,
+def do_create_resolution_file(repo1, repo2, repo2_filter, resolution_store_location,
                               resolution_name="dry_run") -> bool:
     created = False
-    merger = RepositoryMerger(repo1, repo2, repo2_views)
+    merger = RepositoryMerger(repo1, repo2, repo2_filter)
     res_store = ResolutionStore(resolution_store_location)
     res_store.read(resolution_name)
     merger.do_resolve()
@@ -46,11 +46,11 @@ def do_create_resolution_file(repo1, repo2, repo2_views, resolution_store_locati
     return created
 
 
-def do_merge(repo1, repo2, repo2_views, resolution_store_location,
+def do_merge(repo1, repo2, repo2_filter, resolution_store_location,
              resolution_name="dry_run"):
     res_store = ResolutionStore(resolution_store_location)
     res_store.read(resolution_name)
-    merger = RepositoryMerger(repo1, repo2, repo2_views, res_store)
+    merger = RepositoryMerger(repo1, repo2, repo2_filter, res_store)
     merger.do_merge()
 
 
