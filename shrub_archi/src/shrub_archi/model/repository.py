@@ -47,10 +47,12 @@ class Repository(ABC):
         if views:
             aggregate_filter = ()
             for view in views:
-                aggregate_filter += tuple(view.referenced_elements if view.referenced_elements else [])
-                aggregate_filter += tuple(view.referenced_relations if view.referenced_relations else [])
-            result = list(
-                [identity for identity in self.identities if identity.unique_id in aggregate_filter])
+                aggregate_filter += tuple(
+                    view.referenced_elements if view.referenced_elements else [])
+                aggregate_filter += tuple(
+                    view.referenced_relations if view.referenced_relations else [])
+            result = list([identity for identity in self.identities if
+                           identity.unique_id in aggregate_filter])
             return result
         else:
             return self.identities

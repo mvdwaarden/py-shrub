@@ -12,7 +12,7 @@ class ViewTableModel(SelectModel):
     def __init__(self, data: List[View]):
         super().__init__(data=data)
 
-    def get_column_value_for(self, row: View, column: int):
+    def column_value_for(self, row: View, column: int):
         match column:
             case 0:
                 return ''  # Checkbox column

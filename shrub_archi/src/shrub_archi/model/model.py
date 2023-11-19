@@ -14,6 +14,7 @@ class Identity:
     def __hash__(self):
         return super().__hash__()
 
+
 @dataclass
 class View(Identity):
     unique_id: str
@@ -23,6 +24,7 @@ class View(Identity):
     source: Optional[str] = None
     referenced_elements: List[str] = None
     referenced_relations: List[str] = None
+
     def __hash__(self):
         return super().__hash__()
 
@@ -33,6 +35,7 @@ class Relation(Identity):
     target_id: Optional[str] = None
     source: Optional[Identity] = None
     target: Optional[Identity] = None
+
     def __hash__(self):
         return super().__hash__()
 

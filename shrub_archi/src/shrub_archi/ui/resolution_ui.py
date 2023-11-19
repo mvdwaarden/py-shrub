@@ -14,7 +14,7 @@ class ResolutionTableModel(SelectModel):
         for row in data:
             self.set_selected(row, row.resolver_result.manual_verification)
 
-    def get_column_value_for(self, row: ResolvedIdentity, column: int):
+    def column_value_for(self, row: ResolvedIdentity, column: int):
         match column:
             case 0:
                 return ''  # Checkbox column

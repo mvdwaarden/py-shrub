@@ -15,7 +15,7 @@ class SelectModel(QAbstractTableModel):
         super(SelectModel, self).__init__()
         self._data = data
         self._filtered_data = data
-        self._selection = {row: False for row in data}
+        self._selection = {self.row_hash(row): False for row in data}
 
     def rowCount(self, parent=None):
         return len(self._filtered_data)
@@ -46,28 +46,23 @@ class SelectModel(QAbstractTableModel):
         self.layoutChanged.emit()
 
     def toggle_rows(self, selected_indexes: List):
-        # selection_model = self.table_view.selectionModel()
-        # indexes = selection_model.selectedRows()
-        # for index in indexes:
-        #     row = index.row()
-        #     print(f"Selected Row: {row}, Data: {self.model._filtered_data[row]}")
-
         for row in [index.row() for index in selected_indexes]:
-            match self._selection[self._filtered_data[row]]:
+            match self._selection[self.row_hash(self._filtered_data[row])]:
                 case True:
-                    self._toggle_row(self._filtered_data[row], None)
+                    new_value = None
                 case False:
-                    self._toggle_row(self._filtered_data[row], True)
+                    new_value = True
                 case _:
-                    self._toggle_row(self._filtered_data[row], False)
+                    new_value = False
+            self._toggle_row(self._filtered_data[row], new_value)
         self.layoutChanged.emit()
 
     def data(self, index: QModelIndex, role: int = ...):
         if not index.isValid() or index.row() >= len(self._filtered_data):
             return None
         if role == Qt.ItemDataRole.DisplayRole:
-            return self.get_column_value_for(self._filtered_data[index.row()],
-                                             index.column())
+            return self.column_value_for(self._filtered_data[index.row()],
+                                         index.column())
         if role == Qt.ItemDataRole.CheckStateRole and index.column() == 0:
             match self._is_selected(self._filtered_data[index.row()]):
                 case True:
@@ -80,21 +75,24 @@ class SelectModel(QAbstractTableModel):
         return None
 
     def _toggle_row(self, row, status):
-        self._selection[row] = status
+        self._selection[self.row_hash(row)] = status
 
     def _is_selected(self, row) -> Optional[bool]:
-        return self._selection[row]
+        return self._selection[self.row_hash(row)]
 
     def set_selected(self, row, selected: Optional[bool]):
-        self._selection[row] = selected
+        self._selection[self.row_hash(row)] = selected
 
     @abstractmethod
     def hit_row(self, row, search_text: str):
         ...
 
     @abstractmethod
-    def get_column_value_for(self, row, column: int):
+    def column_value_for(self, row, column: int):
         ...
+
+    def row_hash(self, row):
+        return row
 
 
 class SelectUI(QWidget):
@@ -181,3 +179,36 @@ def do_show_select_ui(model: SelectModel, ok_text: str = None, title: str = None
         return {row: selected for row, selected in model._selection.items()}
     else:
         return {}
+
+
+def do_show_select_furniture_test():
+    class FurnitureSelectModel(SelectModel):
+        COL_COUNT = 4  # Number of columns including checkbox
+        HEADER_LABELS = ["", "Name", "Type", "Material"]  # Headers for your columns
+
+        def column_value_for(self, row, column: int):
+            if column == 0:  # Assuming the first column is for checkbox
+                return ""
+            elif column == 1:
+                return row['name']
+            elif column == 2:
+                return row['type']
+            elif column == 3:
+                return row['material']  # Add more columns if needed
+
+        def hit_row(self, row, search_text: str):
+            return search_text in row['name'].lower() or search_text in row[
+                'type'].lower() or search_text in row['material'].lower()
+
+        def row_hash(self, row):
+            return row["name"]
+
+    furniture_data = [
+        {"name": "Chair", "type": "Seating", "material": "Wood", "color": "Brown"},
+        {"name": "Sofa", "type": "Seating", "material": "Fabric", "color": "Grey"},
+        # Add more furniture items here
+    ]
+
+    # Initializing the UI
+    model = FurnitureSelectModel(furniture_data)
+    do_show_select_ui(model, ok_text="Select", title="Select Furniture")

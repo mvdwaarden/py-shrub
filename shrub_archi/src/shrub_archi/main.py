@@ -1,7 +1,7 @@
 import shrub_util.core.logging as logging
 from shrub_archi.merge.identity_resolver import ResolutionStore
 from shrub_archi.merge.repository_graph import RepositoryGrapher
-from shrub_archi.merge.repository_merger import RepositoryMerger
+from shrub_archi.merge.repository_importer import CoArchiRepositoryImporter
 from shrub_archi.model.repository import Repository, XmiArchiRepository, \
     CoArchiRepository
 from shrub_archi.ui.resolution_ui import do_show_resolve_ui
@@ -34,7 +34,7 @@ def create_repository(location: str) -> Repository:
 def do_create_resolution_file(repo1, repo2, repo2_filter, resolution_store_location,
                               resolution_name="dry_run") -> bool:
     created = False
-    merger = RepositoryMerger(repo1, repo2, repo2_filter)
+    merger = CoArchiRepositoryImporter(repo1, repo2, repo2_filter)
     res_store = ResolutionStore(resolution_store_location)
     res_store.read(resolution_name)
     merger.do_resolve()
@@ -46,12 +46,13 @@ def do_create_resolution_file(repo1, repo2, repo2_filter, resolution_store_locat
     return created
 
 
-def do_merge(repo1, repo2, repo2_filter, resolution_store_location,
-             resolution_name="dry_run"):
+def do_import(target_repo, source_repo, source_filter, resolution_store_location,
+              resolution_name="dry_run"):
     res_store = ResolutionStore(resolution_store_location)
     res_store.read(resolution_name)
-    merger = RepositoryMerger(repo1, repo2, repo2_filter, res_store)
-    merger.do_merge()
+    merger = CoArchiRepositoryImporter(target_repo, source_repo, source_filter,
+                                       res_store)
+    merger.do_import()
 
 
 def do_select_views(repo: Repository):
@@ -69,16 +70,15 @@ if __name__ == "__main__":
 
     args = Arguments()
     help = args.has_arg("help")
-    dry_run = args.has_arg("dry-run") or False
+    dry_run = args.has_arg("dry-run") or True
     repo1 = args.get_arg("repo1",
                          "/Users/mwa17610/Library/Application Support/Archi4/model-repository/gemma-archi-repository/model")
     repo2 = args.get_arg("repo2",
                          "/Users/mwa17610/Library/Application Support/Archi4/model-repository/gemma-archi-repository/model")
-    # repo1 = args.get_arg("repo1",
-    #                      "/Users/mwa17610/Library/Application Support/Archi4/model-repository/archi_1/model")
-    # repo2 = args.get_arg("repo2",
-    #                      "/tmp/test/archi/model")
-    repo1 = repo2 = args.get_arg("repo1", "/tmp/GEMMA 2.xml")
+    repo1 = args.get_arg("repo1",
+                         "/Users/mwa17610/Library/Application Support/Archi4/model-repository/archi_1/model")
+    repo2 = args.get_arg("repo2", "/tmp/test/archi/model")
+    # repo1 = repo2 = args.get_arg("repo1", "/tmp/GEMMA 2.xml")
     # repo1 = repo2 = args.get_arg("repo1", "/tmp/archi_src.xml")
     resolution_store_location = args.get_arg("folder", "/tmp")
 
@@ -87,9 +87,12 @@ if __name__ == "__main__":
     elif dry_run:
         target_repo = create_repository(repo1)
         source_repo = create_repository(repo2)
-        if do_create_resolution_file(target_repo, source_repo,
+        source_repo.read()
+        views = do_select_views(source_repo)
+        if do_create_resolution_file(target_repo, source_repo, views,
                                      resolution_store_location=resolution_store_location):
-            do_merge(repo1, repo2, resolution_store_location=resolution_store_location)
+            do_import(target_repo, source_repo, views,
+                      resolution_store_location=resolution_store_location)
     else:
         target_repo = create_repository(repo1)
         source_repo = create_repository(repo2)
