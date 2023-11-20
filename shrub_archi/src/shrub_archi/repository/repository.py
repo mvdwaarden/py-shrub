@@ -34,6 +34,13 @@ class Repository(ABC):
     def do_read(self) -> "Repository":
         ...
 
+    @abstractmethod
+    def do_write(self) -> "Repository":
+        ...
+
+    def add_view(self, view: View):
+        ...
+
     @property
     def identities(self) -> List[Identity]:
         return list(self._identities.values()) if self._identities else []
@@ -82,13 +89,14 @@ class Repository(ABC):
 class XmiArchiRepository(Repository):
     def __init__(self, location: str):
         super().__init__(location)
+        self._element_tree: Optional[ElementTree] = None
+        self._namespaces = {"xsi": "http://www.w3.org/2001/XMLSchema-instance",
+                            "xmi": "http://www.opengroup.org/xsd/archimate/3.0/"}
 
     def do_read(self) -> "XmiArchiRepository":
         try:
-            et: ElementTree = ElementTree.parse(self.location)
-            root = et.getroot()
-            namespaces = {"xsi": "http://www.w3.org/2001/XMLSchema-instance",
-                          "xmi": "http://www.opengroup.org/xsd/archimate/3.0/"}
+            root = self.element_tree.getroot()
+            namespaces = self._namespaces
             for el in root.findall("xmi:elements/xmi:element", namespaces=namespaces):
                 identity: Identity = self._read_identity_from_xml_element(el,
                                                                           namespaces,
@@ -102,6 +110,7 @@ class XmiArchiRepository(Repository):
                 if view and view.unique_id:
                     view.referenced_elements, view.referenced_relations = self._read_referenced_elements_and_relations_from_xml_element(
                         el, namespaces)
+                    view.data = el
                     self._identities[view.unique_id] = view
                     self._views[view.unique_id] = view
 
@@ -118,6 +127,19 @@ class XmiArchiRepository(Repository):
 
         self._create_relations_lookup()
         return self
+
+    def do_write(self) -> "XmiArchiRepository":
+        self.element_tree.write(f"{self.location}.backup")
+        return self
+
+    def add_view(self, view: View):
+        self._write_view(view.data, self._namespaces)
+
+    @property
+    def element_tree(self) -> ElementTree:
+        if not self._element_tree:
+            self._element_tree = ElementTree.parse(self.location)
+        return self._element_tree
 
     def _read_identity_from_xml_element(self, el, namespaces,
                                         specialization) -> Identity | View:
@@ -174,6 +196,14 @@ class XmiArchiRepository(Repository):
         except Exception as ex:
             print(f"problem reading element {el}", ex)
         return element_refs, relation_refs
+
+    def _write_view(self, view, namespaces):
+        try:
+            root = self.element_tree.getroot()
+            diagrams = root.findall("xmi:views/xmi:diagrams")
+            diagrams.append(view)
+        except Exception as ex:
+            print(f"problem _writing view {view}", ex)
 
 
 class CoArchiRepository(Repository):

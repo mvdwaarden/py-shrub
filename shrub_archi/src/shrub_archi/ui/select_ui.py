@@ -14,8 +14,8 @@ class SelectModel(QAbstractTableModel):
     def __init__(self, data: List):
         super(SelectModel, self).__init__()
         self._data = data
+        self._tristate_data = {self.row_hash(row): False for row in data}
         self._filtered_data = data
-        self._selection = {self.row_hash(row): False for row in data}
 
     def rowCount(self, parent=None):
         return len(self._filtered_data)
@@ -46,15 +46,8 @@ class SelectModel(QAbstractTableModel):
         self.layoutChanged.emit()
 
     def toggle_rows(self, selected_indexes: List):
-        for row in [index.row() for index in selected_indexes]:
-            match self._selection[self.row_hash(self._filtered_data[row])]:
-                case True:
-                    new_value = None
-                case False:
-                    new_value = True
-                case _:
-                    new_value = False
-            self._toggle_row(self._filtered_data[row], new_value)
+        for index in selected_indexes:
+            self._toggle_row(self._filtered_data[index.row()])
         self.layoutChanged.emit()
 
     def data(self, index: QModelIndex, role: int = ...):
@@ -74,14 +67,28 @@ class SelectModel(QAbstractTableModel):
 
         return None
 
-    def _toggle_row(self, row, status):
-        self._selection[self.row_hash(row)] = status
+    def setData(self, index, value, role):
+        if role == Qt.ItemDataRole.CheckStateRole and index.column() == 0:
+            self._toggle_row(self._filtered_data[index.row()])
+            return True
+        return False
+
+    def _toggle_row(self, row):
+        selection_idx = self.row_hash(row)
+        match self._tristate_data[selection_idx]:
+            case True:
+                new_status = None
+            case False:
+                new_status = True
+            case _:
+                new_status = False
+        self._tristate_data[selection_idx] = new_status
 
     def _is_selected(self, row) -> Optional[bool]:
-        return self._selection[self.row_hash(row)]
+        return self._tristate_data[self.row_hash(row)]
 
     def set_selected(self, row, selected: Optional[bool]):
-        self._selection[self.row_hash(row)] = selected
+        self._tristate_data[self.row_hash(row)] = selected
 
     @abstractmethod
     def hit_row(self, row, search_text: str):
@@ -123,7 +130,6 @@ class SelectUI(QWidget):
                 self.outer: SelectUI = outer
 
             def keyPressEvent(self, event):
-                super().keyPressEvent(event)
                 if event.key() == Qt.Key.Key_T or event.key() == Qt.Key.Key_Space:
                     self.outer.toggle_checkboxes(0)
 
@@ -176,7 +182,7 @@ def do_show_select_ui(model: SelectModel, ok_text: str = None, title: str = None
     widget.show()
     app.exec()
     if widget.ok:
-        return {row: selected for row, selected in model._selection.items()}
+        return {row: selected for row, selected in model._tristate_data.items()}
     else:
         return {}
 

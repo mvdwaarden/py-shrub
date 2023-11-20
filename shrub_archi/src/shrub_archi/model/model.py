@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Tuple, List
+from typing import Optional, Dict, Tuple, List, Any
 
 from dataclasses import dataclass
 
@@ -22,6 +22,7 @@ class View(Identity):
     classification: str = None
     description: Optional[str] = None
     source: Optional[str] = None
+    data: Optional[Any] = None
     referenced_elements: List[str] = None
     referenced_relations: List[str] = None
 

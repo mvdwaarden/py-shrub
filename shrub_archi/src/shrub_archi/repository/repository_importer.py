@@ -7,10 +7,11 @@ from enum import Enum
 from typing import Optional, List
 
 import shrub_util.core.logging as logging
-from shrub_archi.merge.identity_resolver import ResolvedIdentity, RepositoryResolver, \
-    IdentityResolver, NaiveIdentityResolver, ResolutionStore
+from shrub_archi.resolver.identity_resolver import ResolvedIdentity, RepositoryResolver, \
+    IdentityResolver, NaiveIdentityResolver
+from shrub_archi.resolver.resolution_store import ResolutionStore
 from shrub_archi.model.model import Views
-from shrub_archi.model.repository import CoArchiRepository, Repository
+from shrub_archi.repository.repository import CoArchiRepository, Repository
 
 
 class RepositoryImporter:

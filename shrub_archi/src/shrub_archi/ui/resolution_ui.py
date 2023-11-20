@@ -1,6 +1,6 @@
 from typing import List
 
-from shrub_archi.merge.identity_resolver import ResolvedIdentity
+from shrub_archi.resolver.identity_resolver import ResolvedIdentity
 from .select_ui import SelectModel, do_show_select_ui
 
 

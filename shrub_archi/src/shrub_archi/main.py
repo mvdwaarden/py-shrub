@@ -1,11 +1,12 @@
 import shrub_util.core.logging as logging
-from shrub_archi.merge.identity_resolver import ResolutionStore
-from shrub_archi.merge.repository_graph import RepositoryGrapher
-from shrub_archi.merge.repository_importer import CoArchiRepositoryImporter
-from shrub_archi.model.repository import Repository, XmiArchiRepository, \
+from shrub_archi.resolver.resolution_store import ResolutionStore
+from shrub_archi.repository.repository_graph import RepositoryGrapher
+from shrub_archi.repository.repository_importer import CoArchiRepositoryImporter
+from shrub_archi.repository.repository import Repository, XmiArchiRepository, \
     CoArchiRepository
 from shrub_archi.ui.resolution_ui import do_show_resolve_ui
 from shrub_archi.ui.select_diagrams_ui import do_select_diagrams_ui
+from shrub_archi.ui.select_ui import do_show_select_furniture_test
 from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
 
@@ -77,11 +78,11 @@ if __name__ == "__main__":
                          "/Users/mwa17610/Library/Application Support/Archi4/model-repository/gemma-archi-repository/model")
     repo1 = args.get_arg("repo1",
                          "/Users/mwa17610/Library/Application Support/Archi4/model-repository/archi_1/model")
-    repo2 = args.get_arg("repo2", "/tmp/test/archi/model")
-    # repo1 = repo2 = args.get_arg("repo1", "/tmp/GEMMA 2.xml")
-    # repo1 = repo2 = args.get_arg("repo1", "/tmp/archi_src.xml")
+    # repo2 = args.get_arg("repo2", "/tmp/test/archi/model")
+    repo1 = repo2 = args.get_arg("repo1", "/tmp/GEMMA 2.xml")
+    repo1 = repo2 = args.get_arg("repo1", "/tmp/archi_src.xml")
     resolution_store_location = args.get_arg("folder", "/tmp")
-
+    do_show_select_furniture_test()
     if help:
         do_print_usage()
     elif dry_run:
@@ -91,6 +92,9 @@ if __name__ == "__main__":
         views = do_select_views(source_repo)
         if do_create_resolution_file(target_repo, source_repo, views,
                                      resolution_store_location=resolution_store_location):
+            for view in views:
+                target_repo.add_view(view)
+            target_repo.do_write()
             do_import(target_repo, source_repo, views,
                       resolution_store_location=resolution_store_location)
     else:

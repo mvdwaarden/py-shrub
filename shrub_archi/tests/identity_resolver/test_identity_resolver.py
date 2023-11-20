@@ -1,4 +1,6 @@
-from shrub_archi.merge.identity_resolver import RepositoryResolver, ResolvedIdentityAction, ResolutionStore, NaiveIdentityResolver
+from shrub_archi.resolver.identity_resolver import RepositoryResolver, ResolvedIdentityAction, \
+    NaiveIdentityResolver
+from shrub_archi.resolver.resolution_store import ResolutionStore
 from shrub_archi.model.model import Identity, Identities
 
 
