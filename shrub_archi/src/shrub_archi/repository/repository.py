@@ -3,11 +3,12 @@ import os
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
 from typing import Optional, List, Tuple
+from xml.etree.ElementTree import SubElement, Element, register_namespace
 
 from defusedxml import ElementTree
 
 from shrub_archi.model.model import View, Relation, Relations, RelationsLookup, \
-    Identity, Identities, Views
+    Identity, Identities, Views, PropertyDefinition, PropertyDefinitions
 from shrub_util.core.file import FileLocationIterator, FileLocationIteratorMode
 
 
@@ -19,6 +20,7 @@ class Repository(ABC):
         self._relations: Optional[Relations] = None
         self._elements: Optional[Identities] = None
         self._views: Optional[Views] = None
+        self._property_definitions: Optional[PropertyDefinitions] = None
 
     def read(self) -> "Repository":
         if self._identities is None:
@@ -26,6 +28,7 @@ class Repository(ABC):
             self._elements = {}
             self._relations = {}
             self._views = {}
+            self._property_definitions = {}
         else:
             return self
         return self.do_read()
@@ -39,6 +42,15 @@ class Repository(ABC):
         ...
 
     def add_view(self, view: View):
+        ...
+
+    def add_element(self, element: Identity):
+        ...
+
+    def add_property_definition(self, property_definition: PropertyDefinition):
+        ...
+
+    def add_relation(self, relation: Relation):
         ...
 
     @property
@@ -71,6 +83,23 @@ class Repository(ABC):
     @property
     def elements(self) -> List[Identity]:
         return list(self._elements.values()) if self._elements else []
+
+    @property
+    def property_definitions(self) -> List[Identity]:
+        return list(
+            self._property_definitions.values()) if self._property_definitions else []
+
+    def get_identity_by_id(self, identifier: str) -> Identity:
+        if identifier in self._identities:
+            return self._identities[identifier]
+        else:
+            return None
+
+    def get_relation_by_id(self, identifier: str) -> Relation:
+        if identifier in self._relations:
+            return self._relations[identifier]
+        else:
+            return None
 
     def _create_relations_lookup(self):
         self._relations_lookup = {}
@@ -122,6 +151,14 @@ class XmiArchiRepository(Repository):
                     self._identities[relation.unique_id] = relation
                     self._relations[relation.unique_id] = relation
 
+            for el in root.findall("xmi:propertyDefinitions/xmi:propertyDefinition",
+                                   namespaces=namespaces):
+                property_definition: PropertyDefinition = self._read_property_definition_from_xml_element(
+                    el, namespaces)
+                if property_definition and property_definition.unique_id:
+                    self._property_definitions[
+                        property_definition.unique_id] = property_definition
+
         except Exception as ex:
             print(f"problem with file {self.location}", ex)
 
@@ -129,15 +166,40 @@ class XmiArchiRepository(Repository):
         return self
 
     def do_write(self) -> "XmiArchiRepository":
-        self.element_tree.write(f"{self.location}.backup")
+        self.element_tree.write(f"{self.location}.backup.xml", )
         return self
 
     def add_view(self, view: View):
-        self._write_view(view.data, self._namespaces)
+        if view.unique_id not in self._views:
+            self._views[view.unique_id] = view
+            self._identities[view.unique_id] = view
+            self._write_view(view.data, self._namespaces)
+            self._write_organization(view, self._namespaces)
+
+    def add_element(self, element: Identity):
+        if element.unique_id not in self._elements:
+            self._elements[element.unique_id] = element
+            self._identities[element.unique_id] = element
+            self._write_element(element.data, self._namespaces)
+            self._write_organization(element, self._namespaces)
+
+    def add_property_definition(self, property_definition: PropertyDefinition):
+        if property_definition.unique_id not in self.property_definitions:
+            self._property_definitions[
+                property_definition.unique_id] = property_definition
+            self._write_property_definition(property_definition.data, self._namespaces)
+
+    def add_relation(self, relation: Relation):
+        if relation.unique_id not in self._relations:
+            self._identities[relation.unique_id] = relation
+            self._relations[relation.unique_id] = relation
+            self._write_relation(relation.data, self._namespaces)
+            self._write_organization(relation, self._namespaces)
 
     @property
     def element_tree(self) -> ElementTree:
         if not self._element_tree:
+            register_namespace('', self._namespaces['xmi'])
             self._element_tree = ElementTree.parse(self.location)
         return self._element_tree
 
@@ -151,13 +213,29 @@ class XmiArchiRepository(Repository):
                     name = child.text
                 elif child.tag.endswith("documentation"):
                     documentation = child.text
-            result = identity = specialization(unique_id=el.get("identifier"),
-                                               name=name, description=documentation,
-                                               classification=el.get(
-                                                   f"{{{namespaces['xsi']}}}type"),
-                                               source=self.location)
+            result = specialization(unique_id=el.get("identifier"), name=name,
+                                    description=documentation, classification=el.get(
+                    f"{{{namespaces['xsi']}}}type"), source=self.location, data=el)
         except Exception as ex:
             print(f"problem reading element {el}", ex)
+        return result
+
+    def _read_property_definition_from_xml_element(self, el,
+                                                   namespaces) -> PropertyDefinition:
+        result = None
+        try:
+            name = documentation = None
+            for child in el:
+                if child.tag.endswith("name"):
+                    name = child.text
+                elif child.tag.endswith("documentation"):
+                    documentation = child.text
+            result = PropertyDefinition(unique_id=el.get("identifier"), name=name,
+                                        description=documentation,
+                                        classification=el.get("type"),
+                                        source=self.location, data=el)
+        except Exception as ex:
+            print(f"problem reading property definition {el}", ex)
         return result
 
     def _read_relation_from_xml_element(self, el, namespaces) -> Relation:
@@ -170,12 +248,11 @@ class XmiArchiRepository(Repository):
                 elif child.tag.endswith("documentation"):
                     documentation = child.text
             xsi_type = el.get(f"{{{namespaces['xsi']}}}type")
-            result = relation = Relation(unique_id=el.get("identifier"), name=name,
-                                         description=documentation,
-                                         classification=f"{xsi_type}Relationship",
-                                         source=self.location,
-                                         source_id=el.get("source"),
-                                         target_id=el.get("target"))
+            result = Relation(unique_id=el.get("identifier"), name=name,
+                              description=documentation,
+                              classification=f"{xsi_type}Relationship",
+                              source=self.location, source_id=el.get("source"),
+                              target_id=el.get("target"), data=el)
         except Exception as ex:
             print(f"problem reading element {el}", ex)
         return result
@@ -200,10 +277,73 @@ class XmiArchiRepository(Repository):
     def _write_view(self, view, namespaces):
         try:
             root = self.element_tree.getroot()
-            diagrams = root.findall("xmi:views/xmi:diagrams")
-            diagrams.append(view)
+            diagrams = root.findall("xmi:views/xmi:diagrams",
+                                    namespaces=self._namespaces)
+            diagrams[0].append(view)
         except Exception as ex:
-            print(f"problem _writing view {view}", ex)
+            print(f"problem writing view {view}", ex)
+
+    def _write_element(self, element, namespaces):
+        try:
+            root = self.element_tree.getroot()
+            elements = root.findall("xmi:elements", namespaces=self._namespaces)
+            elements[0].append(element)
+        except Exception as ex:
+            print(f"problem writing element {element}", ex)
+
+    def _write_relation(self, relation, namespaces):
+        try:
+            root = self.element_tree.getroot()
+            relations = root.findall("xmi:relationships", namespaces=self._namespaces)
+            relations[0].append(relation)
+        except Exception as ex:
+            print(f"problem writing relation {relation}", ex)
+
+    def _write_organization(self, identity, namespaces):
+        try:
+            organization = "Imports"
+            root = self.element_tree.getroot()
+            label = root.findall(
+                f"xmi:organizations/xmi:item/xmi:label[.='{organization}']",
+                namespaces=self._namespaces)
+            folder_item = None
+            if len(label) == 0:
+                organizations = root.findall("xmi:organizations",
+                                             namespaces=self._namespaces)
+                folder_item = SubElement(organizations[0],
+                                         f"{{{self._namespaces['xmi']}}}item")
+                label = SubElement(folder_item, f"{{{self._namespaces['xmi']}}}label",
+                                   attrib={"xml:lang": "nl"})
+                label.text = organization
+            else:
+                # find folder item (Python has limited XPath support
+                # xmi:organizations/xmi:item[xmi:label[.='{organization}']] does not work
+                for item in root.findall("xmi:organizations/xmi:item",
+                                         namespaces=self._namespaces):
+                    if item.find("xmi:label",
+                                 namespaces=self._namespaces).text == organization:
+                        folder_item = item
+                        break
+            item_ref = SubElement(folder_item, f"{{{self._namespaces['xmi']}}}item",
+                                  attrib={"identifierRef": identity.unique_id})
+        except Exception as ex:
+            print(f"problem writing identity {identity} to organizations", ex)
+
+    def _write_property_definition(self, property_definition, namespaces):
+        try:
+            root = self.element_tree.getroot()
+            property_definitions = root.findall("xmi:propertyDefinitions",
+                                                namespaces=self._namespaces)
+            if len(property_definitions) == 0:
+                views = root.findall("xmi:views", namespaces=self._namespaces)
+                index = list(root).index(views[0])
+                root.insert(index,
+                            Element(f"{{{namespaces['xmi']}}}propertyDefinitions"))
+                property_definitions = root.findall("xmi:propertyDefinitions",
+                                                    namespaces=self._namespaces)
+            property_definitions[0].append(property_definition)
+        except Exception as ex:
+            print(f"problem writing property definition {property_definition}", ex)
 
 
 class CoArchiRepository(Repository):

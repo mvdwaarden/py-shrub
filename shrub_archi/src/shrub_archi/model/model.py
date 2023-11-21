@@ -10,9 +10,15 @@ class Identity:
     classification: str = None
     description: Optional[str] = None
     source: Optional[str] = None
+    data: Optional[Any] = None
 
     def __hash__(self):
         return super().__hash__()
+
+
+@dataclass
+class PropertyDefinition(Identity):
+    ...
 
 
 @dataclass
@@ -22,7 +28,6 @@ class View(Identity):
     classification: str = None
     description: Optional[str] = None
     source: Optional[str] = None
-    data: Optional[Any] = None
     referenced_elements: List[str] = None
     referenced_relations: List[str] = None
 
@@ -45,3 +50,4 @@ Relations = Dict[str, Relation]
 RelationsLookup = Dict[Tuple[str, str], Relation]
 Identities = Dict[str, Identity]
 Views = Dict[str, View]
+PropertyDefinitions = Dict[str, PropertyDefinition]

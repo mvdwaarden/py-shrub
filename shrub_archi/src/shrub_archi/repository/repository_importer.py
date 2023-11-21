@@ -7,11 +7,11 @@ from enum import Enum
 from typing import Optional, List
 
 import shrub_util.core.logging as logging
+from shrub_archi.model.model import Views, Identity, Relation
+from shrub_archi.repository.repository import CoArchiRepository, Repository
 from shrub_archi.resolver.identity_resolver import ResolvedIdentity, RepositoryResolver, \
     IdentityResolver, NaiveIdentityResolver
 from shrub_archi.resolver.resolution_store import ResolutionStore
-from shrub_archi.model.model import Views
-from shrub_archi.repository.repository import CoArchiRepository, Repository
 
 
 class RepositoryImporter:
@@ -25,7 +25,7 @@ class RepositoryImporter:
                  compare_cutoff_score=None):
         self.target_repo: Repository = target_repo
         self.source_repo: Repository = source_repo
-        self.source_filter = source_filter
+        self.source_filter: Views = source_filter
         self.resolutions: List[ResolvedIdentity] = []
         self._identity_resolver: Optional[RepositoryResolver] = None
         self._identity_comparator: Optional[IdentityResolver] = None
@@ -84,6 +84,10 @@ class RepositoryImporter:
     def import_(self):
         ...
 
+    @abstractmethod
+    def import_sweep_update_uuids(self):
+        ...
+
 
 class CoArchiRepositoryImporter(RepositoryImporter):
     """Merges repository 2 to repository 1, considers
@@ -117,17 +121,14 @@ class CoArchiRepositoryImporter(RepositoryImporter):
                 try:
                     with open(filename, "r", encoding='utf-8') as ifp:
                         content = ifp.read()
-                    content = self.update_uuids(content)
+                    content = self.resolution_store.update_uuids_in_str(content)
                     self.copy(filename, self.source_repo.location,
                               self.target_repo.location, content)
                 except Exception as ex:
                     logging.get_logger().error(f"problem readding {filename}", ex=ex)
 
-    def update_uuids(self, content) -> str:
-        for (id1, id2), value in self.resolution_store.resolutions.items():
-            if value is True:
-                content = content.replace(id2, id1)
-        return content
+    def import_sweep_update_uuids(self):
+        ...
 
     def copy(self, filename: str, base_path: str, target_base_path: str, content: str):
         norm_filename = os.path.normpath(filename)
@@ -161,42 +162,46 @@ class XmiArchiRepositoryImporter(RepositoryImporter):
         # read ID from repo 2, check if it is resolved
         # resolved: do not copy
         # not resolved : copy, make sure to replace all resolved ID's with repo 1 UUID
-        for dirpath, dirs, file in self.source_repo:
-            filename = os.path.join(dirpath, file)
-            identity = self.source_repo.read_identity(dirpath, file)
-            if identity:
-                found, resolved_result = self.resolution_store.is_resolved(
-                    identity.unique_id)
+        to_import_identities = []
+        for view in self.source_filter:
+            to_import_identities += view.referenced_elements
+            to_import_identities += view.referenced_relations
+        # import elements not in target repo, take resolution store info into account
+        for unique_id in set(to_import_identities):
+            # find identity in source repo
+            identity = self.source_repo.get_identity_by_id(unique_id)
+            # find resolutions for ID in target repo
+            found = False
+            target_ids = []
+            for resolution in [resolution for resolution in self.resolutions if
+                               resolution.identity2.unique_id == unique_id and resolution.resolver_result.manual_verification is True]:
+                target_ids += resolution.identity1.unique_id
+            # if NOT found -> ADD
+            if len(target_ids) == 0:
+                match identity:
+                    case Relation():
+                        self.target_repo.add_relation(identity)
+                    case Identity():
+                        self.target_repo.add_element(identity)
+            # if found -> overwrite? ignore? => ignore for now
             else:
-                found = resolved_result = False
-            if not found or resolved_result is not True:
-                try:
-                    with open(filename, "r", encoding='utf-8') as ifp:
-                        content = ifp.read()
-                    content = self.update_uuids(content)
-                    self.copy(filename, self.source_repo.location,
-                              self.target_repo.location, content)
-                except Exception as ex:
-                    logging.get_logger().error(f"problem readding {filename}", ex=ex)
+                ...  # overwrite ?
 
-    def update_uuids(self, content) -> str:
-        for (id1, id2), value in self.resolution_store.resolutions.items():
-            if value is True:
-                content = content.replace(id2, id1)
-        return content
+        for property_definition in self.source_repo.property_definitions:
+            self.target_repo.add_property_definition(property_definition)
 
-    def copy(self, filename: str, base_path: str, target_base_path: str, content: str):
-        norm_filename = os.path.normpath(filename)
-        relative_filename = norm_filename[len(base_path) + 1:]
-        target_filename = os.path.join(target_base_path,
-                                       relative_filename + "_delete_me")
-        drive, tmp = os.path.splitdrive(target_filename)
-        path, tmp = os.path.split(tmp)
-        if not os.path.exists(path):
-            os.makedirs(path)
-        print(f"copy {filename} -> {target_filename}")
-        with open(target_filename, "w", encoding='utf-8') as ofp:
-            ofp.write(content)
+        for view in self.source_filter:
+            self.target_repo.add_view(view)
+
+    def import_sweep_update_uuids(self):
+        content = None
+        with open(self.target_repo.location, "r", encoding='utf8') as ifp:
+            content = self.resolution_store.update_uuids_in_str(ifp.read())
+        if content:
+            with open(self.target_repo.location, "w", encoding='utf8') as ofp:
+                ofp.write()
+
+
 
 
 class MergingMode(Enum):

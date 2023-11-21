@@ -46,11 +46,9 @@ class ResolutionTableModel(SelectModel):
 
 
 def do_show_resolve_ui(resolved_ids: List[ResolvedIdentity]) -> bool:
-    selection = do_show_select_ui(model=ResolutionTableModel(resolved_ids),
-                                  ok_text="Resolve")
-    saved = False
+    saved, selection = do_show_select_ui(model=ResolutionTableModel(resolved_ids),
+                                         ok_text="Resolve")
     for row, selected in selection.items():
         row.resolver_result.manual_verification = selected
-        saved = True
 
     return saved

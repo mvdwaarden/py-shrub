@@ -1,6 +1,6 @@
 import sys
 from abc import abstractmethod
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Tuple
 
 from PyQt6.QtCore import Qt, QAbstractTableModel, QModelIndex
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLineEdit, QHBoxLayout, QPushButton, \
@@ -132,6 +132,8 @@ class SelectUI(QWidget):
             def keyPressEvent(self, event):
                 if event.key() == Qt.Key.Key_T or event.key() == Qt.Key.Key_Space:
                     self.outer.toggle_checkboxes(0)
+                else:
+                    super().keyPressEvent(event)
 
         # Create table widget
         self.table_widget = FilterTableView(self, self)
@@ -175,16 +177,16 @@ class SelectUI(QWidget):
 
 
 def do_show_select_ui(model: SelectModel, ok_text: str = None, title: str = None) -> \
-        Dict[Any, Optional[bool]]:
+        Tuple[bool, Dict[Any, Optional[bool]]]:
     # Initialize and run the application
     app = QApplication(sys.argv)
     widget = SelectUI(model=model, ok_text=ok_text, title=title)
     widget.show()
     app.exec()
     if widget.ok:
-        return {row: selected for row, selected in model._tristate_data.items()}
+        return True, {row: selected for row, selected in model._tristate_data.items()}
     else:
-        return {}
+        return False, {}
 
 
 def do_show_select_furniture_test():

@@ -1,12 +1,11 @@
 import shrub_util.core.logging as logging
-from shrub_archi.resolver.resolution_store import ResolutionStore
-from shrub_archi.repository.repository_graph import RepositoryGrapher
-from shrub_archi.repository.repository_importer import CoArchiRepositoryImporter
 from shrub_archi.repository.repository import Repository, XmiArchiRepository, \
     CoArchiRepository
+from shrub_archi.repository.repository_graph import RepositoryGrapher
+from shrub_archi.repository.repository_importer import XmiArchiRepositoryImporter
+from shrub_archi.resolver.resolution_store import ResolutionStore
 from shrub_archi.ui.resolution_ui import do_show_resolve_ui
 from shrub_archi.ui.select_diagrams_ui import do_select_diagrams_ui
-from shrub_archi.ui.select_ui import do_show_select_furniture_test
 from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
 
@@ -35,7 +34,7 @@ def create_repository(location: str) -> Repository:
 def do_create_resolution_file(repo1, repo2, repo2_filter, resolution_store_location,
                               resolution_name="dry_run") -> bool:
     created = False
-    merger = CoArchiRepositoryImporter(repo1, repo2, repo2_filter)
+    merger = XmiArchiRepositoryImporter(repo1, repo2, repo2_filter)
     res_store = ResolutionStore(resolution_store_location)
     res_store.read(resolution_name)
     merger.do_resolve()
@@ -51,13 +50,15 @@ def do_import(target_repo, source_repo, source_filter, resolution_store_location
               resolution_name="dry_run"):
     res_store = ResolutionStore(resolution_store_location)
     res_store.read(resolution_name)
-    merger = CoArchiRepositoryImporter(target_repo, source_repo, source_filter,
-                                       res_store)
-    merger.do_import()
+    importer = XmiArchiRepositoryImporter(target_repo, source_repo, source_filter,
+                                          res_store)
+    importer.do_import()
+    importer.target_repo.do_write()
+    importer.import_sweep_update_uuids()
 
 
 def do_select_views(repo: Repository):
-    views = do_select_diagrams_ui(repo.views)
+    selected, views = do_select_diagrams_ui(repo.views)
 
     return views
 
@@ -79,10 +80,10 @@ if __name__ == "__main__":
     repo1 = args.get_arg("repo1",
                          "/Users/mwa17610/Library/Application Support/Archi4/model-repository/archi_1/model")
     # repo2 = args.get_arg("repo2", "/tmp/test/archi/model")
-    repo1 = repo2 = args.get_arg("repo1", "/tmp/GEMMA 2.xml")
-    repo1 = repo2 = args.get_arg("repo1", "/tmp/archi_src.xml")
+    repo1 = args.get_arg("repo1", "/tmp/archi_src.xml")
+    repo2 = args.get_arg("repo1", "/tmp/GEMMA 2.xml")
     resolution_store_location = args.get_arg("folder", "/tmp")
-    do_show_select_furniture_test()
+    # do_show_select_furniture_test()
     if help:
         do_print_usage()
     elif dry_run:
@@ -92,11 +93,10 @@ if __name__ == "__main__":
         views = do_select_views(source_repo)
         if do_create_resolution_file(target_repo, source_repo, views,
                                      resolution_store_location=resolution_store_location):
-            for view in views:
-                target_repo.add_view(view)
-            target_repo.do_write()
             do_import(target_repo, source_repo, views,
                       resolution_store_location=resolution_store_location)
+
+
     else:
         target_repo = create_repository(repo1)
         source_repo = create_repository(repo2)

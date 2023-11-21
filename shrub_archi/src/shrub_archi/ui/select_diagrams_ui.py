@@ -45,6 +45,7 @@ class ViewTableModel(SelectModel):
 
 def do_select_diagrams_ui(views: List[View]) -> List[View]:
     model = ViewTableModel(views)
-    return [row for row, selected in do_show_select_ui(model=model, ok_text="Select",
-                                                       title="Select Diagrams").items()
+    selected, selection = do_show_select_ui(model=model, ok_text="Select",
+                                                       title="Select Diagrams")
+    return selected, [row for row, selected in selection.items()
             if selected is True]

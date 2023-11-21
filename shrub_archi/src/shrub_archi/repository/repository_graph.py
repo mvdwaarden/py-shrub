@@ -19,10 +19,11 @@ class RepositoryGrapher:
 
         def to_stringer(thingy):
             match thingy:
-                case Identity():
-                    return thingy.name
                 case Relation():
                     return thingy.name if thingy.name else ""
+                case Identity():
+                    return thingy.name
+
                 case _:
                     return "?"
 
