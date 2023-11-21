@@ -25,7 +25,7 @@ usage = """
 
 
 def create_repository(location: str) -> Repository:
-    if location.lower().endswith(".xml"):
+    if location.lower().endswith((".archimate", ".xml")):
         return XmiArchiRepository(location)
     else:
         return CoArchiRepository(location)
@@ -81,7 +81,7 @@ if __name__ == "__main__":
                          "/Users/mwa17610/Library/Application Support/Archi4/model-repository/archi_1/model")
     # repo2 = args.get_arg("repo2", "/tmp/test/archi/model")
     repo1 = args.get_arg("repo1", "/tmp/archi_src.xml")
-    repo2 = args.get_arg("repo1", "/tmp/GEMMA 2.xml")
+    repo2 = args.get_arg("repo2", "/tmp/GEMMA 2.xml")
     resolution_store_location = args.get_arg("folder", "/tmp")
     # do_show_select_furniture_test()
     if help:

@@ -1,1 +1,1 @@
-call init_project.cmd SHRUB_all SHRUB_batch SHRUB_util SHRUB_mgmt SHRUB_sec
+call init_project.cmd shrub_util shrub_archi shrub_devops
