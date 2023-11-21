@@ -74,13 +74,6 @@ if __name__ == "__main__":
     args = Arguments()
     help = args.has_arg("help")
     dry_run = args.has_arg("dry-run") or True
-    source = args.get_arg("source",
-                         "/Users/mwa17610/Library/Application Support/Archi4/model-repository/gemma-archi-repository/model")
-    target = args.get_arg("target",
-                         "/Users/mwa17610/Library/Application Support/Archi4/model-repository/gemma-archi-repository/model")
-    source = args.get_arg("source",
-                         "/Users/mwa17610/Library/Application Support/Archi4/model-repository/archi_1/model")
-    # repo2 = args.get_arg("repo2", "/tmp/test/archi/model")
     source = args.get_arg("source", "/tmp/archi_src.xml")
     target = args.get_arg("target", "/tmp/GEMMA 2.xml")
     work_dir = args.get_arg("workdir", "/tmp")
