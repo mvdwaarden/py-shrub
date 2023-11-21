@@ -1,10 +1,11 @@
 import concurrent.futures
 import itertools
+import math
 from abc import ABC, abstractmethod
 from difflib import SequenceMatcher
 from enum import Enum
 from typing import Optional, List
-import math
+
 from dataclasses import dataclass
 
 from shrub_archi.model.model import Identity, Views

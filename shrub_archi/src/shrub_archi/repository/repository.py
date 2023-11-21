@@ -53,7 +53,7 @@ class Repository(ABC):
     def add_relation(self, relation: Relation):
         ...
 
-    def get_dry_run_location(self, filename: str=None):
+    def get_dry_run_location(self, filename: str = None):
         return f"{self.location}{filename if filename else ''}.backup.xml"
 
     @property
