@@ -199,7 +199,7 @@ class XmiArchiRepositoryImporter(RepositoryImporter):
             content = self.resolution_store.update_uuids_in_str(ifp.read())
         if content:
             with open(self.target_repo.location, "w", encoding='utf8') as ofp:
-                ofp.write()
+                ofp.write(content)
 
 
 

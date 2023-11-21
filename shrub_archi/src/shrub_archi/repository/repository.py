@@ -184,7 +184,7 @@ class XmiArchiRepository(Repository):
             self._write_organization(element, self._namespaces)
 
     def add_property_definition(self, property_definition: PropertyDefinition):
-        if property_definition.unique_id not in self.property_definitions:
+        if property_definition.unique_id not in self._property_definitions:
             self._property_definitions[
                 property_definition.unique_id] = property_definition
             self._write_property_definition(property_definition.data, self._namespaces)

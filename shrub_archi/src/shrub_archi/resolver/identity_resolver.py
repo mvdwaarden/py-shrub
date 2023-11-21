@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from difflib import SequenceMatcher
 from enum import Enum
 from typing import Optional, List
-
+import math
 from dataclasses import dataclass
 
 from shrub_archi.model.model import Identity, Views
@@ -81,7 +81,7 @@ class NaiveIdentityResolver(IdentityResolver):
                                         rule="NAME_EXACT_RULE")
             else:
                 name_score = 0
-                if len(identity1.name) > 10 and len(identity2.name) > 10:
+                if math.fabs(len(identity1.name) - len(identity2.name)) < 10:
                     name_score = int(SequenceMatcher(a=identity1.name,
                                                      b=identity2.name).ratio() * ResolverResult.MAX_EQUAL_SCORE)
                 description_score = 0

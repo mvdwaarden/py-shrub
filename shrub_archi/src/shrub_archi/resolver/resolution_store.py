@@ -86,7 +86,7 @@ class ResolutionStore:
                 break
 
     def update_uuids_in_str(self, content: str) -> str:
-        for (id1, id2), value in self.resolution_store.resolutions.items():
+        for (id1, id2), value in self.resolutions.items():
             if value is True:
                 content = content.replace(id2, id1)
         return content

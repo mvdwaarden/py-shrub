@@ -17,15 +17,16 @@ usage = """
     - The config.ini contains the connections definitions. Connection sections
       have the name [ExternalApi-<connection name>]
 
-    Mode - <mode>
-    <description>
+    Mode - import source repository into target repository    
     Parameters:
-    - <param1>: <description>
+    - source: source XMI file location
+    - target: target XMI file location
+    
 """
 
 
 def create_repository(location: str) -> Repository:
-    if location.lower().endswith(".xml"):
+    if location.lower().endswith((".archimate", ".xml")):
         return XmiArchiRepository(location)
     else:
         return CoArchiRepository(location)
@@ -34,13 +35,13 @@ def create_repository(location: str) -> Repository:
 def do_create_resolution_file(repo1, repo2, repo2_filter, resolution_store_location,
                               resolution_name="dry_run") -> bool:
     created = False
-    merger = XmiArchiRepositoryImporter(repo1, repo2, repo2_filter)
+    importer = XmiArchiRepositoryImporter(repo1, repo2, repo2_filter)
     res_store = ResolutionStore(resolution_store_location)
     res_store.read(resolution_name)
-    merger.do_resolve()
-    res_store.apply_to(merger.resolutions)
-    if do_show_resolve_ui(merger.resolutions):
-        res_store.resolutions = merger.resolutions
+    importer.do_resolve()
+    res_store.apply_to(importer.resolutions)
+    if do_show_resolve_ui(importer.resolutions):
+        res_store.resolutions = importer.resolutions
         res_store.write(resolution_name)
         created = True
     return created
@@ -73,35 +74,36 @@ if __name__ == "__main__":
     args = Arguments()
     help = args.has_arg("help")
     dry_run = args.has_arg("dry-run") or True
-    repo1 = args.get_arg("repo1",
+    source = args.get_arg("source",
                          "/Users/mwa17610/Library/Application Support/Archi4/model-repository/gemma-archi-repository/model")
-    repo2 = args.get_arg("repo2",
+    target = args.get_arg("target",
                          "/Users/mwa17610/Library/Application Support/Archi4/model-repository/gemma-archi-repository/model")
-    repo1 = args.get_arg("repo1",
+    source = args.get_arg("source",
                          "/Users/mwa17610/Library/Application Support/Archi4/model-repository/archi_1/model")
     # repo2 = args.get_arg("repo2", "/tmp/test/archi/model")
-    repo1 = args.get_arg("repo1", "/tmp/archi_src.xml")
-    repo2 = args.get_arg("repo1", "/tmp/GEMMA 2.xml")
-    resolution_store_location = args.get_arg("folder", "/tmp")
+    source = args.get_arg("source", "/tmp/archi_src.xml")
+    target = args.get_arg("target", "/tmp/GEMMA 2.xml")
+    work_dir = args.get_arg("workdir", "/tmp")
+    function_import = args.has_arg("import")
+
     # do_show_select_furniture_test()
     if help:
         do_print_usage()
-    elif dry_run:
-        target_repo = create_repository(repo1)
-        source_repo = create_repository(repo2)
+    elif function_import:
+        target_repo = create_repository(target)
+        source_repo = create_repository(source)
         source_repo.read()
         views = do_select_views(source_repo)
         if do_create_resolution_file(target_repo, source_repo, views,
-                                     resolution_store_location=resolution_store_location):
+                                     resolution_store_location=work_dir):
             do_import(target_repo, source_repo, views,
-                      resolution_store_location=resolution_store_location)
-
+                      resolution_store_location=work_dir)
 
     else:
-        target_repo = create_repository(repo1)
-        source_repo = create_repository(repo2)
+        target_repo = create_repository(target)
+        source_repo = create_repository(source)
         source_repo.read()
         views = do_select_views(source_repo)
         do_create_resolution_file(target_repo, source_repo, views,
-                                  resolution_store_location=resolution_store_location)
+                                  resolution_store_location=work_dir)
         RepositoryGrapher.create_graph(target_repo)
