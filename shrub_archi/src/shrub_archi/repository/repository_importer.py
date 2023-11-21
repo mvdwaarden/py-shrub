@@ -29,8 +29,6 @@ class RepositoryImporter:
         self.resolutions: List[ResolvedIdentity] = []
         self._identity_resolver: Optional[RepositoryResolver] = None
         self._identity_comparator: Optional[IdentityResolver] = None
-        self._resolution_store: Optional[
-            ResolutionStore] = resolution_store if resolution_store else None
         self.compare_cutoff_score = compare_cutoff_score if compare_cutoff_score else 85
 
     def do_import(self):
@@ -58,6 +56,20 @@ class RepositoryImporter:
         print(
             f"took {time.time() - st} seconds to determine {len(self.resolutions)} resolutions")
 
+    def is_resolved(self, id2):
+        result = False, None
+        if self.resolutions:
+            for res_id in [res_id for res_id in self.resolutions if res_id.identity2.unique_id == id2]:
+                result = True, res_id.resolver_result.manual_verification
+                break
+        return result
+
+    def update_uuids_in_str(self, content: str) -> str:
+        for res_id in [res_id for res_id in self.resolutions if res_id.resolver_result.manual_verification is True]:
+            content = content.replace(res_id.identity2.unique_id, res_id.identity1.unique_id)
+            print(f"replaced {res_id.identity2.unique_id} -> {res_id.identity1.unique_id}")
+        return content
+
     @property
     def resolver(self) -> RepositoryResolver:
         if not self._identity_resolver:
@@ -71,14 +83,6 @@ class RepositoryImporter:
             self._identity_comparator = NaiveIdentityResolver(
                 cutoff_score=self.compare_cutoff_score)
         return self._identity_comparator
-
-    @property
-    def resolution_store(self) -> ResolutionStore:
-        return self._resolution_store
-
-    @resolution_store.setter
-    def resolution_store(self, resolution_store: ResolutionStore):
-        self._resolution_store = resolution_store
 
     @abstractmethod
     def import_(self):
@@ -96,10 +100,10 @@ class CoArchiRepositoryImporter(RepositoryImporter):
      """
 
     def __init__(self, target_repo: Repository, source_repo: CoArchiRepository,
-                 source_filter: Views, resolution_store: ResolutionStore = None,
+                 source_filter: Views,
                  compare_cutoff_score=None):
         super().__init__(target_repo=target_repo, source_repo=source_repo,
-                         source_filter=source_filter, resolution_store=resolution_store,
+                         source_filter=source_filter,
                          compare_cutoff_score=compare_cutoff_score)
 
     def import_(self):
@@ -113,7 +117,7 @@ class CoArchiRepositoryImporter(RepositoryImporter):
             filename = os.path.join(dirpath, file)
             identity = self.source_repo._read_identity_from_file(dirpath, file)
             if identity:
-                found, resolved_result = self.resolution_store.is_resolved(
+                found, resolved_result = self.is_resolved(
                     identity.unique_id)
             else:
                 found = resolved_result = False
@@ -121,7 +125,7 @@ class CoArchiRepositoryImporter(RepositoryImporter):
                 try:
                     with open(filename, "r", encoding='utf-8') as ifp:
                         content = ifp.read()
-                    content = self.resolution_store.update_uuids_in_str(content)
+                    content = self.update_uuids_in_str(content)
                     self.copy(filename, self.source_repo.location,
                               self.target_repo.location, content)
                 except Exception as ex:
@@ -133,8 +137,8 @@ class CoArchiRepositoryImporter(RepositoryImporter):
     def copy(self, filename: str, base_path: str, target_base_path: str, content: str):
         norm_filename = os.path.normpath(filename)
         relative_filename = norm_filename[len(base_path) + 1:]
-        target_filename = os.path.join(target_base_path,
-                                       relative_filename + "_delete_me")
+        target_filename = self.target_repo.get_dry_run_location(os.path.join(target_base_path,
+                                       relative_filename))
         drive, tmp = os.path.splitdrive(target_filename)
         path, tmp = os.path.split(tmp)
         if not os.path.exists(path):
@@ -154,7 +158,7 @@ class XmiArchiRepositoryImporter(RepositoryImporter):
                  source_filter: Views, resolution_store: ResolutionStore = None,
                  compare_cutoff_score=None):
         super().__init__(target_repo=target_repo, source_repo=source_repo,
-                         source_filter=source_filter, resolution_store=resolution_store,
+                         source_filter=source_filter,
                          compare_cutoff_score=compare_cutoff_score)
 
     def import_(self):
@@ -195,12 +199,11 @@ class XmiArchiRepositoryImporter(RepositoryImporter):
 
     def import_sweep_update_uuids(self):
         content = None
-        with open(self.target_repo.location, "r", encoding='utf8') as ifp:
-            content = self.resolution_store.update_uuids_in_str(ifp.read())
+        with open(self.target_repo.get_dry_run_location(), "r", encoding='utf8') as ifp:
+            content = self.update_uuids_in_str(ifp.read())
         if content:
-            with open(self.target_repo.location, "w", encoding='utf8') as ofp:
+            with open(self.target_repo.get_dry_run_location(), "w", encoding='utf8') as ofp:
                 ofp.write(content)
-
 
 
 

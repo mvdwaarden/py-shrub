@@ -68,15 +68,6 @@ class ResolutionStore:
         else:
             return None
 
-    def is_resolved(self, id2):
-        result = False, None
-        if self.resolutions:
-            for verified in [value for (_, id2_check), value in self.resolutions.items()
-                             if id2 == id2_check]:
-                result = True, verified
-                break
-        return result
-
     def apply_to(self, resolved_ids: List[ResolvedIdentity]):
         for (id1, id2), manual_verification in self.resolutions.items():
             for res_id in [res_id for res_id in resolved_ids if
@@ -84,9 +75,3 @@ class ResolutionStore:
                 res_id.resolver_result.manual_verification = manual_verification
                 res_id.resolver_result.rule = "ID_RESOLUTION_FILE"
                 break
-
-    def update_uuids_in_str(self, content: str) -> str:
-        for (id1, id2), value in self.resolutions.items():
-            if value is True:
-                content = content.replace(id2, id1)
-        return content

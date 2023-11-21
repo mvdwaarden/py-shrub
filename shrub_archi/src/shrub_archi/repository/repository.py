@@ -53,6 +53,9 @@ class Repository(ABC):
     def add_relation(self, relation: Relation):
         ...
 
+    def get_dry_run_location(self, filename: str=None):
+        return f"{self.location}{filename if filename else ''}.backup.xml"
+
     @property
     def identities(self) -> List[Identity]:
         return list(self._identities.values()) if self._identities else []
@@ -166,7 +169,7 @@ class XmiArchiRepository(Repository):
         return self
 
     def do_write(self) -> "XmiArchiRepository":
-        self.element_tree.write(f"{self.location}.backup.xml", )
+        self.element_tree.write(self.get_dry_run_location())
         return self
 
     def add_view(self, view: View):
