@@ -1,1 +1,1 @@
-call ..\sbin\distribute.cmd shrub_archi
+call ..\sbin\distribute.cmd shrub_archi shrub_util
