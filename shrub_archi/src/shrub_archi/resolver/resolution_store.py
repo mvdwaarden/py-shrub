@@ -69,5 +69,5 @@ class ResolutionStore:
             for res_id in [res_id for res_id in resolved_ids if
                            res_id.identity1.unique_id == id1 and res_id.identity2.unique_id == id2]:
                 res_id.resolver_result.manual_verification = manual_verification
-                res_id.resolver_result.rule = "ID_RESOLUTION_FILE"
+                res_id.resolver_result.rule = f"*{res_id.resolver_result.rule}"
                 break

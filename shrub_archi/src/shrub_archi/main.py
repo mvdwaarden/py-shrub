@@ -71,7 +71,7 @@ if __name__ == "__main__":
     help = args.has_arg("help")
     dry_run = args.has_arg("dry-run") or True
     source = args.get_arg("source", "/tmp/archi_src.xml")
-    source = target = args.get_arg("target", "/tmp/GEMMA 2.xml")
+    target = args.get_arg("target", "/tmp/GEMMA 2.xml")
     work_dir = args.get_arg("workdir", "/tmp")
     function_import = args.has_arg("import")
 
