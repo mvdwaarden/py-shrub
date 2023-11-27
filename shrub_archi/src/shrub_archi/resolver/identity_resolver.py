@@ -1,15 +1,12 @@
 import concurrent.futures
 import itertools
-import math
 from abc import ABC, abstractmethod
-from difflib import SequenceMatcher
-from enum import Enum
-from typing import Optional, List
-
 from dataclasses import dataclass
+from enum import Enum
+from typing import List
 
 from shrub_archi.model.model import Identity, Views
-from shrub_archi.repository.repository import Repository
+from shrub_archi.repository.repository import Repository, RepositoryFilter
 
 
 class ResolvedIdentityAction(Enum):
@@ -60,67 +57,27 @@ class IdentityResolver(ABC):
 
     @abstractmethod
     def do_resolve(self, identity1: Identity, identity2: Identity) -> ResolverResult:
-        pass
-
-
-class NaiveIdentityResolver(IdentityResolver):
-    def __init__(self, cutoff_score: int = 80, parent: IdentityResolver = None):
-        super().__init__(parent)
-        self.cutoff_score = cutoff_score
-
-    def do_resolve(self, identity1: Identity, identity2: Identity) -> Optional[
-        ResolverResult]:
-        result = None
-        if identity1.unique_id == identity2.unique_id:
-            result = ResolverResult(score=ResolverResult.MAX_EQUAL_SCORE + 10,
-                                    rule="ID_EXACT_RULE")
-        elif identity1.classification == identity2.classification:
-            if not identity1.name or not identity2.name:
-                ...
-            elif identity1.name.lower() == identity2.name.lower():
-                result = ResolverResult(score=ResolverResult.MAX_EQUAL_SCORE + 10,
-                                        rule="NAME_EXACT_RULE")
-            else:
-                name_score = 0
-                if math.fabs(len(identity1.name) - len(identity2.name)) < 10:
-                    name_score = int(SequenceMatcher(a=identity1.name.lower(),
-                                                     b=identity2.name.lower()).ratio() * ResolverResult.MAX_EQUAL_SCORE)
-                description_score = 0
-                if identity1.description and identity2.description and len(
-                        identity1.description) > 10 and len(identity2.description) > 10:
-                    description_score = int(SequenceMatcher(a=identity1.description,
-                                                            b=identity2.description).ratio() * ResolverResult.MAX_EQUAL_SCORE)
-                if name_score > 0 and name_score > description_score:
-                    result = ResolverResult(score=name_score, rule="NAME_CLASS_RULE")
-                elif description_score > 0:
-                    result = ResolverResult(score=description_score,
-                                            rule="DESCRIPTION_CLASS_RULE")
-
-        return result if result and result.score >= self.cutoff_score else None
+        ...
 
 
 class RepositoryResolver:
-    def classification_resolve(self, ids1: List[ResolvedIdentity],
-                               ids2: List[ResolvedIdentity],
+    def classification_resolve(self, ids1: List[ResolvedIdentity], ids2: List[ResolvedIdentity],
                                comparator: IdentityResolver):
         result = []
         for id1, id2 in [(id1, id2) for id1, id2 in itertools.product(ids1, ids2)]:
             compare_result = comparator.resolve(id1, id2)
             if compare_result:
-                resolved_id = ResolvedIdentity(identity1=id1, identity2=id2,
-                                               resolver_result=compare_result)
+                resolved_id = ResolvedIdentity(identity1=id1, identity2=id2, resolver_result=compare_result)
                 result.append(resolved_id)
         return result
 
-    def resolve(self, repo1: Repository, repo2: Repository, repo2_filter: Views = None,
+    def resolve(self, repo1: Repository, repo2: Repository, repo2_filter: RepositoryFilter = None,
                 comparator: IdentityResolver = None):
-        naive = False
         result = []
 
-        def to_map(repository: Repository, repo_filter: Views = None):
+        def to_map(repository: Repository, repo_filter: RepositoryFilter = None):
             map_ids1 = {}
-            for k, g in itertools.groupby(
-                    repository.view_referenced_identies(repo_filter),
+            for k, g in itertools.groupby(repository.filter(repo_filter),
                     lambda id: id.classification):
                 if k not in map_ids1:
                     map_ids1[k] = list(g)
@@ -134,9 +91,16 @@ class RepositoryResolver:
             futures = []
             for group1 in map1:
                 if group1 in map2:
-                    futures.append(
-                        exec.submit(self.classification_resolve, map1[group1],
-                                    map2[group1], comparator))
+                    futures.append(exec.submit(self.classification_resolve, map1[group1], map2[group1], comparator))
             for future in concurrent.futures.as_completed(futures):
                 result += future.result()
         return result
+
+
+def resolutions_is_resolved(resolutions: List[ResolvedIdentity], id2: str):
+    result = False, None
+    if resolutions:
+        for res_id in [res_id for res_id in resolutions if res_id.identity2.unique_id == id2]:
+            result = True, res_id.resolver_result.manual_verification
+            break
+    return result

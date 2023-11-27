@@ -1,6 +1,6 @@
 import shrub_util.core.logging as logging
 from shrub_archi.repository.repository import Repository, XmiArchiRepository, \
-    CoArchiRepository
+    CoArchiRepository, ViewRepositoryFilter
 from shrub_archi.repository.repository_graph import RepositoryGrapher
 from shrub_archi.repository.repository_importer import XmiArchiRepositoryImporter
 from shrub_archi.resolver.resolution_store import ResolutionStore
@@ -71,7 +71,7 @@ if __name__ == "__main__":
     help = args.has_arg("help")
     dry_run = args.has_arg("dry-run") or True
     source = args.get_arg("source", "/tmp/archi_src.xml")
-    target = args.get_arg("target", "/tmp/GEMMA 2.xml")
+    source = target = args.get_arg("target", "/tmp/GEMMA 2.xml")
     work_dir = args.get_arg("workdir", "/tmp")
     function_import = args.has_arg("import")
 
@@ -82,8 +82,8 @@ if __name__ == "__main__":
         target_repo = create_repository(target)
         source_repo = create_repository(source)
         source_repo.read()
-        views = do_select_views(source_repo)
-        importer = XmiArchiRepositoryImporter(target_repo, source_repo, views)
+        view_repo_filter = ViewRepositoryFilter(do_select_views(source_repo))
+        importer = XmiArchiRepositoryImporter(target_repo, source_repo, view_repo_filter)
         if do_create_resolution_file(importer, resolution_store_location=work_dir):
             do_import(importer, resolution_store_location=work_dir)
 
@@ -91,7 +91,8 @@ if __name__ == "__main__":
         target_repo = create_repository(target)
         source_repo = create_repository(source)
         source_repo.read()
-        views = do_select_views(source_repo)
-        do_create_resolution_file(target_repo, source_repo, views,
+        view_repo_filter = ViewRepositoryFilter(do_select_views(source_repo))
+        importer = XmiArchiRepositoryImporter(target_repo, source_repo, view_repo_filter)
+        do_create_resolution_file(importer,
                                   resolution_store_location=work_dir)
         RepositoryGrapher.create_graph(target_repo)

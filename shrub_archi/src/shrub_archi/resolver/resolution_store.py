@@ -23,8 +23,7 @@ class ResolutionStore:
                 res_id.identity1.unique_id, res_id.identity2.unique_id] = res_id.resolver_result.manual_verification
 
     def _get_resolution_file(self, name) -> str:
-        return os.path.join(self.location,
-                            f"{name if name else 'resolved_identities'}.json")
+        return os.path.join(self.location, f"{name if name else 'resolved_identities'}.json")
 
     def _read_from_string(self, resolutions: str):
         self._resolutions = {}
@@ -45,9 +44,7 @@ class ResolutionStore:
                 with open(self._get_resolution_file(name), "r") as ifp:
                     self._read_from_string(ifp.read())
             except Exception as ex:
-                logging.get_logger().error(
-                    f"problem reading resolution file {self._get_resolution_file(name)}",
-                    ex=ex)
+                logging.get_logger().error(f"problem reading resolution file {self._get_resolution_file(name)}", ex=ex)
                 self._resolutions = {}
         return self.resolutions
 
@@ -59,8 +56,7 @@ class ResolutionStore:
             with open(self._get_resolution_file(name), "w") as ofp:
                 json.dump(tmp, ofp)
         except Exception as ex:
-            logging.get_logger().error(
-                f"problem writing resolution file {self._get_resolution_file}", ex=ex)
+            logging.get_logger().error(f"problem writing resolution file {self._get_resolution_file}", ex=ex)
 
     def resolution(self, id1, id2):
         if self.resolutions and (id1, id2) in self.resolutions:
