@@ -1,18 +1,28 @@
 from typing import List
 
+from shrub_archi.model.model import Relation
 from shrub_archi.resolver.identity_resolver import ResolvedIdentity
 from .select_ui import SelectModel, do_show_select_ui
 
 
 class ResolutionTableModel(SelectModel):
     COL_COUNT: int = 6
-    HEADER_LABELS: List[str] = ['Equal', 'Score', 'Rule', 'Class', 'Identity1',
-                                'Identity2']
+    HEADER_LABELS: List[str] = ['Equal', 'Score', 'Rule', 'Class', 'Identity1', 'Identity2']
 
     def __init__(self, data: List[ResolvedIdentity]):
         super().__init__(data=data)
         for row in data:
             self.set_selected(row, row.resolver_result.manual_verification)
+
+    def _row_name(self, identity):
+        match identity:
+            case Relation():
+                if identity.name:
+                    return f"{identity.source.name}-({identity.name})->{identity.target.name}"
+                else:
+                    return f"{identity.source.name}->{identity.target.name}"
+            case _:
+                return identity.name
 
     def column_value_for(self, row: ResolvedIdentity, column: int):
         match column:
@@ -25,29 +35,27 @@ class ResolutionTableModel(SelectModel):
             case 3:
                 return row.identity1.classification
             case 4:
-                return row.identity1.name
+                return self._row_name(row.identity1)
             case 5:
-                return row.identity2.name
+                return self._row_name(row.identity2)
             case _:
                 return "?"
 
     def hit_row(self, row: ResolvedIdentity, search_text: str):
         def hit_identity(identity):
-            return (identity.name and search_text in identity.name.lower()) or (
-                    identity.description and search_text in identity.description.lower()) or (
+            return ((identity.name or isinstance(identity, Relation)) and search_text in self._row_name(
+                identity).lower()) or (identity.description and search_text in identity.description.lower()) or (
                     identity.classification and search_text in identity.classification.lower())
 
         def hit_resolve_result(res):
             return search_text in str(res.score) or search_text in str(res.rule.lower())
 
-        result = hit_identity(row.identity1) or hit_identity(
-            row.identity2) or hit_resolve_result(row.resolver_result)
+        result = hit_identity(row.identity1) or hit_identity(row.identity2) or hit_resolve_result(row.resolver_result)
         return result
 
 
 def do_show_resolve_ui(resolved_ids: List[ResolvedIdentity]) -> bool:
-    saved, selection = do_show_select_ui(model=ResolutionTableModel(resolved_ids),
-                                         ok_text="Resolve")
+    saved, selection = do_show_select_ui(model=ResolutionTableModel(resolved_ids), ok_text="Resolve")
     for row, selected in selection.items():
         row.resolver_result.manual_verification = selected
 

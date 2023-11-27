@@ -135,7 +135,7 @@ class ViewRepositoryFilter(RepositoryFilter):
 
     @property
     def aggregate_identities_ids(self) -> List[str]:
-        if self.views:
+        if self.views and not self._aggregate_identities_ids:
             self._aggregate_identities_ids = []
             for view in self.views:
                 if self.include_elements:
@@ -143,7 +143,8 @@ class ViewRepositoryFilter(RepositoryFilter):
                 if self.include_relations:
                     self._aggregate_identities_ids += view.referenced_relations
             return self._aggregate_identities_ids
-        return []
+        return self._aggregate_identities_ids
+
     def clone(self, target: "ViewRepositoryFilter" = None):
         if not target:
             target = ViewRepositoryFilter(None)

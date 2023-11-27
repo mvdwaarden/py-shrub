@@ -12,7 +12,7 @@ import shrub_util.core.logging as logging
 from shrub_archi.model.model import Identity, Relation
 from shrub_archi.repository.repository import CoArchiRepository, Repository, RepositoryFilter, ViewRepositoryFilter
 from shrub_archi.resolver.identity_resolver import ResolvedIdentity, RepositoryResolver, IdentityResolver, \
-    ResolverResult, resolutions_is_resolved
+    ResolverResult, resolutions_is_resolved, resolutions_get_resolved_identity
 from shrub_archi.resolver.resolution_store import ResolutionStore
 
 
@@ -27,22 +27,23 @@ class NaiveRelationResolver(IdentityResolver):
 
         if isinstance(identity1, Relation) and isinstance(identity2,
                                                           Relation) and identity1.classification == identity2.classification:
-            rel1: Relation = identity1
-            rel2: Relation = identity2
-            source_result = resolutions_is_resolved(self.resolutions, rel2.source_id)
-            if source_result:
-                target_result = resolutions_is_resolved(self.resolutions, rel2.target_id)
-            if target_result:
-                if not rel1.name or not rel2.name:
-                    ...
-                elif rel1.name.lower() == rel2.name.lower():
-                    rel_result = ResolverResult(score=ResolverResult.MAX_EQUAL_SCORE + 10,
-                                                rule="REL_SOURCE_TARGET_NAME_NAME_EXACT_RULE")
-                elif math.fabs(len(identity1.name) - len(identity2.name)) < 10:
-                    name_score = int(SequenceMatcher(a=identity1.name.lower(),
-                                                     b=identity2.name.lower()).ratio() * ResolverResult.MAX_EQUAL_SCORE)
-                    if name_score > 0:
-                        rel_result = ResolverResult(score=name_score, rule="REL_SOURCE_TARGET_NAME_CLASS_RULE")
+            if identity1.unique_id == identity2.unique_id:
+                rel_result = ResolverResult(score=ResolverResult.MAX_EQUAL_SCORE + 10, rule="REL_ID_EXACT_RULE")
+            else:
+                rel1: Relation = identity1
+                rel2: Relation = identity2
+                found, source_result = resolutions_get_resolved_identity(self.resolutions, rel2.source_id)
+                if source_result and source_result.identity1.unique_id == rel1.source_id:
+                    found, target_result = resolutions_get_resolved_identity(self.resolutions, rel2.target_id)
+                if target_result and target_result.identity1.unique_id == rel1.target_id:
+                    if not rel1.name or not rel2.name or rel1.name.lower() == rel2.name.lower():
+                        rel_result = ResolverResult(score=ResolverResult.MAX_EQUAL_SCORE + 10,
+                                                    rule="REL_SOURCE_TARGET_NAME_NAME_EXACT_RULE")
+                    elif math.fabs(len(identity1.name) - len(identity2.name)) < 10:
+                        name_score = int(SequenceMatcher(a=identity1.name.lower(),
+                                                         b=identity2.name.lower()).ratio() * ResolverResult.MAX_EQUAL_SCORE)
+                        if name_score > 0:
+                            rel_result = ResolverResult(score=name_score, rule="REL_SOURCE_TARGET_NAME_CLASS_RULE")
 
         return rel_result if rel_result and rel_result.score >= self.cutoff_score else None
 
@@ -54,10 +55,11 @@ class NaiveIdentityResolver(IdentityResolver):
 
     def do_resolve(self, identity1: Identity, identity2: Identity) -> Optional[ResolverResult]:
         result = None
-        if identity1.unique_id == identity2.unique_id:
-            result = ResolverResult(score=ResolverResult.MAX_EQUAL_SCORE + 10, rule="ID_EXACT_RULE")
-        elif isinstance(identity1, Relation) and isinstance(identity2, Relation):
+
+        if isinstance(identity1, Relation) and isinstance(identity2, Relation):
             ...
+        elif identity1.unique_id == identity2.unique_id:
+            result = ResolverResult(score=ResolverResult.MAX_EQUAL_SCORE + 10, rule="ID_EXACT_RULE")
         elif identity1.classification == identity2.classification:
             if not identity1.name or not identity2.name:
                 ...
@@ -160,10 +162,10 @@ class RepositoryImporter:
 
     @property
     def relation_comparator(self) -> IdentityResolver:
-        if not self._identity_comparator:
+        if not self._relation_comparator:
             self._relation_comparator = NaiveRelationResolver(resolutions=self.resolutions,
                                                               cutoff_score=self.compare_cutoff_score)
-        return self._identity_comparator
+        return self._relation_comparator
 
     @abstractmethod
     def import_(self):

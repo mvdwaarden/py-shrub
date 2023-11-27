@@ -3,7 +3,7 @@ import itertools
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
-from typing import List
+from typing import List, Tuple, Optional
 
 from shrub_archi.model.model import Identity, Views
 from shrub_archi.repository.repository import Repository, RepositoryFilter
@@ -97,10 +97,17 @@ class RepositoryResolver:
         return result
 
 
-def resolutions_is_resolved(resolutions: List[ResolvedIdentity], id2: str):
+def resolutions_is_resolved(resolutions: List[ResolvedIdentity], id2: str) -> Tuple[bool, Optional[bool]]:
+    found, result = resolutions_get_resolved_identity(resolutions, id2)
+    if result:
+        return True, result.resolver_result.manual_verification
+    return found, result
+
+
+def resolutions_get_resolved_identity(resolutions: List[ResolvedIdentity], id2: str) -> Tuple[bool, Optional[ResolvedIdentity]]:
     result = False, None
     if resolutions:
         for res_id in [res_id for res_id in resolutions if res_id.identity2.unique_id == id2]:
-            result = True, res_id.resolver_result.manual_verification
+            result = True, res_id
             break
     return result
