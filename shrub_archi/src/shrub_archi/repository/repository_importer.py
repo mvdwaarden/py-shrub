@@ -37,15 +37,16 @@ class NaiveRelationResolver(IdentityResolver):
                     found, target_result = resolutions_get_resolved_identity(self.resolutions, rel2.target_id)
                 if target_result and target_result.identity1.unique_id == rel1.target_id:
                     if not rel1.name or not rel2.name or rel1.name.lower() == rel2.name.lower():
-                        rel_result = ResolverResult(score=ResolverResult.MAX_EQUAL_SCORE + 10,
-                                                    rule="REL_SOURCE_TARGET_NAME_NAME_EXACT_RULE")
+                        rel_result = ResolverResult(
+                            score=source_result.resolver_result.score * target_result.resolver_result.score / ResolverResult.MAX_EQUAL_SCORE,
+                            rule="REL_SOURCE_TARGET_NAME_NAME_EXACT_RULE")
                     elif math.fabs(len(identity1.name) - len(identity2.name)) < 10:
                         name_score = int(SequenceMatcher(a=identity1.name.lower(),
                                                          b=identity2.name.lower()).ratio() * ResolverResult.MAX_EQUAL_SCORE)
-                        if name_score > 0:
+                        if name_score > 0 and name_score >= self.cutoff_score:
                             rel_result = ResolverResult(score=name_score, rule="REL_SOURCE_TARGET_NAME_CLASS_RULE")
 
-        return rel_result if rel_result and rel_result.score >= self.cutoff_score else None
+        return rel_result if rel_result else None
 
 
 class NaiveIdentityResolver(IdentityResolver):

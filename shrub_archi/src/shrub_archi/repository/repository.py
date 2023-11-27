@@ -143,6 +143,8 @@ class ViewRepositoryFilter(RepositoryFilter):
                 if self.include_relations:
                     self._aggregate_identities_ids += view.referenced_relations
             return self._aggregate_identities_ids
+        elif not self._aggregate_identities_ids:
+            self._aggregate_identities_ids = []
         return self._aggregate_identities_ids
 
     def clone(self, target: "ViewRepositoryFilter" = None):
