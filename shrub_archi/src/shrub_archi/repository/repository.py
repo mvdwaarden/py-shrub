@@ -131,7 +131,9 @@ class ViewRepositoryFilter(RepositoryFilter):
         self._aggregate_identities_ids: Optional[List[str]] = None
 
     def include(self, identity: Identity):
-        return super().include(identity) and identity.unique_id in self.aggregate_identities_ids
+        return super().include(identity) and (identity.unique_id in self.aggregate_identities_ids
+            or isinstance(identity, Relation) and identity.identity1.unique_id in self.aggregate_identities_ids
+            and identity.identity2.unique_id in self.aggregate_identities_ids)
 
     @property
     def aggregate_identities_ids(self) -> List[str]:
