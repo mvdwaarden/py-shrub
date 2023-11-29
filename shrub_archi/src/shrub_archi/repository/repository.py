@@ -242,6 +242,7 @@ class XmiArchiRepository(Repository):
             del self._identities[element.unique_id]
             self._delete_element(element, self._namespaces)
             self._delete_organization(element, self._namespaces)
+            print(f"deleted element {element}")
 
     def add_property_definition(self, property_definition: PropertyDefinition):
         if property_definition.unique_id not in self._property_definitions:
@@ -261,6 +262,7 @@ class XmiArchiRepository(Repository):
             del self._relations[relation.unique_id]
             self._delete_relation(relation, self._namespaces)
             self._delete_organization(relation, self._namespaces)
+            print(f"deleted relation {relation}")
 
     @property
     def element_tree(self) -> ElementTree:
@@ -347,7 +349,15 @@ class XmiArchiRepository(Repository):
             print(f"problem writing element {element}", ex)
 
     def _delete_element(self, element, namespaces):
-        ...
+        try:
+            root = self.element_tree.getroot()
+            relations = root.findall("xmi:elements", namespaces=self._namespaces)
+            rel = root.findall(f"xmi:elements/xmi:element[@identifier='{element.unique_id}']",
+                               namespaces=self._namespaces)
+            if len(rel):
+                relations[0].remove(rel[0])
+        except Exception as ex:
+            print(f"problem deleting element {element}", ex)
 
     def _write_relation(self, relation, namespaces):
         try:
@@ -361,11 +371,12 @@ class XmiArchiRepository(Repository):
         try:
             root = self.element_tree.getroot()
             relations = root.findall("xmi:relationships", namespaces=self._namespaces)
-            rel = root.findall(f"xmi:relationships/xmi:relationship[@identifier='{relation.unique_id}']", namespaces=self._namespaces)
+            rel = root.findall(f"xmi:relationships/xmi:relationship[@identifier='{relation.unique_id}']",
+                               namespaces=self._namespaces)
             if len(rel):
                 relations[0].remove(rel[0])
         except Exception as ex:
-            print(f"problem writing relation {relation}", ex)
+            print(f"problem deleting relation {relation}", ex)
 
     def _write_organization(self, identity, namespaces):
         try:
@@ -392,7 +403,27 @@ class XmiArchiRepository(Repository):
             print(f"problem writing identity {identity} to organizations", ex)
 
     def _delete_organization(self, identity, namespaces):
-        ...
+        try:
+            def remove_item(item, unique_id) -> bool:
+                removed = False
+                to_remove = []
+                for child in item.findall("xmi:item", namespaces=namespaces):
+                    if child.get("identifierRef") == unique_id:
+                        to_remove.append(child)
+                for remove_me in to_remove:
+                    item.remove(remove_me)
+                    removed = True
+                if not removed:
+                    for child in item.findall("xmi:item", namespaces=namespaces):
+                        if remove_item(child, unique_id):
+                            removed = True
+                return removed
+
+            for item in self.element_tree.findall(f"xmi:organizations/xmi:item", namespaces=namespaces):
+                remove_item(item, identity.unique_id)
+
+        except Exception as ex:
+            print(f"problem deleting identity {identity} in organizations", ex)
 
     def _write_property_definition(self, property_definition, namespaces):
         try:

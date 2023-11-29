@@ -264,9 +264,31 @@ class XmiArchiRepositoryImporter(RepositoryImporter):
                         self.target_repo.add_relation(identity)
                     case Identity():
                         self.target_repo.add_element(identity)
-            # if found -> overwrite? ignore? => ignore for now
+            # if found, so resolved -> overwrite? ignore? => ignore for now
             else:
                 ...
+        # build target id resolutions
+        target_resolutions = {}
+        for res_id in [res_id for res_id in self.resolutions if res_id.resolver_result.manual_verification is True]:
+            if res_id.identity1.unique_id not in target_resolutions:
+                target_resolutions[res_id.identity1.unique_id] = [res_id]
+            else:
+                target_resolutions[res_id.identity1.unique_id].append(res_id)
+        # IF there are more target resolution AND the target resolution is also itself THEN
+        # one of these resolutions can remain, whilst the others when existing in the target
+        # can be removed
+        for unique_id in target_resolutions:
+            exists_itself = len(
+                [res_id for res_id in target_resolutions[unique_id] if res_id.identity2.unique_id == unique_id]) > 0
+            if exists_itself and len(target_resolutions[unique_id]) > 1:
+                # Remove all others
+                for res_id in [res_id for res_id in target_resolutions[unique_id] if
+                               not res_id.identity2.unique_id == unique_id]:
+                    match res_id.identity2:
+                        case Relation():
+                            self.target_repo.del_relation(res_id.identity2)
+                        case Identity():
+                            self.target_repo.del_element(res_id.identity2)
 
         for property_definition in self.source_repo.property_definitions:
             self.target_repo.add_property_definition(property_definition)

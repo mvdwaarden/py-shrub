@@ -1,7 +1,8 @@
 import json
 import os
-from typing import Optional, List, Tuple
 import shutil
+from typing import Optional, List, Tuple
+
 from shrub_archi.resolver.identity_resolver import ResolvedIdentity
 from shrub_util.core import logging as logging
 
@@ -57,7 +58,8 @@ class ResolutionStore:
                 i = 0
                 while os.path.exists(f"{self._get_resolution_file(name)}.backup.{i}"):
                     i += 1
-                shutil.copyfile(src=self._get_resolution_file(name), dst=f"{self._get_resolution_file(name)}.backup.{i}")
+                shutil.copyfile(src=self._get_resolution_file(name),
+                                dst=f"{self._get_resolution_file(name)}.backup.{i}")
             with open(self._get_resolution_file(name), "w") as ofp:
                 json.dump(tmp, ofp)
         except Exception as ex:

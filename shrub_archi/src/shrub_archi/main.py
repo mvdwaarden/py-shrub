@@ -35,7 +35,6 @@ usage = """
     
     TODO:
     - feature: Option to overwrite target repository identities
-    - feature: Allow deduplication when importing into self
 """
 
 
