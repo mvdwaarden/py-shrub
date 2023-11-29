@@ -246,7 +246,7 @@ class XmiArchiRepository(Repository):
                 elif child.tag.endswith("documentation"):
                     documentation = child.text
             result = specialization(unique_id=el.get("identifier"), name=name, description=documentation,
-                                    classification=el.get(f"{{{namespaces['xsi']}}}type"), source=self.location,
+                                    classification=el.get(f"{{{namespaces['xsi']}}}type"), location=self.location,
                                     data=el)
         except Exception as ex:
             print(f"problem reading element {el}", ex)
@@ -262,7 +262,7 @@ class XmiArchiRepository(Repository):
                 elif child.tag.endswith("documentation"):
                     documentation = child.text
             result = PropertyDefinition(unique_id=el.get("identifier"), name=name, description=documentation,
-                                        classification=el.get("type"), source=self.location, data=el)
+                                        classification=el.get("type"), location=self.location, data=el)
         except Exception as ex:
             print(f"problem reading property definition {el}", ex)
         return result
@@ -278,7 +278,7 @@ class XmiArchiRepository(Repository):
                     documentation = child.text
             xsi_type = el.get(f"{{{namespaces['xsi']}}}type")
             result = Relation(unique_id=el.get("identifier"), name=name, description=documentation,
-                              classification=f"{xsi_type}Relationship", source=self.location,
+                              classification=f"{xsi_type}Relationship", location=self.location,
                               source_id=el.get("source"), target_id=el.get("target"), data=el)
         except Exception as ex:
             print(f"problem reading element {el}", ex)
@@ -402,7 +402,7 @@ class CoArchiRepository(Repository):
                 constructor = Identity
             identity = constructor(unique_id=root.get("id"), name=root.get("name"),
                                    description=root.get("documentation"), classification=classification,
-                                   source=full_filename)
+                                   location=full_filename)
             if identity.unique_id and identity.name:
                 result = identity
         except Exception as ex:
@@ -424,7 +424,7 @@ class CoArchiRepository(Repository):
                         target = child
             relation = Relation(unique_id=root.get("id"), name=root.get('name'), description=root.get("documentation"),
                                 classification=root.tag.split("}")[-1], source_id=source.get("href").split("#")[1],
-                                target_id=target.get("href").split("#")[1], source=full_filename)
+                                target_id=target.get("href").split("#")[1], location=full_filename)
             if relation.unique_id:
                 result = relation
         except Exception as ex:

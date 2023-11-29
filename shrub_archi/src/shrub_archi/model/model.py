@@ -9,7 +9,7 @@ class Identity:
     name: str
     classification: str = None
     description: Optional[str] = None
-    source: Optional[str] = None
+    location: Optional[str] = None
     data: Optional[Any] = None
 
     def __hash__(self):
