@@ -1,6 +1,5 @@
 import shrub_util.core.logging as logging
-from shrub_archi.repository.repository import Repository, XmiArchiRepository, \
-    CoArchiRepository, ViewRepositoryFilter
+from shrub_archi.repository.repository import Repository, XmiArchiRepository, CoArchiRepository, ViewRepositoryFilter
 from shrub_archi.repository.repository_graph import RepositoryGrapher
 from shrub_archi.repository.repository_importer import XmiArchiRepositoryImporter
 from shrub_archi.resolver.resolution_store import ResolutionStore
@@ -17,11 +16,26 @@ usage = """
     - The config.ini contains the connections definitions. Connection sections
       have the name [ExternalApi-<connection name>]
 
-    Mode - import source repository into target repository    
-    Parameters:
+    Mode - import source repository into target repository
+    Function:
+    - import    
+    Parameters:    
     - source: source XMI file location
     - target: target XMI file location
+    - workdir: work directory
+    - cutoff: cut off for comparison
+    - resolutions: name of the resolutions file (without .json) in the work directory
     
+    Mode - create graph
+    Function:
+    - graph
+    Parameters:    
+    - source: source XMI file location
+    - workdir: output directory
+    
+    TODO:
+    - feature: Option to overwrite target repository identities
+    - feature: Allow deduplication when importing into self
 """
 
 
@@ -32,23 +46,27 @@ def create_repository(location: str) -> Repository:
         return CoArchiRepository(location)
 
 
-def do_create_resolution_file(importer, resolution_store_location,
-                              resolution_name="dry_run") -> bool:
+def get_resolution_name(repo: Repository, resolution_name):
+    return resolution_name if resolution_name else repo.name
+
+
+def do_create_resolution_file(importer, resolution_store_location, resolution_name: str = None) -> bool:
     created = False
     res_store = ResolutionStore(resolution_store_location)
-    res_store.read(resolution_name)
+
+    res_store.read(get_resolution_name(importer.source_repo, resolution_name))
     importer.do_resolve()
     res_store.apply_to(importer.resolutions)
     if do_show_resolve_ui(importer.resolutions):
         res_store.resolutions = importer.resolutions
-        res_store.write(resolution_name)
+        res_store.write(get_resolution_name(importer.source_repo, resolution_name))
         created = True
     return created
 
 
-def do_import(importer, resolution_store_location, resolution_name="dry_run"):
+def do_import(importer, resolution_store_location, resolution_name: str = None):
     res_store = ResolutionStore(resolution_store_location)
-    res_store.read(resolution_name)
+    res_store.read(get_resolution_name(importer.source_repo, resolution_name))
     importer.do_import()
     importer.target_repo.do_write()
     importer.import_sweep_update_uuids()
@@ -69,11 +87,13 @@ if __name__ == "__main__":
 
     args = Arguments()
     help = args.has_arg("help")
-    dry_run = args.has_arg("dry-run") or True
-    source = target =args.get_arg("source", "/tmp/archi_src.xml")
-    #target = args.get_arg("target", "/tmp/GEMMA 2.xml")
-    work_dir = args.get_arg("workdir", "/tmp")
+    source = args.get_arg("source")
+    target = args.get_arg("target")
+    work_dir = args.get_arg("workdir")
     function_import = args.has_arg("import")
+    function_create_graph = args.has_arg("graph")
+    cutoff_score = args.get_arg("cutoff", 85)
+    resolution_name = args.get_arg("resolutions", None)
 
     # do_show_select_furniture_test()
     if help:
@@ -83,16 +103,12 @@ if __name__ == "__main__":
         source_repo = create_repository(source)
         source_repo.read()
         view_repo_filter = ViewRepositoryFilter(do_select_views(source_repo))
-        importer = XmiArchiRepositoryImporter(target_repo, source_repo, view_repo_filter)
-        if do_create_resolution_file(importer, resolution_store_location=work_dir):
-            do_import(importer, resolution_store_location=work_dir)
+        importer = XmiArchiRepositoryImporter(target_repo=target_repo, source_repo=source_repo,
+                                              source_filter=view_repo_filter, compare_cutoff_score=cutoff_score)
+        if do_create_resolution_file(importer, resolution_store_location=work_dir, resolution_name=resolution_name):
+            do_import(importer, resolution_store_location=work_dir, resolution_name=resolution_name)
 
-    else:
-        target_repo = create_repository(target)
+    elif function_create_graph:
         source_repo = create_repository(source)
         source_repo.read()
-        view_repo_filter = ViewRepositoryFilter(do_select_views(source_repo))
-        importer = XmiArchiRepositoryImporter(target_repo, source_repo, view_repo_filter)
-        do_create_resolution_file(importer,
-                                  resolution_store_location=work_dir)
-        RepositoryGrapher.create_graph(target_repo)
+        RepositoryGrapher().create_graph(source_repo, work_dir=work_dir)

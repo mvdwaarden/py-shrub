@@ -64,14 +64,31 @@ class Repository(ABC):
     def add_element(self, element: Identity):
         ...
 
+    def del_element(self, element: Identity):
+        ...
+
     def add_property_definition(self, property_definition: PropertyDefinition):
         ...
 
     def add_relation(self, relation: Relation):
         ...
 
+    def del_relation(self, relation: Relation):
+        ...
+
     def get_dry_run_location(self, filename: str = None):
         return f"{self.location}{filename if filename else ''}.backup.xml"
+
+    @property
+    def name(self) -> str:
+        if self.location:
+            drive, full_filename = os.path.splitdrive(self.location)
+            path, filename_with_extension = os.path.split(full_filename)
+            filename, extension = os.path.splitext(filename_with_extension)
+            return filename
+
+        else:
+            return "n.a."
 
     @property
     def identities(self) -> List[Identity]:
@@ -131,9 +148,9 @@ class ViewRepositoryFilter(RepositoryFilter):
         self._aggregate_identities_ids: Optional[List[str]] = None
 
     def include(self, identity: Identity):
-        return super().include(identity) and (identity.unique_id in self.aggregate_identities_ids
-            or isinstance(identity, Relation) and identity.identity1.unique_id in self.aggregate_identities_ids
-            and identity.identity2.unique_id in self.aggregate_identities_ids)
+        return super().include(identity) and (
+                identity.unique_id in self.aggregate_identities_ids or isinstance(identity,
+                                                                                  Relation) and identity.source_id in self.aggregate_identities_ids and identity.target_id in self.aggregate_identities_ids)
 
     @property
     def aggregate_identities_ids(self) -> List[str]:
@@ -219,6 +236,13 @@ class XmiArchiRepository(Repository):
             self._write_element(element.data, self._namespaces)
             self._write_organization(element, self._namespaces)
 
+    def del_element(self, element: Identity):
+        if element.unique_id in self._elements:
+            del self._elements[element.unique_id]
+            del self._identities[element.unique_id]
+            self._delete_element(element, self._namespaces)
+            self._delete_organization(element, self._namespaces)
+
     def add_property_definition(self, property_definition: PropertyDefinition):
         if property_definition.unique_id not in self._property_definitions:
             self._property_definitions[property_definition.unique_id] = property_definition
@@ -230,6 +254,13 @@ class XmiArchiRepository(Repository):
             self._relations[relation.unique_id] = relation
             self._write_relation(relation.data, self._namespaces)
             self._write_organization(relation, self._namespaces)
+
+    def del_relation(self, relation: Relation):
+        if relation.unique_id in self._relations:
+            del self._identities[relation.unique_id]
+            del self._relations[relation.unique_id]
+            self._delete_relation(relation, self._namespaces)
+            self._delete_organization(relation, self._namespaces)
 
     @property
     def element_tree(self) -> ElementTree:
@@ -315,11 +346,24 @@ class XmiArchiRepository(Repository):
         except Exception as ex:
             print(f"problem writing element {element}", ex)
 
+    def _delete_element(self, element, namespaces):
+        ...
+
     def _write_relation(self, relation, namespaces):
         try:
             root = self.element_tree.getroot()
             relations = root.findall("xmi:relationships", namespaces=self._namespaces)
             relations[0].append(relation)
+        except Exception as ex:
+            print(f"problem writing relation {relation}", ex)
+
+    def _delete_relation(self, relation, namespaces):
+        try:
+            root = self.element_tree.getroot()
+            relations = root.findall("xmi:relationships", namespaces=self._namespaces)
+            rel = root.findall(f"xmi:relationships/xmi:relationship[@identifier='{relation.unique_id}']", namespaces=self._namespaces)
+            if len(rel):
+                relations[0].remove(rel[0])
         except Exception as ex:
             print(f"problem writing relation {relation}", ex)
 
@@ -346,6 +390,9 @@ class XmiArchiRepository(Repository):
                                   attrib={"identifierRef": identity.unique_id})
         except Exception as ex:
             print(f"problem writing identity {identity} to organizations", ex)
+
+    def _delete_organization(self, identity, namespaces):
+        ...
 
     def _write_property_definition(self, property_definition, namespaces):
         try:

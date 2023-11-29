@@ -6,8 +6,8 @@ from .select_ui import SelectModel, do_show_select_ui
 
 
 class ResolutionTableModel(SelectModel):
-    COL_COUNT: int = 6
-    HEADER_LABELS: List[str] = ['Equal', 'Score', 'Rule', 'Class', 'Identity1', 'Identity2']
+    COL_COUNT: int = 8
+    HEADER_LABELS: List[str] = ['Equal', 'Score', 'Rule', 'Class', 'ID 1', 'Identity1', 'ID 2', 'Identity2']
 
     def __init__(self, data: List[ResolvedIdentity]):
         super().__init__(data=data)
@@ -35,17 +35,22 @@ class ResolutionTableModel(SelectModel):
             case 3:
                 return row.identity1.classification
             case 4:
-                return self._row_name(row.identity1)
+                return row.identity1.unique_id
             case 5:
+                return self._row_name(row.identity1)
+            case 6:
+                return row.identity2.unique_id
+            case 7:
                 return self._row_name(row.identity2)
             case _:
                 return "?"
 
     def hit_row(self, row: ResolvedIdentity, search_text: str):
         def hit_identity(identity):
-            return ((identity.name or isinstance(identity, Relation)) and search_text in self._row_name(
-                identity).lower()) or (identity.description and search_text in identity.description.lower()) or (
-                    identity.classification and search_text in identity.classification.lower())
+            return search_text in self._row_name(identity).lower() or (
+                    identity.description and search_text in identity.description.lower()) or (
+                    identity.classification and search_text in identity.classification.lower()) or (
+                    identity.unique_id and search_text in identity.unique_id)
 
         def hit_resolve_result(res):
             return search_text in str(res.score) or search_text in str(res.rule.lower())

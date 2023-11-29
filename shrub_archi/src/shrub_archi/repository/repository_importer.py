@@ -266,12 +266,12 @@ class XmiArchiRepositoryImporter(RepositoryImporter):
                         self.target_repo.add_element(identity)
             # if found -> overwrite? ignore? => ignore for now
             else:
-                ...  # overwrite ?
+                ...
 
         for property_definition in self.source_repo.property_definitions:
             self.target_repo.add_property_definition(property_definition)
 
-        for view in self.source_filter:
+        for view in self.source_filter.views:
             self.target_repo.add_view(view)
 
     def import_sweep_update_uuids(self):
