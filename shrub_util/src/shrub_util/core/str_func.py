@@ -150,3 +150,5 @@ class StringAppendBuffer:
             return "null"
         result = str(self.buffer[0 : self.write_pos], self.encoding)
         return result
+
+

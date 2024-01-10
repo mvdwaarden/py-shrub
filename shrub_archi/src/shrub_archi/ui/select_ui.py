@@ -11,17 +11,20 @@ class SelectModel(QAbstractTableModel):
     COL_COUNT: int = ...
     HEADER_LABELS: List[str] = ...
 
-    def __init__(self, data: List):
+    def __init__(self, data: List, tristate: bool = True):
         super(SelectModel, self).__init__()
         self._data = data
         self._tristate_data = {self.row_hash(row): False for row in data}
         self._filtered_data = data
+        # governs if selection is tri state (None, True, False) or dual state (True/False)
+        self._tristate = tristate
 
     def rowCount(self, parent=None):
         return len(self._filtered_data)
 
     def columnCount(self, parent=None):
         return self.COL_COUNT  # Number of columns (checkbox, label1, label2)
+
 
     def headerData(self, section, orientation, role):
         if role == Qt.ItemDataRole.DisplayRole:
@@ -75,13 +78,16 @@ class SelectModel(QAbstractTableModel):
 
     def _toggle_row(self, row):
         selection_idx = self.row_hash(row)
-        match self._tristate_data[selection_idx]:
-            case True:
-                new_status = None
-            case False:
-                new_status = True
-            case _:
-                new_status = False
+        if self._tristate:
+            match self._tristate_data[selection_idx]:
+                case True:
+                    new_status = None
+                case False:
+                    new_status = True
+                case _:
+                    new_status = False
+        else:
+            new_status = not self._tristate_data[selection_idx]
         self._tristate_data[selection_idx] = new_status
 
     def _is_selected(self, row) -> Optional[bool]:

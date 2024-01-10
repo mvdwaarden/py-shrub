@@ -468,6 +468,9 @@ class CoArchiRepository(Repository):
         self._create_relations_lookup()
         return self
 
+    def do_write(self) -> "Repository":
+        return self
+
     def _read_identity_from_file(self, dirpath, file) -> Identity | View:
         result = None
         full_filename = os.path.join(dirpath, file)

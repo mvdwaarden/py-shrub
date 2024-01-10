@@ -93,10 +93,16 @@ if __name__ == "__main__":
     function_create_graph = args.has_arg("graph")
     cutoff_score = args.get_arg("cutoff", 85)
     resolution_name = args.get_arg("resolutions", None)
+    function_test = args.has_arg("test")
 
     # do_show_select_furniture_test()
     if help:
         do_print_usage()
+    elif function_test:
+        from shrub_archi.generator.generator import Generator
+        import shrub_archi.data.risk.it.it_risk as it_risk
+        from shrub_archi.model.model import ElementType
+        Generator().cleanup().write_elements_csv(it_risk.IT_RISKS_ISO_IEC_27001, ElementType.CONSTRAINT)
     elif function_import:
         target_repo = create_repository(target)
         source_repo = create_repository(source)

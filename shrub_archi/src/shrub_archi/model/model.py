@@ -1,6 +1,12 @@
+from dataclasses import dataclass
+from enum import Enum
 from typing import Optional, Dict, Tuple, List, Any
 
-from dataclasses import dataclass
+
+class ElementType(Enum):
+    BUSINESS_ACTOR = "BusinessActor"
+    CONSTRAINT = "Constraint"
+    APPLICATION = "Application"
 
 
 @dataclass
