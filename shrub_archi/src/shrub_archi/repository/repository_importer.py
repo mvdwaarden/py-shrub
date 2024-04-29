@@ -139,13 +139,27 @@ class RepositoryImporter:
                                   comparator=self.relation_comparator))
         print(f"took {time.time() - st} seconds to determine {len(self.resolutions)} relation resolutions")
 
+    def get_target_ids_for_source_id(self, unique_id) -> list[str]:
+        result = []
+        for resolution in [resolution for resolution in self.resolutions if
+                           resolution.identity2.unique_id == unique_id and resolution.resolver_result.manual_verification is True]:
+            result.append(resolution.identity1.unique_id)
+        return sorted(result)
+
     def is_resolved(self, id2):
         return resolutions_is_resolved(self.resolutions, id2)
 
     def update_uuids_in_str(self, content: str) -> str:
-        for res_id in [res_id for res_id in self.resolutions if res_id.resolver_result.manual_verification is True]:
-            content = content.replace(res_id.identity2.unique_id, res_id.identity1.unique_id)
-            print(f"replaced {res_id.identity2.unique_id} -> {res_id.identity1.unique_id}")
+        for resolution in [resolution for resolution in self.resolutions if resolution.resolver_result.manual_verification is True]:
+            target_ids = self.get_target_ids_for_source_id(resolution.identity2.unique_id)
+            content = content.replace(resolution.identity2.unique_id, resolution.identity1.unique_id)
+            print(f"replaced {resolution.identity2.unique_id} -> {resolution.identity1.unique_id}")
+            if len(target_ids) > 1:
+                # note first one is kept!
+                for target_id in target_ids[1:]:
+                    content = content.replace(target_id, target_ids[0])
+                    print(f"merged {target_id} -> {target_ids[0]}")
+
         return content
 
     @property
@@ -239,8 +253,8 @@ class XmiArchiRepositoryImporter(RepositoryImporter):
                          compare_cutoff_score=compare_cutoff_score)
 
     def import_(self):
-        # use repo1 items, and copy everything which is in repo2 but has no equivalent in repo1
-        # read ID from repo 2, check if it is resolved
+        # use target items, and copy everything which is in target but has no equivalent in source
+        # read ID from source, check if it is resolved
         # resolved: do not copy
         # not resolved : copy, make sure to replace all resolved ID's with repo 1 UUID
         to_import_identities = []
@@ -249,46 +263,27 @@ class XmiArchiRepositoryImporter(RepositoryImporter):
             to_import_identities += view.referenced_relations
         # import elements not in target repo, take resolution store info into account
         for unique_id in set(to_import_identities):
-            # find identity in source repo
-            identity = self.source_repo.get_identity_by_id(unique_id)
-            # find resolutions for ID in target repo
+            # find resolutions for ID in target repo (multiple source identities can map to same target identity)
             found = False
-            target_ids = []
-            for resolution in [resolution for resolution in self.resolutions if
-                               resolution.identity2.unique_id == unique_id and resolution.resolver_result.manual_verification is True]:
-                target_ids += resolution.identity1.unique_id
+            target_ids = self.get_target_ids_for_source_id(unique_id)
             # if NOT found -> ADD
             if len(target_ids) == 0:
+                # find identity in source repo
+                identity = self.source_repo.get_identity_by_id(unique_id)
                 match identity:
                     case Relation():
                         self.target_repo.add_relation(identity)
                     case Identity():
                         self.target_repo.add_element(identity)
-            # if found, so resolved -> overwrite? ignore? => ignore for now
-            else:
-                ...
-        # build target id resolutions
-        target_resolutions = {}
-        for res_id in [res_id for res_id in self.resolutions if res_id.resolver_result.manual_verification is True]:
-            if res_id.identity1.unique_id not in target_resolutions:
-                target_resolutions[res_id.identity1.unique_id] = [res_id]
-            else:
-                target_resolutions[res_id.identity1.unique_id].append(res_id)
-        # IF there are more target resolution AND the target resolution is also itself THEN
-        # one of these resolutions can remain, whilst the others when existing in the target
-        # can be removed
-        for unique_id in target_resolutions:
-            exists_itself = len(
-                [res_id for res_id in target_resolutions[unique_id] if res_id.identity2.unique_id == unique_id]) > 0
-            if exists_itself and len(target_resolutions[unique_id]) > 1:
-                # Remove all others
-                for res_id in [res_id for res_id in target_resolutions[unique_id] if
-                               not res_id.identity2.unique_id == unique_id]:
-                    match res_id.identity2:
+            # if source maps to multiple identities in target, remove all but one in the target!!
+            if len(target_ids) > 1:
+                for target_id in target_ids[1:]:
+                    identity = self.target_repo.get_identity_by_id(target_id)
+                    match identity:
                         case Relation():
-                            self.target_repo.del_relation(res_id.identity2)
+                            self.target_repo.del_relation(identity)
                         case Identity():
-                            self.target_repo.del_element(res_id.identity2)
+                            self.target_repo.del_element(identity)
 
         for property_definition in self.source_repo.property_definitions:
             self.target_repo.add_property_definition(property_definition)

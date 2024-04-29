@@ -76,6 +76,7 @@ class RepositoryResolver:
         result = []
 
         def to_map(repository: Repository, repo_filter: RepositoryFilter = None):
+            # build map from repository items based on filter and identities
             map_ids1 = {}
             for k, g in itertools.groupby(repository.filter(repo_filter),
                     lambda id: id.classification):

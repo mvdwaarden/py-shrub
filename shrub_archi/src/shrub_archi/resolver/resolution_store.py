@@ -19,9 +19,9 @@ class ResolutionStore:
     @resolutions.setter
     def resolutions(self, resolved_identities: List[ResolvedIdentity]):
         self._resolutions = {}
-        for res_id in resolved_identities:
+        for resolution in resolved_identities:
             self._resolutions[
-                res_id.identity1.unique_id, res_id.identity2.unique_id] = res_id.resolver_result.manual_verification
+                resolution.identity1.unique_id, resolution.identity2.unique_id] = resolution.resolver_result.manual_verification
 
     def _get_resolution_file(self, name) -> str:
         return os.path.join(self.location, f"{name if name else 'resolved_identities'}.json")

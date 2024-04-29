@@ -1,7 +1,7 @@
 import shrub_util.core.logging as logging
 from shrub_archi.repository.repository import Repository, XmiArchiRepository, CoArchiRepository, ViewRepositoryFilter
 from shrub_archi.repository.repository_graph import RepositoryGrapher
-from shrub_archi.repository.repository_importer import XmiArchiRepositoryImporter
+from shrub_archi.repository.repository_importer import XmiArchiRepositoryImporter, RepositoryImporter
 from shrub_archi.resolver.resolution_store import ResolutionStore
 from shrub_archi.ui.resolution_ui import do_show_resolve_ui
 from shrub_archi.ui.select_diagrams_ui import do_select_diagrams_ui
@@ -49,7 +49,7 @@ def get_resolution_name(repo: Repository, resolution_name):
     return resolution_name if resolution_name else repo.name
 
 
-def do_create_resolution_file(importer, resolution_store_location, resolution_name: str = None) -> bool:
+def do_create_resolution_file(importer: RepositoryImporter, resolution_store_location, resolution_name: str = None) -> bool:
     created = False
     res_store = ResolutionStore(resolution_store_location)
 
@@ -63,7 +63,7 @@ def do_create_resolution_file(importer, resolution_store_location, resolution_na
     return created
 
 
-def do_import(importer, resolution_store_location, resolution_name: str = None):
+def do_import(importer: RepositoryImporter, resolution_store_location, resolution_name: str = None):
     res_store = ResolutionStore(resolution_store_location)
     res_store.read(get_resolution_name(importer.source_repo, resolution_name))
     importer.do_import()

@@ -186,9 +186,14 @@ class XmiArchiRepository(Repository):
         try:
             root = self.element_tree.getroot()
             namespaces = self._namespaces
+            def _check_for_duplicate_identity(identity, identity_dictionary):
+                if identity.unique_id in self._identities:
+                    print(
+                        f"found duplicate identity {identity.unique_id} - {identity.classification} - {identity.name}")
             for el in root.findall("xmi:elements/xmi:element", namespaces=namespaces):
                 identity: Identity = self._read_identity_from_xml_element(el, namespaces, Identity)
                 if identity and identity.unique_id:
+                    _check_for_duplicate_identity(identity, self._identities)
                     self._identities[identity.unique_id] = identity
                     self._elements[identity.unique_id] = identity
             for el in root.findall("xmi:views/xmi:diagrams/xmi:view", namespaces=namespaces):
@@ -197,12 +202,14 @@ class XmiArchiRepository(Repository):
                     view.referenced_elements, view.referenced_relations = self._read_referenced_elements_and_relations_from_xml_element(
                         el, namespaces)
                     view.data = el
+                    _check_for_duplicate_identity(view, self._identities)
                     self._identities[view.unique_id] = view
                     self._views[view.unique_id] = view
 
             for el in root.findall("xmi:relationships/xmi:relationship", namespaces=namespaces):
                 relation: Relation = self._read_relation_from_xml_element(el, namespaces)
                 if relation and relation.unique_id:
+                    _check_for_duplicate_identity(relation, self._identities)
                     self._identities[relation.unique_id] = relation
                     self._relations[relation.unique_id] = relation
 
