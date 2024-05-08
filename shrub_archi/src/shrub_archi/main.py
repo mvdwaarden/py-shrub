@@ -39,7 +39,7 @@ usage = """
 
 
 def create_repository(location: str) -> Repository:
-    if location.lower().endswith((".archimate", ".xml")):
+    if location is None or location.lower().endswith((".archimate", ".xml")):
         return XmiArchiRepository(location)
     else:
         return CoArchiRepository(location)
