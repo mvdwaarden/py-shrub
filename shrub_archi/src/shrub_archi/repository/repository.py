@@ -1,13 +1,14 @@
 import concurrent.futures
+import itertools
 import os
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
 from typing import Optional, List, Tuple
-import shrub_util.core.logging as logging
 from xml.etree.ElementTree import SubElement, Element, register_namespace
 
 from defusedxml import ElementTree
 
+import shrub_util.core.logging as logging
 from shrub_archi.model.model import View, Relation, Relations, RelationsLookup, Identity, Identities, Views, \
     PropertyDefinition, PropertyDefinitions
 from shrub_util.core.file import FileLocationIterator, FileLocationIteratorMode
@@ -186,16 +187,24 @@ class XmiArchiRepository(Repository):
         try:
             root = self.element_tree
             namespaces = self._namespaces
+
             def _check_for_duplicate_identity(identity, identity_dictionary):
                 if identity.unique_id in self._identities:
                     print(
                         f"found duplicate identity {identity.unique_id} - {identity.classification} - {identity.name}")
+
             for el in root.findall("xmi:elements/xmi:element", namespaces=namespaces):
                 identity: Identity = self._read_identity_from_xml_element(el, namespaces, Identity)
                 if identity and identity.unique_id:
                     _check_for_duplicate_identity(identity, self._identities)
                     self._identities[identity.unique_id] = identity
                     self._elements[identity.unique_id] = identity
+            for el in root.findall("xmi:relationships/xmi:relationship", namespaces=namespaces):
+                relation: Relation = self._read_relation_from_xml_element(el, namespaces)
+                if relation and relation.unique_id:
+                    _check_for_duplicate_identity(relation, self._identities)
+                    self._identities[relation.unique_id] = relation
+                    self._relations[relation.unique_id] = relation
             for el in root.findall("xmi:views/xmi:diagrams/xmi:view", namespaces=namespaces):
                 view: View = self._read_identity_from_xml_element(el, namespaces, View)
                 if view and view.unique_id:
@@ -203,16 +212,21 @@ class XmiArchiRepository(Repository):
                         el, namespaces)
                     view.data = el
                     _check_for_duplicate_identity(view, self._identities)
+
+                    def connects_one_off(rel: Relation, combinations: list[()]) -> bool:
+                        for a, b in combinations:
+                            if rel.connects(a, b):
+                                return True
+                        return False
+
+                    combos: list[()] = itertools.combinations(view.referenced_elements, 2)
+                    relations_potentially_not_in_view = [rel for rel in self._relations.values() if
+                                                         connects_one_off(rel, combos)]
+                    for rel in relations_potentially_not_in_view:
+                        if rel.unique_id not in view.referenced_relations:
+                            view.referenced_relations.append(rel.unique_id)
                     self._identities[view.unique_id] = view
                     self._views[view.unique_id] = view
-
-            for el in root.findall("xmi:relationships/xmi:relationship", namespaces=namespaces):
-                relation: Relation = self._read_relation_from_xml_element(el, namespaces)
-                if relation and relation.unique_id:
-                    _check_for_duplicate_identity(relation, self._identities)
-                    self._identities[relation.unique_id] = relation
-                    self._relations[relation.unique_id] = relation
-
             for el in root.findall("xmi:propertyDefinitions/xmi:propertyDefinition", namespaces=namespaces):
                 property_definition: PropertyDefinition = self._read_property_definition_from_xml_element(el,
                                                                                                           namespaces)
@@ -279,8 +293,7 @@ class XmiArchiRepository(Repository):
             if os.path.exists(self.location):
                 self._element_tree = ElementTree.parse(self.location).getroot()
             else:
-                self._element_tree = ElementTree.fromstring(
-                    f"""<?xml version="1.0" encoding="UTF-8"?>
+                self._element_tree = ElementTree.fromstring(f"""<?xml version="1.0" encoding="UTF-8"?>
                             <model xmlns="http://www.opengroup.org/xsd/archimate/3.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengroup.org/xsd/archimate/3.0/ http://www.opengroup.org/xsd/archimate/3.1/archimate3_Diagram.xsd" identifier="id-d4622bfd7e0d4cdab01dc008fae135ec">
                               <name xml:lang="en">new</name>
                               <elements>
@@ -319,8 +332,7 @@ class XmiArchiRepository(Repository):
                                 </diagrams>
                               </views>
                             </model>
-                            """
-                )
+                            """)
 
         return self._element_tree
 

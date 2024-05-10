@@ -16,6 +16,7 @@ class Identity:
     classification: str = None
     description: Optional[str] = None
     location: Optional[str] = None
+    #data from the source that is used to create the Identity (can be XML element)
     data: Optional[Any] = None
 
     def __hash__(self):
@@ -50,6 +51,10 @@ class Relation(Identity):
 
     def __hash__(self):
         return super().__hash__()
+
+    def connects(self, id1: str, id2: str) -> bool:
+        return (self.source_id == id1 and self.target_id == id2 or
+                self.source_id == id2 and self.target_id == id1)
 
 
 Relations = Dict[str, Relation]
