@@ -219,11 +219,12 @@ class XmiArchiRepository(Repository):
                                 return True
                         return False
 
-                    combos: list[()] = itertools.combinations(view.referenced_elements, 2)
+                    combos: [()] = list(itertools.combinations(view.referenced_elements, 2))
                     relations_potentially_not_in_view = [rel for rel in self._relations.values() if
                                                          connects_one_off(rel, combos)]
                     for rel in relations_potentially_not_in_view:
                         if rel.unique_id not in view.referenced_relations:
+                            print(f"appended implicit relation {rel}")
                             view.referenced_relations.append(rel.unique_id)
                     self._identities[view.unique_id] = view
                     self._views[view.unique_id] = view

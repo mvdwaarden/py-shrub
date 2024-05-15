@@ -30,8 +30,6 @@ class PropertyDefinition(Identity):
 
 @dataclass
 class View(Identity):
-    unique_id: str
-    name: str
     classification: str = None
     description: Optional[str] = None
     source: Optional[str] = None

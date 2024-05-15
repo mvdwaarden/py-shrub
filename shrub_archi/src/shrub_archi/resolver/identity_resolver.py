@@ -88,7 +88,7 @@ class RepositoryResolver:
 
         map1 = to_map(repo1)
         map2 = to_map(repo2, repo2_filter)
-        with concurrent.futures.ProcessPoolExecutor() as exec:
+        with concurrent.futures.ThreadPoolExecutor() as exec:
             futures = []
             for group1 in map1:
                 if group1 in map2:
