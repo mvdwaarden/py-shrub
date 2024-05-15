@@ -136,7 +136,7 @@ def resolutions_get_resolved_identity(
                 or res_id.target.unique_id == unique_id
         ]:
             result = True
-            if not res_id:
-                res_id = []
+            if not res_ids:
+                res_ids = []
             res_ids.append(res_id)
     return result, res_ids
