@@ -60,7 +60,7 @@ class NaiveRelationResolver(IdentityResolver):
                     self.resolutions, target_rel.source_id
                 )
                 target_results = []
-                # check if the source of the source relation exists in the resolved source_ids
+                # check if the source of the source relation exists in the resolved source ids of the target
                 for res_id in source_results:
                     if res_id.source.unique_id == source_rel.source_id:
                         # check if the target of the target relation is resolved
@@ -69,7 +69,7 @@ class NaiveRelationResolver(IdentityResolver):
                         )
                         source_result = res_id
                         break
-                # check if the target of the source relation exists in the resolved target ids
+                # check if the target of the source relation exists in the resolved source ids for the target
                 for res_id in target_results:
                      if res_id.source.unique_id == source_rel.target_id:
                         # check if the target of the target relation is resolved
