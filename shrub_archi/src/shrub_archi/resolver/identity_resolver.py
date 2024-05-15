@@ -127,7 +127,7 @@ class RepositoryResolver:
 
 def resolutions_get_resolved_identity(
     resolutions: List[ResolvedIdentity], unique_id: str, unique_id_should_match_source: bool = False
-) -> Tuple[bool, Optional[ResolvedIdentity]]:
+) -> Tuple[bool, Optional[List[ResolvedIdentity]]]:
     result = False
     res_ids = []
     if resolutions:

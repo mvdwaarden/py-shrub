@@ -56,25 +56,26 @@ class NaiveRelationResolver(IdentityResolver):
                 source_rel: Relation = source
                 target_rel: Relation = target
                 # check if the source of the target relation is resolved
-                found, source_result = resolutions_get_resolved_identity(
+                found, source_results = resolutions_get_resolved_identity(
                     self.resolutions, target_rel.source_id
                 )
+                target_results = []
                 # check if the source of the source relation exists in the resolved source_ids
-                for res_id in source_result:
+                for res_id in source_results:
                     if res_id.source.unique_id == source_rel.source_id:
                         # check if the target of the target relation is resolved
-                        found, target_result = resolutions_get_resolved_identity(
+                        found, target_results = resolutions_get_resolved_identity(
                             self.resolutions, target_rel.target_id
                         )
+                        source_result = res_id
                         break
-                relates_the_same = False
                 # check if the target of the source relation exists in the resolved target ids
-                for res_id in target_result:
-                    if res_id.source.unique_id == source_rel.target_id:
+                for res_id in target_results:
+                     if res_id.source.unique_id == source_rel.target_id:
                         # check if the target of the target relation is resolved
-                        relates_the_same = True
+                        target_result = res_id
                         break
-                if relates_the_same:
+                if target_result:
                     if (
                         not source_rel.name
                         or not target_rel.name
