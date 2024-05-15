@@ -129,7 +129,7 @@ def resolutions_get_resolved_identity(
     resolutions: List[ResolvedIdentity], unique_id: str, unique_id_should_match_source: bool = False
 ) -> Tuple[bool, Optional[ResolvedIdentity]]:
     result = False
-    res_ids = None
+    res_ids = []
     if resolutions:
         for res_id in [
             res_id for res_id in resolutions if (unique_id_should_match_source and res_id.source.unique_id == unique_id)
