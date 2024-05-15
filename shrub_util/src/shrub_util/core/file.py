@@ -20,7 +20,8 @@ def file_read_file(context, filename):
             result = ifp.read()
     except Exception as ex:
         logging.get_logger().error(
-            f"problem reading file {filename} in context {context}, {ex}", ex=ex)
+            f"problem reading file {filename} in context {context}, {ex}", ex=ex
+        )
         raise ex
 
     return result

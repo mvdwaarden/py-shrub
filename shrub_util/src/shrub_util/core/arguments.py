@@ -30,7 +30,7 @@ class Arguments:
         self.switch_char = switch_char
 
     def get_arg(self, name, default=None):
-        """ Get the argument by name. If not found the default value is used"""
+        """Get the argument by name. If not found the default value is used"""
         result = default
         i = 0
         # find the argument
@@ -51,7 +51,7 @@ class Arguments:
         return result
 
     def has_arg(self, name):
-        """ Check íf a command line argument exists"""
+        """Check íf a command line argument exists"""
         if self.switch_char + name in self.argv:
             result = True
         else:

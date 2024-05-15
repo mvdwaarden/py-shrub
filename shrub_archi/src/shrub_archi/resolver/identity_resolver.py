@@ -20,12 +20,12 @@ class ResolvedIdentityAction(Enum):
 
 @dataclass
 class ResolvedIdentity:
-    identity1: "Identity"
-    identity2: "Identity"
+    source: "Identity"
+    target: "Identity"
     resolver_result: "ResolverResult"
 
     def __hash__(self):
-        return hash((self.identity1.unique_id, self.identity2.unique_id))
+        return hash((self.source.unique_id, self.target.unique_id))
 
 
 @dataclass
@@ -46,69 +46,102 @@ class IdentityResolver(ABC):
         if parent:
             self.resolver_chain.append(*parent.resolver_chain)
 
-    def resolve(self, identity1: Identity, identity2: Identity) -> ResolverResult:
+    def resolve(self, source: Identity, target: Identity) -> ResolverResult:
         result = None
         for cmp in self.resolver_chain:
-            result = cmp.do_resolve(identity1, identity2)
+            result = cmp.do_resolve(source, target)
             if result:
                 break
 
         return result
 
     @abstractmethod
-    def do_resolve(self, identity1: Identity, identity2: Identity) -> ResolverResult:
+    def do_resolve(self, source: Identity, target: Identity) -> ResolverResult:
         ...
 
 
 class RepositoryResolver:
-    def classification_resolve(self, ids1: List[ResolvedIdentity], ids2: List[ResolvedIdentity],
-                               comparator: IdentityResolver):
+    def classification_resolve(
+        self,
+        source_identities: List[ResolvedIdentity],
+        target_identities: List[ResolvedIdentity],
+        comparator: IdentityResolver,
+    ):
         result = []
-        for id1, id2 in [(id1, id2) for id1, id2 in itertools.product(ids1, ids2)]:
-            compare_result = comparator.resolve(id1, id2)
+        for source, target in [
+            (source, target)
+            for source, target in itertools.product(
+                source_identities, target_identities
+            )
+        ]:
+            compare_result = comparator.resolve(source, target)
             if compare_result:
-                resolved_id = ResolvedIdentity(identity1=id1, identity2=id2, resolver_result=compare_result)
+                resolved_id = ResolvedIdentity(
+                    source=source, target=target, resolver_result=compare_result
+                )
                 result.append(resolved_id)
         return result
 
-    def resolve(self, repo1: Repository, repo2: Repository, repo2_filter: RepositoryFilter = None,
-                comparator: IdentityResolver = None):
+    def resolve(
+        self,
+        target_repo: Repository,
+        source_repo: Repository,
+        source_filter: RepositoryFilter = None,
+        comparator: IdentityResolver = None,
+    ):
         result = []
 
-        def to_map(repository: Repository, repo_filter: RepositoryFilter = None):
+        def to_segmented_map_by_classification(
+            repository: Repository, repo_filter: RepositoryFilter = None
+        ):
             # build map from repository items based on filter and identities
+            # it segments all the identities in the repository on classification
             map_ids1 = {}
-            for k, g in itertools.groupby(repository.filter(repo_filter),
-                    lambda id: id.classification):
+            for k, g in itertools.groupby(
+                repository.filter(repo_filter), lambda id: id.classification
+            ):
                 if k not in map_ids1:
                     map_ids1[k] = list(g)
                 else:
                     map_ids1[k] += list(g)
             return map_ids1
 
-        map1 = to_map(repo1)
-        map2 = to_map(repo2, repo2_filter)
+        target_map = to_segmented_map_by_classification(target_repo)
+        source_map = to_segmented_map_by_classification(source_repo, source_filter)
         with concurrent.futures.ThreadPoolExecutor() as exec:
             futures = []
-            for group1 in map1:
-                if group1 in map2:
-                    futures.append(exec.submit(self.classification_resolve, map1[group1], map2[group1], comparator))
+            for target_group in target_map:
+                if target_group in source_map:
+                    futures.append(
+                        exec.submit(
+                            self.classification_resolve,
+                            source_map[target_group],
+                            target_map[target_group],
+                            comparator,
+                        )
+                    )
             for future in concurrent.futures.as_completed(futures):
                 result += future.result()
         return result
 
 
-def resolutions_is_resolved(resolutions: List[ResolvedIdentity], id2: str) -> Tuple[bool, Optional[bool]]:
+def resolutions_is_resolved(
+    resolutions: List[ResolvedIdentity], id2: str
+) -> Tuple[bool, Optional[bool]]:
     found, result = resolutions_get_resolved_identity(resolutions, id2)
     if result:
         return True, result.resolver_result.manual_verification
     return found, result
 
 
-def resolutions_get_resolved_identity(resolutions: List[ResolvedIdentity], id2: str) -> Tuple[bool, Optional[ResolvedIdentity]]:
+def resolutions_get_resolved_identity(
+    resolutions: List[ResolvedIdentity], id2: str
+) -> Tuple[bool, Optional[ResolvedIdentity]]:
     result = False, None
     if resolutions:
-        for res_id in [res_id for res_id in resolutions if res_id.identity2.unique_id == id2]:
+        for res_id in [
+            res_id for res_id in resolutions if res_id.target.unique_id == id2
+        ]:
             result = True, res_id
             break
     return result

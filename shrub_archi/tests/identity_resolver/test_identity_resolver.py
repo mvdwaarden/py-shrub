@@ -1,6 +1,9 @@
 from shrub_archi.model.model import Identity, Identities
 from shrub_archi.repository.repository_importer import NaiveIdentityResolver
-from shrub_archi.resolver.identity_resolver import RepositoryResolver, ResolvedIdentityAction
+from shrub_archi.resolver.identity_resolver import (
+    RepositoryResolver,
+    ResolvedIdentityAction,
+)
 from shrub_archi.resolver.resolution_store import ResolutionStore
 
 
@@ -18,7 +21,10 @@ def test_identity_resolver():
 
 
 def test_stacked_action():
-    actions = ResolvedIdentityAction.REPLACE_TARGET_ID.value + ResolvedIdentityAction.REPLACE_TARGET_NAME.value
+    actions = (
+        ResolvedIdentityAction.REPLACE_TARGET_ID.value
+        + ResolvedIdentityAction.REPLACE_TARGET_NAME.value
+    )
 
     assert ResolvedIdentityAction.REPLACE_TARGET_NAME.part_of(actions) is True
     assert ResolvedIdentityAction.REPLACE_TARGET_ID.part_of(actions) is True
@@ -35,8 +41,12 @@ def test_identity_resolver_with_resolutions():
     ids2["22"] = Identity(unique_id="22", name="klaasj", classification="")
 
     res_store = ResolutionStore()
-    res_store.read_from_string("""{
+    res_store.read_from_string(
+        """{
             "1": "11"
-        }""")
-    for resolved_identity in RepositoryResolver().resolve(ids1, ids2, comparator=NaiveIdentityResolver()):
+        }"""
+    )
+    for resolved_identity in RepositoryResolver().resolve(
+        ids1, ids2, comparator=NaiveIdentityResolver()
+    ):
         print(resolved_identity)

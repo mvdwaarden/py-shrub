@@ -14,7 +14,7 @@ class InstanceConfig(ABC):
         self._instance_name = instance_name
 
     def get_secret(self, secret):
-        """ Use this method for retrieving API specific secrets"""
+        """Use this method for retrieving API specific secrets"""
         secrets_ref = self.get_setting("SecretReference", no_warn=True)
         secrets = self._get_secrets()
         if secrets_ref is not None:
@@ -25,7 +25,7 @@ class InstanceConfig(ABC):
         return secrets.get_secret(section, secret)
 
     def get_setting(self, setting, default_value=None, no_warn=False):
-        """ Use this method for retrieving API specific settings"""
+        """Use this method for retrieving API specific settings"""
         config = self._get_config()
         section = self.get_config_prefix() + "-" + self._instance_name
 

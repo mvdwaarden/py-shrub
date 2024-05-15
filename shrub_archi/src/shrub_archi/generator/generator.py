@@ -7,11 +7,15 @@ import uuid
 
 
 class Generator:
-    def __init__(self, separator=','):
+    def __init__(self, separator=","):
         self.separator = separator
 
     def cleanup(self) -> "Generator":
-        for filename in [self.get_elements_filename(), self.get_relations_filename(), self.get_properties_filename()]:
+        for filename in [
+            self.get_elements_filename(),
+            self.get_relations_filename(),
+            self.get_properties_filename(),
+        ]:
             if os.path.exists(filename):
                 os.remove(filename)
         return self
@@ -21,13 +25,17 @@ class Generator:
 
     def write_elements_csv(self, data: List[List], element_type: ElementType):
         with open(self.get_elements_filename(), "w") as ofp:
-            ofp.write(f"{self.separator}".join(["ID","Type","Name","Documentation","Specialization"]))
+            ofp.write(
+                f"{self.separator}".join(
+                    ["ID", "Type", "Name", "Documentation", "Specialization"]
+                )
+            )
             ofp.write("\n")
             for row in data:
                 ofp.write(f"{self._escape(self.generate_id())}{self.separator}")
                 ofp.write(f"{self._escape(element_type.value)}{self.separator}")
                 for col in row:
-                    ofp.write(f'{self._escape(col)}{self.separator}')
+                    ofp.write(f"{self._escape(col)}{self.separator}")
                 ofp.write("\n")
 
     def get_elements_filename(self):

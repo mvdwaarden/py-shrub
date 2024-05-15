@@ -7,7 +7,7 @@ from shrub_archi.repository.repository import Repository
 
 
 class RepositoryGrapher:
-    """ Generates graph GML """
+    """Generates graph GML"""
 
     def create_graph(self, repo: Repository, work_dir: str = None) -> nx.Graph:
         g = nx.DiGraph()
@@ -26,6 +26,8 @@ class RepositoryGrapher:
                 case _:
                     return "?"
 
-        filename = os.path.join(f"{work_dir if work_dir else 'tmp'}", f"{repo.name}.gml")
+        filename = os.path.join(
+            f"{work_dir if work_dir else 'tmp'}", f"{repo.name}.gml"
+        )
         nx.write_gml(g, filename, to_stringer)
         return g

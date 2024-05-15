@@ -1,1 +1,1 @@
-call .\sbin\format.cmd SHRUB_util SHRUB_mgmt SHRUB_batch SHRUB_sec
+call .\sbin\format.cmd shrub_util shrub_archi shrub_devops

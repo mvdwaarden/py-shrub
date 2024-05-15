@@ -1,6 +1,13 @@
 from PyQt6.QtCore import Qt, QAbstractItemModel, QModelIndex
 import sys
-from PyQt6.QtWidgets import QApplication, QMainWindow, QTreeView, QGridLayout, QWidget, QPushButton
+from PyQt6.QtWidgets import (
+    QApplication,
+    QMainWindow,
+    QTreeView,
+    QGridLayout,
+    QWidget,
+    QPushButton,
+)
 from PyQt6.QtCore import QDataStream, QIODevice, QByteArray, QMimeData
 
 
@@ -42,11 +49,12 @@ class TreeItem:
     def removeChild(self, position):
         del self.childItems[position]
 
+
 class TreeModel(QAbstractItemModel):
     def __init__(self, data, parent=None):
         super(TreeModel, self).__init__(parent)
         self.rootItem = TreeItem(["Title"])
-        self.setupModelData(data.split('\n'), self.rootItem)
+        self.setupModelData(data.split("\n"), self.rootItem)
 
     def columnCount(self, parent):
         if parent.isValid():
@@ -64,10 +72,18 @@ class TreeModel(QAbstractItemModel):
     def flags(self, index):
         if not index.isValid():
             return Qt.ItemFlag.NoItemFlags
-        return Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsDragEnabled | Qt.ItemFlag.ItemIsDropEnabled
+        return (
+            Qt.ItemFlag.ItemIsEnabled
+            | Qt.ItemFlag.ItemIsSelectable
+            | Qt.ItemFlag.ItemIsDragEnabled
+            | Qt.ItemFlag.ItemIsDropEnabled
+        )
 
     def headerData(self, section, orientation, role):
-        if orientation == Qt.Orientation.Horizontal and role == Qt.ItemDataRole.DisplayRole:
+        if (
+            orientation == Qt.Orientation.Horizontal
+            and role == Qt.ItemDataRole.DisplayRole
+        ):
             return self.rootItem.data(section)
         return None
 
@@ -113,14 +129,16 @@ class TreeModel(QAbstractItemModel):
         else:
             parentItem = parentIndex.internalPointer()
 
-        self.beginInsertRows(parentIndex, parentItem.childCount(), parentItem.childCount())
+        self.beginInsertRows(
+            parentIndex, parentItem.childCount(), parentItem.childCount()
+        )
         childItem = TreeItem([childData], parentItem)
         parentItem.appendChild(childItem)
         self.endInsertRows()
         return True
 
     def mimeTypes(self):
-        return ['application/x-qabstractitemmodeldatalist']
+        return ["application/x-qabstractitemmodeldatalist"]
 
     def mimeData(self, indexes):
         mimeData = QMimeData()
@@ -132,14 +150,14 @@ class TreeModel(QAbstractItemModel):
                 text = self.data(index, Qt.ItemDataRole.DisplayRole)
                 stream << QByteArray(text.encode())
 
-        mimeData.setData('application/x-qabstractitemmodeldatalist', encodedData)
+        mimeData.setData("application/x-qabstractitemmodeldatalist", encodedData)
         return mimeData
 
     def dropMimeData(self, data, action, row, column, parentIndex):
         if action == Qt.DropAction.IgnoreAction:
             return True
 
-        if not data.hasFormat('application/x-qabstractitemmodeldatalist'):
+        if not data.hasFormat("application/x-qabstractitemmodeldatalist"):
             return False
 
         if column > 0:
@@ -153,14 +171,16 @@ class TreeModel(QAbstractItemModel):
         else:
             beginRow = self.rootItem.childCount()
 
-        encodedData = data.data('application/x-qabstractitemmodeldatalist')
+        encodedData = data.data("application/x-qabstractitemmodeldatalist")
         stream = QDataStream(encodedData, QIODevice.OpenModeFlag.ReadOnly)
 
         while not stream.atEnd():
             text = QByteArray()
             stream >> text
             self.insertRows(beginRow, 1, parentIndex)
-            self.setData(self.index(beginRow, 0, parentIndex), text, Qt.ItemDataRole.EditRole)
+            self.setData(
+                self.index(beginRow, 0, parentIndex), text, Qt.ItemDataRole.EditRole
+            )
             beginRow += 1
 
         return True
@@ -188,10 +208,13 @@ class TreeModel(QAbstractItemModel):
             if item:
                 return item
         return self.rootItem
+
     def supportedDropActions(self):
         return Qt.DropAction.CopyAction | Qt.DropAction.MoveAction
 
+
 from PyQt6.QtWidgets import QTableWidget, QTableWidgetItem
+
 
 def createTableWidget():
     table_widget = QTableWidget(5, 3)  # 5 rows, 3 columns
@@ -204,7 +227,9 @@ def createTableWidget():
 
     return table_widget
 
+
 # ... [previous code for imports and TreeItem, TreeModel definitions] ...
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -234,8 +259,12 @@ class MainWindow(QMainWindow):
         self.add_child_button = QPushButton("Add Child Node")
         self.add_child_button.clicked.connect(self.addChildNode)
 
-        self.grid_layout.addWidget(self.add_child_button, 1, 0)  # Add button below the tree view
-        self.tree_view.selectionModel().selectionChanged.connect(self.onSelectionChanged)
+        self.grid_layout.addWidget(
+            self.add_child_button, 1, 0
+        )  # Add button below the tree view
+        self.tree_view.selectionModel().selectionChanged.connect(
+            self.onSelectionChanged
+        )
 
         self.resize(800, 600)
 
@@ -264,13 +293,18 @@ class MainWindow(QMainWindow):
             for row in range(5):
                 self.table_widget.insertRow(row)
                 for column in range(3):
-                    newItem = QTableWidgetItem(f"{item.data(0)}: Row {row}, Col {column}")
+                    newItem = QTableWidgetItem(
+                        f"{item.data(0)}: Row {row}, Col {column}"
+                    )
                     self.table_widget.setItem(row, column, newItem)
+
+
 def main():
     app = QApplication(sys.argv)
     main_window = MainWindow()
     main_window.show()
     sys.exit(app.exec())
+
 
 if __name__ == "__main__":
     main()

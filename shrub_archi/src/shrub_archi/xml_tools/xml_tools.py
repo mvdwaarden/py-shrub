@@ -21,8 +21,6 @@ def clone_xml(xml: str) -> str:
         if event == "START_ELEMENT":
             print(f"{type(event)}{event}{type(el)}{el} -> {el.tagName}")
 
-
-
     return "ok"
 
 
@@ -43,12 +41,11 @@ def xml_to_graph_eltree(xml: str):
                 print(f"{ns}, {tag}, {el.attrib}, {type(el)}")
 
 
-
 def xml_to_graph_sax(xml: str) -> Graph:
     class l_ContentHandler(ContentHandler):
         def startElement(self, name, attrs):
             match name, attrs:
-                case name, {"id":id}:
+                case name, {"id": id}:
                     print(f"id element : {name}")
                 case _:
                     print(f"{name}{attrs}")
@@ -56,7 +53,8 @@ def xml_to_graph_sax(xml: str) -> Graph:
         def endElement(self, name):
             pass
 
-    saxParseString(xml,  l_ContentHandler())
+    saxParseString(xml, l_ContentHandler())
+
 
 def xml_to_graph(xml: str) -> Graph:
     g = Graph()
@@ -69,12 +67,12 @@ def xml_to_graph(xml: str) -> Graph:
             case "END_DOCUMENT":
                 print(f"end doc {el}")
             case "START_ELEMENT":
-                g.add_node(_el,**{"name": _el.tagName})
+                g.add_node(_el, **{"name": _el.tagName})
                 if len(node_stack) > 0:
-                    g.add_edge(node_stack[-1], _el, **{"name" : "child"})
+                    g.add_edge(node_stack[-1], _el, **{"name": "child"})
                 node_stack.append(_el)
                 match _el:
-                    case minidomElement(childNodes=id,tagName=tag):
+                    case minidomElement(childNodes=id, tagName=tag):
                         print(f"start id el {el}: {tag}")
                     case _:
                         print(f"start el {el}, {_el}")
@@ -93,6 +91,7 @@ def xml_to_graph(xml: str) -> Graph:
                 print(f"{event}")
 
     return g
+
 
 DEF_XML = """<?xml version="1.0"?>
 <bck:catalog xmlns="book_namespace" xmlns:bck="book_namespace">
@@ -151,7 +150,6 @@ def test_replace_xml(xml: str):
     print(ElementTree.tostring(et).decode("utf8"))
 
 
-
 def transform_xml(xml_file: str, xslt_file: str):
     et = ElementTree.parse(xml_file)
     xsl = ElementTree.parse(xslt_file)
@@ -179,12 +177,12 @@ def main():
         g = relabel_nodes(g, lambda n: f"{n.tagName}-{hash(n)}")
         nx.write_network_text(g)
         ag = nx.nx_agraph.to_agraph(g)
-        #ag.draw(f"/tmp/{os.path.split(file)[-1]}.png", prog="neato")
+        # ag.draw(f"/tmp/{os.path.split(file)[-1]}.png", prog="neato")
         labels = nx.get_node_attributes(g, "name")
 
-        #nx.draw(g, with_labels=True, labels=labels)
+        # nx.draw(g, with_labels=True, labels=labels)
         nx.write_gml(g, f"/tmp/{os.path.split(file)[-1]}2.gml")
-        #show()
+        # show()
     elif True:
         test_replace_xml(DEF_XML)
 

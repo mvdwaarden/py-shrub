@@ -6,8 +6,16 @@ from .select_ui import SelectModel, do_show_select_ui
 
 class ViewTableModel(SelectModel):
     COL_COUNT: int = 8
-    HEADER_LABELS: List[str] = ['Select', 'ID', 'Classification', 'Name', 'Description',
-                                'Source', 'Elements', 'Relations']
+    HEADER_LABELS: List[str] = [
+        "Select",
+        "ID",
+        "Classification",
+        "Name",
+        "Description",
+        "Source",
+        "Elements",
+        "Relations",
+    ]
 
     def __init__(self, data: List[View]):
         super().__init__(data=data)
@@ -15,7 +23,7 @@ class ViewTableModel(SelectModel):
     def column_value_for(self, row: View, column: int):
         match column:
             case 0:
-                return ''  # Checkbox column
+                return ""  # Checkbox column
             case 1:
                 return row.unique_id
             case 2:
@@ -35,9 +43,16 @@ class ViewTableModel(SelectModel):
 
     def hit_row(self, row: View, search_text: str):
         def hit_identity(identity):
-            return (identity.name and search_text in identity.name.lower()) or (
-                    identity.description and search_text in identity.description.lower()) or (
-                    identity.classification and search_text in identity.classification.lower())
+            return (
+                (identity.name and search_text in identity.name.lower())
+                or (
+                    identity.description and search_text in identity.description.lower()
+                )
+                or (
+                    identity.classification
+                    and search_text in identity.classification.lower()
+                )
+            )
 
         result = hit_identity(row)
         return result
@@ -45,7 +60,7 @@ class ViewTableModel(SelectModel):
 
 def do_select_diagrams_ui(views: List[View]) -> List[View]:
     model = ViewTableModel(views)
-    selected, selection = do_show_select_ui(model=model, ok_text="Select",
-                                                       title="Select Diagrams")
-    return selected, [row for row, selected in selection.items()
-            if selected is True]
+    selected, selection = do_show_select_ui(
+        model=model, ok_text="Select", title="Select Diagrams"
+    )
+    return selected, [row for row, selected in selection.items() if selected is True]

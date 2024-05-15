@@ -21,10 +21,13 @@ class ResolutionStore:
         self._resolutions = {}
         for resolution in resolved_identities:
             self._resolutions[
-                resolution.identity1.unique_id, resolution.identity2.unique_id] = resolution.resolver_result.manual_verification
+                resolution.source.unique_id, resolution.target.unique_id
+            ] = resolution.resolver_result.manual_verification
 
     def _get_resolution_file(self, name) -> str:
-        return os.path.join(self.location, f"{name if name else 'resolved_identities'}.json")
+        return os.path.join(
+            self.location, f"{name if name else 'resolved_identities'}.json"
+        )
 
     def _read_from_string(self, resolutions: str):
         self._resolutions = {}
@@ -45,7 +48,10 @@ class ResolutionStore:
                 with open(self._get_resolution_file(name), "r") as ifp:
                     self._read_from_string(ifp.read())
             except Exception as ex:
-                logging.get_logger().error(f"problem reading resolution file {self._get_resolution_file(name)}", ex=ex)
+                logging.get_logger().error(
+                    f"problem reading resolution file {self._get_resolution_file(name)}",
+                    ex=ex,
+                )
                 self._resolutions = {}
         return self.resolutions
 
@@ -58,12 +64,16 @@ class ResolutionStore:
                 i = 0
                 while os.path.exists(f"{self._get_resolution_file(name)}.backup.{i}"):
                     i += 1
-                shutil.copyfile(src=self._get_resolution_file(name),
-                                dst=f"{self._get_resolution_file(name)}.backup.{i}")
+                shutil.copyfile(
+                    src=self._get_resolution_file(name),
+                    dst=f"{self._get_resolution_file(name)}.backup.{i}",
+                )
             with open(self._get_resolution_file(name), "w") as ofp:
                 json.dump(tmp, ofp)
         except Exception as ex:
-            logging.get_logger().error(f"problem writing resolution file {self._get_resolution_file}", ex=ex)
+            logging.get_logger().error(
+                f"problem writing resolution file {self._get_resolution_file}", ex=ex
+            )
 
     def resolution(self, id1, id2):
         if self.resolutions and (id1, id2) in self.resolutions:
@@ -73,8 +83,11 @@ class ResolutionStore:
 
     def apply_to(self, resolved_ids: List[ResolvedIdentity]):
         for (id1, id2), manual_verification in self.resolutions.items():
-            for res_id in [res_id for res_id in resolved_ids if
-                           res_id.identity1.unique_id == id1 and res_id.identity2.unique_id == id2]:
+            for res_id in [
+                res_id
+                for res_id in resolved_ids
+                if res_id.source.unique_id == id1 and res_id.target.unique_id == id2
+            ]:
                 res_id.resolver_result.manual_verification = manual_verification
                 res_id.resolver_result.rule = f"*{res_id.resolver_result.rule}"
                 break

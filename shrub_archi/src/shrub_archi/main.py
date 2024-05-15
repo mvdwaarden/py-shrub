@@ -1,7 +1,15 @@
 import shrub_util.core.logging as logging
-from shrub_archi.repository.repository import Repository, XmiArchiRepository, CoArchiRepository, ViewRepositoryFilter
+from shrub_archi.repository.repository import (
+    Repository,
+    XmiArchiRepository,
+    CoArchiRepository,
+    ViewRepositoryFilter,
+)
 from shrub_archi.repository.repository_graph import RepositoryGrapher
-from shrub_archi.repository.repository_importer import XmiArchiRepositoryImporter, RepositoryImporter
+from shrub_archi.repository.repository_importer import (
+    XmiArchiRepositoryImporter,
+    RepositoryImporter,
+)
 from shrub_archi.resolver.resolution_store import ResolutionStore
 from shrub_archi.ui.resolution_ui import do_show_resolve_ui
 from shrub_archi.ui.select_diagrams_ui import do_select_diagrams_ui
@@ -49,7 +57,9 @@ def get_resolution_name(repo: Repository, resolution_name):
     return resolution_name if resolution_name else repo.name
 
 
-def do_create_resolution_file(importer: RepositoryImporter, resolution_store_location, resolution_name: str = None) -> bool:
+def do_create_resolution_file(
+    importer: RepositoryImporter, resolution_store_location, resolution_name: str = None
+) -> bool:
     created = False
     res_store = ResolutionStore(resolution_store_location)
 
@@ -63,7 +73,9 @@ def do_create_resolution_file(importer: RepositoryImporter, resolution_store_loc
     return created
 
 
-def do_import(importer: RepositoryImporter, resolution_store_location, resolution_name: str = None):
+def do_import(
+    importer: RepositoryImporter, resolution_store_location, resolution_name: str = None
+):
     res_store = ResolutionStore(resolution_store_location)
     res_store.read(get_resolution_name(importer.source_repo, resolution_name))
     importer.do_import()
@@ -79,10 +91,10 @@ def do_select_views(repo: Repository):
 
 logging.configure_console()
 if __name__ == "__main__":
+
     def do_print_usage():
         qotd = QuoteOfTheDay().get_quote()
         print(usage + f"\n    {qotd['quote']} - {qotd['source']}")
-
 
     args = Arguments()
     help = args.has_arg("help")
@@ -102,16 +114,31 @@ if __name__ == "__main__":
         from shrub_archi.generator.generator import Generator
         import shrub_archi.data.risk.it.it_risk as it_risk
         from shrub_archi.model.model import ElementType
-        Generator().cleanup().write_elements_csv(it_risk.IT_RISKS_ISO_IEC_27001, ElementType.CONSTRAINT)
+
+        Generator().cleanup().write_elements_csv(
+            it_risk.IT_RISKS_ISO_IEC_27001, ElementType.CONSTRAINT
+        )
     elif function_import:
         target_repo = create_repository(target)
         source_repo = create_repository(source)
         source_repo.read()
         view_repo_filter = ViewRepositoryFilter(do_select_views(source_repo))
-        importer = XmiArchiRepositoryImporter(target_repo=target_repo, source_repo=source_repo,
-                                              source_filter=view_repo_filter, compare_cutoff_score=cutoff_score)
-        if do_create_resolution_file(importer, resolution_store_location=work_dir, resolution_name=resolution_name):
-            do_import(importer, resolution_store_location=work_dir, resolution_name=resolution_name)
+        importer = XmiArchiRepositoryImporter(
+            target_repo=target_repo,
+            source_repo=source_repo,
+            source_filter=view_repo_filter,
+            compare_cutoff_score=cutoff_score,
+        )
+        if do_create_resolution_file(
+            importer,
+            resolution_store_location=work_dir,
+            resolution_name=resolution_name,
+        ):
+            do_import(
+                importer,
+                resolution_store_location=work_dir,
+                resolution_name=resolution_name,
+            )
 
     elif function_create_graph:
         source_repo = create_repository(source)

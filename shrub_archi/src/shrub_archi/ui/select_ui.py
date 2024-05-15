@@ -3,8 +3,15 @@ from abc import abstractmethod
 from typing import List, Optional, Dict, Any, Tuple
 
 from PyQt6.QtCore import Qt, QAbstractTableModel, QModelIndex
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLineEdit, QHBoxLayout, QPushButton, \
-    QTableView, QApplication
+from PyQt6.QtWidgets import (
+    QWidget,
+    QVBoxLayout,
+    QLineEdit,
+    QHBoxLayout,
+    QPushButton,
+    QTableView,
+    QApplication,
+)
 
 
 class SelectModel(QAbstractTableModel):
@@ -25,7 +32,6 @@ class SelectModel(QAbstractTableModel):
     def columnCount(self, parent=None):
         return self.COL_COUNT  # Number of columns (checkbox, label1, label2)
 
-
     def headerData(self, section, orientation, role):
         if role == Qt.ItemDataRole.DisplayRole:
             if orientation == Qt.Orientation.Horizontal:
@@ -44,8 +50,9 @@ class SelectModel(QAbstractTableModel):
             self._filtered_data = self._data
         else:
             search_text_lower = search_text.lower()
-            self._filtered_data = [row for row in self._data if
-                                   self.hit_row(row, search_text_lower)]
+            self._filtered_data = [
+                row for row in self._data if self.hit_row(row, search_text_lower)
+            ]
         self.layoutChanged.emit()
 
     def toggle_rows(self, selected_indexes: List):
@@ -57,8 +64,9 @@ class SelectModel(QAbstractTableModel):
         if not index.isValid() or index.row() >= len(self._filtered_data):
             return None
         if role == Qt.ItemDataRole.DisplayRole:
-            return self.column_value_for(self._filtered_data[index.row()],
-                                         index.column())
+            return self.column_value_for(
+                self._filtered_data[index.row()], index.column()
+            )
         if role == Qt.ItemDataRole.CheckStateRole and index.column() == 0:
             match self._is_selected(self._filtered_data[index.row()]):
                 case True:
@@ -119,7 +127,9 @@ class SelectUI(QWidget):
 
     def initUI(self):
         # Set window title
-        window_title = self.title if self.title else "Press SPACE or T to mark selected rows"
+        window_title = (
+            self.title if self.title else "Press SPACE or T to mark selected rows"
+        )
         self.setWindowTitle(window_title)
 
         # Create vertical layout
@@ -127,7 +137,7 @@ class SelectUI(QWidget):
 
         # Create search box
         self.search_box = QLineEdit(self)
-        self.search_box.setPlaceholderText('Search...')
+        self.search_box.setPlaceholderText("Search...")
         layout.addWidget(self.search_box)
 
         class FilterTableView(QTableView):
@@ -153,7 +163,7 @@ class SelectUI(QWidget):
         buttons_layout.addWidget(self.save_button)
 
         # Cancel button
-        self.cancel_button = QPushButton('Cancel')
+        self.cancel_button = QPushButton("Cancel")
         self.cancel_button.clicked.connect(self.close)
         buttons_layout.addWidget(self.cancel_button)
 
@@ -182,8 +192,9 @@ class SelectUI(QWidget):
         self.ok = True
 
 
-def do_show_select_ui(model: SelectModel, ok_text: str = None, title: str = None) -> \
-        Tuple[bool, Dict[Any, Optional[bool]]]:
+def do_show_select_ui(
+    model: SelectModel, ok_text: str = None, title: str = None
+) -> Tuple[bool, Dict[Any, Optional[bool]]]:
     # Initialize and run the application
     app = QApplication(sys.argv)
     widget = SelectUI(model=model, ok_text=ok_text, title=title)
@@ -204,15 +215,18 @@ def do_show_select_furniture_test():
             if column == 0:  # Assuming the first column is for checkbox
                 return ""
             elif column == 1:
-                return row['name']
+                return row["name"]
             elif column == 2:
-                return row['type']
+                return row["type"]
             elif column == 3:
-                return row['material']  # Add more columns if needed
+                return row["material"]  # Add more columns if needed
 
         def hit_row(self, row, search_text: str):
-            return search_text in row['name'].lower() or search_text in row[
-                'type'].lower() or search_text in row['material'].lower()
+            return (
+                search_text in row["name"].lower()
+                or search_text in row["type"].lower()
+                or search_text in row["material"].lower()
+            )
 
         def row_hash(self, row):
             return row["name"]
