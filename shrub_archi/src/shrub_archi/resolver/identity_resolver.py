@@ -125,23 +125,18 @@ class RepositoryResolver:
         return result
 
 
-def resolutions_is_resolved(
-    resolutions: List[ResolvedIdentity], id2: str
-) -> Tuple[bool, Optional[bool]]:
-    found, result = resolutions_get_resolved_identity(resolutions, id2)
-    if result:
-        return True, result.resolver_result.manual_verification
-    return found, result
-
-
 def resolutions_get_resolved_identity(
-    resolutions: List[ResolvedIdentity], id2: str
+    resolutions: List[ResolvedIdentity], unique_id: str, unique_id_should_match_source: bool = False
 ) -> Tuple[bool, Optional[ResolvedIdentity]]:
-    result = False, None
+    result = False
+    res_ids = None
     if resolutions:
         for res_id in [
-            res_id for res_id in resolutions if res_id.target.unique_id == id2
+            res_id for res_id in resolutions if (unique_id_should_match_source and res_id.source.unique_id == unique_id)
+                or res_id.target.unique_id == unique_id
         ]:
-            result = True, res_id
-            break
-    return result
+            result = True
+            if not res_id:
+                res_id = []
+            res_ids.append(res_id)
+    return result, res_ids

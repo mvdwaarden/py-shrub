@@ -21,7 +21,6 @@ from shrub_archi.resolver.identity_resolver import (
     RepositoryResolver,
     IdentityResolver,
     ResolverResult,
-    resolutions_is_resolved,
     resolutions_get_resolved_identity,
 )
 from shrub_archi.resolver.resolution_store import ResolutionStore
@@ -54,20 +53,32 @@ class NaiveRelationResolver(IdentityResolver):
                     score=ResolverResult.MAX_EQUAL_SCORE + 10, rule="REL_ID_EXACT_RULE"
                 )
             else:
-                rel1: Relation = source
-                rel2: Relation = target
+                source_rel: Relation = source
+                target_rel: Relation = target
+                # check if the source of the target relation is resolved
                 found, source_result = resolutions_get_resolved_identity(
-                    self.resolutions, rel2.source_id
+                    self.resolutions, target_rel.source_id
                 )
-                if source_result and source_result.source.unique_id == rel1.source_id:
-                    found, target_result = resolutions_get_resolved_identity(
-                        self.resolutions, rel2.target_id
-                    )
-                if target_result and target_result.source.unique_id == rel1.target_id:
+                # check if the source of the source relation exists in the resolved source_ids
+                for res_id in source_result:
+                    if res_id.source.unique_id == source_rel.source_id:
+                        # check if the target of the target relation is resolved
+                        found, target_result = resolutions_get_resolved_identity(
+                            self.resolutions, target_rel.target_id
+                        )
+                        break
+                relates_the_same = False
+                # check if the target of the source relation exists in the resolved target ids
+                for res_id in target_result:
+                    if res_id.source.unique_id == source_rel.target_id:
+                        # check if the target of the target relation is resolved
+                        relates_the_same = True
+                        break
+                if relates_the_same:
                     if (
-                        not rel1.name
-                        or not rel2.name
-                        or rel1.name.lower() == rel2.name.lower()
+                        not source_rel.name
+                        or not target_rel.name
+                        or source_rel.name.lower() == target_rel.name.lower()
                     ):
                         rel_result = ResolverResult(
                             score=source_result.resolver_result.score
@@ -232,9 +243,6 @@ class RepositoryImporter:
             result.append(resolution.target.unique_id)
         return sorted(result)
 
-    def is_resolved(self, id2):
-        return resolutions_is_resolved(self.resolutions, id2)
-
     def update_uuids_in_str(self, content: str) -> str:
         for resolution in [
             resolution
@@ -286,72 +294,6 @@ class RepositoryImporter:
     @abstractmethod
     def import_sweep_update_uuids(self):
         ...
-
-
-class CoArchiRepositoryImporter(RepositoryImporter):
-    """Merges repository 2 to repository 1, considers
-    - if identities in repo1 already exists, the copied identity is ignored
-    - if an artefact is copied, all resolved id's that exist in repo 1 are replaced
-    """
-
-    def __init__(
-        self,
-        target_repo: Repository,
-        source_repo: CoArchiRepository,
-        source_filter: ViewRepositoryFilter,
-        compare_cutoff_score=None,
-    ):
-        super().__init__(
-            target_repo=target_repo,
-            source_repo=source_repo,
-            source_filter=source_filter,
-            compare_cutoff_score=compare_cutoff_score,
-        )
-
-    def import_(self):
-        # use source items, and copy everything which is in source repo but has no
-        # equivalent in target repo
-        # read ID from source repo, check if it is resolved
-        # resolved:      do not copy
-        # not resolved : copy, make sure to replace all resolved ID's with source
-        #                repo UUID's
-        for dirpath, dirs, file in self.source_repo:
-            filename = os.path.join(dirpath, file)
-            identity = self.source_repo._read_identity_from_file(dirpath, file)
-            if identity:
-                found, resolved_result = self.is_resolved(identity.unique_id)
-            else:
-                found = resolved_result = False
-            if not found or resolved_result is not True:
-                try:
-                    with open(filename, "r", encoding="utf-8") as ifp:
-                        content = ifp.read()
-                    content = self.update_uuids_in_str(content)
-                    self.copy(
-                        filename,
-                        self.source_repo.location,
-                        self.target_repo.location,
-                        content,
-                    )
-                except Exception as ex:
-                    logging.get_logger().error(f"problem readding {filename}", ex=ex)
-
-    def import_sweep_update_uuids(self):
-        ...
-
-    def copy(self, filename: str, base_path: str, target_base_path: str, content: str):
-        norm_filename = os.path.normpath(filename)
-        relative_filename = norm_filename[len(base_path) + 1 :]
-        target_filename = self.target_repo.get_dry_run_location(
-            os.path.join(target_base_path, relative_filename)
-        )
-        drive, tmp = os.path.splitdrive(target_filename)
-        path, tmp = os.path.split(tmp)
-        if not os.path.exists(path):
-            os.makedirs(path)
-        print(f"copy {filename} -> {target_filename}")
-        with open(target_filename, "w", encoding="utf-8") as ofp:
-            ofp.write(content)
 
 
 class XmiArchiRepositoryImporter(RepositoryImporter):
