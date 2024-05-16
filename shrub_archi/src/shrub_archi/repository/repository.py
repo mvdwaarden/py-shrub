@@ -182,7 +182,7 @@ class Repository(ABC):
 class ViewRepositoryFilter(RepositoryFilter):
     def __init__(
         self,
-        views: Views,
+        views: List[Views],
         include_elements: bool = True,
         include_relations: bool = True,
         include_views: bool = True,
@@ -190,7 +190,7 @@ class ViewRepositoryFilter(RepositoryFilter):
         super().__init__(
             include_elements=include_elements, include_relations=include_relations
         )
-        self.views: Views = views
+        self.views: List[Views] = views
         self._aggregate_identities_ids: Optional[List[str]] = None
 
     def include(self, identity: Identity):
@@ -222,6 +222,13 @@ class ViewRepositoryFilter(RepositoryFilter):
         target.views = []
         target.views += self.views
         return target
+
+    def contains(self, check_view: View) -> bool:
+        for view in self.views:
+            if check_view.unique_id == view.unique_id:
+                return True
+        return False
+
 
 
 class XmiArchiRepository(Repository):

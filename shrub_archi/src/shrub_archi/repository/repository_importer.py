@@ -11,7 +11,6 @@ from typing import Optional, List
 import shrub_util.core.logging as logging
 from shrub_archi.model.model import Identity, Relation
 from shrub_archi.repository.repository import (
-    CoArchiRepository,
     Repository,
     RepositoryFilter,
     ViewRepositoryFilter,
@@ -183,7 +182,7 @@ class RepositoryImporter:
 
     def do_import(self):
         # make sure to read source repository
-        self.read_repositories([self.source_repo])
+        self.read_repositories([self.target_repo])
         self.import_()
 
     def do_resolve(self):
@@ -259,7 +258,7 @@ class RepositoryImporter:
             )
             if len(target_ids) > 1:
                 # note first one is kept!
-                for target_id in target_ids[1:]:
+                for target_id in target_ids:
                     content = content.replace(target_id, target_ids[0])
                     print(f"merged {target_id} -> {target_ids[0]}")
 
@@ -345,15 +344,6 @@ class XmiArchiRepositoryImporter(RepositoryImporter):
                         self.target_repo.add_relation(identity)
                     case Identity():
                         self.target_repo.add_element(identity)
-            # if source maps to multiple identities in target, remove all but one in the target!!
-            if len(target_ids) > 1:
-                for target_id in target_ids[1:]:
-                    identity = self.target_repo.get_identity_by_id(target_id)
-                    match identity:
-                        case Relation():
-                            self.target_repo.del_relation(identity)
-                        case Identity():
-                            self.target_repo.del_element(identity)
 
         for property_definition in self.source_repo.property_definitions:
             self.target_repo.add_property_definition(property_definition)
