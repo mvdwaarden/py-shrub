@@ -1,6 +1,8 @@
 import sys
 from abc import abstractmethod
 from typing import List, Optional, Dict, Any, Tuple
+import os
+import yaml
 
 from PyQt6.QtCore import Qt, QAbstractTableModel, QModelIndex
 from PyQt6.QtWidgets import (
@@ -14,12 +16,12 @@ from PyQt6.QtWidgets import (
 )
 
 
-class SelectModel(QAbstractTableModel):
+class TableSelectModel(QAbstractTableModel):
     COL_COUNT: int = ...
     HEADER_LABELS: List[str] = ...
 
     def __init__(self, data: List, tristate: bool = True):
-        super(SelectModel, self).__init__()
+        super(TableSelectModel, self).__init__()
         self._data = data
         self._tristate_data = {self.row_hash(row): False for row in data}
         self._filtered_data = data
@@ -40,7 +42,7 @@ class SelectModel(QAbstractTableModel):
                 return section + 1
 
     def flags(self, index):
-        flags = super(SelectModel, self).flags(index)
+        flags = super(TableSelectModel, self).flags(index)
         if index.column() == 0:
             flags |= Qt.ItemFlag.ItemIsUserCheckable
         return flags
@@ -116,10 +118,11 @@ class SelectModel(QAbstractTableModel):
         return row
 
 
-class SelectUI(QWidget):
-    def __init__(self, model: SelectModel, ok_text: str, title: str):
+class TableSelectUI(QWidget):
+    def __init__(self, model: TableSelectModel, ok_text: str, title: str):
         super().__init__()
-        self.model: SelectModel = model
+        self._screen_data = None
+        self.model: TableSelectModel = model
         self.ok_text = ok_text
         self.title = title
         self.initUI()
@@ -131,7 +134,12 @@ class SelectUI(QWidget):
             self.title if self.title else "Press SPACE or T to mark selected rows"
         )
         self.setWindowTitle(window_title)
-
+        # read screen data
+        self._read_screen_data()
+        # set size
+        if self._screen_data:
+            d = self._screen_data
+            self.setGeometry(d["x"], d["y"], d["w"], d["h"])
         # Create vertical layout
         layout = QVBoxLayout(self)
 
@@ -141,9 +149,9 @@ class SelectUI(QWidget):
         layout.addWidget(self.search_box)
 
         class FilterTableView(QTableView):
-            def __init__(self, parent, outer: SelectUI):
+            def __init__(self, parent, outer: TableSelectUI):
                 super().__init__(parent)
-                self.outer: SelectUI = outer
+                self.outer: TableSelectUI = outer
 
             def keyPressEvent(self, event):
                 if event.key() == Qt.Key.Key_T or event.key() == Qt.Key.Key_Space:
@@ -191,13 +199,41 @@ class SelectUI(QWidget):
         self.close()
         self.ok = True
 
+    def closeEvent(self, event):
+        if not self._screen_data:
+            self._screen_data = {}
+
+        self._screen_data["x"] = self.geometry().x()
+        self._screen_data["y"] = self.geometry().y()
+        self._screen_data["w"] = self.geometry().width()
+        self._screen_data["h"] = self.geometry().height()
+        self._write_screen_data()
+        super().closeEvent(event)
+
+    def _read_screen_data(self):
+        if os.path.exists("./archi_screens.dat"):
+            with open("./archi_screens.dat", "r") as asd:
+                screens_data = yaml.safe_load(asd.read())
+            if screens_data and self.title in screens_data:
+                self._screen_data = screens_data[self.title if self.title else "default_screen"]
+        if not screens_data:
+            screens_data = {}
+        return screens_data
+
+    def _write_screen_data(self):
+        if self._screen_data:
+            screens_data = self._read_screen_data()
+            screens_data[self.title if self.title else "default_screen"] = self._screen_data
+            with open("./archi_screens.dat", "w") as asd:
+                asd.write(yaml.safe_dump(screens_data))
+
 
 def do_show_select_ui(
-    model: SelectModel, ok_text: str = None, title: str = None
+    model: TableSelectModel, ok_text: str = None, title: str = None
 ) -> Tuple[bool, Dict[Any, Optional[bool]]]:
     # Initialize and run the application
     app = QApplication(sys.argv)
-    widget = SelectUI(model=model, ok_text=ok_text, title=title)
+    widget = TableSelectUI(model=model, ok_text=ok_text, title=title)
     widget.show()
     app.exec()
     if widget.ok:
@@ -207,7 +243,7 @@ def do_show_select_ui(
 
 
 def do_show_select_furniture_test():
-    class FurnitureSelectModel(SelectModel):
+    class FurnitureTableSelectModel(TableSelectModel):
         COL_COUNT = 4  # Number of columns including checkbox
         HEADER_LABELS = ["", "Name", "Type", "Material"]  # Headers for your columns
 
@@ -238,5 +274,5 @@ def do_show_select_furniture_test():
     ]
 
     # Initializing the UI
-    model = FurnitureSelectModel(furniture_data)
+    model = FurnitureTableSelectModel(furniture_data)
     do_show_select_ui(model, ok_text="Select", title="Select Furniture")

@@ -6,11 +6,11 @@ from shrub_archi.model.model import ElementType
 import uuid
 
 
-class Generator:
+class ArchiCsvGenerator:
     def __init__(self, separator=","):
         self.separator = separator
 
-    def cleanup(self) -> "Generator":
+    def cleanup(self) -> "ArchiCsvGenerator":
         for filename in [
             self.get_elements_filename(),
             self.get_relations_filename(),

@@ -2,10 +2,10 @@ from typing import List
 
 from shrub_archi.model.model import Relation
 from shrub_archi.resolver.identity_resolver import ResolvedIdentity
-from .select_ui import SelectModel, do_show_select_ui
+from .select_ui import TableSelectModel, do_show_select_ui
 
 
-class ResolutionTableModel(SelectModel):
+class ResolutionTableSelectModel(TableSelectModel):
     COL_COUNT: int = 8
     HEADER_LABELS: List[str] = [
         "Equal",
@@ -81,7 +81,7 @@ class ResolutionTableModel(SelectModel):
 
 def do_show_resolve_ui(resolved_ids: List[ResolvedIdentity]) -> bool:
     saved, selection = do_show_select_ui(
-        model=ResolutionTableModel(resolved_ids), ok_text="Resolve"
+        model=ResolutionTableSelectModel(resolved_ids), ok_text="Resolve"
     )
     for row, selected in selection.items():
         row.resolver_result.manual_verification = selected

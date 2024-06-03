@@ -116,11 +116,11 @@ if __name__ == "__main__":
     if help:
         do_print_usage()
     elif function_test:
-        from shrub_archi.generator.generator import Generator
+        from shrub_archi.generator.archi_csv_generator import ArchiCsvGenerator
         import shrub_archi.data.risk.it.it_risk as it_risk
         from shrub_archi.model.model import ElementType
 
-        Generator().cleanup().write_elements_csv(it_risk.IT_RISKS_ISO_IEC_27001, ElementType.CONSTRAINT)
+        ArchiCsvGenerator().cleanup().write_elements_csv(it_risk.IT_RISKS_ISO_IEC_27001, ElementType.CONSTRAINT)
     elif function_import:
         do_import(source, target, work_dir)
     elif function_create_graph:

@@ -1,10 +1,10 @@
 from typing import List
 
 from shrub_archi.model.model import View
-from .select_ui import SelectModel, do_show_select_ui
+from .select_ui import TableSelectModel, do_show_select_ui
 
 
-class ViewTableModel(SelectModel):
+class ViewTableSelectModel(TableSelectModel):
     COL_COUNT: int = 8
     HEADER_LABELS: List[str] = [
         "Select",
@@ -59,7 +59,7 @@ class ViewTableModel(SelectModel):
 
 
 def do_select_diagrams_ui(views: List[View]) -> List[View]:
-    model = ViewTableModel(views)
+    model = ViewTableSelectModel(views)
     selected, selection = do_show_select_ui(
         model=model, ok_text="Select", title="Select Diagrams"
     )
