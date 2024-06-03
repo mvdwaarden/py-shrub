@@ -8,7 +8,7 @@ from xml.etree.ElementTree import SubElement, Element, register_namespace
 
 import shrub_util.core.logging as logging
 from defusedxml import ElementTree
-from shrub_archi.model.model import (
+from shrub_archi.model.archi_model import (
     View,
     Relation,
     Relations,

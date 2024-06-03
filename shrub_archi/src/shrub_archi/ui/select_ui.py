@@ -198,24 +198,23 @@ class TableSelectUI(QWidget):
         # Implement the save logic here
         self.close()
         self.ok = True
-
-    def closeEvent(self, event):
+    
+    def close(self):
         if not self._screen_data:
             self._screen_data = {}
-
-        self._screen_data["x"] = self.geometry().x()
-        self._screen_data["y"] = self.geometry().y()
-        self._screen_data["w"] = self.geometry().width()
-        self._screen_data["h"] = self.geometry().height()
         self._write_screen_data()
-        super().closeEvent(event)
+        super().close()
 
+    def _screen_data_key(self):
+        return self.title if self.title else "default_screen"
+    
     def _read_screen_data(self):
+        screens_data = None
         if os.path.exists("./archi_screens.dat"):
             with open("./archi_screens.dat", "r") as asd:
                 screens_data = yaml.safe_load(asd.read())
-            if screens_data and self.title in screens_data:
-                self._screen_data = screens_data[self.title if self.title else "default_screen"]
+            if screens_data and self._screen_data_key() in screens_data:
+                self._screen_data = screens_data[self._screen_data_key()]
         if not screens_data:
             screens_data = {}
         return screens_data
@@ -223,7 +222,11 @@ class TableSelectUI(QWidget):
     def _write_screen_data(self):
         if self._screen_data:
             screens_data = self._read_screen_data()
-            screens_data[self.title if self.title else "default_screen"] = self._screen_data
+            self._screen_data["x"] = self.geometry().x()
+            self._screen_data["y"] = self.geometry().y()
+            self._screen_data["w"] = self.geometry().width()
+            self._screen_data["h"] = self.geometry().height()
+            screens_data[self._screen_data_key()] = self._screen_data
             with open("./archi_screens.dat", "w") as asd:
                 asd.write(yaml.safe_dump(screens_data))
 

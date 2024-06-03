@@ -118,7 +118,7 @@ if __name__ == "__main__":
     elif function_test:
         from shrub_archi.generator.archi_csv_generator import ArchiCsvGenerator
         import shrub_archi.data.risk.it.it_risk as it_risk
-        from shrub_archi.model.model import ElementType
+        from shrub_archi.model.archi_model import ElementType
 
         ArchiCsvGenerator().cleanup().write_elements_csv(it_risk.IT_RISKS_ISO_IEC_27001, ElementType.CONSTRAINT)
     elif function_import:

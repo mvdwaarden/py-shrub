@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import List, Tuple, Optional
 
-from shrub_archi.model.model import Identity, Views
+from shrub_archi.model.archi_model import Identity, Views
 from shrub_archi.repository.repository import Repository, RepositoryFilter
 
 

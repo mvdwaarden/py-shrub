@@ -9,7 +9,7 @@ from enum import Enum
 from typing import Optional, List
 
 import shrub_util.core.logging as logging
-from shrub_archi.model.model import Identity, Relation
+from shrub_archi.model.archi_model import Identity, Relation
 from shrub_archi.repository.repository import (
     Repository,
     RepositoryFilter,

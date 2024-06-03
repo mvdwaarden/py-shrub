@@ -1,3 +1,10 @@
+"""
+    This model is a subset of the complete archimate model. It supports:
+    - Elements
+    - Relations
+    - Views
+
+"""
 from dataclasses import dataclass
 from enum import Enum
 from typing import Optional, Dict, Tuple, List, Any

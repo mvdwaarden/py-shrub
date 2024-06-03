@@ -1,6 +1,6 @@
 from typing import List
 
-from shrub_archi.model.model import View
+from shrub_archi.model.archi_model import View
 from .select_ui import TableSelectModel, do_show_select_ui
 
 
