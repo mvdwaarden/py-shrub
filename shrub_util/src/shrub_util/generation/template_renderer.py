@@ -15,8 +15,8 @@ class TemplateRenderer:
     SECTION_PREFIX = "Renderer"
     LOADER_KEY = "Loader"
 
-    def __init__(self, basepath: str = None, get_loader=None):
-        self.basepath = basepath
+    def __init__(self, loader_initializer = None, get_loader=None):
+        self.loader_initializer = loader_initializer
         self.environment = None
         self.get_loader = get_loader
 
@@ -26,7 +26,7 @@ class TemplateRenderer:
         kwargs: template context variables
         """
         if self.environment is None:
-            self.environment = Environment(loader=self.__get_loader()(self.basepath))
+            self.environment = Environment(loader=self.__get_loader()(self.loader_initializer))
         return self.environment.get_template(template).render(**kwargs)
 
     def __get_loader(self):

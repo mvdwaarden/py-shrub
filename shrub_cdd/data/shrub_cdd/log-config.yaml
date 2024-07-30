@@ -1,0 +1,62 @@
+version: 1
+formatters:
+    default:
+        format: '%(asctime)s - %(levelname)s - %(process)d - %(thread)d %(message)s'
+        datefmt: '%Y-%m-%d %H:%M:%S'
+handlers:
+    console:
+        level: DEBUG
+        class: logging.StreamHandler
+        formatter: default
+        stream: ext://sys.stdout
+    error_handler:
+        level: INFO
+        class: logging.FileHandler
+        #class: logging.handlers.RotatingFileHandler
+        formatter: default
+        filename: {log_dir}/error_handler.log
+        #maxBytes: 2000000
+        #backupCount: 10
+    audit_file:
+        level: INFO
+        class: logging.FileHandler
+        #class: logging.handlers.RotatingFileHandler
+        formatter: default
+        filename: {log_dir}/audit.log
+        #maxBytes: 2000000
+        #backupCount: 10
+    application_file:
+        level: INFO
+        class: logging.FileHandler
+        #class: logging.handlers.RotatingFileHandler
+        formatter: default
+        filename: {log_dir}/application.log
+        #maxBytes: 2000000
+        #backupCount: 5
+loggers:
+    # flask configuration
+    root:
+        level: DEBUG
+        handlers: [console]
+        propagate: True
+    # audit (hard code, see SHRUB_util.core.logging)
+    audit:
+        level: INFO
+        handlers: [console, audit_file]
+        propagate: True
+    # requests
+    werkzeug:
+        level: INFO
+        handlers: [console, audit_file]
+        propagate: True
+    # error handler
+    error_handler:
+        level: INFO
+        handlers: [ console, error_handler]
+        propagate: True
+    # project components
+    {{ build_object.name }}:
+        level: DEBUG
+        handlers: [console, application_file]
+        propagate: True
+disable_existing_loggers: False
