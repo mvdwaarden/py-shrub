@@ -1,6 +1,5 @@
 import concurrent.futures
 import math
-import os
 import time
 from abc import abstractmethod
 from concurrent.futures import ThreadPoolExecutor
@@ -8,22 +7,20 @@ from difflib import SequenceMatcher
 from enum import Enum
 from typing import Optional, List
 
-import shrub_util.core.logging as logging
-from shrub_archi.model.archi_model import Identity, Relation
-from shrub_archi.repository.repository import (
+from shrub_archi.modeling.archi.model.archi_model import Identity, Relation
+from shrub_archi.modeling.archi.repository.repository import (
     Repository,
     RepositoryFilter,
     ViewRepositoryFilter,
 )
-from shrub_archi.resolver.identity_resolver import (
+from shrub_archi.modeling.archi.resolver.identity_resolver import (
     ResolvedIdentity,
     RepositoryResolver,
     IdentityResolver,
     ResolverResult,
     resolutions_get_resolved_identity,
 )
-from shrub_archi.resolver.resolution_store import ResolutionStore
-import itertools
+from shrub_archi.modeling.archi.resolver.resolution_store import ResolutionStore
 
 
 class NaiveRelationResolver(IdentityResolver):

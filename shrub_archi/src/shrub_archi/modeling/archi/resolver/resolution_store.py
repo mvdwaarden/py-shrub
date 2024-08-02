@@ -3,7 +3,7 @@ import os
 import shutil
 from typing import Optional, List, Tuple
 
-from shrub_archi.resolver.identity_resolver import ResolvedIdentity
+from shrub_archi.modeling.archi.resolver.identity_resolver import ResolvedIdentity
 from shrub_util.core import logging as logging
 
 

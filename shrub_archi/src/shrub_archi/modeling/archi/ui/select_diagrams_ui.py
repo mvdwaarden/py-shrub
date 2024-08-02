@@ -1,7 +1,7 @@
 from typing import List
 
-from shrub_archi.model.archi_model import View
-from .select_ui import TableSelectModel, do_show_select_ui
+from shrub_archi.modeling.archi.model.archi_model import View
+from shrub_archi.ui.select_ui import TableSelectModel, do_show_select_ui
 
 
 class ViewTableSelectModel(TableSelectModel):

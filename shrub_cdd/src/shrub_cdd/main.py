@@ -1,7 +1,9 @@
 import shrub_util.core.logging as logging
 from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
-from shrub_cdd.readers.read_aggregated_cdd import read_aggregated_graph, aggregate_graph, write_aggregated_graph
+from shrub_cdd.readers.read_aggregated_cdd import read_aggregated_graph
+from shrub_cdd.aggregator.aggregate_cdd import aggregate_graph
+from shrub_cdd.writers.write_aggregated_cdd import write_aggregated_graph
 
 usage = """
     Custom Shrubbery Project CDD, assumes:

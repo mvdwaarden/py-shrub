@@ -6,7 +6,6 @@ import shrub_util.core.logging as logging
 
 from .arguments import Arguments
 
-
 class Config:
     """Purpose: configuration implementation.
     Author: Mando van der Waarden
@@ -17,7 +16,6 @@ class Config:
     - Commandline argument: {self.ARG_CONFIG_INI}
     Precedence is: [Commandline argument, Environment variable]
     """
-
     ARG_CONFIG_INI = "config-ini"
     ENV_CONFIG_INI = "ARCHICONFIG_INI"
 
@@ -127,6 +125,37 @@ class Config:
     # def __getitem__(self, section):
     #     return self.get_section(section)
 
+    """ Purpose: Get dictionary from a configuration section
+        Configuration sample
+        [SectionPrefix-Instance]        
+        Administrator.GetUsers=/users/get
+        Administrator.GetGroups=/groups/get
+    
+        Python code:
+        the_dict = Config().get_section_dictionary("SectionPrefix-Instance","Administrator.")
+        
+        Where the dictionary the_dict contains: {
+            "GetUsers": "/users/get",
+            "GetGroups": "/groups/get"
+        }
+    """
+    def get_settings_dictionary(self, section, key_prefix: str, no_warn=False) -> dict:
+        result = {}
+        try:
+            for key in self.__get_config(config_parser_transformation=lambda x: x)[
+                section
+            ]:
+                if key.startswith(key_prefix):
+                    result[key] = self.get_setting(section, key, no_warn=no_warn)
+        except KeyError as ex:
+            if not no_warn:
+                # decision to log on debug level, warnings on functional level!
+                logging.get_logger().debug(
+                    f"unable to read configuration value dictionary {section}/{key_prefix}: {ex}"
+                    f" from {self.filename}"
+                )
+        return result
+
 
 class ConfigSection:
     def __init__(self, config: Config, section):
@@ -135,3 +164,37 @@ class ConfigSection:
 
     def get_setting(self, key, default_value=None, no_warn=False):
         return self.config.get_setting(self.section, key, default_value, no_warn)
+
+    """ Purpose: standardize secret reference
+        
+        The secret reference can be either absolute or relative
+        Absolute secret reference sample
+        -   Configuration file: 
+            [SectionPrefix-Instance]
+            SecretReference = @AbsoluteSecretSection
+        -   Secrets file:
+            [AbsoluteSecretSection]
+            key1=secret1
+            ...
+        Relative secret reference sample
+        -   Configuration file: 
+            [SectionPrefix-Instance]
+            SecretReference = RelativeSecretSection
+        -   Secrets file:
+            [SectionPrefix-Instance-RelativeSecretSection]
+            key1=secret1
+            ...
+        """
+    def get_secret_reference(self) -> str:
+        raw_secret_reference = self.get_setting("SecretReference")
+        if not raw_secret_reference:
+            logging.get_logger().error(
+                f"no SecretReference found for [{self.section}] check configuration"
+            )
+            secret_reference = None
+        elif raw_secret_reference[0] == "@":
+            secret_reference = raw_secret_reference[1:]
+        else:
+            secret_reference = f"{self.section}-{raw_secret_reference}"
+        return secret_reference
+

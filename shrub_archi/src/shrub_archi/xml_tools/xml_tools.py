@@ -3,7 +3,6 @@ from xml.dom.pulldom import parse, parseString
 from shrub_util.core.arguments import Arguments
 from networkx import Graph
 import networkx as nx
-from matplotlib.pyplot import show
 import os
 from xml.sax.handler import ContentHandler
 from xml.sax import parseString as saxParseString
@@ -11,9 +10,6 @@ from xml.dom.minidom import Element as minidomElement
 from xml.etree.ElementTree import register_namespace
 import json
 import re
-
-import xmltodict
-
 
 def clone_xml(xml: str) -> str:
     for event, el in parse(xml):

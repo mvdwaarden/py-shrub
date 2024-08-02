@@ -2,8 +2,8 @@ import os
 
 import networkx as nx
 
-from shrub_archi.model.archi_model import Relation, Identity
-from shrub_archi.repository.repository import Repository
+from shrub_archi.modeling.archi.model.archi_model import Relation, Identity
+from shrub_archi.modeling.archi.repository.repository import Repository
 
 
 class RepositoryGrapher:

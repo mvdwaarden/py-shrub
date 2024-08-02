@@ -1,13 +1,15 @@
 import shrub_util.core.logging as logging
-from shrub_archi.repository.repository import (Repository, XmiArchiRepository, CoArchiRepository,
-                                               ViewRepositoryFilter, )
-from shrub_archi.repository.repository_graph import RepositoryGrapher
-from shrub_archi.repository.repository_importer import (XmiArchiRepositoryImporter, RepositoryImporter, )
-from shrub_archi.resolver.resolution_store import ResolutionStore
-from shrub_archi.ui.resolution_ui import do_show_resolve_ui
-from shrub_archi.ui.select_diagrams_ui import do_select_diagrams_ui
+from shrub_archi.modeling.archi.repository.repository import (Repository, XmiArchiRepository, CoArchiRepository,
+                                                   ViewRepositoryFilter, )
+from shrub_archi.modeling.archi.repository.repository_graph import RepositoryGrapher
+from shrub_archi.modeling.archi.repository.repository_importer import (XmiArchiRepositoryImporter, RepositoryImporter, )
+from shrub_archi.modeling.archi.resolver.resolution_store import ResolutionStore
+from shrub_archi.modeling.archi.ui.resolution_ui import do_show_resolve_ui
+from shrub_archi.modeling.archi.ui.select_diagrams_ui import do_select_diagrams_ui
 from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
+from shrub_archi.cmdb.cmdb_extract import cmdb_extract
+from shrub_archi.cmdb.model.cmdb_model import CmdbLocalView
 
 usage = """
     Archi Shrubbery, assumes:
@@ -94,6 +96,7 @@ def do_select_views(repo: Repository):
     return views
 
 
+
 logging.configure_console()
 if __name__ == "__main__":
 
@@ -107,10 +110,16 @@ if __name__ == "__main__":
     target = args.get_arg("target")
     work_dir = args.get_arg("workdir")
     function_import = args.has_arg("import")
+    function_extract_cmdb = args.has_arg("cmdb")
     function_create_graph = args.has_arg("graph")
     cutoff_score = args.get_arg("cutoff", 85)
     resolution_name = args.get_arg("resolutions", None)
     function_test = args.has_arg("test")
+    environment = args.get_arg("env", "ITSM_UAT")
+    file = args.get_arg("file")
+    email = args.get_arg("email")
+    cmdb_api = args.get_arg("cmdb-api")
+    source = args.get_arg("source")
 
     # do_show_select_furniture_test()
     if help:
@@ -118,7 +127,7 @@ if __name__ == "__main__":
     elif function_test:
         from shrub_archi.generator.archi_csv_generator import ArchiCsvGenerator
         import shrub_archi.data.risk.it.it_risk as it_risk
-        from shrub_archi.model.archi_model import ElementType
+        from shrub_archi.modeling.archi.model import ElementType
 
         ArchiCsvGenerator().cleanup().write_elements_csv(it_risk.IT_RISKS_ISO_IEC_27001, ElementType.CONSTRAINT)
     elif function_import:
@@ -127,3 +136,7 @@ if __name__ == "__main__":
         source_repo = create_repository(source)
         source_repo.read()
         RepositoryGrapher().create_graph(source_repo, work_dir=work_dir)
+    elif function_extract_cmdb:
+        local_view = cmdb_extract(environment, email=email, cmdb_api=cmdb_api, source=source)
+        local_view.write_dot_graph(file)
+

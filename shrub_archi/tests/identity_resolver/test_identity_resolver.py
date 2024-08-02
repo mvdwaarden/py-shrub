@@ -1,10 +1,10 @@
-from shrub_archi.model.archi_model import Identity, Identities
-from shrub_archi.repository.repository_importer import NaiveIdentityResolver
-from shrub_archi.resolver.identity_resolver import (
+from shrub_archi.modeling.archi.model import Identity, Identities
+from shrub_archi.modeling.archi.repository import NaiveIdentityResolver
+from shrub_archi.modeling.archi.resolver.identity_resolver import (
     RepositoryResolver,
     ResolvedIdentityAction,
 )
-from shrub_archi.resolver.resolution_store import ResolutionStore
+from shrub_archi.modeling.archi.resolver import ResolutionStore
 
 
 def test_identity_resolver():
