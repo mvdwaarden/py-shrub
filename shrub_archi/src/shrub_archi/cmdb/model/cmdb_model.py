@@ -20,6 +20,10 @@ class NamedItem:
     def get_resolve_key(self):
         return self.name
 
+    
+    def resolve_references(self, id_entity_map: dict):
+        ...
+    
     def to_dict(self) -> dict:
         the_dict = {"@type": self.__class__.__name__, "id": self.id, "name": self.name}
 
@@ -48,6 +52,12 @@ class NamedItemRelation:
         self.src = the_dict["src"]
         self.dst = the_dict["dst"]
         self.type = the_dict["type"]
+        
+    def resolve_references(self, id_entity_map: dict):
+        if isinstance(self.src, int) and self.src in id_entity_map:
+            self.src = id_entity_map[self.src]
+        if isinstance(self.dst, int) and self.dst in id_entity_map:
+            self.dst = id_entity_map[self.dst]
 
 
 class ConfigurationItem(NamedItem):
@@ -140,6 +150,20 @@ class ConfigurationItem(NamedItem):
         if "vendor" in the_dict:
             self.vendor = the_dict["vendor"]
 
+    def resolve_references(self, id_entity_map: dict):
+        if isinstance(self.manager, int) and self.manager in id_entity_map:
+            self.manager = id_entity_map[self.manager]
+        if isinstance(self.vendor, int) and self.vendor in id_entity_map:
+            self.vendor = id_entity_map[self.vendor]
+        if isinstance(self.business_owner, int) and self.business_owner in id_entity_map:
+            self.business_owner = id_entity_map[self.business_owner]
+        if isinstance(self.config_admin, int) and self.config_admin in id_entity_map:
+            self.config_admin = id_entity_map[self.config_admin]
+        if isinstance(self.related_service_component, int) and self.related_service_component in id_entity_map:
+            self.related_service_component = id_entity_map[self.related_service_component]
+        if isinstance(self.department, int) and self.department in id_entity_map:
+            self.department = id_entity_map[self.department]
+            
 
 class ConfigAdmin(NamedItem):
     def __init__(self):
@@ -285,16 +309,28 @@ class CmdbLocalView:
         return the_dict
 
     def from_dict(self, the_dict: dict):
+        map_all_named_entities = {}
+        resolve_references = []
         def add_dict_to_named_entity_to_map[T](name: str, named_entity_map: dict, constructor: T):
             for v in the_dict[name]:
                 ne = constructor()
                 ne.from_dict(v)
                 named_entity_map[ne.get_resolve_key()] = ne
+                map_all_named_entities[ne.id] = ne
+                resolve_references.append(ne.resolve_references)
 
         for name, named_entity_map, constructor in [
             ("configuration_items", self.map_configuration_items, ConfigurationItem),
             ("service_components", self.map_service_components, ServiceComponent),
             ("vendors", self.map_vendors, Vendor), ("departments", self.map_departments, Department),
             ("managers", self.map_managers, Manager), ("config_admins", self.map_config_admins, ConfigAdmin),
-            ("relations", self.map_relations, ConfigurationItemRelation), ]:
+            ("relations", self.map_relations, ConfigurationItemRelation)]:
             add_dict_to_named_entity_to_map(name, named_entity_map, constructor)
+
+        for resolve in resolve_references:
+            resolve(map_all_named_entities)
+        
+            
+        
+        
+        
