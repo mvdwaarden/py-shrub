@@ -179,8 +179,13 @@ class CmdbApi:
         }
 
 
-def cmdb_extract(environment: str, email: str, cmdb_api: str, source: str, local_view: CmdbLocalView = None) -> CmdbLocalView:
+def cmdb_extract(environment: str, email: str, cmdb_api: str, source: str,
+                 local_view: CmdbLocalView = None, test_only: bool =False) -> CmdbLocalView:
+
     test_cmdb_extract_factory()
+    if test_only:
+        return local_view
+
     token = azure_get_token(environment)
     api = CmdbApi(base_uri=cmdb_api, token=token,
                   source=source)
@@ -264,7 +269,3 @@ def test_cmdb_extract_factory():
     result = json.loads(RETRIEVE_CI_BY_AUTHORIZATION_RESPONSE)
     cis = factory.get_configuration_item_ids_from_retreive_ci_by_authorization_result(json_dict=result)
     print(f"configuration items: {cis}")
-
-
-def _cmdb_extract(environment: str):
-    test_cmdb_extract_factory()
