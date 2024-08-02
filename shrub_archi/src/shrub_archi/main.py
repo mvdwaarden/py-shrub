@@ -9,7 +9,6 @@ from shrub_archi.modeling.archi.ui.select_diagrams_ui import do_select_diagrams_
 from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
 from shrub_archi.cmdb.cmdb_extract import cmdb_extract
-from networkx.readwrite.gml import write_gml
 
 
 usage = """
@@ -140,5 +139,4 @@ if __name__ == "__main__":
     elif function_extract_cmdb:
         local_view = cmdb_extract(environment, email=email, cmdb_api=cmdb_api, source=source, test_only=True)
         local_view.write_dot_graph(file)
-        write_gml(local_view.graph,f"{file}.gml")
 

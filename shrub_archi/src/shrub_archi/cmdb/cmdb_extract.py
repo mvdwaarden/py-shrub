@@ -182,7 +182,7 @@ class CmdbApi:
 def cmdb_extract(environment: str, email: str, cmdb_api: str, source: str,
                  local_view: CmdbLocalView = None, test_only: bool =False) -> CmdbLocalView:
 
-    test_cmdb_extract_factory()
+    local_view = test_cmdb_extract_factory()
     if test_only:
         return local_view
 
@@ -249,7 +249,7 @@ def cmdb_get_relation_ships_by_configuration_item(api: CmdbApi, factory: CmdbApi
         logging.get_logger().warning(f"no upstream and downstream for {ci}")
 
 
-def test_cmdb_extract_factory():
+def test_cmdb_extract_factory() -> CmdbLocalView:
     local_view = CmdbLocalView()
     result = json.loads(RETRIEVE_CI_RELATION_SHIPS_RESPONSE)
     factory = CmdbApiFactory(local_view=local_view)
@@ -269,3 +269,9 @@ def test_cmdb_extract_factory():
     result = json.loads(RETRIEVE_CI_BY_AUTHORIZATION_RESPONSE)
     cis = factory.get_configuration_item_ids_from_retreive_ci_by_authorization_result(json_dict=result)
     print(f"configuration items: {cis}")
+    local_view_dict = local_view.to_dict()
+    print(local_view_dict)
+    new_local_view = CmdbLocalView()
+    new_local_view.from_dict(local_view_dict)
+    print(new_local_view.to_dict())
+    return local_view
