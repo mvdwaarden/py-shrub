@@ -9,6 +9,7 @@ from shrub_archi.modeling.archi.ui.select_diagrams_ui import do_select_diagrams_
 from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
 from shrub_archi.cmdb.cmdb_extract import cmdb_extract
+from shrub_archi.cmdb.model.cmdb_model import CmdbLocalView
 
 
 usage = """
@@ -137,6 +138,12 @@ if __name__ == "__main__":
         source_repo.read()
         RepositoryGrapher().create_graph(source_repo, work_dir=work_dir)
     elif function_extract_cmdb:
-        local_view = cmdb_extract(environment, email=email, cmdb_api=cmdb_api, source=source, test_only=True)
-        local_view.write_dot_graph(file)
+        if False:
+            local_view = cmdb_extract(environment, email=email, cmdb_api=cmdb_api, source=source, test_only=False)
+            local_view.write_dot_graph(file)
+            local_view.write_json(file)
+        else:
+            local_view = CmdbLocalView()
+            local_view.read_json(file)
+            print(local_view)
 

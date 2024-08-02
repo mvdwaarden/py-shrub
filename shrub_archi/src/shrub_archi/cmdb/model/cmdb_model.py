@@ -1,9 +1,12 @@
-from typing import Optional
+import json
+from typing import Optional, TypeVar
 
 from networkx import DiGraph
 
 import shrub_util.core.logging as logging
 from shrub_util.generation.template_renderer import TemplateRenderer, get_dictionary_loader
+
+T = TypeVar("T")
 
 
 class NamedItem:
@@ -20,10 +23,9 @@ class NamedItem:
     def get_resolve_key(self):
         return self.name
 
-    
     def resolve_references(self, id_entity_map: dict):
         ...
-    
+
     def to_dict(self) -> dict:
         the_dict = {"@type": self.__class__.__name__, "id": self.id, "name": self.name}
 
@@ -36,23 +38,35 @@ class NamedItem:
             self.name = the_dict["name"]
 
 
-class NamedItemRelation:
+class NamedItemRelation(NamedItem):
     def __init__(self):
+        super().__init__()
         self.src: NamedItem = None
         self.dst: NamedItem = None
         self.type: str = None
 
     def get_resolve_key(self):
-        return f"{self.src.get_resolve_key()}-({self.dst.get_resolve_key()})->{self.dst.name}"
+        resolve_key = None
+        if isinstance(self.src, int) and isinstance(self.dst, int):
+            resolve_key = f"{self.src}-({self.type})->{self.dst}"
+        else:
+            resolve_key = f"{self.src.get_resolve_key()}-({self.type})->{self.dst.get_resolve_key()}"
+        return resolve_key
 
-    def to_json(self) -> dict:
-        the_dict = {"@type": self.__class__.__name__, "src": self.src.id, "dst": self.dst.id, "type": self.type}
+    def to_dict(self) -> dict:
+        the_dict = super().to_dict()
+        the_dict["@type"] =  self.__class__.__name__
+        the_dict["src"] = self.src.id
+        the_dict["dst"] = self.dst.id
+        the_dict["type"] = self.type
+        return the_dict
 
-    def from_json(self, the_dict: dict):
+    def from_dict(self, the_dict: dict):
+        super().from_dict(the_dict)
         self.src = the_dict["src"]
         self.dst = the_dict["dst"]
         self.type = the_dict["type"]
-        
+
     def resolve_references(self, id_entity_map: dict):
         if isinstance(self.src, int) and self.src in id_entity_map:
             self.src = id_entity_map[self.src]
@@ -163,7 +177,7 @@ class ConfigurationItem(NamedItem):
             self.related_service_component = id_entity_map[self.related_service_component]
         if isinstance(self.department, int) and self.department in id_entity_map:
             self.department = id_entity_map[self.department]
-            
+
 
 class ConfigAdmin(NamedItem):
     def __init__(self):
@@ -236,7 +250,7 @@ class CmdbLocalView:
 
         self.graph: DiGraph = DiGraph()
 
-    def __resolve_named_item[T](self, named_item: T, map_named_item: dict, custom_key: str = None) -> T:
+    def __resolve_named_item(self, named_item: T, map_named_item: dict, custom_key: str = None) -> T:
         result = named_item
         check_key = named_item.get_resolve_key()
         if check_key in map_named_item:
@@ -266,15 +280,17 @@ class CmdbLocalView:
     def resolve_vendor(self, vendor: Vendor) -> Vendor:
         return self.__resolve_named_item(vendor, self.map_vendors)
 
-    def resolve_relation[T](self, named_item_relation: T) -> T:
+    def resolve_relation(self, named_item_relation: T) -> T:
         result = named_item_relation
         ed = self.graph.get_edge_data(named_item_relation.src, named_item_relation.dst)
         if not ed:
-            self.map_relations[named_item_relation.get_key()] = named_item_relation
+            result.id = self.uuid
+            self.map_relations[named_item_relation.get_resolve_key()] = named_item_relation
             self.graph.add_edge(named_item_relation.src, named_item_relation.dst,
                                 relation_type=named_item_relation.type)
+            self.uuid += 1
         else:
-            logging.get_logger().warning(f"relation already exists {named_item_relation.get_key()}")
+            logging.get_logger().warning(f"relation already exists {named_item_relation.get_resolve_key()}")
         return result
 
     def write_dot_graph(self, file: str):
@@ -292,6 +308,14 @@ class CmdbLocalView:
             dot = tr.render("tha_template", g=self.graph)
             ofp.write(dot)
 
+    def write_json(self, file):
+        with open(f"{file}.json", "w") as opf:
+            opf.write(json.dumps(self.to_dict()))
+
+    def read_json(self, file):
+        with open(f"{file}.json", "r") as opf:
+            self.from_dict(json.loads(opf.read()))
+
     def to_dict(self) -> dict:
         the_dict = {}
 
@@ -301,9 +325,10 @@ class CmdbLocalView:
                 the_dict[name].append(v.to_dict())
 
         for name, named_entity_map in [("configuration_items", self.map_configuration_items),
-            ("service_components", self.map_service_components), ("vendors", self.map_vendors),
-            ("departments", self.map_departments), ("managers", self.map_managers),
-            ("config_admins", self.map_config_admins), ("relations", self.map_relations), ]:
+                                       ("service_components", self.map_service_components),
+                                       ("vendors", self.map_vendors),
+                                       ("departments", self.map_departments), ("managers", self.map_managers),
+                                       ("config_admins", self.map_config_admins), ("relations", self.map_relations), ]:
             add_named_entity_map_to_dict(name, named_entity_map)
 
         return the_dict
@@ -311,26 +336,25 @@ class CmdbLocalView:
     def from_dict(self, the_dict: dict):
         map_all_named_entities = {}
         resolve_references = []
-        def add_dict_to_named_entity_to_map[T](name: str, named_entity_map: dict, constructor: T):
+
+        def add_dict_to_named_entity_to_map(name: str, named_entity_map: dict, constructor: T, resolver):
             for v in the_dict[name]:
                 ne = constructor()
                 ne.from_dict(v)
                 named_entity_map[ne.get_resolve_key()] = ne
                 map_all_named_entities[ne.id] = ne
                 resolve_references.append(ne.resolve_references)
+                resolver(ne)
 
-        for name, named_entity_map, constructor in [
-            ("configuration_items", self.map_configuration_items, ConfigurationItem),
-            ("service_components", self.map_service_components, ServiceComponent),
-            ("vendors", self.map_vendors, Vendor), ("departments", self.map_departments, Department),
-            ("managers", self.map_managers, Manager), ("config_admins", self.map_config_admins, ConfigAdmin),
-            ("relations", self.map_relations, ConfigurationItemRelation)]:
-            add_dict_to_named_entity_to_map(name, named_entity_map, constructor)
+        for name, named_entity_map, constructor, resolver in [
+            ("configuration_items", self.map_configuration_items, ConfigurationItem, self.resolve_configuration_item),
+            ("service_components", self.map_service_components, ServiceComponent, self.resolve_service_component),
+            ("vendors", self.map_vendors, Vendor, self.resolve_vendor),
+            ("departments", self.map_departments, Department, self.resolve_department),
+            ("managers", self.map_managers, Manager, self.resolve_manager),
+            ("config_admins", self.map_config_admins, ConfigAdmin, self.resolve_config_admin),
+            ("relations", self.map_relations, ConfigurationItemRelation, self.resolve_relation)]:
+            add_dict_to_named_entity_to_map(name, named_entity_map, constructor, resolver)
 
         for resolve in resolve_references:
             resolve(map_all_named_entities)
-        
-            
-        
-        
-        
