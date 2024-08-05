@@ -147,6 +147,7 @@ if __name__ == "__main__":
             read_json(local_view, file)
             write_named_item_graph(local_view, GraphType.DOT, file)
             write_named_item_graph(local_view, GraphType.GRAPHML, file)
+            write_named_item_graph(local_view, GraphType.CYPHER, file)
             print(local_view)
         else:
             local_view = cmdb_extract(environment, email=email, cmdb_api=cmdb_api, source=source, test_only=False)

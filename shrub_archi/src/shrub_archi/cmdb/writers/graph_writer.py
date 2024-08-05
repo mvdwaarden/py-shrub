@@ -7,6 +7,7 @@ from ..model.cmdb_model import CmdbLocalView
 class GraphType(Enum):
     DOT = "dot"
     GRAPHML = "graphml"
+    CYPHER = "cypher"
 
 
 DOT_TEMPLATE = """
@@ -61,12 +62,24 @@ GRAPHML_TEMPLATE = """<?xml version="1.0" encoding="UTF-8"?>
 </graphml>
 """
 
+CYPHER_TEMPLATE = """
+{% for n in g.nodes %}
+{% set node_type = n.type if n.__class__.__name__ == "ConfigurationItem" else n.__class__.__name__ %}
+CREATE ({{ n.__class__.__name__ }}{{ n.id }}:{{ node_type }} {name: '{{ n.name }}'})
+{% endfor %}  
+{% for s,d in g.edges %}
+{% set relation_type = g.get_edge_data(s,d)["relation_type"] %}
+CREATE ({{ s.__class__.__name__ }}{{ s.id }}) -[:{{ 'relation_type' }}]-> ({{ d.__class__.__name__ }}{{ d.id }})
+{% endfor %}                 
+"""
+
 
 def write_named_item_graph(local_view: CmdbLocalView, graph_type: GraphType, file: str, ):
     local_view.build_graph()
     with open(f"{file}.{graph_type.value}", "w") as ofp:
         tr = TemplateRenderer({
             GraphType.DOT.value: DOT_TEMPLATE,
-            GraphType.GRAPHML.value: GRAPHML_TEMPLATE}, get_loader=get_dictionary_loader)
+            GraphType.GRAPHML.value: GRAPHML_TEMPLATE,
+            GraphType.CYPHER.value:  CYPHER_TEMPLATE}, get_loader=get_dictionary_loader)
         graph_output = tr.render(graph_type.value, g=local_view.graph)
         ofp.write(graph_output)

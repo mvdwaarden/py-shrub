@@ -347,9 +347,10 @@ class CmdbLocalView:
         for ci in self.map_configuration_items.values():
             add_config_item_relations(ci)
 
-    def build_graph(self, rebuild: bool = False) -> DiGraph:
+    def build_graph(self, rebuild: bool = False, include_object_reference: bool = True) -> DiGraph:
         if not self.graph or rebuild:
-            self.refresh_object_reference_relations()
+            if include_object_reference:
+                self.refresh_object_reference_relations()
             self.graph = DiGraph()
             for key, named_entity_map, constructor in self.all_maps:
                 if issubclass(constructor, NamedItemRelation):
