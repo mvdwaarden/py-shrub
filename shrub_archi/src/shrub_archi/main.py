@@ -10,6 +10,9 @@ from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
 from shrub_archi.cmdb.cmdb_extract import cmdb_extract
 from shrub_archi.cmdb.model.cmdb_model import CmdbLocalView
+from cmdb.readers.json_reader import read_json
+from cmdb.writers.graph_writer import write_named_item_graph, GraphType
+from cmdb.writers.json_writer import write_json
 
 
 usage = """
@@ -141,11 +144,13 @@ if __name__ == "__main__":
     elif function_extract_cmdb:
         if use_local_view:
             local_view = CmdbLocalView()
-            local_view.read_json(file)
-            local_view.write_dot_graph(file)
+            read_json(local_view, file)
+            write_named_item_graph(local_view, GraphType.DOT, file)
+            write_named_item_graph(local_view, GraphType.GRAPHML, file)
             print(local_view)
         else:
             local_view = cmdb_extract(environment, email=email, cmdb_api=cmdb_api, source=source, test_only=False)
-            local_view.write_dot_graph(file)
-            local_view.write_json(file)
+            write_json(local_view, file)
+            write_named_item_graph(local_view, GraphType.DOT, file)
+            write_named_item_graph(local_view, GraphType.GRAPHML, file)
 

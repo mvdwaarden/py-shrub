@@ -3,8 +3,6 @@ from typing import Optional, TypeVar
 
 from networkx import DiGraph
 
-import shrub_util.core.logging as logging
-from shrub_util.generation.template_renderer import TemplateRenderer, get_dictionary_loader
 
 T = TypeVar("T")
 
@@ -242,6 +240,7 @@ class ObjectReferenceRelation(NamedItemRelation):
         super().__init__()
         ...
 
+
 class CmdbLocalView:
     def __init__(self):
         self.uuid = 0
@@ -293,30 +292,6 @@ class CmdbLocalView:
 
     def resolve_relation(self, named_item_relation: T) -> T:
         return self.__resolve_named_item(named_item_relation, self.map_relations)
-
-    def write_dot_graph(self, file: str):
-        DOT_TEMPLATE = """
-            digraph "{{g.name}}" {
-                rankdir=LR
-                {% for s,d in g.edges %}
-                    {% set relation_type = g.get_edge_data(s,d)["relation_type"] %}
-                    "{{ s.name }}" -> "{{ d.name }}" [label={{relation_type}}]
-                {% endfor %}
-            }
-            """
-        self.build_graph()
-        with open(f"{file}.dot", "w") as ofp:
-            tr = TemplateRenderer({"tha_template": DOT_TEMPLATE}, get_loader=get_dictionary_loader)
-            dot = tr.render("tha_template", g=self.graph)
-            ofp.write(dot)
-
-    def write_json(self, file):
-        with open(f"{file}.json", "w") as opf:
-            opf.write(json.dumps(self.to_dict()))
-
-    def read_json(self, file):
-        with open(f"{file}.json", "r") as opf:
-            self.from_dict(json.loads(opf.read()))
 
     def to_dict(self) -> dict:
         the_dict = {}
