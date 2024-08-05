@@ -237,6 +237,11 @@ class ConfigurationItemRelation(NamedItemRelation):
         ...
 
 
+class ObjectReferenceRelation(NamedItemRelation):
+    def __init__(self):
+        super().__init__()
+        ...
+
 class CmdbLocalView:
     def __init__(self):
         self.uuid = 0
@@ -255,7 +260,6 @@ class CmdbLocalView:
         self.all_maps.append(("vendors", self.map_vendors, Vendor))
         self.map_relations: dict = {}
         self.all_maps.append(("relations", self.map_relations, ConfigurationItemRelation))
-
         self.graph: DiGraph = None
 
     def __resolve_named_item(self, named_item: T, map_named_item: dict, custom_key: str = None) -> T:
@@ -346,15 +350,41 @@ class CmdbLocalView:
             resolve(map_all_named_entities)
         self.build_graph()
 
+    def refresh_object_reference_relations(self):
+        def add_config_item_relations(ci: ConfigurationItem):
+            def _resolve_relation(dst: NamedItem, relation_type):
+                if dst:
+                    relation = ObjectReferenceRelation()
+                    relation.src = ci
+                    relation.dst = dst
+                    relation.type = relation_type
+                    self.resolve_relation(relation)
+
+            _resolve_relation(ci.vendor, "vendor")
+            _resolve_relation(ci.manager, "manager")
+            _resolve_relation(ci.business_owner, "business owner")
+            _resolve_relation(ci.related_service_component, "related_service_component")
+            _resolve_relation(ci.config_admin, "config_admin")
+            _resolve_relation(ci.department, "department")
+        for rel in self.map_relations.values():
+            if isinstance(rel, ObjectReferenceRelation):
+                del self.map_relations[rel.get_resolve_key()]
+        for ci in self.map_configuration_items.values():
+            add_config_item_relations(ci)
+
     def build_graph(self, rebuild: bool = False) -> DiGraph:
         if not self.graph or rebuild:
+            self.refresh_object_reference_relations()
             self.graph = DiGraph()
-            for key, named_entity_map, constructor  in self.all_maps:
+            for key, named_entity_map, constructor in self.all_maps:
                 if issubclass(constructor, NamedItemRelation):
                     for v in named_entity_map.values():
                         self.graph.add_edge(v.src, v.dst,relation_type=v.type)
                 else:
                     for v in named_entity_map.values():
                         self.graph.add_node(v)
+
+        return self.graph
+
 
 
