@@ -240,15 +240,23 @@ class ConfigurationItemRelation(NamedItemRelation):
 class CmdbLocalView:
     def __init__(self):
         self.uuid = 0
+        self.all_maps = []
         self.map_configuration_items: dict = {}
+        self.all_maps.append(("configuration_items", self.map_configuration_items, ConfigurationItem))
         self.map_managers: dict = {}
+        self.all_maps.append(("managers", self.map_managers, Manager))
         self.map_config_admins: dict = {}
+        self.all_maps.append(("config_admins", self.map_config_admins, ConfigAdmin))
         self.map_departments: dict = {}
+        self.all_maps.append(("departments", self.map_departments, Department))
         self.map_service_components: dict = {}
+        self.all_maps.append(("service_components", self.map_service_components, ServiceComponent))
         self.map_vendors: dict = {}
+        self.all_maps.append(("vendors", self.map_vendors, Vendor))
         self.map_relations: dict = {}
+        self.all_maps.append(("relations", self.map_relations, ConfigurationItemRelation))
 
-        self.graph: DiGraph = DiGraph()
+        self.graph: DiGraph = None
 
     def __resolve_named_item(self, named_item: T, map_named_item: dict, custom_key: str = None) -> T:
         result = named_item
@@ -258,7 +266,6 @@ class CmdbLocalView:
         else:
             named_item.id = self.uuid
             map_named_item[check_key] = named_item
-            self.graph.add_node(named_item)
             self.uuid += 1
         return result
 
@@ -281,17 +288,7 @@ class CmdbLocalView:
         return self.__resolve_named_item(vendor, self.map_vendors)
 
     def resolve_relation(self, named_item_relation: T) -> T:
-        result = named_item_relation
-        ed = self.graph.get_edge_data(named_item_relation.src, named_item_relation.dst)
-        if not ed:
-            result.id = self.uuid
-            self.map_relations[named_item_relation.get_resolve_key()] = named_item_relation
-            self.graph.add_edge(named_item_relation.src, named_item_relation.dst,
-                                relation_type=named_item_relation.type)
-            self.uuid += 1
-        else:
-            logging.get_logger().warning(f"relation already exists {named_item_relation.get_resolve_key()}")
-        return result
+        return self.__resolve_named_item(named_item_relation, self.map_relations)
 
     def write_dot_graph(self, file: str):
         DOT_TEMPLATE = """
@@ -303,6 +300,7 @@ class CmdbLocalView:
                 {% endfor %}
             }
             """
+        self.build_graph()
         with open(f"{file}.dot", "w") as ofp:
             tr = TemplateRenderer({"tha_template": DOT_TEMPLATE}, get_loader=get_dictionary_loader)
             dot = tr.render("tha_template", g=self.graph)
@@ -324,37 +322,39 @@ class CmdbLocalView:
             for v in named_entity_map.values():
                 the_dict[name].append(v.to_dict())
 
-        for name, named_entity_map in [("configuration_items", self.map_configuration_items),
-                                       ("service_components", self.map_service_components),
-                                       ("vendors", self.map_vendors),
-                                       ("departments", self.map_departments), ("managers", self.map_managers),
-                                       ("config_admins", self.map_config_admins), ("relations", self.map_relations), ]:
+        for name, named_entity_map, constructur in self.all_maps:
             add_named_entity_map_to_dict(name, named_entity_map)
 
         return the_dict
 
     def from_dict(self, the_dict: dict):
         map_all_named_entities = {}
-        resolve_references = []
+        deferred_resolve_references = []
 
-        def add_dict_to_named_entity_to_map(name: str, named_entity_map: dict, constructor: T, resolver):
+        def add_dict_to_named_entity_to_map(name: str, named_entity_map: dict, constructor: T):
             for v in the_dict[name]:
                 ne = constructor()
                 ne.from_dict(v)
                 named_entity_map[ne.get_resolve_key()] = ne
                 map_all_named_entities[ne.id] = ne
-                resolve_references.append(ne.resolve_references)
-                resolver(ne)
+                deferred_resolve_references.append(ne.resolve_references)
 
-        for name, named_entity_map, constructor, resolver in [
-            ("configuration_items", self.map_configuration_items, ConfigurationItem, self.resolve_configuration_item),
-            ("service_components", self.map_service_components, ServiceComponent, self.resolve_service_component),
-            ("vendors", self.map_vendors, Vendor, self.resolve_vendor),
-            ("departments", self.map_departments, Department, self.resolve_department),
-            ("managers", self.map_managers, Manager, self.resolve_manager),
-            ("config_admins", self.map_config_admins, ConfigAdmin, self.resolve_config_admin),
-            ("relations", self.map_relations, ConfigurationItemRelation, self.resolve_relation)]:
-            add_dict_to_named_entity_to_map(name, named_entity_map, constructor, resolver)
+        for name, named_entity_map, constructor in self.all_maps:
+            add_dict_to_named_entity_to_map(name, named_entity_map, constructor)
 
-        for resolve in resolve_references:
+        for resolve in deferred_resolve_references:
             resolve(map_all_named_entities)
+        self.build_graph()
+
+    def build_graph(self, rebuild: bool = False) -> DiGraph:
+        if not self.graph or rebuild:
+            self.graph = DiGraph()
+            for key, named_entity_map, constructor  in self.all_maps:
+                if issubclass(constructor, NamedItemRelation):
+                    for v in named_entity_map.values():
+                        self.graph.add_edge(v.src, v.dst,relation_type=v.type)
+                else:
+                    for v in named_entity_map.values():
+                        self.graph.add_node(v)
+
+

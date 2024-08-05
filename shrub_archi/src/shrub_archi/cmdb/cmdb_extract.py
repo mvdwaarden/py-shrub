@@ -185,6 +185,8 @@ def cmdb_extract(environment: str, email: str, cmdb_api: str, source: str,
     local_view = test_cmdb_extract_factory()
     if test_only:
         return local_view
+    else:
+        local_view = None
 
     token = azure_get_token(environment)
     api = CmdbApi(base_uri=cmdb_api, token=token,
