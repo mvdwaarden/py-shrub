@@ -9,7 +9,7 @@ from shrub_archi.modeling.archi.ui.select_diagrams_ui import do_select_diagrams_
 from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
 from shrub_archi.cmdb.cmdb_extract import cmdb_extract
-from shrub_archi.cmdb.model.cmdb_model import CmdbLocalView
+from shrub_archi.cmdb.model.cmdb_model import CmdbLocalView, ConfigurationItem, NamedItem
 from cmdb.readers.json_reader import read_json
 from cmdb.writers.graph_writer import write_named_item_graph, GraphType
 from cmdb.writers.json_writer import write_json
@@ -125,6 +125,7 @@ if __name__ == "__main__":
     cmdb_api = args.get_arg("cmdb-api")
     use_local_view = args.has_arg("use-local-view")
     source = args.get_arg("source")
+    node_exclusion = args.get_arg("skip-ci-nodes","digitalcertificate,cicollection").split(",")
 
     # do_show_select_furniture_test()
     if help:
@@ -142,16 +143,21 @@ if __name__ == "__main__":
         source_repo.read()
         RepositoryGrapher().create_graph(source_repo, work_dir=work_dir)
     elif function_extract_cmdb:
+        def node_filter(node: NamedItem) -> bool:
+            return True if not isinstance(node, ConfigurationItem) or not node.type in node_exclusion else False
+
+
         if use_local_view:
             local_view = CmdbLocalView()
             read_json(local_view, file)
-            write_named_item_graph(local_view, GraphType.DOT, file)
-            write_named_item_graph(local_view, GraphType.GRAPHML, file)
-            write_named_item_graph(local_view, GraphType.CYPHER, file)
+            write_named_item_graph(local_view, GraphType.DOT, file, node_filter=node_filter)
+            write_named_item_graph(local_view, GraphType.GRAPHML, file, node_filter=node_filter)
+            write_named_item_graph(local_view, GraphType.CYPHER, file, node_filter=node_filter)
             print(local_view)
         else:
             local_view = cmdb_extract(environment, email=email, cmdb_api=cmdb_api, source=source, test_only=False)
             write_json(local_view, file)
-            write_named_item_graph(local_view, GraphType.DOT, file)
-            write_named_item_graph(local_view, GraphType.GRAPHML, file)
+            write_named_item_graph(local_view, GraphType.DOT, file, node_filter=node_filter)
+            write_named_item_graph(local_view, GraphType.GRAPHML, file, node_filter=node_filter)
+            write_named_item_graph(local_view, GraphType.CYPHER, file, node_filter=node_filter)
 

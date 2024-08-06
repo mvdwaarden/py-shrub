@@ -1,8 +1,6 @@
-import json
-from typing import Optional, TypeVar
+from typing import Optional, TypeVar, Callable
 
 from networkx import DiGraph
-
 
 T = TypeVar("T")
 
@@ -53,7 +51,7 @@ class NamedItemRelation(NamedItem):
 
     def to_dict(self) -> dict:
         the_dict = super().to_dict()
-        the_dict["@type"] =  self.__class__.__name__
+        the_dict["@type"] = self.__class__.__name__
         the_dict["src"] = self.src.id
         the_dict["dst"] = self.dst.id
         the_dict["type"] = self.type
@@ -212,6 +210,9 @@ class Manager(NamedItem):
         super().from_dict(the_dict)
         if "email" in the_dict:
             self.email = the_dict["email"]
+        # extra logic
+        if not self.name and self.email:
+            self.name = self.email
 
 
 class Department(NamedItem):
@@ -341,26 +342,37 @@ class CmdbLocalView:
             _resolve_relation(ci.related_service_component, "related_service_component")
             _resolve_relation(ci.config_admin, "config_admin")
             _resolve_relation(ci.department, "department")
+
+        rel_to_delete = []
         for rel in self.map_relations.values():
             if isinstance(rel, ObjectReferenceRelation):
-                del self.map_relations[rel.get_resolve_key()]
+                rel_to_delete.append(rel.get_resolve_key())
+
+        for k in rel_to_delete:
+            del self.map_relations[k]
+
         for ci in self.map_configuration_items.values():
             add_config_item_relations(ci)
 
-    def build_graph(self, rebuild: bool = False, include_object_reference: bool = True) -> DiGraph:
+    def build_graph(self, rebuild: bool = False, include_object_reference: bool = True,
+                    node_filter: Callable[[NamedItem], bool] = None) -> DiGraph:
+        if not node_filter:
+            def no_filter(n: NamedItem) -> bool:
+                return True
+            node_filter = no_filter
+        else:
+            rebuild = True
+
         if not self.graph or rebuild:
             if include_object_reference:
                 self.refresh_object_reference_relations()
             self.graph = DiGraph()
             for key, named_entity_map, constructor in self.all_maps:
                 if issubclass(constructor, NamedItemRelation):
-                    for v in named_entity_map.values():
-                        self.graph.add_edge(v.src, v.dst,relation_type=v.type)
+                    for v in [v for v in named_entity_map.values() if node_filter(v.src) and node_filter(v.dst)]:
+                        self.graph.add_edge(v.src, v.dst, relation_type=v.type)
                 else:
-                    for v in named_entity_map.values():
+                    for v in [v for v in named_entity_map.values() if node_filter(v)]:
                         self.graph.add_node(v)
 
         return self.graph
-
-
-

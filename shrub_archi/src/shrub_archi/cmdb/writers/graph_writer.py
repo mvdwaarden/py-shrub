@@ -1,7 +1,8 @@
 import shrub_util.core.logging as logging
 from shrub_util.generation.template_renderer import TemplateRenderer, get_dictionary_loader
 from enum import Enum
-from ..model.cmdb_model import CmdbLocalView
+from ..model.cmdb_model import CmdbLocalView, NamedItem
+from typing import Callable
 
 
 class GraphType(Enum):
@@ -74,12 +75,13 @@ CREATE ({{ s.__class__.__name__ }}{{ s.id }}) -[:{{ 'relation_type' }}]-> ({{ d.
 """
 
 
-def write_named_item_graph(local_view: CmdbLocalView, graph_type: GraphType, file: str, ):
-    local_view.build_graph()
+def write_named_item_graph(local_view: CmdbLocalView, graph_type: GraphType, file: str,
+                           node_filter: Callable[[NamedItem], bool] = False):
+    local_view.build_graph(node_filter=node_filter)
     with open(f"{file}.{graph_type.value}", "w") as ofp:
         tr = TemplateRenderer({
             GraphType.DOT.value: DOT_TEMPLATE,
             GraphType.GRAPHML.value: GRAPHML_TEMPLATE,
             GraphType.CYPHER.value:  CYPHER_TEMPLATE}, get_loader=get_dictionary_loader)
-        graph_output = tr.render(graph_type.value, g=local_view.graph)
+        graph_output = tr.render(graph_type.value, g=local_view.graph, node_filter=node_filter)
         ofp.write(graph_output)
