@@ -100,7 +100,6 @@ def do_select_views(repo: Repository):
     return views
 
 
-
 logging.configure_console()
 if __name__ == "__main__":
 
@@ -121,11 +120,12 @@ if __name__ == "__main__":
     function_test = args.has_arg("test")
     environment = args.get_arg("env", "ITSM_UAT")
     file = args.get_arg("file")
-    email = args.get_arg("email")
+    emails = args.get_arg("email", "").split(",")
     cmdb_api = args.get_arg("cmdb-api")
     use_local_view = args.has_arg("use-local-view")
     source = args.get_arg("source")
-    node_exclusion = args.get_arg("skip-ci-nodes","digitalcertificate,cicollection").split(",")
+    node_exclusion = args.get_arg("skip-ci-nodes","digitalcertificate, manager").split(",")
+    extra_cis = args.get_arg("extra-cis","").split(",")
 
     # do_show_select_furniture_test()
     if help:
@@ -144,18 +144,25 @@ if __name__ == "__main__":
         RepositoryGrapher().create_graph(source_repo, work_dir=work_dir)
     elif function_extract_cmdb:
         def node_filter(node: NamedItem) -> bool:
-            return True if not isinstance(node, ConfigurationItem) or not node.type in node_exclusion else False
+            if isinstance(node, ConfigurationItem) and node.type:
+                return node.type.lower() not in node_exclusion
+            else:
+                return node.__class__.__name__.lower() not in node_exclusion
 
 
         if use_local_view:
             local_view = CmdbLocalView()
             read_json(local_view, file)
-            write_named_item_graph(local_view, GraphType.DOT, file, node_filter=node_filter)
             write_named_item_graph(local_view, GraphType.GRAPHML, file, node_filter=node_filter)
+            write_named_item_graph(local_view, GraphType.GRAPHML, f"{file}-without-refs", node_filter=node_filter,
+                                   include_object_reference=False)
             write_named_item_graph(local_view, GraphType.CYPHER, file, node_filter=node_filter)
+            write_named_item_graph(local_view, GraphType.DOT, file, node_filter=node_filter)
+            write_named_item_graph(local_view, GraphType.DOT, f"{file}-without-refs", node_filter=node_filter,
+                                   include_object_reference=False)
             print(local_view)
         else:
-            local_view = cmdb_extract(environment, email=email, cmdb_api=cmdb_api, source=source, test_only=False)
+            local_view = cmdb_extract(environment, emails=emails, cmdb_api=cmdb_api, source=source, extra_cis=extra_cis, test_only=False)
             write_json(local_view, file)
             write_named_item_graph(local_view, GraphType.DOT, file, node_filter=node_filter)
             write_named_item_graph(local_view, GraphType.GRAPHML, file, node_filter=node_filter)

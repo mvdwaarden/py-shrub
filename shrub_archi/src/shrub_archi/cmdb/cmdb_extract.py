@@ -45,6 +45,9 @@ class CmdbApiFactory:
 
     def create_configuration_item_from_retrieve_ci_info_result_json(self, json_dict: dict) -> ConfigurationItem:
         ci = ConfigurationItem()
+        if not json_dict or "information" not in json_dict or len(json_dict["information"]) <= 0:
+            return None
+
         source_dict = json_dict["information"][0]
         ci.name = source_dict["CiName"]
         resolved_ci = self.local_view.resolve_configuration_item(ci)
@@ -98,6 +101,8 @@ class CmdbApiFactory:
 
     def get_configuration_item_ids_from_retreive_ci_by_authorization_result(self, json_dict: dict):
         result = []
+        if not json_dict or "information" not in json_dict or len(json_dict["information"]) <= 0:
+            return result
         source_dict = json_dict["information"][0]["CIName"]
         matcher = re.compile("(.*) \\((.*)\\)")
         for ci_name in source_dict:
@@ -120,10 +125,11 @@ class CmdbApi:
         self.token = token
 
     def _call_retrieve_api(self, function, request_builder) -> dict:
+        request = request_builder()
         response = requests.post(
             url=self._get_url(function),
             headers=self._get_headers(),
-            data=request_builder())
+            data=request)
         if response.ok:
             result = response.json()[function]
         else:
@@ -155,19 +161,19 @@ class CmdbApi:
 
         return self._call_retrieve_api(self.RETRIEVE_CI_INFO_BY_KEY_URI, get_retrieve_ci_info_request)
 
-    def get_configuration_items_by_authorization(self, email: str):
-        def get_retrieve_ci_by_authorization():
+    def get_configuration_items_by_authorization(self, emails: list):
+        def get_retrieve_ci_by_authorization_request():
             return f"""{{
                             "{self.RETRIEVE_CI_AUTHORIZATION}": {{
                                 "Key": [
-                                    "{email}"
+                                    "{'","'.join(emails)}"
                                 ],
                                 "Type": "user",
                                 "Source": "{self.source}"
                             }}
                         }}"""
 
-        return self._call_retrieve_api(self.RETRIEVE_CI_AUTHORIZATION, get_retrieve_ci_by_authorization)
+        return self._call_retrieve_api(self.RETRIEVE_CI_AUTHORIZATION, get_retrieve_ci_by_authorization_request)
 
     def _get_url(self, uri: str) -> str:
         return f"{self.base_uri}{uri}"
@@ -179,7 +185,7 @@ class CmdbApi:
         }
 
 
-def cmdb_extract(environment: str, email: str, cmdb_api: str, source: str,
+def cmdb_extract(environment: str, emails: list, cmdb_api: str, source: str, extra_cis: list = None,
                  local_view: CmdbLocalView = None, test_only: bool =False) -> CmdbLocalView:
 
     local_view = test_cmdb_extract_factory()
@@ -197,16 +203,22 @@ def cmdb_extract(environment: str, email: str, cmdb_api: str, source: str,
     else:
         result = CmdbLocalView()
     factory = CmdbApiFactory(local_view=result)
+    cis = cmdb_get_configuration_items_by_authorization(api, factory, emails)
 
-    for key in cmdb_get_configuration_items_by_authorization(api, factory, email):
+    if extra_cis:
+        for ci in [ci for ci in extra_cis if ci not in cis]:
+            cis.append(ci)
+
+    for key in cis:
         ci = cmdb_get_info_for_configuration_item_by_key(api, factory, key)
-        cmdb_get_relation_ships_by_configuration_item(api, factory, ci)
+        if ci:
+            cmdb_get_relation_ships_by_configuration_item(api, factory, ci)
 
     return result
 
 
-def cmdb_get_configuration_items_by_authorization(api: CmdbApi, factory: CmdbApiFactory, email: str) -> []:
-    response_json = api.get_configuration_items_by_authorization(email)
+def cmdb_get_configuration_items_by_authorization(api: CmdbApi, factory: CmdbApiFactory, emails: str) -> []:
+    response_json = api.get_configuration_items_by_authorization(emails)
     cis = factory.get_configuration_item_ids_from_retreive_ci_by_authorization_result(response_json)
 
     return cis

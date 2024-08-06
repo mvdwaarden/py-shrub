@@ -1,8 +1,8 @@
-import shrub_util.core.logging as logging
-from shrub_util.generation.template_renderer import TemplateRenderer, get_dictionary_loader
 from enum import Enum
-from ..model.cmdb_model import CmdbLocalView, NamedItem, ConfigurationItem
 from typing import Callable
+
+from shrub_archi.cmdb.model.cmdb_model import CmdbLocalView, NamedItem, ConfigurationItem, Manager
+from shrub_util.generation.template_renderer import TemplateRenderer, get_dictionary_loader
 
 
 class GraphType(Enum):
@@ -16,10 +16,10 @@ DOT_TEMPLATE = """
                rankdir=LR
                {% for s,d in g.edges %}
                    {% set relation_type = g.get_edge_data(s,d)["relation_type"] %}
-                   "{{ s.name }}" -> "{{ d.name }}" [label={{relation_type}}]
+                   "{{ s.name }}" -> "{{ d.name }}" [label="{{ relation_type }}"]
                {% endfor %}
                {% for n in g.nodes %}
-                   "{{ n.name }}" [shape={{ dot_shaper(n) }}]
+                   "{{ n.name }}" [label="{{ dot_node_namer(n) }}", shape={{ dot_shaper(n) }}]
                {% endfor %}
            }
            """
@@ -69,7 +69,7 @@ GRAPHML_TEMPLATE = """<?xml version="1.0" encoding="UTF-8"?>
 CYPHER_TEMPLATE = """
 {% for n in g.nodes %}
 {% set node_type = n.type if n.__class__.__name__ == "ConfigurationItem" else n.__class__.__name__ %}
-CREATE ({{ n.__class__.__name__ }}{{ n.id }}:{{ node_type }} {name: '{{ n.name }}'})
+CREATE ({{ n.__class__.__name__ }}{{ n.id }}:{{ node_type }} {{ cypher_node_namer(n) }})
 {% endfor %}  
 {% for s,d in g.edges %}
 {% set relation_type = g.get_edge_data(s,d)["relation_type"] %}
@@ -79,20 +79,46 @@ CREATE ({{ s.__class__.__name__ }}{{ s.id }}) -[:{{ 'relation_type' }}]-> ({{ d.
 
 
 def write_named_item_graph(local_view: CmdbLocalView, graph_type: GraphType, file: str,
+                           include_object_reference: bool = True,
                            node_filter: Callable[[NamedItem], bool] = False):
-    local_view.build_graph(node_filter=node_filter)
+    g = local_view.build_graph(include_object_reference=include_object_reference, node_filter=node_filter)
+
     with open(f"{file}.{graph_type.value}", "w") as ofp:
         def dot_shaper(n) -> str:
-            if isinstance(n, ConfigurationItem):
-                if n.type and  n.type in ["application", "subapplication"]:
-                    return "component"
-                elif n.type and n.type in ["database"]:
-                    return "cylinder"
             return "Mrecord"
+
+        def dot_node_namer(n) -> str:
+            if isinstance(n, ConfigurationItem):
+                email = n.manager.email if n.manager else "n.a."
+                bo_email = n.business_owner.email if n.business_owner else "n.a."
+                department = n.department.name if n.department else "n.a."
+                return f"{{{{{n.key}|{n.status}}} | {{{n.name} | {n.type} | {n.sub_type}}} | {{{bo_email} | {email} | {department}}}}} "
+            elif isinstance(n, Manager):
+                return f"{{{n.email}}} | {{ Manager }}"
+            else:
+                return f"{{{n.name}}} | {{ {n.__class__.__name__} }}"
+
+        def cypher_node_namer(n) -> str:
+            if isinstance(n, ConfigurationItem):
+                email = n.manager.email if n.manager else "n.a."
+                bo_email = n.business_owner.email if n.business_owner else "n.a."
+                department = n.department.name if n.department else "n.a."
+                return (f"{{name:'{n.name}', system_owner: '{email}', department: '{department}'"
+                        f", business_owner: '{bo_email}', type: '{n.type}', sub_type: '{n.sub_type}'"
+                        f", status: '{n.status}', key: '{n.key}'}}")
+            elif isinstance(n, Manager):
+                return f"{{name: '{n.name}', email: '{n.email}'}}"
+            else:
+                return f"{{name: '{n.name}'}}"
+
+        def node_namer(n):
+            return n.name
 
         tr = TemplateRenderer({
             GraphType.DOT.value: DOT_TEMPLATE,
             GraphType.GRAPHML.value: GRAPHML_TEMPLATE,
-            GraphType.CYPHER.value:  CYPHER_TEMPLATE}, get_loader=get_dictionary_loader)
-        graph_output = tr.render(graph_type.value, g=local_view.graph, node_filter=node_filter, dot_shaper=dot_shaper)
+            GraphType.CYPHER.value: CYPHER_TEMPLATE}, get_loader=get_dictionary_loader)
+        graph_output = tr.render(graph_type.value, g=g, node_filter=node_filter, dot_shaper=dot_shaper,
+                                 default_node_namer=node_namer, dot_node_namer=dot_node_namer,
+                                 cypher_node_namer=cypher_node_namer)
         ofp.write(graph_output)

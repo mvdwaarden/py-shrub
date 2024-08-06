@@ -324,9 +324,8 @@ class CmdbLocalView:
 
         for resolve in deferred_resolve_references:
             resolve(map_all_named_entities)
-        self.build_graph()
 
-    def refresh_object_reference_relations(self):
+    def refresh_object_reference_relations(self, include_object_reference: bool):
         def add_config_item_relations(ci: ConfigurationItem):
             def _resolve_relation(dst: NamedItem, relation_type):
                 if dst:
@@ -343,36 +342,46 @@ class CmdbLocalView:
             _resolve_relation(ci.config_admin, "config_admin")
             _resolve_relation(ci.department, "department")
 
+        # delete the old object relation references
         rel_to_delete = []
         for rel in self.map_relations.values():
             if isinstance(rel, ObjectReferenceRelation):
                 rel_to_delete.append(rel.get_resolve_key())
-
         for k in rel_to_delete:
             del self.map_relations[k]
+        if include_object_reference:
+            # add the objecct relation references
+            for ci in self.map_configuration_items.values():
+                add_config_item_relations(ci)
 
-        for ci in self.map_configuration_items.values():
-            add_config_item_relations(ci)
-
-    def build_graph(self, rebuild: bool = False, include_object_reference: bool = True,
+    def build_graph(self, include_object_reference: bool = True,
                     node_filter: Callable[[NamedItem], bool] = None) -> DiGraph:
+        g = DiGraph()
         if not node_filter:
             def no_filter(n: NamedItem) -> bool:
                 return True
+
             node_filter = no_filter
         else:
-            rebuild = True
+            param_node_filter = node_filter
 
-        if not self.graph or rebuild:
-            if include_object_reference:
-                self.refresh_object_reference_relations()
-            self.graph = DiGraph()
-            for key, named_entity_map, constructor in self.all_maps:
-                if issubclass(constructor, NamedItemRelation):
-                    for v in [v for v in named_entity_map.values() if node_filter(v.src) and node_filter(v.dst)]:
-                        self.graph.add_edge(v.src, v.dst, relation_type=v.type)
+            def local_node_filter(n: NamedItem) -> bool:
+                if include_object_reference:
+                    return param_node_filter(n)
+                elif not isinstance(n, ConfigurationItem):
+                    return False
                 else:
-                    for v in [v for v in named_entity_map.values() if node_filter(v)]:
-                        self.graph.add_node(v)
+                    return param_node_filter(n)
+            node_filter = local_node_filter
 
-        return self.graph
+        self.refresh_object_reference_relations(include_object_reference)
+        for key, named_entity_map, constructor in self.all_maps:
+            if issubclass(constructor, NamedItemRelation):
+                for v in [v for v in named_entity_map.values() if node_filter(v.src) and node_filter(v.dst)]:
+                    g.add_edge(v.src, v.dst, relation_type=v.type)
+            else:
+                for v in named_entity_map.values():
+                    if node_filter(v):
+                        g.add_node(v)
+
+        return g
