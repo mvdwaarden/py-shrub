@@ -95,7 +95,7 @@ class CmdbApiFactory:
             dep = Department()
             # custom key = email!
             dep.name = source_dict["SystemOwnerDepartment"]
-            resolved_dep = self.local_view.resolve_department(man)
+            resolved_dep = self.local_view.resolve_department(dep)
             resolved_ci.department = resolved_dep
 
         if "Vendor" in source_dict:
