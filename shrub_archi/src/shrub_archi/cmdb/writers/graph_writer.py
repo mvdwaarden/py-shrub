@@ -1,7 +1,7 @@
 import shrub_util.core.logging as logging
 from shrub_util.generation.template_renderer import TemplateRenderer, get_dictionary_loader
 from enum import Enum
-from ..model.cmdb_model import CmdbLocalView, NamedItem
+from ..model.cmdb_model import CmdbLocalView, NamedItem, ConfigurationItem
 from typing import Callable
 
 
@@ -17,6 +17,9 @@ DOT_TEMPLATE = """
                {% for s,d in g.edges %}
                    {% set relation_type = g.get_edge_data(s,d)["relation_type"] %}
                    "{{ s.name }}" -> "{{ d.name }}" [label={{relation_type}}]
+               {% endfor %}
+               {% for n in g.nodes %}
+                   "{{ n.name }}" [shape={{ dot_shaper(n) }}]
                {% endfor %}
            }
            """
@@ -79,9 +82,17 @@ def write_named_item_graph(local_view: CmdbLocalView, graph_type: GraphType, fil
                            node_filter: Callable[[NamedItem], bool] = False):
     local_view.build_graph(node_filter=node_filter)
     with open(f"{file}.{graph_type.value}", "w") as ofp:
+        def dot_shaper(n) -> str:
+            if isinstance(n, ConfigurationItem):
+                if n.type and  n.type in ["application", "subapplication"]:
+                    return "component"
+                elif n.type and n.type in ["database"]:
+                    return "cylinder"
+            return "Mrecord"
+
         tr = TemplateRenderer({
             GraphType.DOT.value: DOT_TEMPLATE,
             GraphType.GRAPHML.value: GRAPHML_TEMPLATE,
             GraphType.CYPHER.value:  CYPHER_TEMPLATE}, get_loader=get_dictionary_loader)
-        graph_output = tr.render(graph_type.value, g=local_view.graph, node_filter=node_filter)
+        graph_output = tr.render(graph_type.value, g=local_view.graph, node_filter=node_filter, dot_shaper=dot_shaper)
         ofp.write(graph_output)
