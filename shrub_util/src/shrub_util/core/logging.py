@@ -181,7 +181,7 @@ def trace_message(context: str, message: str, headers: dict):
         for tag in ["Password", "BSN"]:
             message = re.sub(
                 f"{tag}([^>].*)>[^<]*<\\/([^:]*):{tag}",
-                f"{tag}\g<1>>***OBFUSCATED***</\g<2>:{tag}",
+                f"{tag}\\g<1>>***OBFUSCATED***</\\g<2>:{tag}",
                 message,
             )
         return message

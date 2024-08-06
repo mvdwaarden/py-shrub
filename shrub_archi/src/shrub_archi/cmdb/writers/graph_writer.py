@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Callable
 
-from shrub_archi.cmdb.model.cmdb_model import CmdbLocalView, NamedItem, ConfigurationItem, Manager
+from shrub_archi.cmdb.model.cmdb_model import CmdbLocalView, NamedItem, ConfigurationItem, Manager, ConfigAdmin
 from shrub_util.generation.template_renderer import TemplateRenderer, get_dictionary_loader
 
 
@@ -94,7 +94,9 @@ def write_named_item_graph(local_view: CmdbLocalView, graph_type: GraphType, fil
                 department = n.department.name if n.department else "n.a."
                 return f"{{{{{n.key}|{n.status}}} | {{{n.name} | {n.type} | {n.sub_type}}} | {{{bo_email} | {email} | {department}}}}} "
             elif isinstance(n, Manager):
-                return f"{{{n.email}}} | {{ Manager }}"
+                return f"{{{n.email} | {n.name}}} | {{ Manager }}"
+            elif isinstance(n, ConfigAdmin):
+                return f"{{{n.functional_email} | {n.name}}} | {{ Manager }}"
             else:
                 return f"{{{n.name}}} | {{ {n.__class__.__name__} }}"
 
@@ -108,6 +110,8 @@ def write_named_item_graph(local_view: CmdbLocalView, graph_type: GraphType, fil
                         f", status: '{n.status}', key: '{n.key}'}}")
             elif isinstance(n, Manager):
                 return f"{{name: '{n.name}', email: '{n.email}'}}"
+            elif isinstance(n, ConfigAdmin):
+                return f"{{name: '{n.name}', functional_email: '{n.functional_email}'}}"
             else:
                 return f"{{name: '{n.name}'}}"
 
