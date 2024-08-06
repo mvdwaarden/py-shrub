@@ -84,6 +84,19 @@ class CmdbApiFactory:
             man.email = source_dict["BusinessOwner"]
             resolved_man = self.local_view.resolve_manager(man)
             resolved_ci.business_owner = resolved_man
+        if "SystemOwner" in source_dict:
+            man = Manager()
+            # custom key = email!
+            man.email = source_dict["SystemOwner"]
+            resolved_man = self.local_view.resolve_manager(man)
+            resolved_ci.system_owner = resolved_man
+
+        if "SystemOwnerDepartment" in source_dict:
+            dep = Department()
+            # custom key = email!
+            dep.name = source_dict["SystemOwnerDepartment"]
+            resolved_dep = self.local_view.resolve_manager(man)
+            resolved_ci.department = resolved_dep
 
         if "Vendor" in source_dict:
             vendor = Vendor()
