@@ -96,7 +96,7 @@ def write_named_item_graph(local_view: CmdbLocalView, graph_type: GraphType, fil
             elif isinstance(n, Manager):
                 return f"{{{n.email} | {n.name}}} | {{ Manager }}"
             elif isinstance(n, ConfigAdmin):
-                return f"{{{n.functional_email} | {n.name}}} | {{ Manager }}"
+                return f"{{{n.functional_email} | {n.name}}} | {{ ConfigAdmin }}"
             else:
                 return f"{{{n.name}}} | {{ {n.__class__.__name__} }}"
 
