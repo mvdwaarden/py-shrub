@@ -92,7 +92,8 @@ def write_named_item_graph(local_view: CmdbLocalView, graph_type: GraphType, fil
                 email = n.system_owner.email if n.system_owner else "n.a."
                 bo_email = n.business_owner.email if n.business_owner else "n.a."
                 department = n.department.name if n.department else "n.a."
-                return f"{{{{{n.key}|{n.status}}} | {{{n.name} | {n.type} | {n.sub_type}}} | {{{bo_email} | {email} | {department}}}}} "
+                aic = n.aic if n.aic else "n.a."
+                return f"{{{{{n.key}|{n.status}|{aic}}} | {{{n.name} | {n.type} | {n.sub_type}}} | {{{bo_email} | {email} | {department}}}}} "
             elif isinstance(n, Manager):
                 return f"{{{n.email} | {n.name}}} | {{ Manager }}"
             elif isinstance(n, ConfigAdmin):
