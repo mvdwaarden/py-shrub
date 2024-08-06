@@ -81,7 +81,7 @@ class ConfigurationItem(NamedItem):
         self.config_admin: Optional[ConfigAdmin] = None
         self.department: Optional[Department] = None
         self.business_owner: Optional[Manager] = None
-        self.manager: Optional[Manager] = None
+        self.system_owner: Optional[Manager] = None
         self.description = None
         self.title = None
         self.related_service_component: Optional[ServiceComponent] = None
@@ -109,8 +109,8 @@ class ConfigurationItem(NamedItem):
         if self.business_owner:
             the_dict["business_owner"] = self.business_owner.id if isinstance(self.business_owner,
                                                                               Manager) else self.business_owner
-        if self.manager:
-            the_dict["manager"] = self.manager.id if isinstance(self.manager, Manager) else self.manager
+        if self.system_owner:
+            the_dict["system_owner"] = self.system_owner.id if isinstance(self.system_owner, Manager) else self.system_owner
         if self.description:
             the_dict["description"] = self.description
         if self.title:
@@ -149,8 +149,8 @@ class ConfigurationItem(NamedItem):
             self.iam_provisioning_methods = the_dict["iam_provisioning_methods"]
         if "department" in the_dict:
             self.department = the_dict["department"]
-        if "manager" in the_dict:
-            self.manager = the_dict["manager"]
+        if "system_owner" in the_dict:
+            self.system_owner = the_dict["system_owner"]
         if "config_admin" in the_dict:
             self.config_admin = the_dict["config_admin"]
         if "business_owner" in the_dict:
@@ -161,8 +161,8 @@ class ConfigurationItem(NamedItem):
             self.vendor = the_dict["vendor"]
 
     def resolve_references(self, id_entity_map: dict):
-        if isinstance(self.manager, int) and self.manager in id_entity_map:
-            self.manager = id_entity_map[self.manager]
+        if isinstance(self.system_owner, int) and self.system_owner in id_entity_map:
+            self.system_owner = id_entity_map[self.system_owner]
         if isinstance(self.vendor, int) and self.vendor in id_entity_map:
             self.vendor = id_entity_map[self.vendor]
         if isinstance(self.business_owner, int) and self.business_owner in id_entity_map:
@@ -336,7 +336,7 @@ class CmdbLocalView:
                     self.resolve_relation(relation)
 
             _resolve_relation(ci.vendor, "vendor")
-            _resolve_relation(ci.manager, "manager")
+            _resolve_relation(ci.system_owner, "system_owner")
             _resolve_relation(ci.business_owner, "business owner")
             _resolve_relation(ci.related_service_component, "related_service_component")
             _resolve_relation(ci.config_admin, "config_admin")

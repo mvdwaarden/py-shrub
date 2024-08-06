@@ -36,7 +36,7 @@ class CmdbApiFactory:
         man.email = source_dict[f"{prefix}ManagerEmail"]
         resolved_man = self.local_view.resolve_manager(man)
         resolved_man.name = source_dict[f"{prefix}ManagerName"]
-        resolved_ci.manager = resolved_man
+        resolved_ci.system_owner = resolved_man
         dep = Department()
         dep.name = source_dict[f"{prefix}Department"]
         resolved_dep = self.local_view.resolve_department(dep)

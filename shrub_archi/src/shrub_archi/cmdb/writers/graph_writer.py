@@ -1,7 +1,8 @@
 from enum import Enum
 from typing import Callable
 
-from shrub_archi.cmdb.model.cmdb_model import CmdbLocalView, NamedItem, ConfigurationItem, Manager, ConfigAdmin
+from shrub_archi.cmdb.model.cmdb_model import CmdbLocalView, NamedItem, ConfigurationItem, Manager, ConfigAdmin, \
+    NamedItemRelation
 from shrub_util.generation.template_renderer import TemplateRenderer, get_dictionary_loader
 
 
@@ -73,14 +74,13 @@ CREATE ({{ n.__class__.__name__ }}{{ n.id }}:{{ node_type }} {{ cypher_node_name
 {% endfor %}  
 {% for s,d in g.edges %}
 {% set relation_type = g.get_edge_data(s,d)["relation_type"] %}
-CREATE ({{ s.__class__.__name__ }}{{ s.id }}) -[:{{ 'relation_type' }}]-> ({{ d.__class__.__name__ }}{{ d.id }})
+CREATE ({{ s.__class__.__name__ }}{{ s.id }}) -[:{{ cypher_relation_namer(relation_type) }}]-> ({{ d.__class__.__name__ }}{{ d.id }})
 {% endfor %}                 
 """
 
 
 def write_named_item_graph(local_view: CmdbLocalView, graph_type: GraphType, file: str,
-                           include_object_reference: bool = True,
-                           node_filter: Callable[[NamedItem], bool] = False):
+                           include_object_reference: bool = True, node_filter: Callable[[NamedItem], bool] = False):
     g = local_view.build_graph(include_object_reference=include_object_reference, node_filter=node_filter)
 
     with open(f"{file}.{graph_type.value}", "w") as ofp:
@@ -89,7 +89,7 @@ def write_named_item_graph(local_view: CmdbLocalView, graph_type: GraphType, fil
 
         def dot_node_namer(n) -> str:
             if isinstance(n, ConfigurationItem):
-                email = n.manager.email if n.manager else "n.a."
+                email = n.system_owner.email if n.system_owner else "n.a."
                 bo_email = n.business_owner.email if n.business_owner else "n.a."
                 department = n.department.name if n.department else "n.a."
                 return f"{{{{{n.key}|{n.status}}} | {{{n.name} | {n.type} | {n.sub_type}}} | {{{bo_email} | {email} | {department}}}}} "
@@ -102,7 +102,7 @@ def write_named_item_graph(local_view: CmdbLocalView, graph_type: GraphType, fil
 
         def cypher_node_namer(n) -> str:
             if isinstance(n, ConfigurationItem):
-                email = n.manager.email if n.manager else "n.a."
+                email = n.system_owner.email if n.system_owner else "n.a."
                 bo_email = n.business_owner.email if n.business_owner else "n.a."
                 department = n.department.name if n.department else "n.a."
                 return (f"{{name:'{n.name}', system_owner: '{email}', department: '{department}'"
@@ -115,14 +115,18 @@ def write_named_item_graph(local_view: CmdbLocalView, graph_type: GraphType, fil
             else:
                 return f"{{name: '{n.name}'}}"
 
+        def cypher_relation_namer(org_name: str) -> str:
+            if org_name:
+                return org_name.replace(' ', '_')
+            else:
+                return "relates_to"
+
         def node_namer(n):
             return n.name
 
-        tr = TemplateRenderer({
-            GraphType.DOT.value: DOT_TEMPLATE,
-            GraphType.GRAPHML.value: GRAPHML_TEMPLATE,
+        tr = TemplateRenderer({GraphType.DOT.value: DOT_TEMPLATE, GraphType.GRAPHML.value: GRAPHML_TEMPLATE,
             GraphType.CYPHER.value: CYPHER_TEMPLATE}, get_loader=get_dictionary_loader)
         graph_output = tr.render(graph_type.value, g=g, node_filter=node_filter, dot_shaper=dot_shaper,
                                  default_node_namer=node_namer, dot_node_namer=dot_node_namer,
-                                 cypher_node_namer=cypher_node_namer)
+                                 cypher_node_namer=cypher_node_namer, cypher_relation_namer=cypher_relation_namer)
         ofp.write(graph_output)
