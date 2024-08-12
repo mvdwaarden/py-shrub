@@ -11,6 +11,7 @@ from .cmdb_test_data import RETRIEVE_CI_RELATION_SHIPS_RESPONSE, RETRIEVE_CI_BY_
 from .model.cmdb_model import CmdbLocalView, ConfigurationItem, ConfigAdmin, Manager, Department, Vendor, \
     ServiceComponent, ConfigurationItemRelation
 from typing import List
+from shrub_util.core.iteration_helpers import list_block_iterator
 
 
 class CmdbApiFactory:
@@ -50,68 +51,71 @@ class CmdbApiFactory:
         if not json_dict or "information" not in json_dict or len(json_dict["information"]) <= 0:
             return []
         for source_dict in json_dict["information"]:
-            ci = ConfigurationItem()
-            ci.name = source_dict["CiName"]
-            resolved_ci = self.local_view.resolve_configuration_item(ci)
-            if "AicClassification" in source_dict:
-                resolved_ci.aic = source_dict["AicClassification"]
-            resolved_ci.key = source_dict["CiID"]
-            resolved_ci.status = source_dict["Status"]
-            resolved_ci.sub_type = source_dict["CiSubtype"]
-            resolved_ci.type = source_dict[("CiType")]
-            if "Description" in source_dict:
-                if source_dict["Description"]:
-                    resolved_ci.description = ""
-                    for line in source_dict["Description"]:
-                        if line:
-                            resolved_ci.description += line
-            if "Title" in source_dict:
-                resolved_ci.title = source_dict["Title"]
-            if "Environment" in source_dict:
-                resolved_ci.environments = []
-                for env in source_dict["Environment"]:
-                    resolved_ci.environments.append(env)
-            if "IAMProvisioningMethod" in source_dict:
-                resolved_ci.iam_provisioning_methods = []
-                for prov in source_dict["IAMProvisioningMethod"]:
-                    resolved_ci.iam_provisioning_methods.append(prov)
+            try:
+                ci = ConfigurationItem()
+                ci.name = source_dict["CiName"]
+                resolved_ci = self.local_view.resolve_configuration_item(ci)
+                if "AicClassification" in source_dict:
+                    resolved_ci.aic = source_dict["AicClassification"]
+                resolved_ci.key = source_dict["CiID"]
+                resolved_ci.status = source_dict["Status"]
+                resolved_ci.sub_type = source_dict["CiSubtype"]
+                resolved_ci.type = source_dict[("CiType")]
+                if "Description" in source_dict:
+                    if source_dict["Description"]:
+                        resolved_ci.description = ""
+                        for line in source_dict["Description"]:
+                            if line:
+                                resolved_ci.description += line
+                if "Title" in source_dict:
+                    resolved_ci.title = source_dict["Title"]
+                if "Environment" in source_dict:
+                    resolved_ci.environments = []
+                    for env in source_dict["Environment"]:
+                        resolved_ci.environments.append(env)
+                if "IAMProvisioningMethod" in source_dict:
+                    resolved_ci.iam_provisioning_methods = []
+                    for prov in source_dict["IAMProvisioningMethod"]:
+                        resolved_ci.iam_provisioning_methods.append(prov)
 
-            ca = ConfigAdmin()
-            ca.name = source_dict["ConfigAdminGroup"]
-            resolved_ca = self.local_view.resolve_config_admin(ca)
-            resolved_ci.config_admin = resolved_ca
-            if "BusinessOwner" in source_dict:
-                man = Manager()
-                # custom key = email!
-                man.email = source_dict["BusinessOwner"]
-                resolved_man = self.local_view.resolve_manager(man)
-                resolved_ci.business_owner = resolved_man
-            if "SystemOwner" in source_dict:
-                man = Manager()
-                # custom key = email!
-                man.email = source_dict["SystemOwner"]
-                resolved_man = self.local_view.resolve_manager(man)
-                resolved_ci.system_owner = resolved_man
+                ca = ConfigAdmin()
+                ca.name = source_dict["ConfigAdminGroup"]
+                resolved_ca = self.local_view.resolve_config_admin(ca)
+                resolved_ci.config_admin = resolved_ca
+                if "BusinessOwner" in source_dict:
+                    man = Manager()
+                    # custom key = email!
+                    man.email = source_dict["BusinessOwner"]
+                    resolved_man = self.local_view.resolve_manager(man)
+                    resolved_ci.business_owner = resolved_man
+                if "SystemOwner" in source_dict:
+                    man = Manager()
+                    # custom key = email!
+                    man.email = source_dict["SystemOwner"]
+                    resolved_man = self.local_view.resolve_manager(man)
+                    resolved_ci.system_owner = resolved_man
 
-            if "SystemOwnerDepartment" in source_dict:
-                dep = Department()
-                # custom key = email!
-                dep.name = source_dict["SystemOwnerDepartment"]
-                resolved_dep = self.local_view.resolve_department(dep)
-                resolved_ci.department = resolved_dep
+                if "SystemOwnerDepartment" in source_dict:
+                    dep = Department()
+                    # custom key = email!
+                    dep.name = source_dict["SystemOwnerDepartment"]
+                    resolved_dep = self.local_view.resolve_department(dep)
+                    resolved_ci.department = resolved_dep
 
-            if "Vendor" in source_dict:
-                vendor = Vendor()
-                vendor.name = source_dict["Vendor"]
-                resolved_vendor = self.local_view.resolve_vendor(vendor)
-                resolved_ci.vendor = resolved_vendor
+                if "Vendor" in source_dict:
+                    vendor = Vendor()
+                    vendor.name = source_dict["Vendor"]
+                    resolved_vendor = self.local_view.resolve_vendor(vendor)
+                    resolved_ci.vendor = resolved_vendor
 
-            if "RelatedServiceComponent" in source_dict:
-                sc = ServiceComponent()
-                sc.name = source_dict["RelatedServiceComponent"]
-                resolved_sc = self.local_view.resolve_service_component(sc)
-                resolved_ci.related_service_component = resolved_sc
-            resolved_cis.append(resolved_ci)
+                if "RelatedServiceComponent" in source_dict:
+                    sc = ServiceComponent()
+                    sc.name = source_dict["RelatedServiceComponent"]
+                    resolved_sc = self.local_view.resolve_service_component(sc)
+                    resolved_ci.related_service_component = resolved_sc
+                resolved_cis.append(resolved_ci)
+            except Exception as ex:
+                logging.get_logger().error(f"issue creating ConfigurationInfo from {json_dict}")
 
         return resolved_cis
 
@@ -141,6 +145,7 @@ class CmdbApi:
         self.token = token
 
     def _call_retrieve_api(self, function, request_builder) -> dict:
+        logging.get_logger().info(f"start calling {function}")
         request = request_builder()
         response = requests.post(
             url=self._get_url(function),
@@ -150,6 +155,7 @@ class CmdbApi:
             result = response.json()[function]
         else:
             result = None
+        logging.get_logger().info(f"done calling {function}")
         return result
 
     def get_relation_ships_by_configuration_item_name(self, name: str):
@@ -225,12 +231,14 @@ def cmdb_extract(environment: str, emails: list, cmdb_api: str, source: str, ext
         for ci in [ci for ci in extra_cis if ci not in cis]:
             cis.append(ci)
     recursion_count = 0
-    max_recursion_count = 2
+    max_block_size = 100
+    max_recursion_count = 3
     map_ci_retrieval_cache = {}
     while len(cis) > 0 and recursion_count < max_recursion_count:
-        resolved_cis = cmdb_get_info_for_configuration_item_by_key(api, factory, cis)
-        for ci in resolved_cis:
-            map_ci_retrieval_cache[ci.key] = ci
+        for cis_block in list_block_iterator(cis, max_block_size):
+            resolved_cis = cmdb_get_info_for_configuration_item_by_key(api, factory, cis_block)
+            for ci in resolved_cis:
+                map_ci_retrieval_cache[ci.key] = ci
         cis = []
         for resolved_ci in resolved_cis:
             relations = cmdb_get_relation_ships_by_configuration_item(api, factory, resolved_ci)
