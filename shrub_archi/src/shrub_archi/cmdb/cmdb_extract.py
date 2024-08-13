@@ -137,7 +137,7 @@ class CmdbApiFactory:
 class CmdbApi:
     RETRIEVE_RELATION_SHIPS_BY_NAME_URI = "retrieveCIRelationshipInfoByKey"
     RETRIEVE_CI_INFO_BY_KEY_URI = "retrieveCiInfoByKey"
-    RETRIEVE_CI_AUTHORIZATION = "retrieveCIAuthorization"
+    RETRIEVE_CI_AUTHORIZATION_URI = "retrieveCIAuthorization"
 
     def __init__(self, source: str, base_uri: str, token: Token):
         self.source = source
@@ -186,7 +186,7 @@ class CmdbApi:
     def get_configuration_items_by_authorization(self, emails: list):
         def get_retrieve_ci_by_authorization_request():
             return f"""{{
-                            "{self.RETRIEVE_CI_AUTHORIZATION}": {{
+                            "{self.RETRIEVE_CI_AUTHORIZATION_URI}": {{
                                 "Key": [
                                     "{'","'.join(emails)}"
                                 ],
@@ -195,7 +195,7 @@ class CmdbApi:
                             }}
                         }}"""
 
-        return self._call_retrieve_api(self.RETRIEVE_CI_AUTHORIZATION, get_retrieve_ci_by_authorization_request)
+        return self._call_retrieve_api(self.RETRIEVE_CI_AUTHORIZATION_URI, get_retrieve_ci_by_authorization_request)
 
     def _get_url(self, uri: str) -> str:
         return f"{self.base_uri}{uri}"

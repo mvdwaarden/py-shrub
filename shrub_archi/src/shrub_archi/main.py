@@ -13,6 +13,7 @@ from shrub_archi.cmdb.model.cmdb_model import CmdbLocalView, ConfigurationItem, 
 from cmdb.readers.json_reader import read_json
 from cmdb.writers.graph_writer import write_named_item_graph, GraphType
 from cmdb.writers.json_writer import write_json
+from shrub_archi.oia.oia_api import OiaApi
 
 
 usage = """
@@ -113,6 +114,7 @@ if __name__ == "__main__":
     target = args.get_arg("target")
     work_dir = args.get_arg("workdir")
     function_import = args.has_arg("import")
+    function_oia = args.has_arg("oia")
     function_extract_cmdb = args.has_arg("cmdb")
     function_create_graph = args.has_arg("graph")
     cutoff_score = args.get_arg("cutoff", 85)
@@ -126,6 +128,7 @@ if __name__ == "__main__":
     source = args.get_arg("source")
     node_exclusion = args.get_arg("skip-ci-nodes","digitalcertificate, manager").split(",")
     extra_cis = args.get_arg("extra-cis","").split(",")
+    oia_api = args.get_arg("oia-api")
 
     # do_show_select_furniture_test()
     if help:
@@ -142,14 +145,15 @@ if __name__ == "__main__":
         source_repo = create_repository(source)
         source_repo.read()
         RepositoryGrapher().create_graph(source_repo, work_dir=work_dir)
+    elif function_oia:
+        oia_api = OiaApi(base_url=oia_api, application=environment)
+        oia_api.get_users()
     elif function_extract_cmdb:
         def node_filter(node: NamedItem) -> bool:
             if isinstance(node, ConfigurationItem) and node.type:
                 return node.type.lower() not in node_exclusion
             else:
                 return node.__class__.__name__.lower() not in node_exclusion
-
-
         if use_local_view:
             local_view = CmdbLocalView()
             read_json(local_view, file)
