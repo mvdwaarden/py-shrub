@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import TypeVar
+from typing import TypeVar, List
 
 
 class Identity:
@@ -120,6 +120,40 @@ class Authorization:
         self.role = the_dict["role"]
 
         return self
+
+
+class Authorizations:
+    def __init__(self, authorizations: List[Authorization]):
+        self.authorizations: List[Authorization] = authorizations
+        self.lookup_resources_for_identity = {}
+        self.lookup_roles_for_identity_resource = {}
+        self._build_lookups()
+
+    def _get_lookup_authorization_by_user_resource_key(self, identity: Identity, resource: Resource):
+        return f"{identity.get_resolve_key()}.{resource.get_resolve_key()}"
+
+    def _build_lookups(self):
+        self.lookup_resources_for_identity = {}
+        for auth in self.authorizations:
+            if auth.identity.get_resolve_key() not in self.lookup_resources_for_identity:
+                self.lookup_resources_for_identity[auth.identity.get_resolve_key()] = []
+            if auth.resource not in self.lookup_resources_for_identity[auth.identity.get_resolve_key()]:
+                self.lookup_resources_for_identity[auth.identity.get_resolve_key()].append(auth.resource)
+            _key = self._get_lookup_authorization_by_user_resource_key(auth.identity, auth.resource)
+            if _key not in self.lookup_roles_for_identity_resource:
+                self.lookup_roles_for_identity_resource[_key] = []
+            self.lookup_roles_for_identity_resource[_key].append(auth.role)
+
+    def get_identities(self) -> List[Identity]:
+        return self.lookup_resources_for_identity.keys()
+
+    def get_resources_for_identity(self, identity: Identity) -> List[Resource]:
+        return self.lookup_resources_for_identity[identity.get_resolve_key()]
+
+    def get_roles_for_identity_resource(self, identity: Identity, resource: Resource) -> List[Resource]:
+        return self.lookup_roles_for_identity_resource[self._get_lookup_authorization_by_user_resource_key(identity, resource)]
+
+
 
 
 T = TypeVar("T")

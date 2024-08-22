@@ -3,9 +3,11 @@ import json
 import requests
 
 from shrub_archi.connectors.oracle.token import oracle_get_token
-from shrub_archi.oia.model.oia_model import OiaLocalView, Identity, Role, Resource, ResourceType, Authorization
+from shrub_archi.oia.model.oia_model import OiaLocalView, Identity, Role, Resource, ResourceType, Authorization, Authorizations
 from shrub_util.api.token import Token
 from .oia_test_data import TEST_AUTHORIZATIONS
+from typing import List
+from shrub_util.generation.template_renderer import TemplateRenderer, get_dictionary_loader
 
 
 class OiaApiObjectFactory:
@@ -75,13 +77,34 @@ class OiaApi:
         }
         return headers
 
-    def get_users(self):
+    def get_identities(self) -> List[Identity]:
         if False:
             response = requests.request("GET", self._get_url(self.USERS_URI), headers=self._get_headers(), data="")
 
             print(response.text)
 
         test_extract()
+
+    def update_user(self, identity: Identity, authorizations: Authorizations):
+        request = """{
+                "userName": "{{ identity.username }}",
+                "email": "{{ identity.email }}",
+                "fullName": "{{ identity.full_name }}",
+                "workspaces": [
+                    {% for workspace in authorizations.get_resources_for_identity(identity) %}
+                    {
+                        "name": "{{ workspace.name }}",
+                        "roles": [
+                        {% for role in authorizations.get_roles_for_identity_resource(identity, workspace) %}                        
+                            "{{ role.name }}" {% if not loop.last  %},{% endif %}
+                        {% endfor %}
+                        ]
+                    }{% if not loop.last  %},{% endif %}
+                    {% endfor %}  
+                ]                  
+            }"""
+        tr = TemplateRenderer({"request": request}, get_loader=get_dictionary_loader)
+        print(tr.render("request", identity=identity, authorizations=authorizations))
 
 
 def test_extract():
@@ -98,3 +121,7 @@ def test_extract():
         local_view_read_back.from_dict(json.loads(ipf.read()))
     with open("oia_local_view_read_back.json", "w") as ofp:
         ofp.write(json.dumps(local_view_read_back.to_dict()))
+
+    oia_cln = OiaApi(base_url="dont_care", application="whatever")
+
+    oia_cln.update_user(list(local_view.map_identities.values())[0], Authorizations(local_view.map_authorizations.values()))
