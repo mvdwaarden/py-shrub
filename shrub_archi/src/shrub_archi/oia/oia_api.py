@@ -14,8 +14,8 @@ class OiaApiObjectFactory:
     def __init__(self, local_view):
         self.local_view: OiaLocalView = local_view
 
-    def create_users(self, json_dict: dict):
-        result = []
+    def create_identities(self, json_dict: dict) -> List[Identity]:
+        result: List[Identity] = []
         if "items" not in json_dict:
             return result
         for item in json_dict["items"]:
@@ -85,7 +85,7 @@ class OiaApi:
 
         test_extract()
 
-    def update_user(self, identity: Identity, authorizations: Authorizations):
+    def update_identity(self, identity: Identity, authorizations: Authorizations):
         request = """{
                 "userName": "{{ identity.username }}",
                 "email": "{{ identity.email }}",
@@ -109,7 +109,7 @@ class OiaApi:
 
 def test_extract():
     local_view = OiaLocalView()
-    users = OiaApiObjectFactory(local_view).create_users(json.loads(TEST_AUTHORIZATIONS))
+    users = OiaApiObjectFactory(local_view).create_identities(json.loads(TEST_AUTHORIZATIONS))
     print(users)
 
 
@@ -124,4 +124,4 @@ def test_extract():
 
     oia_cln = OiaApi(base_url="dont_care", application="whatever")
 
-    oia_cln.update_user(list(local_view.map_identities.values())[0], Authorizations(local_view.map_authorizations.values()))
+    oia_cln.update_identity(list(local_view.map_identities.values())[0], Authorizations(local_view.map_authorizations.values()))
