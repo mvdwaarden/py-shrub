@@ -14,7 +14,7 @@ from typing import List
 from shrub_util.core.iteration_helpers import list_block_iterator
 
 
-class CmdbApiFactory:
+class CmdbApiObjectFactory:
     def __init__(self, local_view: CmdbLocalView):
         self.local_view = local_view
 
@@ -224,7 +224,7 @@ def cmdb_extract(environment: str, emails: list, cmdb_api: str, source: str, ext
         result = local_view
     else:
         result = CmdbLocalView()
-    factory = CmdbApiFactory(local_view=result)
+    factory = CmdbApiObjectFactory(local_view=result)
     cis = cmdb_get_configuration_items_by_authorization(api, factory, emails)
 
     if extra_cis:
@@ -252,21 +252,21 @@ def cmdb_extract(environment: str, emails: list, cmdb_api: str, source: str, ext
     return result
 
 
-def cmdb_get_configuration_items_by_authorization(api: CmdbApi, factory: CmdbApiFactory, emails: str) -> []:
+def cmdb_get_configuration_items_by_authorization(api: CmdbApi, factory: CmdbApiObjectFactory, emails: str) -> []:
     response_json = api.get_configuration_items_by_authorization(emails)
     cis = factory.get_configuration_item_ids_from_retreive_ci_by_authorization_result(response_json)
 
     return cis
 
 
-def cmdb_get_info_for_configuration_item_by_key(api: CmdbApi, factory: CmdbApiFactory, keys: list) -> ConfigurationItem:
+def cmdb_get_info_for_configuration_item_by_key(api: CmdbApi, factory: CmdbApiObjectFactory, keys: list) -> ConfigurationItem:
     response_json = api.get_configuration_item_info_by_key(keys)
     cis = factory.create_configuration_item_from_retrieve_ci_info_result_json(response_json)
 
     return cis
 
 
-def cmdb_get_relation_ships_by_configuration_item(api: CmdbApi, factory: CmdbApiFactory, ci: ConfigurationItem) -> list:
+def cmdb_get_relation_ships_by_configuration_item(api: CmdbApi, factory: CmdbApiObjectFactory, ci: ConfigurationItem) -> list:
     response_json = api.get_relation_ships_by_configuration_item_name(ci.name)
     downstream = upstream = False
     relations = []
@@ -301,11 +301,10 @@ def cmdb_get_relation_ships_by_configuration_item(api: CmdbApi, factory: CmdbApi
     return relations
 
 
-
 def test_cmdb_extract_factory() -> CmdbLocalView:
     local_view = CmdbLocalView()
     result = json.loads(RETRIEVE_CI_RELATION_SHIPS_RESPONSE)
-    factory = CmdbApiFactory(local_view=local_view)
+    factory = CmdbApiObjectFactory(local_view=local_view)
     for down_stream_ci in result["downstreamCIs"]:
         ci = factory.create_configuration_item_from_retrieve_relation_ship_result_json(json_dict=down_stream_ci,
                                                                                        prefix="Downstream")

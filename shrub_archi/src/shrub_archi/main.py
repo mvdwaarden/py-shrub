@@ -146,8 +146,8 @@ if __name__ == "__main__":
         source_repo.read()
         RepositoryGrapher().create_graph(source_repo, work_dir=work_dir)
     elif function_oia:
-        oia_api = OiaApi(base_url=oia_api, application=environment)
-        oia_api.get_users()
+        oia_cln = OiaApi(base_url=oia_api, application=environment)
+        oia_cln.get_users()
     elif function_extract_cmdb:
         def node_filter(node: NamedItem) -> bool:
             if isinstance(node, ConfigurationItem) and node.type:
