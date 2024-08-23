@@ -12,7 +12,7 @@ class Identity:
         self.user_type: str = None
 
     def get_resolve_key(self):
-        return self.email
+        return self.email if self.email else f"{self.name}@no.email.defined"
 
     def from_dict(self, json_dict: dict) -> "Identity":
         self.name = json_dict["name"]
@@ -152,8 +152,6 @@ class Authorizations:
 
     def get_roles_for_identity_resource(self, identity: Identity, resource: Resource) -> List[Resource]:
         return self.lookup_roles_for_identity_resource[self._get_lookup_authorization_by_user_resource_key(identity, resource)]
-
-
 
 
 T = TypeVar("T")

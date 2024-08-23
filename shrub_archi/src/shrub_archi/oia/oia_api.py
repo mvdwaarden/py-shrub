@@ -1,11 +1,8 @@
-import json
-
 import requests
 
 from shrub_archi.connectors.oracle.token import oracle_get_token
 from shrub_archi.oia.model.oia_model import OiaLocalView, Identity, Role, Resource, ResourceType, Authorization, Authorizations
 from shrub_util.api.token import Token
-from .oia_test_data import TEST_AUTHORIZATIONS
 from typing import List
 from shrub_util.generation.template_renderer import TemplateRenderer, get_dictionary_loader
 
@@ -21,8 +18,10 @@ class OiaApiObjectFactory:
         for item in json_dict["items"]:
             u = Identity()
             u.name = item["userName"]
-            u.email = item["email"]
-            u.full_name = item["fullName"]
+            if "email" in item:
+                u.email = item["email"]
+            if "fullName" in item:
+                u.full_name = item["fullName"]
             u.status = item["status"]
             u.hub_admin = item["hubAdmin"]
             u.user_type = item["userType"]
@@ -78,12 +77,9 @@ class OiaApi:
         return headers
 
     def get_identities(self) -> List[Identity]:
-        if False:
-            response = requests.request("GET", self._get_url(self.USERS_URI), headers=self._get_headers(), data="")
+        response = requests.request("GET", self._get_url(self.USERS_URI), headers=self._get_headers(), data="")
 
-            print(response.text)
-
-        test_extract()
+        return response.json()
 
     def update_identity(self, identity: Identity, authorizations: Authorizations):
         request = """{
@@ -104,24 +100,8 @@ class OiaApi:
                 ]                  
             }"""
         tr = TemplateRenderer({"request": request}, get_loader=get_dictionary_loader)
+        response = requests.request("PATCH", self._get_url(self.USERS_URI), headers=self._get_headers(), data=request)
+
         print(tr.render("request", identity=identity, authorizations=authorizations))
 
 
-def test_extract():
-    local_view = OiaLocalView()
-    users = OiaApiObjectFactory(local_view).create_identities(json.loads(TEST_AUTHORIZATIONS))
-    print(users)
-
-
-    dict_local = local_view.to_dict()
-    with open("oia_local_view.json", "w") as ofp:
-        ofp.write(json.dumps(dict_local))
-    local_view_read_back = OiaLocalView()
-    with open("oia_local_view.json", "r") as ipf:
-        local_view_read_back.from_dict(json.loads(ipf.read()))
-    with open("oia_local_view_read_back.json", "w") as ofp:
-        ofp.write(json.dumps(local_view_read_back.to_dict()))
-
-    oia_cln = OiaApi(base_url="dont_care", application="whatever")
-
-    oia_cln.update_identity(list(local_view.map_identities.values())[0], Authorizations(local_view.map_authorizations.values()))

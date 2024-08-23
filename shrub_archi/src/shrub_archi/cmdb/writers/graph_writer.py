@@ -79,8 +79,8 @@ CREATE ({{ s.__class__.__name__ }}{{ s.id }}) -[:{{ cypher_relation_namer(relati
 """
 
 
-def write_named_item_graph(local_view: CmdbLocalView, graph_type: GraphType, file: str,
-                           include_object_reference: bool = True, node_filter: Callable[[NamedItem], bool] = False):
+def cmdb_write_named_item_graph(local_view: CmdbLocalView, graph_type: GraphType, file: str,
+                                include_object_reference: bool = True, node_filter: Callable[[NamedItem], bool] = False):
     g = local_view.build_graph(include_object_reference=include_object_reference, node_filter=node_filter)
 
     with open(f"{file}.{graph_type.value}", "w") as ofp:

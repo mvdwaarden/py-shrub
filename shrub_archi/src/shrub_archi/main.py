@@ -10,10 +10,13 @@ from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
 from shrub_archi.cmdb.cmdb_extract import cmdb_extract
 from shrub_archi.cmdb.model.cmdb_model import CmdbLocalView, ConfigurationItem, NamedItem
-from cmdb.readers.json_reader import read_json
-from cmdb.writers.graph_writer import write_named_item_graph, GraphType
-from cmdb.writers.json_writer import write_json
-from shrub_archi.oia.oia_api import OiaApi
+from cmdb.readers.json_reader import cmdb_read_json
+from cmdb.writers.graph_writer import cmdb_write_named_item_graph, GraphType
+from cmdb.writers.json_writer import cmdb_write_json
+from shrub_archi.oia.oia_extract import oia_extract_authorizations
+from shrub_archi.oia.model.oia_model import OiaLocalView
+from shrub_archi.oia.writers.json_writer import oia_write_json
+from shrub_archi.oia.readers.json_reader import oia_read_json
 
 
 usage = """
@@ -146,8 +149,12 @@ if __name__ == "__main__":
         source_repo.read()
         RepositoryGrapher().create_graph(source_repo, work_dir=work_dir)
     elif function_oia:
-        oia_cln = OiaApi(base_url=oia_api, application=environment)
-        oia_cln.get_identities()
+        if use_local_view:
+            local_view = OiaLocalView()
+            oia_read_json(local_view, file)
+        else:
+            local_view = oia_extract_authorizations(environment=environment, oia_api=oia_api)
+            oia_write_json(local_view, file)
     elif function_extract_cmdb:
         def node_filter(node: NamedItem) -> bool:
             if isinstance(node, ConfigurationItem) and node.type:
@@ -156,19 +163,19 @@ if __name__ == "__main__":
                 return node.__class__.__name__.lower() not in node_exclusion
         if use_local_view:
             local_view = CmdbLocalView()
-            read_json(local_view, file)
-            write_named_item_graph(local_view, GraphType.GRAPHML, file, node_filter=node_filter)
-            write_named_item_graph(local_view, GraphType.GRAPHML, f"{file}-without-refs", node_filter=node_filter,
-                                   include_object_reference=False)
-            write_named_item_graph(local_view, GraphType.CYPHER, file, node_filter=node_filter)
-            write_named_item_graph(local_view, GraphType.DOT, file, node_filter=node_filter)
-            write_named_item_graph(local_view, GraphType.DOT, f"{file}-without-refs", node_filter=node_filter,
-                                   include_object_reference=False)
+            cmdb_read_json(local_view, file)
+            cmdb_write_named_item_graph(local_view, GraphType.GRAPHML, file, node_filter=node_filter)
+            cmdb_write_named_item_graph(local_view, GraphType.GRAPHML, f"{file}-without-refs", node_filter=node_filter,
+                                        include_object_reference=False)
+            cmdb_write_named_item_graph(local_view, GraphType.CYPHER, file, node_filter=node_filter)
+            cmdb_write_named_item_graph(local_view, GraphType.DOT, file, node_filter=node_filter)
+            cmdb_write_named_item_graph(local_view, GraphType.DOT, f"{file}-without-refs", node_filter=node_filter,
+                                        include_object_reference=False)
             print(local_view)
         else:
             local_view = cmdb_extract(environment, emails=emails, cmdb_api=cmdb_api, source=source, extra_cis=extra_cis, test_only=False)
-            write_json(local_view, file)
-            write_named_item_graph(local_view, GraphType.DOT, file, node_filter=node_filter)
-            write_named_item_graph(local_view, GraphType.GRAPHML, file, node_filter=node_filter)
-            write_named_item_graph(local_view, GraphType.CYPHER, file, node_filter=node_filter)
+            cmdb_write_json(local_view, file)
+            cmdb_write_named_item_graph(local_view, GraphType.DOT, file, node_filter=node_filter)
+            cmdb_write_named_item_graph(local_view, GraphType.GRAPHML, file, node_filter=node_filter)
+            cmdb_write_named_item_graph(local_view, GraphType.CYPHER, file, node_filter=node_filter)
 
