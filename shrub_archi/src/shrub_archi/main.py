@@ -1,23 +1,23 @@
 import shrub_util.core.logging as logging
+from cmdb.readers.json_reader import cmdb_read_json
+from cmdb.writers.graph_writer import cmdb_write_named_item_graph, GraphType
+from cmdb.writers.json_writer import cmdb_write_json
+from shrub_archi.cmdb.cmdb_extract import cmdb_extract
+from shrub_archi.cmdb.model.cmdb_model import CmdbLocalView, ConfigurationItem, NamedItem
 from shrub_archi.modeling.archi.repository.repository import (Repository, XmiArchiRepository, CoArchiRepository,
-                                                   ViewRepositoryFilter, )
+                                                              ViewRepositoryFilter, )
 from shrub_archi.modeling.archi.repository.repository_graph import RepositoryGrapher
 from shrub_archi.modeling.archi.repository.repository_importer import (XmiArchiRepositoryImporter, RepositoryImporter, )
 from shrub_archi.modeling.archi.resolver.resolution_store import ResolutionStore
 from shrub_archi.modeling.archi.ui.resolution_ui import do_show_resolve_ui
 from shrub_archi.modeling.archi.ui.select_diagrams_ui import do_select_diagrams_ui
+from shrub_archi.oia.model.oia_model import OiaLocalView, Authorizations
+from shrub_archi.oia.oia_extract import oia_extract_authorizations
+from shrub_archi.oia.readers.json_reader import oia_read_json
+from shrub_archi.oia.writers.json_writer import oia_write_json
+from shrub_archi.oia.oia_api import OiaApi
 from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
-from shrub_archi.cmdb.cmdb_extract import cmdb_extract
-from shrub_archi.cmdb.model.cmdb_model import CmdbLocalView, ConfigurationItem, NamedItem
-from cmdb.readers.json_reader import cmdb_read_json
-from cmdb.writers.graph_writer import cmdb_write_named_item_graph, GraphType
-from cmdb.writers.json_writer import cmdb_write_json
-from shrub_archi.oia.oia_extract import oia_extract_authorizations
-from shrub_archi.oia.model.oia_model import OiaLocalView
-from shrub_archi.oia.writers.json_writer import oia_write_json
-from shrub_archi.oia.readers.json_reader import oia_read_json
-
 
 usage = """
     Archi Shrubbery, assumes:
@@ -117,7 +117,7 @@ if __name__ == "__main__":
     target = args.get_arg("target")
     work_dir = args.get_arg("workdir")
     function_import = args.has_arg("import")
-    function_oia = args.has_arg("oia")
+    function_oia = args.get_arg("oia")
     function_extract_cmdb = args.has_arg("cmdb")
     function_create_graph = args.has_arg("graph")
     cutoff_score = args.get_arg("cutoff", 85)
@@ -129,11 +129,10 @@ if __name__ == "__main__":
     cmdb_api = args.get_arg("cmdb-api")
     use_local_view = args.has_arg("use-local-view")
     source = args.get_arg("source")
-    node_exclusion = args.get_arg("skip-ci-nodes","digitalcertificate, manager").split(",")
-    extra_cis = args.get_arg("extra-cis","").split(",")
+    node_exclusion = args.get_arg("skip-ci-nodes", "digitalcertificate, manager").split(",")
+    extra_cis = args.get_arg("extra-cis", "").split(",")
     oia_api = args.get_arg("oia-api")
-
-    # do_show_select_furniture_test()
+    export_options = args.get_arg("export-options", "all")
     if help:
         do_print_usage()
     elif function_test:
@@ -152,9 +151,18 @@ if __name__ == "__main__":
         if use_local_view:
             local_view = OiaLocalView()
             oia_read_json(local_view, file)
-        else:
+            print(local_view.to_dict())
+        elif function_oia == "export":
             local_view = oia_extract_authorizations(environment=environment, oia_api=oia_api)
-            oia_write_json(local_view, file)
+            oia_write_json(local_view=local_view, file=file)
+        elif function_oia == "update-authorizations":
+            local_view = OiaLocalView()
+            oia_read_json(local_view=local_view, file=file)
+            auths = Authorizations(local_view.map_authorizations.values())
+            api = OiaApi(environment=environment, oia_api=oia_api, base_url=oia_api)
+            # only update authorizations for user accounts (NOT for local accounts)
+            for identity in [identity for identity in auths.get_identities() if identity.email]:
+                api.update_identity(identity, authorizations=auths)
     elif function_extract_cmdb:
         def node_filter(node: NamedItem) -> bool:
             if isinstance(node, ConfigurationItem) and node.type:
@@ -171,11 +179,10 @@ if __name__ == "__main__":
             cmdb_write_named_item_graph(local_view, GraphType.DOT, file, node_filter=node_filter)
             cmdb_write_named_item_graph(local_view, GraphType.DOT, f"{file}-without-refs", node_filter=node_filter,
                                         include_object_reference=False)
-            print(local_view)
         else:
-            local_view = cmdb_extract(environment, emails=emails, cmdb_api=cmdb_api, source=source, extra_cis=extra_cis, test_only=False)
+            local_view = cmdb_extract(environment, emails=emails, cmdb_api=cmdb_api, source=source, extra_cis=extra_cis,
+                                      test_only=False)
             cmdb_write_json(local_view, file)
             cmdb_write_named_item_graph(local_view, GraphType.DOT, file, node_filter=node_filter)
             cmdb_write_named_item_graph(local_view, GraphType.GRAPHML, file, node_filter=node_filter)
             cmdb_write_named_item_graph(local_view, GraphType.CYPHER, file, node_filter=node_filter)
-
