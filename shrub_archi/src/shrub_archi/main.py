@@ -1,7 +1,7 @@
 import shrub_util.core.logging as logging
-from cmdb.readers.json_reader import cmdb_read_json
-from cmdb.writers.graph_writer import cmdb_write_named_item_graph, GraphType
-from cmdb.writers.json_writer import cmdb_write_json
+from shrub_archi.cmdb.readers.json_reader import cmdb_read_json
+from shrub_archi.cmdb.writers.graph_writer import cmdb_write_named_item_graph, GraphType
+from shrub_archi.cmdb.writers.json_writer import cmdb_write_json
 from shrub_archi.cmdb.cmdb_extract import cmdb_extract
 from shrub_archi.cmdb.model.cmdb_model import CmdbLocalView, ConfigurationItem, NamedItem
 from shrub_archi.modeling.archi.repository.repository import (Repository, XmiArchiRepository, CoArchiRepository,
@@ -15,6 +15,7 @@ from shrub_archi.oia.model.oia_model import OiaLocalView, Authorizations
 from shrub_archi.oia.oia_extract import oia_extract_authorizations
 from shrub_archi.oia.readers.json_reader import oia_read_json
 from shrub_archi.oia.writers.json_writer import oia_write_json
+from shrub_archi.oia.writers.csv_writer import oia_write_csv
 from shrub_archi.oia.oia_api import OiaApi
 from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
@@ -155,6 +156,7 @@ if __name__ == "__main__":
         elif function_oia == "export":
             local_view = oia_extract_authorizations(environment=environment, oia_api=oia_api)
             oia_write_json(local_view=local_view, file=file)
+            oia_write_csv(local_view=local_view, file=file)
         elif function_oia == "update-authorizations":
             local_view = OiaLocalView()
             oia_read_json(local_view=local_view, file=file)
@@ -163,6 +165,15 @@ if __name__ == "__main__":
             # only update authorizations for user accounts (NOT for local accounts)
             for identity in [identity for identity in auths.get_identities() if identity.email]:
                 api.update_identity(identity, authorizations=auths)
+        elif function_oia == "connect":
+            from shrub_archi.connectors.oracle.token import oracle_get_token
+            for env in environment.split(","):
+                try:
+                    token = oracle_get_token(application=env)
+                    print(token.access_token[:20])
+                except Exception as ex:
+                    print(f"getting token for environment {env} failed")
+
     elif function_extract_cmdb:
         def node_filter(node: NamedItem) -> bool:
             if isinstance(node, ConfigurationItem) and node.type:

@@ -24,6 +24,7 @@ def oracle_get_token(application: str) -> Token:
         access_token = result_json["access_token"]
         expires_in = result_json.get("expires_in")
         token = Token(access_token=access_token, expires_in=expires_in)
+        # TODO remove printing of token
         print("Access token:", token)
 
     else:
