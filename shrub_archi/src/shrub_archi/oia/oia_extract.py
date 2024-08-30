@@ -1,17 +1,9 @@
 import json
-from typing import List
 
-from shrub_archi.oia.model.oia_model import OiaLocalView, Authorizations, Identity
-from shrub_archi.oia.oia_api import OiaApiObjectFactory, OiaApi
+from shrub_archi.oia.model.oia_model import OiaLocalView
+from shrub_archi.iam.model.iam_model import Authorizations
+from shrub_archi.oia.oia_api import OiaApiObjectFactory, OiaApi, oia_get_users
 from shrub_archi.oia.oia_test_data import TEST_AUTHORIZATIONS
-
-
-def oia_get_users(api: OiaApi, local_view: OiaLocalView) -> List[Identity]:
-    json_dict = api.get_identities()
-    factory = OiaApiObjectFactory(local_view=local_view)
-    users = factory.create_identities(json_dict)
-
-    return users
 
 
 def oia_extract_authorizations(environment: str, oia_api: str,

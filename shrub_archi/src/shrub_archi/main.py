@@ -11,7 +11,8 @@ from shrub_archi.modeling.archi.repository.repository_importer import (XmiArchiR
 from shrub_archi.modeling.archi.resolver.resolution_store import ResolutionStore
 from shrub_archi.modeling.archi.ui.resolution_ui import do_show_resolve_ui
 from shrub_archi.modeling.archi.ui.select_diagrams_ui import do_select_diagrams_ui
-from shrub_archi.oia.model.oia_model import OiaLocalView, Authorizations
+from shrub_archi.iam.model.iam_model import Authorizations
+from shrub_archi.oia.model.oia_model import OiaLocalView
 from shrub_archi.oia.oia_extract import oia_extract_authorizations
 from shrub_archi.oia.readers.json_reader import oia_read_json
 from shrub_archi.oia.writers.json_writer import oia_write_json
@@ -19,6 +20,7 @@ from shrub_archi.oia.writers.csv_writer import oia_write_csv
 from shrub_archi.oia.oia_api import OiaApi
 from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
+from shrub_archi.oci.oci_api import OciApi
 
 usage = """
     Archi Shrubbery, assumes:
@@ -119,6 +121,7 @@ if __name__ == "__main__":
     work_dir = args.get_arg("workdir")
     function_import = args.has_arg("import")
     function_oia = args.get_arg("oia")
+    function_oci = args.get_arg("oci")
     function_extract_cmdb = args.has_arg("cmdb")
     function_create_graph = args.has_arg("graph")
     cutoff_score = args.get_arg("cutoff", 85)
@@ -133,6 +136,7 @@ if __name__ == "__main__":
     node_exclusion = args.get_arg("skip-ci-nodes", "digitalcertificate, manager").split(",")
     extra_cis = args.get_arg("extra-cis", "").split(",")
     oia_api = args.get_arg("oia-api")
+    oci_api = args.get_arg("oci-api")
     export_options = args.get_arg("export-options", "all")
     if help:
         do_print_usage()
@@ -166,14 +170,17 @@ if __name__ == "__main__":
             for identity in [identity for identity in auths.get_identities() if identity.email]:
                 api.update_identity(identity, authorizations=auths)
         elif function_oia == "connect":
-            from shrub_archi.connectors.oracle.token import oracle_get_token
+            from shrub_archi.connectors.oracle.token import oracle_oia_get_token
             for env in environment.split(","):
                 try:
-                    token = oracle_get_token(application=env)
+                    token = oracle_oia_get_token(application=env)
                     print(token.access_token[:20])
                 except Exception as ex:
                     print(f"getting token for environment {env} failed")
-
+    elif function_oci:
+        if function_oci == "load-test":
+            api = OciApi(environment=environment, base_url=oci_api)
+            api.load_test()
     elif function_extract_cmdb:
         def node_filter(node: NamedItem) -> bool:
             if isinstance(node, ConfigurationItem) and node.type:

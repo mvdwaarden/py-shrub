@@ -1,7 +1,8 @@
 import requests
 
-from shrub_archi.connectors.oracle.token import oracle_get_token
-from shrub_archi.oia.model.oia_model import OiaLocalView, Identity, Role, Resource, ResourceType, Authorization, Authorizations
+from shrub_archi.connectors.oracle.token import oracle_oia_get_token
+from shrub_archi.oia.model.oia_model import Identity, OiaLocalView
+from shrub_archi.iam.model.iam_model import Role, ResourceType, Resource, Authorization, Authorizations
 from shrub_util.api.token import Token
 from typing import List
 from shrub_util.generation.template_renderer import TemplateRenderer, get_dictionary_loader
@@ -58,7 +59,7 @@ class OiaApi:
 
     def _get_token(self):
         if not self.token or self.token.expires_in_actual() < 30:
-            self.token = oracle_get_token(self.application)
+            self.token = oracle_oia_get_token(self.application)
 
         return self.token
 
@@ -105,3 +106,9 @@ class OiaApi:
         print(tr.render("request", identity=identity, authorizations=authorizations))
 
 
+def oia_get_users(api: OiaApi, local_view: OiaLocalView) -> List[Identity]:
+    json_dict = api.get_identities()
+    factory = OiaApiObjectFactory(local_view=local_view)
+    users = factory.create_identities(json_dict)
+
+    return users
