@@ -43,7 +43,7 @@ TEST_AUTHORIZATIONS = """{
         },
         {
             "userName": "mario.bross@archisure.nl",
-            "email": "Bross.Brouwers@archisure.nl",
+            "email": "Bross.Mario@archisure.nl",
             "fullName": "Mario Bross",
             "status": "Enabled",
             "hubAdmin": false,

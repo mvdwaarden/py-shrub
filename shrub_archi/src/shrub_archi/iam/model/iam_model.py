@@ -1,8 +1,6 @@
 from enum import Enum
 from typing import List, TypeVar
 
-from shrub_archi.oia.model.oia_model import Identity
-
 
 class Identity:
     def __init__(self):

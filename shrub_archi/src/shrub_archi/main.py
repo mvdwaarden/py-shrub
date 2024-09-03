@@ -14,13 +14,14 @@ from shrub_archi.modeling.archi.ui.select_diagrams_ui import do_select_diagrams_
 from shrub_archi.iam.model.iam_model import Authorizations
 from shrub_archi.oia.model.oia_model import OiaLocalView
 from shrub_archi.oia.oia_extract import oia_extract_authorizations
-from shrub_archi.oia.readers.json_reader import oia_read_json
-from shrub_archi.oia.writers.json_writer import oia_write_json
-from shrub_archi.oia.writers.csv_writer import oia_write_csv
+from shrub_archi.iam.readers.json_reader import iam_read_json
+from shrub_archi.iam.writers.json_writer import iam_write_json
+from shrub_archi.iam.writers.csv_writer import iam_write_csv
 from shrub_archi.oia.oia_api import OiaApi
 from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
 from shrub_archi.oci.oci_api import OciApi
+from shrub_archi.oci.oci_extract import oci_extract_users
 
 usage = """
     Archi Shrubbery, assumes:
@@ -155,15 +156,15 @@ if __name__ == "__main__":
     elif function_oia:
         if use_local_view:
             local_view = OiaLocalView()
-            oia_read_json(local_view, file)
+            iam_read_json(local_view, file)
             print(local_view.to_dict())
         elif function_oia == "export":
             local_view = oia_extract_authorizations(environment=environment, oia_api=oia_api)
-            oia_write_json(local_view=local_view, file=file)
-            oia_write_csv(local_view=local_view, file=file)
+            iam_write_json(local_view=local_view, file=file)
+            iam_write_csv(local_view=local_view, file=file)
         elif function_oia == "update-authorizations":
             local_view = OiaLocalView()
-            oia_read_json(local_view=local_view, file=file)
+            iam_read_json(local_view=local_view, file=file)
             auths = Authorizations(local_view.map_authorizations.values())
             api = OiaApi(environment=environment, oia_api=oia_api, base_url=oia_api)
             # only update authorizations for user accounts (NOT for local accounts)
@@ -181,6 +182,10 @@ if __name__ == "__main__":
         if function_oci == "load-test":
             api = OciApi(environment=environment, base_url=oci_api)
             api.load_test()
+        elif function_oci == "export":
+            local_view = oci_extract_users(environment=environment, base_url=oci_api)
+            iam_write_json(local_view=local_view, file=file)
+            iam_write_csv(local_view=local_view, file=file)
     elif function_extract_cmdb:
         def node_filter(node: NamedItem) -> bool:
             if isinstance(node, ConfigurationItem) and node.type:
