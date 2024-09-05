@@ -1,10 +1,11 @@
+from typing import List
+
 import requests
 
 from shrub_archi.connectors.oracle.token import oracle_oia_get_token
-from shrub_archi.oia.model.oia_model import Identity, OiaLocalView
 from shrub_archi.iam.model.iam_model import Role, ResourceType, Resource, Authorization, Authorizations
+from shrub_archi.oia.model.oia_model import Identity, OiaLocalView
 from shrub_util.api.token import Token
-from typing import List
 from shrub_util.generation.template_renderer import TemplateRenderer, get_dictionary_loader
 
 
@@ -104,8 +105,12 @@ class OiaApi:
         tr = TemplateRenderer({"request": request_template}, get_loader=get_dictionary_loader)
         request = tr.render("request", identity=identity, authorizations=authorizations)
         response = requests.request("PATCH", self._get_url(self.USERS_URI), headers=self._get_headers(), data=request)
+        print(f"update  {identity.email} : {response.status_code}")
 
-        print(tr.render("request", identity=identity, authorizations=authorizations))
+    def delete_identity(self, identity: Identity):
+        response = requests.request("DELETE", f"{self._get_url(self.USERS_URI)}/{identity.email.lower()}",
+                                    headers=self._get_headers())
+        print(f"delete {identity.email} : {response.status_code}")
 
 
 def oia_get_users(api: OiaApi, local_view: OiaLocalView) -> List[Identity]:

@@ -164,7 +164,7 @@ if __name__ == "__main__":
             local_view = oia_extract_authorizations(environment=environment, oia_api=oia_api)
             iam_write_json(local_view=local_view, file=file)
             iam_write_csv(local_view=local_view, file=file)
-        elif function_oia == "update-authorizations":
+        elif function_oia and function_oia in ["update-authorizations", "delete-users"]:
             local_view = OiaLocalView()
             iam_read_json(local_view=local_view, file=file)
             auths = Authorizations(local_view.map_authorizations.values())
@@ -172,7 +172,10 @@ if __name__ == "__main__":
             # only update authorizations for user accounts (NOT for local accounts)
             for identity in [identity for identity in auths.get_identities() if
                              identity.email and (not user or identity.email.lower() == user.lower())]:
-                api.update_identity(identity, authorizations=auths)
+                if function_oia == "update-authorizations":
+                    api.update_identity(identity, authorizations=auths)
+                elif function_oia == "delete-users":
+                    api.delete_identity(identity)
         elif function_oia == "connect":
             from shrub_archi.connectors.oracle.token import oracle_oia_get_token
 

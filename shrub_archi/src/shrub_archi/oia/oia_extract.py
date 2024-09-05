@@ -31,7 +31,3 @@ def test_extract():
     with open("oia_local_view_read_back.json", "w") as ofp:
         ofp.write(json.dumps(local_view_read_back.to_dict()))
 
-    oia_cln = OiaApi(base_url="dont_care", application="whatever")
-
-    oia_cln.update_identity(list(local_view.map_identities.values())[0],
-                            Authorizations(local_view.map_authorizations.values()))
