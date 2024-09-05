@@ -1,9 +1,13 @@
 import shrub_util.core.logging as logging
+from shrub_archi.cmdb.cmdb_extract import cmdb_extract
+from shrub_archi.cmdb.model.cmdb_model import CmdbLocalView, ConfigurationItem, NamedItem
 from shrub_archi.cmdb.readers.json_reader import cmdb_read_json
 from shrub_archi.cmdb.writers.graph_writer import cmdb_write_named_item_graph, GraphType
 from shrub_archi.cmdb.writers.json_writer import cmdb_write_json
-from shrub_archi.cmdb.cmdb_extract import cmdb_extract
-from shrub_archi.cmdb.model.cmdb_model import CmdbLocalView, ConfigurationItem, NamedItem
+from shrub_archi.iam.model.iam_model import Authorizations
+from shrub_archi.iam.readers.json_reader import iam_read_json
+from shrub_archi.iam.writers.csv_writer import iam_write_csv
+from shrub_archi.iam.writers.json_writer import iam_write_json
 from shrub_archi.modeling.archi.repository.repository import (Repository, XmiArchiRepository, CoArchiRepository,
                                                               ViewRepositoryFilter, )
 from shrub_archi.modeling.archi.repository.repository_graph import RepositoryGrapher
@@ -11,17 +15,13 @@ from shrub_archi.modeling.archi.repository.repository_importer import (XmiArchiR
 from shrub_archi.modeling.archi.resolver.resolution_store import ResolutionStore
 from shrub_archi.modeling.archi.ui.resolution_ui import do_show_resolve_ui
 from shrub_archi.modeling.archi.ui.select_diagrams_ui import do_select_diagrams_ui
-from shrub_archi.iam.model.iam_model import Authorizations
-from shrub_archi.oia.model.oia_model import OiaLocalView
-from shrub_archi.oia.oia_extract import oia_extract_authorizations
-from shrub_archi.iam.readers.json_reader import iam_read_json
-from shrub_archi.iam.writers.json_writer import iam_write_json
-from shrub_archi.iam.writers.csv_writer import iam_write_csv
-from shrub_archi.oia.oia_api import OiaApi
-from shrub_util.core.arguments import Arguments
-from shrub_util.qotd.qotd import QuoteOfTheDay
 from shrub_archi.oci.oci_api import OciApi
 from shrub_archi.oci.oci_extract import oci_extract_users
+from shrub_archi.oia.model.oia_model import OiaLocalView
+from shrub_archi.oia.oia_api import OiaApi
+from shrub_archi.oia.oia_extract import oia_extract_authorizations
+from shrub_util.core.arguments import Arguments
+from shrub_util.qotd.qotd import QuoteOfTheDay
 
 usage = """
     Archi Shrubbery, assumes:
@@ -115,6 +115,7 @@ if __name__ == "__main__":
         qotd = QuoteOfTheDay().get_quote()
         print(usage + f"\n    {qotd['quote']} - {qotd['source']}")
 
+
     args = Arguments()
     help = args.has_arg("help")
     source = args.get_arg("source")
@@ -139,6 +140,7 @@ if __name__ == "__main__":
     oia_api = args.get_arg("oia-api")
     oci_api = args.get_arg("oci-api")
     export_options = args.get_arg("export-options", "all")
+    user = args.get_arg("user")
     if help:
         do_print_usage()
     elif function_test:
@@ -166,12 +168,14 @@ if __name__ == "__main__":
             local_view = OiaLocalView()
             iam_read_json(local_view=local_view, file=file)
             auths = Authorizations(local_view.map_authorizations.values())
-            api = OiaApi(environment=environment, oia_api=oia_api, base_url=oia_api)
+            api = OiaApi(application=environment, base_url=oia_api)
             # only update authorizations for user accounts (NOT for local accounts)
-            for identity in [identity for identity in auths.get_identities() if identity.email]:
+            for identity in [identity for identity in auths.get_identities() if
+                             identity.email and (not user or identity.email.lower() == user.lower())]:
                 api.update_identity(identity, authorizations=auths)
         elif function_oia == "connect":
             from shrub_archi.connectors.oracle.token import oracle_oia_get_token
+
             for env in environment.split(","):
                 try:
                     token = oracle_oia_get_token(application=env)
@@ -192,6 +196,8 @@ if __name__ == "__main__":
                 return node.type.lower() not in node_exclusion
             else:
                 return node.__class__.__name__.lower() not in node_exclusion
+
+
         if use_local_view:
             local_view = CmdbLocalView()
             cmdb_read_json(local_view, file)

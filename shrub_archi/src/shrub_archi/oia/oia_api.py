@@ -83,10 +83,11 @@ class OiaApi:
         return response.json()
 
     def update_identity(self, identity: Identity, authorizations: Authorizations):
-        request = """{
-                "userName": "{{ identity.username }}",
+        request_template = """{
+                "userName": "{{ identity.email.lower() }}",
                 "email": "{{ identity.email }}",
                 "fullName": "{{ identity.full_name }}",
+                "hubAdmin": {{ 'true' if identity.hub_admin else 'false'}},
                 "workspaces": [
                     {% for workspace in authorizations.get_resources_for_identity(identity) %}
                     {
@@ -100,7 +101,8 @@ class OiaApi:
                     {% endfor %}  
                 ]                  
             }"""
-        tr = TemplateRenderer({"request": request}, get_loader=get_dictionary_loader)
+        tr = TemplateRenderer({"request": request_template}, get_loader=get_dictionary_loader)
+        request = tr.render("request", identity=identity, authorizations=authorizations)
         response = requests.request("PATCH", self._get_url(self.USERS_URI), headers=self._get_headers(), data=request)
 
         print(tr.render("request", identity=identity, authorizations=authorizations))

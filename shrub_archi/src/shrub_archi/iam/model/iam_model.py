@@ -112,6 +112,7 @@ class Authorization:
 class Authorizations:
     def __init__(self, authorizations: List[Authorization]):
         self.authorizations: List[Authorization] = authorizations
+        self.lookup_identities = {}
         self.lookup_resources_for_identity = {}
         self.lookup_roles_for_identity_resource = {}
         self._build_lookups()
@@ -124,6 +125,7 @@ class Authorizations:
         for auth in self.authorizations:
             if auth.identity.get_resolve_key() not in self.lookup_resources_for_identity:
                 self.lookup_resources_for_identity[auth.identity.get_resolve_key()] = []
+                self.lookup_identities[auth.identity.get_resolve_key()] = auth.identity
             if auth.resource not in self.lookup_resources_for_identity[auth.identity.get_resolve_key()]:
                 self.lookup_resources_for_identity[auth.identity.get_resolve_key()].append(auth.resource)
             _key = self._get_lookup_authorization_by_user_resource_key(auth.identity, auth.resource)
@@ -132,7 +134,7 @@ class Authorizations:
             self.lookup_roles_for_identity_resource[_key].append(auth.role)
 
     def get_identities(self) -> List[Identity]:
-        return self.lookup_resources_for_identity.keys()
+        return self.lookup_identities.values()
 
     def get_resources_for_identity(self, identity: Identity) -> List[Resource]:
         return self.lookup_resources_for_identity[identity.get_resolve_key()]
@@ -190,7 +192,7 @@ class IamLocalView:
     def from_dict(self, the_dict: dict) -> "Authorization":
         if "identities" in the_dict:
             for dict_identity in the_dict["identities"]:
-                identity = Identity().from_dict(dict_identity)
+                identity = self._create_identity().from_dict(dict_identity)
                 resolved_identity = self.resolve_identities(identity)
 
         if "resources" in the_dict:

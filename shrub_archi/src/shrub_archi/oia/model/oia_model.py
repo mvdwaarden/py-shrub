@@ -7,8 +7,9 @@ class Identity(IamIdentity):
         self.hub_admin = None
 
     def from_dict(self, the_dict: dict) -> "Identity":
-        super().from_dict(self, the_dict)
-        self.hub_admin = True if the_dict["hubAdmin"] else False
+        super().from_dict(the_dict)
+        if "hub_admin" in the_dict:
+            self.hub_admin = True if the_dict["hub_admin"] else False
 
         return self
 
@@ -19,4 +20,7 @@ class Identity(IamIdentity):
 
 
 class OiaLocalView(IamLocalView):
-    pass
+    def _create_identity(self) -> Identity:
+        return Identity()
+
+
