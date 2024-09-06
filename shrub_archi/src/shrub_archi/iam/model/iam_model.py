@@ -17,6 +17,7 @@ class Identity:
         self.name = the_dict["name"]
         self.email = the_dict["email"]
         self.full_name = the_dict["full_name"]
+        self.user_type = the_dict["user_type"]
         self.status = the_dict["status"]
         return self
 

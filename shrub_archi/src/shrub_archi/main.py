@@ -22,6 +22,9 @@ from shrub_archi.oia.oia_api import OiaApi
 from shrub_archi.oia.oia_extract import oia_extract_authorizations
 from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
+from typing import List
+from shrub_archi.iam.model.iam_model import Identity
+from enum import Enum
 
 usage = """
     Archi Shrubbery, assumes:
@@ -108,6 +111,47 @@ def do_select_views(repo: Repository):
     return views
 
 
+class OiaFunction(Enum):
+    OPP_UPDATE_USER_AUTHORIZATIONS = "update-authorizations"
+    OPP_DELETE_USERS = "delete-users"
+    OPP_CONNECT = "connect"
+    OPP_EXTRACT = "extract"
+
+    @staticmethod
+    def is_operation(operation: str):
+        return operation and operation in [e.value for e in OiaFunction]
+
+
+def do_appy_oia_operation_with_users(identities: List[Identity], operation: OiaFunction, yes: bool=False):
+    affected_identities = [
+        identity for identity in identities
+        if identity.email
+           and identity.user_type == "User"
+           and (
+                   not user
+                   or identity.email.lower() == user.lower())
+    ]
+    if not yes:
+        msg_map = {
+            OiaFunction.OPP_UPDATE_USER_AUTHORIZATIONS: "updating authorizations for ",
+            OiaFunction.OPP_DELETE_USERS: "delete "
+        }
+        print(
+            f"are you sure you want to {msg_map[operation]} {len(affected_identities)} of {len(identities)} users in {environment} environment? Y/n")
+        answer = input()
+        if answer != 'Y':
+            print("aborted")
+            exit(0)
+    api = OiaApi(application=environment, base_url=oia_api)
+    # only update authorizations for user accounts (NOT for local accounts)
+    for identity in affected_identities:
+        if function_oia == "update-authorizations":
+            api.update_identity(identity, authorizations=auths)
+        elif function_oia == "delete-users":
+            api.delete_identity(identity)
+
+
+
 logging.configure_console()
 if __name__ == "__main__":
 
@@ -138,6 +182,7 @@ if __name__ == "__main__":
     node_exclusion = args.get_arg("skip-ci-nodes", "digitalcertificate, manager").split(",")
     extra_cis = args.get_arg("extra-cis", "").split(",")
     oia_api = args.get_arg("oia-api")
+    yes = args.has_arg("y")
     oci_api = args.get_arg("oci-api")
     export_options = args.get_arg("export-options", "all")
     user = args.get_arg("user")
@@ -155,28 +200,25 @@ if __name__ == "__main__":
         source_repo = create_repository(source)
         source_repo.read()
         RepositoryGrapher().create_graph(source_repo, work_dir=work_dir)
-    elif function_oia:
+    elif OiaFunction.is_operation(function_oia):
         if use_local_view:
             local_view = OiaLocalView()
             iam_read_json(local_view, file)
             print(local_view.to_dict())
-        elif function_oia == "export":
+        elif function_oia == OiaFunction.OPP_EXTRACT.value:
             local_view = oia_extract_authorizations(environment=environment, oia_api=oia_api)
             iam_write_json(local_view=local_view, file=file)
             iam_write_csv(local_view=local_view, file=file)
-        elif function_oia and function_oia in ["update-authorizations", "delete-users"]:
+        elif function_oia == OiaFunction.OPP_UPDATE_USER_AUTHORIZATIONS.value:
             local_view = OiaLocalView()
             iam_read_json(local_view=local_view, file=file)
             auths = Authorizations(local_view.map_authorizations.values())
-            api = OiaApi(application=environment, base_url=oia_api)
-            # only update authorizations for user accounts (NOT for local accounts)
-            for identity in [identity for identity in auths.get_identities() if
-                             identity.email and (not user or identity.email.lower() == user.lower())]:
-                if function_oia == "update-authorizations":
-                    api.update_identity(identity, authorizations=auths)
-                elif function_oia == "delete-users":
-                    api.delete_identity(identity)
-        elif function_oia == "connect":
+            do_appy_oia_operation_with_users(auths.get_identities(), OiaFunction.OPP_UPDATE_USER_AUTHORIZATIONS, yes)
+        elif function_oia == OiaFunction.OPP_DELETE_USERS.value:
+            local_view = OiaLocalView()
+            iam_read_json(local_view=local_view, file=file)
+            do_appy_oia_operation_with_users(local_view.map_identities.values(),  OiaFunction.OPP_DELETE_USERS, yes)
+        elif function_oia == OiaFunction.OPP_CONNECT.value:
             from shrub_archi.connectors.oracle.token import oracle_oia_get_token
 
             for env in environment.split(","):
