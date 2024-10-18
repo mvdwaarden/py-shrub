@@ -19,19 +19,6 @@ digraph "{{g.name}}" {
 }
 """
 
-"""
-digraph "{{g.name}}" {
-    rankdir=LR
-    {% for n in g.nodes %}
-        "{{ n.attribute }} [shape=Mrecord]"
-    {% endfor %}
-    {% for s,d,k in g.edges %}
-        {% set weight = g.get_edge_data(s,d,k)["weight"] %}
-        {% set thinkness = 100*(weight-min_weight)/(max_weight - min_weight) %}
-        "{{ s.attribute }}" -> "{{ d.attribute }} [weight = {{weight}}]"
-    {% endfor %}
-}
-"""
 
 def write_aggregated_dot(g: Graph, file: str):
     with open(f"{file}.dot", "w") as ofp:

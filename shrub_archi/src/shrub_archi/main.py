@@ -170,6 +170,8 @@ if __name__ == "__main__":
     function_oci = args.get_arg("oci")
     function_extract_cmdb = args.has_arg("cmdb")
     function_create_graph = args.has_arg("graph")
+    function_extract_agile = args.has_arg("agile")
+    organisation = args.get_arg("org")
     cutoff_score = args.get_arg("cutoff", 85)
     resolution_name = args.get_arg("resolutions", None)
     function_test = args.has_arg("test")
@@ -188,6 +190,16 @@ if __name__ == "__main__":
     user = args.get_arg("user")
     if help:
         do_print_usage()
+    elif function_extract_agile:
+        from shrub_archi.devops.azure_devops import AzureDevOpsApi, AzureDevOpsLocalView, azure_dev_ops_get_projects, azure_dev_ops_get_work_items_for_project
+        api = AzureDevOpsApi(organisation=organisation)
+        local_view = AzureDevOpsLocalView()
+        projects = azure_dev_ops_get_projects(api, local_view)
+
+        print(projects)
+        azure_dev_ops_get_work_items_for_project(api, local_view, projects[0].name)
+
+
     elif function_test:
         from shrub_archi.generator.archi_csv_generator import ArchiCsvGenerator
         import shrub_archi.data.risk.it.it_risk as it_risk

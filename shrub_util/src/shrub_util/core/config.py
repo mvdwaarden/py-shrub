@@ -17,7 +17,7 @@ class Config:
     Precedence is: [Commandline argument, Environment variable]
     """
     ARG_CONFIG_INI = "config-ini"
-    ENV_CONFIG_INI = "ARCHICONFIG_INI"
+    ENV_CONFIG_INI = "ARCHI_CONFIG_INI"
 
     def __init__(self, filename=None, args=None, context=__name__):
         self.sections = {}
