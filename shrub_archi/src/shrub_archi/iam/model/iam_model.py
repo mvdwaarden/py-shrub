@@ -1,6 +1,14 @@
 from enum import Enum
 from typing import List, TypeVar
 
+""" IAM class relations
+    A Resource is of type ResourceType
+    An Authorization defines 
+        which Identity
+        can access which Resource
+        when having a specific role
+"""
+
 
 class Identity:
     def __init__(self):

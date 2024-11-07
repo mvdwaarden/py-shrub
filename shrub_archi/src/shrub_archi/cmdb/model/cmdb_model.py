@@ -4,6 +4,20 @@ from networkx import DiGraph
 
 T = TypeVar("T")
 
+""" CMDB class relations
+    A NamedItemRelation 
+        relates a source NamedItem to a destination NamedItem 
+        is of a certain type
+    A ConfigurationItem
+        has a Manager
+        is assigned to a Department
+        has a ConfigAdminGroup
+        is related to ServiceComponents
+        has a business owner which is a Manager
+        has a system owner which is a Manager
+        can have a Vendor
+"""
+
 
 class NamedItem:
     def __init__(self):

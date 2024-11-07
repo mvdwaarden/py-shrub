@@ -1,3 +1,6 @@
+from enum import Enum
+from typing import List
+
 import shrub_util.core.logging as logging
 from shrub_archi.cmdb.cmdb_extract import cmdb_extract
 from shrub_archi.cmdb.model.cmdb_model import CmdbLocalView, ConfigurationItem, NamedItem
@@ -5,6 +8,7 @@ from shrub_archi.cmdb.readers.json_reader import cmdb_read_json
 from shrub_archi.cmdb.writers.graph_writer import cmdb_write_named_item_graph, GraphType
 from shrub_archi.cmdb.writers.json_writer import cmdb_write_json
 from shrub_archi.iam.model.iam_model import Authorizations
+from shrub_archi.iam.model.iam_model import Identity
 from shrub_archi.iam.readers.json_reader import iam_read_json
 from shrub_archi.iam.writers.csv_writer import iam_write_csv
 from shrub_archi.iam.writers.json_writer import iam_write_json
@@ -22,9 +26,6 @@ from shrub_archi.oia.oia_api import OiaApi
 from shrub_archi.oia.oia_extract import oia_extract_authorizations
 from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
-from typing import List
-from shrub_archi.iam.model.iam_model import Identity
-from enum import Enum
 
 usage = """
     Archi Shrubbery, assumes:
@@ -122,16 +123,17 @@ class OiaFunction(Enum):
         return operation and operation in [e.value for e in OiaFunction]
 
 
-def do_appy_oia_operation_with_users(identities: List[Identity], operation: OiaFunction, yes: bool=False):
+def do_appy_oia_operation_with_users(identities: List[Identity], operation: OiaFunction, prompt: bool = True,
+                                     excluded_users: str = None, dry_run: bool = False):
     affected_identities = [
         identity for identity in identities
         if identity.email
            and identity.user_type == "User"
            and (
-                   not user
-                   or identity.email.lower() == user.lower())
+                   not excluded_users
+                   or identity.email.lower() not in excluded_users.split(","))
     ]
-    if not yes:
+    if prompt:
         msg_map = {
             OiaFunction.OPP_UPDATE_USER_AUTHORIZATIONS: "updating authorizations for ",
             OiaFunction.OPP_DELETE_USERS: "delete "
@@ -145,7 +147,9 @@ def do_appy_oia_operation_with_users(identities: List[Identity], operation: OiaF
     api = OiaApi(application=environment, base_url=oia_api)
     # only update authorizations for user accounts (NOT for local accounts)
     for identity in affected_identities:
-        if function_oia == "update-authorizations":
+        if dry_run:
+            print(f"dry-run [{function_oia}]for {identity.email}")
+        elif function_oia == "update-authorizations":
             api.update_identity(identity, authorizations=auths)
         elif function_oia == "delete-users":
             api.delete_identity(identity)
@@ -188,18 +192,19 @@ if __name__ == "__main__":
     oci_api = args.get_arg("oci-api")
     export_options = args.get_arg("export-options", "all")
     user = args.get_arg("user")
+    dry_run = args.has_arg("dry-run")
     if help:
         do_print_usage()
     elif function_extract_agile:
-        from shrub_archi.devops.azure_devops import AzureDevOpsApi, AzureDevOpsLocalView, azure_dev_ops_get_projects, azure_dev_ops_get_work_items_for_project
+        from shrub_archi.devops.azure_devops import AzureDevOpsApi, AzureDevOpsLocalView, azure_dev_ops_get_projects, \
+            azure_dev_ops_get_work_items_for_project
+
         api = AzureDevOpsApi(organisation=organisation)
         local_view = AzureDevOpsLocalView()
         projects = azure_dev_ops_get_projects(api, local_view)
 
         print(projects)
         azure_dev_ops_get_work_items_for_project(api, local_view, projects[0].name)
-
-
     elif function_test:
         from shrub_archi.generator.archi_csv_generator import ArchiCsvGenerator
         import shrub_archi.data.risk.it.it_risk as it_risk
@@ -225,11 +230,13 @@ if __name__ == "__main__":
             local_view = OiaLocalView()
             iam_read_json(local_view=local_view, file=file)
             auths = Authorizations(local_view.map_authorizations.values())
-            do_appy_oia_operation_with_users(auths.get_identities(), OiaFunction.OPP_UPDATE_USER_AUTHORIZATIONS, yes)
+            do_appy_oia_operation_with_users(auths.get_identities(), OiaFunction.OPP_UPDATE_USER_AUTHORIZATIONS,
+                                             prompt=False if yes else True, excluded_users=user, dry_run=dry_run)
         elif function_oia == OiaFunction.OPP_DELETE_USERS.value:
             local_view = OiaLocalView()
             iam_read_json(local_view=local_view, file=file)
-            do_appy_oia_operation_with_users(local_view.map_identities.values(),  OiaFunction.OPP_DELETE_USERS, yes)
+            do_appy_oia_operation_with_users(local_view.map_identities.values(), OiaFunction.OPP_DELETE_USERS,
+                                             prompt=False if yes else True, excluded_users=user, dry_run=dry_run)
         elif function_oia == OiaFunction.OPP_CONNECT.value:
             from shrub_archi.connectors.oracle.token import oracle_oia_get_token
 

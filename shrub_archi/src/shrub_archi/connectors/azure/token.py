@@ -33,7 +33,7 @@ def azure_get_token(application: str) -> Token:
         access_token = result["access_token"]
         expires_in = result.get("expires_in")
         token = Token(access_token=access_token, expires_in=expires_in)
-        print("Access token:", token)
+        print("Access token retrieved")
 
     else:
         token = None

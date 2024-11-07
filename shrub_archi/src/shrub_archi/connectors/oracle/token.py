@@ -27,7 +27,7 @@ def oracle_oia_get_token(application: str) -> Token:
         expires_in = result_json.get("expires_in")
         token = Token(access_token=access_token, expires_in=expires_in)
         # TODO remove printing of token
-        print("Access token:", token)
+        print("Access token retrieved")
 
     else:
         token = None
