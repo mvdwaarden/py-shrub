@@ -160,7 +160,7 @@ def do_appy_oia_operation_with_users(identities: List[Identity], operation: OiaF
             api.update_identity(identity, authorizations=auths)
         elif operation is OiaFunction.OPP_DELETE_USERS:
             api.delete_identity(identity)
-        elif operation is OiaFunction.OPP_ACTIVATE:
+        elif operation is OiaFunction.OPP_ACTIVATE_USERS:
             api.activate_identity(identity)
 
 
