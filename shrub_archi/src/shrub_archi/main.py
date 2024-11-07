@@ -125,8 +125,8 @@ class OiaFunction(Enum):
 
 
 def do_appy_oia_operation_with_users(identities: List[Identity], operation: OiaFunction, prompt: bool = True,
-                                     user: str = None, excluded_users: str = None, dry_run: bool = False):
-    print(f"scope [{user}], excluding [{excluded_users}] for operation [{operation.value}], dry-run is {dry_run}")
+                                     users: str = None, excluded_users: str = None, dry_run: bool = False):
+    print(f"scope [{users}], excluding [{excluded_users}] for operation [{operation.value}], dry-run is {dry_run}")
     affected_identities = [
         identity for identity in identities
         if identity.email
@@ -135,8 +135,8 @@ def do_appy_oia_operation_with_users(identities: List[Identity], operation: OiaF
                    not excluded_users
                    or identity.email.lower() not in [eu.lower() for eu in excluded_users.split(",")])
            and (
-                   not user
-                   or identity.email.lower() == user.lower())
+                   not users
+                   or identity.email.lower() in [eu.lower() for eu in users.split(",")])
     ]
     if prompt:
         msg_map = {
@@ -199,7 +199,7 @@ if __name__ == "__main__":
     yes = args.has_arg("y")
     oci_api = args.get_arg("oci-api")
     export_options = args.get_arg("export-options", "all")
-    user = args.get_arg("user")
+    users = args.get_arg("users")
     excluded_users = args.get_arg("excluded-users")
     dry_run = args.has_arg("dry-run")
     if help:
@@ -240,19 +240,19 @@ if __name__ == "__main__":
             iam_read_json(local_view=local_view, file=file)
             auths = Authorizations(local_view.map_authorizations.values())
             do_appy_oia_operation_with_users(auths.get_identities(), OiaFunction.OPP_UPDATE_USER_AUTHORIZATIONS,
-                                             prompt=False if yes else True, user=user, excluded_users=excluded_users,
+                                             prompt=False if yes else True, users=users, excluded_users=excluded_users,
                                              dry_run=dry_run)
         elif function_oia == OiaFunction.OPP_DELETE_USERS.value:
             local_view = OiaLocalView()
             iam_read_json(local_view=local_view, file=file)
             do_appy_oia_operation_with_users(local_view.map_identities.values(), OiaFunction.OPP_DELETE_USERS,
-                                             prompt=False if yes else True, user=user,
+                                             prompt=False if yes else True, users=users,
                                              excluded_users=excluded_users, dry_run=dry_run)
         elif function_oia == OiaFunction.OPP_ACTIVATE_USERS.value:
             local_view = OiaLocalView()
             iam_read_json(local_view=local_view, file=file)
             do_appy_oia_operation_with_users(local_view.map_identities.values(), OiaFunction.OPP_ACTIVATE_USERS,
-                                             prompt=False if yes else True, user=user,
+                                             prompt=False if yes else True, users=users,
                                              excluded_users=excluded_users, dry_run=dry_run)
         elif function_oia == OiaFunction.OPP_CONNECT.value:
             from shrub_archi.connectors.oracle.token import oracle_oia_get_token
