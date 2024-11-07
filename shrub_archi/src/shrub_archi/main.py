@@ -115,6 +115,7 @@ def do_select_views(repo: Repository):
 class OiaFunction(Enum):
     OPP_UPDATE_USER_AUTHORIZATIONS = "update-authorizations"
     OPP_DELETE_USERS = "delete-users"
+    OPP_ACTIVATE_USERS = "activate-users"
     OPP_CONNECT = "connect"
     OPP_EXTRACT = "extract"
 
@@ -124,20 +125,25 @@ class OiaFunction(Enum):
 
 
 def do_appy_oia_operation_with_users(identities: List[Identity], operation: OiaFunction, prompt: bool = True,
-                                     excluded_users: str = None, dry_run: bool = False):
-    print(f"excluding [{excluded_users}] for operation [{operation.value}], dry-run is {dry_run}")
+                                     user: str = None, excluded_users: str = None, dry_run: bool = False):
+    print(f"scope [{user}], excluding [{excluded_users}] for operation [{operation.value}], dry-run is {dry_run}")
     affected_identities = [
         identity for identity in identities
         if identity.email
            and identity.user_type == "User"
            and (
                    not excluded_users
-                   or identity.email.lower() not in excluded_users.split(","))
+                   or identity.email.lower() not in [eu.lower() for eu in excluded_users.split(",")])
+           and (
+                   not user
+                   or identity.email.lower() == user.lower())
     ]
     if prompt:
         msg_map = {
             OiaFunction.OPP_UPDATE_USER_AUTHORIZATIONS: "updating authorizations for ",
-            OiaFunction.OPP_DELETE_USERS: "delete "
+            OiaFunction.OPP_DELETE_USERS: "delete ",
+            OiaFunction.OPP_ACTIVATE_USERS: "activate "
+
         }
         print(
             f"are you sure you want to {msg_map[operation]} {len(affected_identities)} of {len(identities)} users in {environment} environment? Y/n")
@@ -149,11 +155,13 @@ def do_appy_oia_operation_with_users(identities: List[Identity], operation: OiaF
     # only update authorizations for user accounts (NOT for local accounts)
     for identity in affected_identities:
         if dry_run:
-            print(f"dry-run [{operation.value}] for {identity.email}")
+            print(f"dry-run [{operation.value}] for {identity.email.lower()}")
         elif operation is OiaFunction.OPP_UPDATE_USER_AUTHORIZATIONS:
             api.update_identity(identity, authorizations=auths)
         elif operation is OiaFunction.OPP_DELETE_USERS:
             api.delete_identity(identity)
+        elif operation is OiaFunction.OPP_ACTIVATE:
+            api.activate_identity(identity)
 
 
 logging.configure_console()
@@ -192,6 +200,7 @@ if __name__ == "__main__":
     oci_api = args.get_arg("oci-api")
     export_options = args.get_arg("export-options", "all")
     user = args.get_arg("user")
+    excluded_users = args.get_arg("excluded-users")
     dry_run = args.has_arg("dry-run")
     if help:
         do_print_usage()
@@ -231,12 +240,20 @@ if __name__ == "__main__":
             iam_read_json(local_view=local_view, file=file)
             auths = Authorizations(local_view.map_authorizations.values())
             do_appy_oia_operation_with_users(auths.get_identities(), OiaFunction.OPP_UPDATE_USER_AUTHORIZATIONS,
-                                             prompt=False if yes else True, excluded_users=user, dry_run=dry_run)
+                                             prompt=False if yes else True, user=user, excluded_users=excluded_users,
+                                             dry_run=dry_run)
         elif function_oia == OiaFunction.OPP_DELETE_USERS.value:
             local_view = OiaLocalView()
             iam_read_json(local_view=local_view, file=file)
             do_appy_oia_operation_with_users(local_view.map_identities.values(), OiaFunction.OPP_DELETE_USERS,
-                                             prompt=False if yes else True, excluded_users=user, dry_run=dry_run)
+                                             prompt=False if yes else True, user=user,
+                                             excluded_users=excluded_users, dry_run=dry_run)
+        elif function_oia == OiaFunction.OPP_ACTIVATE_USERS.value:
+            local_view = OiaLocalView()
+            iam_read_json(local_view=local_view, file=file)
+            do_appy_oia_operation_with_users(local_view.map_identities.values(), OiaFunction.OPP_ACTIVATE_USERS,
+                                             prompt=False if yes else True, user=user,
+                                             excluded_users=excluded_users, dry_run=dry_run)
         elif function_oia == OiaFunction.OPP_CONNECT.value:
             from shrub_archi.connectors.oracle.token import oracle_oia_get_token
 

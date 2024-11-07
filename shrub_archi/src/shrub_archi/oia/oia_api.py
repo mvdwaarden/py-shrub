@@ -112,6 +112,16 @@ class OiaApi:
                                     headers=self._get_headers())
         print(f"delete {identity.email} : {response.status_code}")
 
+    def activate_identity(self, identity: Identity, activate: bool = True):
+        new_status = "Enabled" if activate else "Disabled"
+        request = f"""{{
+                       "userName": "{ identity.email.lower() }",
+                       "status": "{ new_status }"                                       
+                   }}"""
+        response = requests.request("PATCH", f"{self._get_url(self.USERS_URI)}/{identity.email.lower()}",
+                                    headers=self._get_headers(), data=request)
+        print(f"set status of  {identity.email} to {new_status}: {response.status_code}")
+
 
 def oia_get_users(api: OiaApi, local_view: OiaLocalView) -> List[Identity]:
     json_dict = api.get_identities()
