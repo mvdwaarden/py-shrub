@@ -125,6 +125,7 @@ class OiaFunction(Enum):
 
 def do_appy_oia_operation_with_users(identities: List[Identity], operation: OiaFunction, prompt: bool = True,
                                      excluded_users: str = None, dry_run: bool = False):
+    print(f"excluding [{excluded_users}] for operation [{operation.value}], dry-run is {dry_run}")
     affected_identities = [
         identity for identity in identities
         if identity.email
@@ -148,12 +149,11 @@ def do_appy_oia_operation_with_users(identities: List[Identity], operation: OiaF
     # only update authorizations for user accounts (NOT for local accounts)
     for identity in affected_identities:
         if dry_run:
-            print(f"dry-run [{function_oia}]for {identity.email}")
-        elif function_oia == "update-authorizations":
+            print(f"dry-run [{operation.value}] for {identity.email}")
+        elif operation is OiaFunction.OPP_UPDATE_USER_AUTHORIZATIONS:
             api.update_identity(identity, authorizations=auths)
-        elif function_oia == "delete-users":
+        elif operation is OiaFunction.OPP_DELETE_USERS:
             api.delete_identity(identity)
-
 
 
 logging.configure_console()
@@ -245,7 +245,7 @@ if __name__ == "__main__":
                     token = oracle_oia_get_token(application=env)
                     print(token.access_token[:20])
                 except Exception as ex:
-                    print(f"getting token for environment {env} failed")
+                    print(f"getting token for environment {env} failed {ex}")
     elif function_oci:
         if function_oci == "load-test":
             api = OciApi(environment=environment, base_url=oci_api)
