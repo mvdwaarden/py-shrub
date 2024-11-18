@@ -7,6 +7,7 @@ from shrub_archi.iam.model.iam_model import Role, ResourceType, Resource, Author
 from shrub_archi.oia.model.oia_model import Identity, OiaLocalView
 from shrub_util.api.token import Token
 from shrub_util.generation.template_renderer import TemplateRenderer, get_dictionary_loader
+from shrub_util.core.str_func import str_json_encode
 
 
 class OiaApiObjectFactory:
@@ -73,7 +74,7 @@ class OiaApi:
 
     def _get_headers(self):
         headers = {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json; charset=utf-8',
             "Authorization": f"Bearer {self._get_token().access_token}"
         }
         return headers
@@ -103,7 +104,7 @@ class OiaApi:
                 ]                  
             }"""
         tr = TemplateRenderer({"request": request_template}, get_loader=get_dictionary_loader)
-        request = tr.render("request", identity=identity, authorizations=authorizations)
+        request = str_json_encode(tr.render("request", identity=identity, authorizations=authorizations))
         response = requests.request("PATCH", self._get_url(self.USERS_URI), headers=self._get_headers(), data=request)
         print(f"update  {identity.email} : {response.status_code}")
 

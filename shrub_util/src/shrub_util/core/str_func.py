@@ -1,3 +1,5 @@
+import json
+
 def strip_leading_chars(value: str, chars_to_strip: str):
     if value is not None:
         idx = 0
@@ -150,3 +152,7 @@ class StringAppendBuffer:
             return "null"
         result = str(self.buffer[0 : self.write_pos], self.encoding)
         return result
+
+
+def str_json_encode(value: str) -> str:
+    return json.dumps(json.loads(value))
