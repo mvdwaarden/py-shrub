@@ -108,6 +108,7 @@ class OiaApi:
         response = requests.request("PATCH", self._get_url(self.USERS_URI), headers=self._get_headers(), data=request)
         print(f"update  {identity.email} : {response.status_code}")
 
+
     def delete_identity(self, identity: Identity):
         response = requests.request("DELETE", f"{self._get_url(self.USERS_URI)}/{identity.email.lower()}",
                                     headers=self._get_headers())

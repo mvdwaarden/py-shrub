@@ -118,40 +118,6 @@ class Authorization:
         return self
 
 
-class Authorizations:
-    def __init__(self, authorizations: List[Authorization]):
-        self.authorizations: List[Authorization] = authorizations
-        self.lookup_identities = {}
-        self.lookup_resources_for_identity = {}
-        self.lookup_roles_for_identity_resource = {}
-        self._build_lookups()
-
-    def _get_lookup_authorization_by_user_resource_key(self, identity: Identity, resource: Resource):
-        return f"{identity.get_resolve_key()}.{resource.get_resolve_key()}"
-
-    def _build_lookups(self):
-        self.lookup_resources_for_identity = {}
-        for auth in self.authorizations:
-            if auth.identity.get_resolve_key() not in self.lookup_resources_for_identity:
-                self.lookup_resources_for_identity[auth.identity.get_resolve_key()] = []
-                self.lookup_identities[auth.identity.get_resolve_key()] = auth.identity
-            if auth.resource not in self.lookup_resources_for_identity[auth.identity.get_resolve_key()]:
-                self.lookup_resources_for_identity[auth.identity.get_resolve_key()].append(auth.resource)
-            _key = self._get_lookup_authorization_by_user_resource_key(auth.identity, auth.resource)
-            if _key not in self.lookup_roles_for_identity_resource:
-                self.lookup_roles_for_identity_resource[_key] = []
-            self.lookup_roles_for_identity_resource[_key].append(auth.role)
-
-    def get_identities(self) -> List[Identity]:
-        return self.lookup_identities.values()
-
-    def get_resources_for_identity(self, identity: Identity) -> List[Resource]:
-        return self.lookup_resources_for_identity[identity.get_resolve_key()]
-
-    def get_roles_for_identity_resource(self, identity: Identity, resource: Resource) -> List[Resource]:
-        return self.lookup_roles_for_identity_resource[self._get_lookup_authorization_by_user_resource_key(identity, resource)]
-
-
 T = TypeVar("T")
 
 
@@ -222,3 +188,44 @@ class IamLocalView:
                 authorization.resource = self.map_resources[authorization.resource]
                 authorization.role = self.map_roles[authorization.role]
                 resolved_authorization = self.resolve_authorization(authorization)
+
+
+class Authorizations:
+    def __init__(self, local_view: IamLocalView):
+        self.authorizations: List[Authorization] = local_view.map_authorizations.values()
+        self.lookup_identities = {}
+        self.lookup_resources_for_identity = {}
+        self.lookup_roles_for_identity_resource = {}
+        self._build_lookups()
+        self._add_users_with_no_authorizations(local_view.map_identities.values())
+
+    def _get_lookup_authorization_by_user_resource_key(self, identity: Identity, resource: Resource):
+        return f"{identity.get_resolve_key()}.{resource.get_resolve_key()}"
+
+    def _build_lookups(self):
+        self.lookup_resources_for_identity = {}
+        for auth in self.authorizations:
+            if auth.identity.get_resolve_key() not in self.lookup_resources_for_identity:
+                self.lookup_resources_for_identity[auth.identity.get_resolve_key()] = []
+                self.lookup_identities[auth.identity.get_resolve_key()] = auth.identity
+            if auth.resource not in self.lookup_resources_for_identity[auth.identity.get_resolve_key()]:
+                self.lookup_resources_for_identity[auth.identity.get_resolve_key()].append(auth.resource)
+            _key = self._get_lookup_authorization_by_user_resource_key(auth.identity, auth.resource)
+            if _key not in self.lookup_roles_for_identity_resource:
+                self.lookup_roles_for_identity_resource[_key] = []
+            self.lookup_roles_for_identity_resource[_key].append(auth.role)
+
+    def _add_users_with_no_authorizations(self, identities: List[Identity]):
+        for identity in identities:
+            if identity.get_resolve_key() not in self.lookup_identities:
+                self.lookup_identities[identity.get_resolve_key()] = identity
+                self.lookup_resources_for_identity[identity.get_resolve_key()] = []
+
+    def get_identities(self) -> List[Identity]:
+        return self.lookup_identities.values()
+
+    def get_resources_for_identity(self, identity: Identity) -> List[Resource]:
+        return self.lookup_resources_for_identity[identity.get_resolve_key()]
+
+    def get_roles_for_identity_resource(self, identity: Identity, resource: Resource) -> List[Resource]:
+        return self.lookup_roles_for_identity_resource[self._get_lookup_authorization_by_user_resource_key(identity, resource)]

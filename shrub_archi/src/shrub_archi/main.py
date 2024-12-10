@@ -24,6 +24,7 @@ from shrub_archi.oci.oci_extract import oci_extract_users
 from shrub_archi.oia.model.oia_model import OiaLocalView
 from shrub_archi.oia.oia_api import OiaApi
 from shrub_archi.oia.oia_extract import oia_extract_authorizations
+from shrub_archi.security.tls_compliance import test_endpoint_compliance, SslMethod
 from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
 
@@ -183,6 +184,7 @@ if __name__ == "__main__":
     function_extract_cmdb = args.has_arg("cmdb")
     function_create_graph = args.has_arg("graph")
     function_extract_agile = args.has_arg("agile")
+    function_security = args.get_arg("sec", None)
     organisation = args.get_arg("org")
     cutoff_score = args.get_arg("cutoff", 85)
     resolution_name = args.get_arg("resolutions", None)
@@ -204,6 +206,9 @@ if __name__ == "__main__":
     dry_run = args.has_arg("dry-run")
     if help:
         do_print_usage()
+    elif function_security:
+        test_endpoint_compliance(hostname="localhost", endpoint="www.google.nl", port=443,
+                                 methods=[SslMethod.TLS_1_1, SslMethod.TLS_1_2])
     elif function_extract_agile:
         from shrub_archi.devops.azure_devops import AzureDevOpsApi, AzureDevOpsLocalView, azure_dev_ops_get_projects, \
             azure_dev_ops_get_work_items_for_project
@@ -238,7 +243,7 @@ if __name__ == "__main__":
         elif function_oia == OiaFunction.OPP_UPDATE_USER_AUTHORIZATIONS.value:
             local_view = OiaLocalView()
             iam_read_json(local_view=local_view, file=file)
-            auths = Authorizations(local_view.map_authorizations.values())
+            auths = Authorizations(local_view)
             do_appy_oia_operation_with_users(auths.get_identities(), OiaFunction.OPP_UPDATE_USER_AUTHORIZATIONS,
                                              prompt=False if yes else True, users=users, excluded_users=excluded_users,
                                              dry_run=dry_run)
