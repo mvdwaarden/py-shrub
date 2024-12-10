@@ -21,8 +21,8 @@ def test_security_tls_compliance(csv_file: str) -> List[EndpointComplianceInfo]:
         for row in tls_reader:
             for method in row[3:]:
                 try:
-                    info = test_endpoint_compliance(row[0], int(row[1]), SslMethod[method.strip()])
-                    info.reference = row[2]
+                    info = test_endpoint_compliance(row[0].strip(), int(row[1]), SslMethod[method.strip()])
+                    info.reference = row[2].strip()
                     result.append(info)
                 except KeyError as ke:
                     print(f"{csv_file} contains invalid method {method} for row {i}")
@@ -47,6 +47,9 @@ def test_security_tls_compliance(csv_file: str) -> List[EndpointComplianceInfo]:
 
 
 def test_endpoint_compliance(endpoint: str, port: int, method: SslMethod) -> EndpointComplianceInfo:
+    disallowed_ciphers = [
+        'TLS_AES_128_CCM_8_SHA256']
+
     info = EndpointComplianceInfo(endpoint, port, method)
     try:
         # Create an SSL context with the specified version
@@ -66,6 +69,12 @@ def test_endpoint_compliance(endpoint: str, port: int, method: SslMethod) -> End
                 info.negotiated_method = ssock.version()
                 info.ciphers = ssock.cipher()
                 info.peer_certificate = ssock.getpeercert()
+                disallowed_str = ""
+                for disallowed_cipher in disallowed_ciphers:
+                    if disallowed_cipher in info.ciphers:
+                        disallowed_str += f"disallowed cipher {disallowed_cipher}"
+                if len(disallowed_str) > 0:
+                    info.error = f"{disallowed_str}"
     except Exception as e:
         info.error = e
 
