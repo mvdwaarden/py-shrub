@@ -24,7 +24,8 @@ from shrub_archi.oci.oci_extract import oci_extract_users
 from shrub_archi.oia.model.oia_model import OiaLocalView
 from shrub_archi.oia.oia_api import OiaApi
 from shrub_archi.oia.oia_extract import oia_extract_authorizations
-from shrub_archi.security.tls_compliance import test_endpoint_compliance, SslMethod
+from shrub_archi.security.tls_compliance import test_security_tls_compliance
+from shrub_archi.security.model.security_compliance_model import SslMethod
 from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
 
@@ -207,8 +208,7 @@ if __name__ == "__main__":
     if help:
         do_print_usage()
     elif function_security:
-        test_endpoint_compliance(hostname="localhost", endpoint="www.google.nl", port=443,
-                                 methods=[SslMethod.TLS_1_1, SslMethod.TLS_1_2])
+        test_security_tls_compliance(csv_file=file)
     elif function_extract_agile:
         from shrub_archi.devops.azure_devops import AzureDevOpsApi, AzureDevOpsLocalView, azure_dev_ops_get_projects, \
             azure_dev_ops_get_work_items_for_project

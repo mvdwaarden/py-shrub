@@ -1,0 +1,3 @@
+endpoint, port, reference, method1, method2,method3,method4
+www.google.nl, 443,Google,TLS_1_1, TLS_1_2, SSL_2_3
+www.rabobank.nl, 443,Rabobank,TLS_1_1, SSL_2_3
