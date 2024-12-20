@@ -18,7 +18,10 @@ class EndpointComplianceInfo:
         self.ciphers: Optional[Any] = None
         self.peer_certificate: Optional[Any] = None
         self.error: Optional[Exception] = None
-        self.reference: Optional[str] = None
+        self.reference_number: Optional[str] = None
+        self.description: Optional[str] = None
+        self.owner: Optional[str] = None
+        self.environment: Optional[str] = None
 
     def set_from_socket(self, ssock):
         self.negotiated_method = ssock.version()
@@ -27,8 +30,9 @@ class EndpointComplianceInfo:
 
     def to_str(self) -> str:
         return f"""
-            reference: {self.reference}
+            reference_number: {self.reference_number}
             endpoint: {self.endpoint}:{self.port}
+            environment: {self.environment}
             forced method: {self.forced_method}
             negotiated method: {self.negotiated_method}
             cyphers: {self.ciphers}
@@ -36,8 +40,8 @@ class EndpointComplianceInfo:
 
     @staticmethod
     def get_csv_header():
-        return ["reference", "endpoint", "port", "forced_method", "negotiated_method", "ciphers", "error"]
+        return ["reference_number", "endpoint", "port", "environment", "forced_method", "negotiated_method", "ciphers", "error"]
 
     def get_csv_row(self):
-        return [self.reference, self.endpoint, self.port, self.forced_method, self.negotiated_method, self.ciphers,
+        return [self.reference_number, self.endpoint, self.port, self.environment, self.forced_method, self.negotiated_method, self.ciphers,
                 self.error]

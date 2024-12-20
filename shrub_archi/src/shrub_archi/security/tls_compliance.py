@@ -6,60 +6,14 @@ from typing import List
 from shrub_archi.security.model.security_compliance_model import SslMethod, EndpointComplianceInfo
 
 
-def test_security_tls_compliance(csv_file: str) -> List[EndpointComplianceInfo]:
-    """
-        csv_file: location of the endpoint file
-        header : endpoint, port, reference, method ...
-    """
-    result = []
-    with open(f"{csv_file}.csv", "r") as ifp:
-        try:
-            tls_reader = csv.reader(ifp, delimiter=',', quotechar='"')
-        except Exception as ex:
-            print(f"could open {csv_file}")
-        i = 0
-        for row in tls_reader:
-            for method in row[3:]:
-                try:
-                    info = test_endpoint_compliance(row[0].strip(), int(row[1]), SslMethod[method.strip()])
-                    info.reference = row[2].strip()
-                    result.append(info)
-                except KeyError as ke:
-                    print(f"{csv_file} contains invalid method {method} for row {i}")
-                except Exception as ex:
-                    print(f"{csv_file} issue for row {i}: {ex}")
-
-            i = i + 1
-
-    for info in result:
-        print(info.to_str())
-
-    with open(f"{csv_file}-result.csv", "w") as ofp:
-        try:
-            tls_writer = csv.writer(ofp, delimiter=',', quotechar='"')
-            tls_writer.writerow(EndpointComplianceInfo.get_csv_header())
-            for info in result:
-                tls_writer.writerow(info.get_csv_row())
-        except Exception as ex:
-            print(f"could open {csv_file}")
-
-    return result
-
-
 def test_endpoint_compliance(endpoint: str, port: int, method: SslMethod) -> EndpointComplianceInfo:
-    disallowed_ciphers = [
-        'TLS_AES_128_CCM_8_SHA256']
+    disallowed_ciphers = ['TLS_AES_128_CCM_8_SHA256']
 
     info = EndpointComplianceInfo(endpoint, port, method)
     try:
         # Create an SSL context with the specified version
         tls_version = method.value
         context = ssl.SSLContext(tls_version)
-
-        # Optional: Enable stricter security options
-        # context.verify_mode = ssl.CERT_REQUIRED
-        # context.check_hostname = True
-
         # Set up default certificates
         context.load_default_certs()
 
@@ -79,3 +33,50 @@ def test_endpoint_compliance(endpoint: str, port: int, method: SslMethod) -> End
         info.error = e
 
     return info
+
+
+def test_security_tls_compliance(csv_file: str) -> List[EndpointComplianceInfo]:
+    """
+        csv_file: location of the endpoint file
+        header : endpoint, port, reference, method ...
+    """
+    result = []
+    with open(f"{csv_file}.csv", "r") as ifp:
+        try:
+            tls_reader = csv.reader(ifp, delimiter=';', quotechar='"')
+        except Exception as ex:
+            print(f"could open {csv_file}")
+        i = 0
+        for row in tls_reader:
+            i = i + 1
+            if i == 1:
+                continue
+            for method in row[6:]:
+                try:
+                    info = test_endpoint_compliance(row[0].strip(), int(row[1]), SslMethod[method.strip()])
+                    info.reference_number = row[2].strip()
+                    info.environment = row[3].strip()
+                    info.owner = row[4].strip()
+                    info.description = row[5].strip()
+                    result.append(info)
+                except KeyError as ke:
+                    print(f"{csv_file} contains invalid method {method} for row {i}")
+                except Exception as ex:
+                    print(f"{csv_file} issue for row {i}: {ex}")
+
+    for info in result:
+        print(info.to_str())
+
+    with open(f"{csv_file}-result.csv", "w") as ofp:
+        try:
+            tls_writer = csv.writer(ofp, delimiter=';', quotechar='"')
+            tls_writer.writerow(EndpointComplianceInfo.get_csv_header())
+            for info in result:
+                tls_writer.writerow(info.get_csv_row())
+        except Exception as ex:
+            print(f"could not write to {csv_file}, {ex}")
+
+    return result
+
+
+
