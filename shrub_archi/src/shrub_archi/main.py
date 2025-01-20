@@ -15,7 +15,7 @@ from shrub_archi.iam.writers.json_writer import iam_write_json
 from shrub_archi.modeling.archi.repository.repository import (Repository, XmiArchiRepository, CoArchiRepository,
                                                               ViewRepositoryFilter, )
 from shrub_archi.modeling.archi.repository.repository_graph import RepositoryGrapher
-from shrub_archi.modeling.archi.repository.repository_importer import (XmiArchiRepositoryMerger, RepositoryMerger, )
+from shrub_archi.modeling.archi.repository.repository_merger import (XmiArchiRepositoryMerger, )
 from shrub_archi.modeling.archi.resolver.resolution_store import ResolutionStore
 from shrub_archi.modeling.archi.ui.resolution_ui import do_show_resolve_ui
 from shrub_archi.modeling.archi.ui.select_diagrams_ui import do_select_diagrams_ui
@@ -25,7 +25,6 @@ from shrub_archi.oia.model.oia_model import OiaLocalView
 from shrub_archi.oia.oia_api import OiaApi
 from shrub_archi.oia.oia_extract import oia_extract_authorizations
 from shrub_archi.security.tls_compliance import test_security_tls_compliance
-from shrub_archi.security.model.security_compliance_model import SslMethod
 from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
 
@@ -70,17 +69,22 @@ def get_resolution_name(repo: Repository, resolution_name):
     return resolution_name if resolution_name else repo.name
 
 
-def do_create_resolution_file(repo_merger: RepositoryMerger, resolution_store_location,
-                              resolution_name: str = None) -> bool:
+def do_create_or_update_resolution_file(resolutions, resolution_store_location, resolution_name: str) -> bool:
+    """ Tries to read existing resolution file.
+        Applies the read resolution file to the determined resolutions.
+        Ask the user to evaluate the resolutions (UI input is immediately reflected in the RepositoryMerger.
+        If the user confirms the new resolutions
+            Write the updated resolutions.
+
+        So: repo_merger will contain updated resolutions after this.
+    """
     created = False
     res_store = ResolutionStore(resolution_store_location)
-
-    res_store.read(get_resolution_name(repo_merger.source_repo, resolution_name))
-    repo_merger.determine_resolutions()
-    res_store.apply_to(repo_merger.resolutions)
-    if do_show_resolve_ui(repo_merger.resolutions):
-        res_store.resolutions = repo_merger.resolutions
-        res_store.write(get_resolution_name(repo_merger.source_repo, resolution_name))
+    res_store.read(resolution_name)
+    res_store.apply_to(resolutions)
+    if do_show_resolve_ui(resolutions):
+        res_store.resolutions = resolutions
+        res_store.write(resolution_name)
         created = True
     return created
 
@@ -91,10 +95,10 @@ def do_merge(source, target, work_dir, resolution_name):
     source_repo.read()
     view_repo_filter = ViewRepositoryFilter(do_select_views(source_repo))
     repo_merger = XmiArchiRepositoryMerger(target_repo=target_repo, source_repo=source_repo,
-                                        source_filter=view_repo_filter, compare_cutoff_score=cutoff_score, )
-    if do_create_resolution_file(repo_merger, resolution_store_location=work_dir, resolution_name=resolution_name, ):
-        res_store = ResolutionStore(work_dir)
-        res_store.read(get_resolution_name(repo_merger.source_repo, resolution_name))
+                                           source_filter=view_repo_filter, compare_cutoff_score=cutoff_score, )
+    repo_merger.determine_resolutions()
+    if do_create_or_update_resolution_file(repo_merger.resolutions, resolution_store_location=work_dir,
+            resolution_name=get_resolution_name(repo_merger.source_repo, resolution_name)):
         repo_merger.merge()
         repo_merger.target_repo._write()
         repo_merger.import_sweep_update_uuids()
@@ -129,22 +133,13 @@ class OiaFunction(Enum):
 def do_appy_oia_operation_with_users(identities: List[Identity], operation: OiaFunction, prompt: bool = True,
                                      users: str = None, excluded_users: str = None, dry_run: bool = False):
     print(f"scope [{users}], excluding [{excluded_users}] for operation [{operation.value}], dry-run is {dry_run}")
-    affected_identities = [
-        identity for identity in identities
-        if identity.email
-           and identity.user_type == "User"
-           and (
-                   not excluded_users
-                   or identity.email.lower() not in [eu.lower() for eu in excluded_users.split(",")])
-           and (
-                   not users
-                   or identity.email.lower() in [eu.lower() for eu in users.split(",")])
-    ]
+    affected_identities = [identity for identity in identities if identity.email and identity.user_type == "User" and (
+            not excluded_users or identity.email.lower() not in [eu.lower() for eu in excluded_users.split(",")]) and (
+                                                                          not users or identity.email.lower() in [
+                                                                      eu.lower() for eu in users.split(",")])]
     if prompt:
-        msg_map = {
-            OiaFunction.OPP_UPDATE_USER_AUTHORIZATIONS: "updating authorizations for ",
-            OiaFunction.OPP_DELETE_USERS: "delete ",
-            OiaFunction.OPP_ACTIVATE_USERS: "activate "
+        msg_map = {OiaFunction.OPP_UPDATE_USER_AUTHORIZATIONS: "updating authorizations for ",
+            OiaFunction.OPP_DELETE_USERS: "delete ", OiaFunction.OPP_ACTIVATE_USERS: "activate "
 
         }
         print(
@@ -251,14 +246,14 @@ if __name__ == "__main__":
             local_view = OiaLocalView()
             iam_read_json(local_view=local_view, file=file)
             do_appy_oia_operation_with_users(local_view.map_identities.values(), OiaFunction.OPP_DELETE_USERS,
-                                             prompt=False if yes else True, users=users,
-                                             excluded_users=excluded_users, dry_run=dry_run)
+                                             prompt=False if yes else True, users=users, excluded_users=excluded_users,
+                                             dry_run=dry_run)
         elif function_oia == OiaFunction.OPP_ACTIVATE_USERS.value:
             local_view = OiaLocalView()
             iam_read_json(local_view=local_view, file=file)
             do_appy_oia_operation_with_users(local_view.map_identities.values(), OiaFunction.OPP_ACTIVATE_USERS,
-                                             prompt=False if yes else True, users=users,
-                                             excluded_users=excluded_users, dry_run=dry_run)
+                                             prompt=False if yes else True, users=users, excluded_users=excluded_users,
+                                             dry_run=dry_run)
         elif function_oia == OiaFunction.OPP_CONNECT.value:
             from shrub_archi.connectors.oracle.token import oracle_oia_get_token
 

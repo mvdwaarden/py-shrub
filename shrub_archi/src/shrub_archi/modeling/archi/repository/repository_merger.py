@@ -20,7 +20,6 @@ from shrub_archi.modeling.archi.resolver.identity_resolver import (
     ResolverResult,
     resolutions_get_resolved_identity,
 )
-from shrub_archi.modeling.archi.resolver.resolution_store import ResolutionStore
 
 
 class NaiveRelationResolver(IdentityResolver):
