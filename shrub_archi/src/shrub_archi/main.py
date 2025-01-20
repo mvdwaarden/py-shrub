@@ -15,7 +15,7 @@ from shrub_archi.iam.writers.json_writer import iam_write_json
 from shrub_archi.modeling.archi.repository.repository import (Repository, XmiArchiRepository, CoArchiRepository,
                                                               ViewRepositoryFilter, )
 from shrub_archi.modeling.archi.repository.repository_graph import RepositoryGrapher
-from shrub_archi.modeling.archi.repository.repository_importer import (XmiArchiRepositoryImporter, RepositoryImporter, )
+from shrub_archi.modeling.archi.repository.repository_importer import (XmiArchiRepositoryMerger, RepositoryMerger, )
 from shrub_archi.modeling.archi.resolver.resolution_store import ResolutionStore
 from shrub_archi.modeling.archi.ui.resolution_ui import do_show_resolve_ui
 from shrub_archi.modeling.archi.ui.select_diagrams_ui import do_select_diagrams_ui
@@ -70,42 +70,42 @@ def get_resolution_name(repo: Repository, resolution_name):
     return resolution_name if resolution_name else repo.name
 
 
-def do_create_resolution_file(importer: RepositoryImporter, resolution_store_location,
+def do_create_resolution_file(repo_merger: RepositoryMerger, resolution_store_location,
                               resolution_name: str = None) -> bool:
     created = False
     res_store = ResolutionStore(resolution_store_location)
 
-    res_store.read(get_resolution_name(importer.source_repo, resolution_name))
-    importer.do_resolve()
-    res_store.apply_to(importer.resolutions)
-    if do_show_resolve_ui(importer.resolutions):
-        res_store.resolutions = importer.resolutions
-        res_store.write(get_resolution_name(importer.source_repo, resolution_name))
+    res_store.read(get_resolution_name(repo_merger.source_repo, resolution_name))
+    repo_merger.determine_resolutions()
+    res_store.apply_to(repo_merger.resolutions)
+    if do_show_resolve_ui(repo_merger.resolutions):
+        res_store.resolutions = repo_merger.resolutions
+        res_store.write(get_resolution_name(repo_merger.source_repo, resolution_name))
         created = True
     return created
 
 
-def do_import(source, target, work_dir):
+def do_merge(source, target, work_dir, resolution_name):
     target_repo = create_repository(target)
     source_repo = create_repository(source)
     source_repo.read()
     view_repo_filter = ViewRepositoryFilter(do_select_views(source_repo))
-    importer = XmiArchiRepositoryImporter(target_repo=target_repo, source_repo=source_repo,
-                                          source_filter=view_repo_filter, compare_cutoff_score=cutoff_score, )
-    if do_create_resolution_file(importer, resolution_store_location=work_dir, resolution_name=resolution_name, ):
+    repo_merger = XmiArchiRepositoryMerger(target_repo=target_repo, source_repo=source_repo,
+                                        source_filter=view_repo_filter, compare_cutoff_score=cutoff_score, )
+    if do_create_resolution_file(repo_merger, resolution_store_location=work_dir, resolution_name=resolution_name, ):
         res_store = ResolutionStore(work_dir)
-        res_store.read(get_resolution_name(importer.source_repo, resolution_name))
-        importer.do_import()
-        importer.target_repo.do_write()
-        importer.import_sweep_update_uuids()
-        filtered_target = create_repository(importer.target_repo.get_dry_run_location())
+        res_store.read(get_resolution_name(repo_merger.source_repo, resolution_name))
+        repo_merger.merge()
+        repo_merger.target_repo._write()
+        repo_merger.import_sweep_update_uuids()
+        filtered_target = create_repository(repo_merger.target_repo.get_dry_run_location())
         filtered_target.read()
         filtered_view_repo_filter = ViewRepositoryFilter(
             list([view for view in filtered_target.views if view_repo_filter.contains(view)]))
-        exporter = XmiArchiRepositoryImporter(target_repo=create_repository(f"{target}.filtered.xml"),
-                                              source_repo=filtered_target, source_filter=filtered_view_repo_filter)
-        exporter.do_import()
-        exporter.target_repo.do_write()
+        exporter = XmiArchiRepositoryMerger(target_repo=create_repository(f"{target}.filtered.xml"),
+                                            source_repo=filtered_target, source_filter=filtered_view_repo_filter)
+        exporter.merge()
+        exporter.target_repo._write()
 
 
 def do_select_views(repo: Repository):
@@ -179,7 +179,7 @@ if __name__ == "__main__":
     source = args.get_arg("source")
     target = args.get_arg("target")
     work_dir = args.get_arg("workdir")
-    function_import = args.has_arg("import")
+    function_merge = args.has_arg("merge")
     function_oia = args.get_arg("oia")
     function_oci = args.get_arg("oci")
     function_extract_cmdb = args.has_arg("cmdb")
@@ -225,8 +225,8 @@ if __name__ == "__main__":
         from shrub_archi.modeling.archi.model import ElementType
 
         ArchiCsvGenerator().cleanup().write_elements_csv(it_risk.IT_RISKS_ISO_IEC_27001, ElementType.CONSTRAINT)
-    elif function_import:
-        do_import(source, target, work_dir)
+    elif function_merge:
+        do_merge(source, target, work_dir, resolution_name)
     elif function_create_graph:
         source_repo = create_repository(source)
         source_repo.read()

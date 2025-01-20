@@ -154,7 +154,7 @@ class NaiveIdentityResolver(IdentityResolver):
         return result if result and result.score >= self.cutoff_score else None
 
 
-class RepositoryImporter:
+class RepositoryMerger:
     """Merges repository 2 to repository 1, considers
     - if identities in repo1 already exists, the copied identity is ignored
     - if an artefact is copied, all resolved id's that exist in repo 1 are replaced
@@ -165,7 +165,6 @@ class RepositoryImporter:
         target_repo: Repository,
         source_repo: Repository,
         source_filter: RepositoryFilter,
-        resolution_store: ResolutionStore = None,
         compare_cutoff_score=None,
     ):
         self.target_repo: Repository = target_repo
@@ -177,12 +176,12 @@ class RepositoryImporter:
         self._relation_comparator: Optional[IdentityResolver] = None
         self.compare_cutoff_score = compare_cutoff_score if compare_cutoff_score else 85
 
-    def do_import(self):
+    def merge(self):
         # make sure to read source repository
         self.read_repositories([self.target_repo])
-        self.import_()
+        self.merge_()
 
-    def do_resolve(self):
+    def determine_resolutions(self):
         self.read_repositories([self.target_repo, self.source_repo])
         self.resolutions: List[ResolvedIdentity] = []
         self.resolve_elements(source_filter=self.source_filter)
@@ -285,7 +284,7 @@ class RepositoryImporter:
         return self._relation_comparator
 
     @abstractmethod
-    def import_(self):
+    def merge_(self):
         ...
 
     @abstractmethod
@@ -293,18 +292,18 @@ class RepositoryImporter:
         ...
 
 
-class XmiArchiRepositoryImporter(RepositoryImporter):
-    """Merges repository 2 to repository 1, considers
-    - if identities in repo1 already exists, the copied identity is ignored
-    - if an artefact is copied, all resolved id's that exist in repo 1 are replaced
+class XmiArchiRepositoryMerger(RepositoryMerger):
+    """Merges repository 2 to repository 1 (from source -> destination), it:
+    - determines resolutions
+        => identities that could be the same in the source and the destination.
+        => a user needs to identify which identities are the same
+    - performs a merge also using the resolution specification
     """
-
     def __init__(
         self,
         target_repo: Repository,
         source_repo: Repository,
         source_filter: ViewRepositoryFilter,
-        resolution_store: ResolutionStore = None,
         compare_cutoff_score=None,
     ):
         super().__init__(
@@ -314,8 +313,9 @@ class XmiArchiRepositoryImporter(RepositoryImporter):
             compare_cutoff_score=compare_cutoff_score,
         )
 
-    def import_(self):
+    def merge_(self):
         # use target items, and copy everything which is in target but has no equivalent in source
+        # (note: equivalence is based on resolution file. :see: RepositoryMerger.determine_resolutions()
         # read ID from source, check if it is resolved
         # resolved: do not copy
         # not resolved : copy, make sure to replace all resolved ID's with repo 1 UUID

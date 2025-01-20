@@ -61,14 +61,14 @@ class Repository(ABC):
             self._property_definitions = {}
         else:
             return self
-        return self.do_read()
+        return self._read()
 
     @abstractmethod
-    def do_read(self) -> "Repository":
+    def _read(self) -> "Repository":
         ...
 
     @abstractmethod
-    def do_write(self) -> "Repository":
+    def _write(self) -> "Repository":
         ...
 
     def add_view(self, view: View):
@@ -230,7 +230,6 @@ class ViewRepositoryFilter(RepositoryFilter):
         return False
 
 
-
 class XmiArchiRepository(Repository):
     def __init__(self, location: str):
         super().__init__(location)
@@ -240,7 +239,7 @@ class XmiArchiRepository(Repository):
             "xmi": "http://www.opengroup.org/xsd/archimate/3.0/",
         }
 
-    def do_read(self) -> "XmiArchiRepository":
+    def _read(self) -> "XmiArchiRepository":
         try:
             root = self.element_tree
             namespaces = self._namespaces
@@ -301,7 +300,7 @@ class XmiArchiRepository(Repository):
         self._create_relations_lookup()
         return self
 
-    def do_write(self) -> "XmiArchiRepository":
+    def _write(self) -> "XmiArchiRepository":
         with open(self.get_dry_run_location(), "w") as ofp:
             ofp.write(str(ElementTree.tostring(self.element_tree), encoding="utf8"))
         return self
@@ -641,7 +640,7 @@ class CoArchiRepository(Repository):
     def __init__(self, location: str):
         super().__init__(location)
 
-    def do_read(self) -> "CoArchiRepository":
+    def _read(self) -> "CoArchiRepository":
         with ThreadPoolExecutor(max_workers=128) as exec:
             futures = {}
             for dirpath, dirs, file in self:
@@ -670,7 +669,7 @@ class CoArchiRepository(Repository):
         self._create_relations_lookup()
         return self
 
-    def do_write(self) -> "Repository":
+    def _write(self) -> "Repository":
         return self
 
     def _read_identity_from_file(self, dirpath, file) -> Identity | View:

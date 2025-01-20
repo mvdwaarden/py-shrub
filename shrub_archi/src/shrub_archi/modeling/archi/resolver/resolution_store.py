@@ -9,6 +9,8 @@ from shrub_util.core import logging as logging
 
 class ResolutionStore:
     def __init__(self, location: str):
+        # currently a files based store
+        # location is the directory/folder the resolution files are stored
         self.location = location
         self._resolutions: Optional[List[Tuple[str, str, bool]]] = None
 
