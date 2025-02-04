@@ -69,7 +69,7 @@ def get_resolution_name(repo: Repository, resolution_name):
     return resolution_name if resolution_name else repo.name
 
 
-def do_create_or_update_resolution_file(resolutions, resolution_store_location, resolution_name: str) -> bool:
+def do_create_or_update_resolution_file_and_resolutions(resolutions, resolution_store_location, resolution_name: str) -> bool:
     """ Tries to read existing resolution file.
         Applies the read resolution file to the determined resolutions.
         Ask the user to evaluate the resolutions (UI input is immediately reflected in the RepositoryMerger.
@@ -97,8 +97,8 @@ def do_merge(source, target, work_dir, resolution_name):
     repo_merger = XmiArchiRepositoryMerger(target_repo=target_repo, source_repo=source_repo,
                                            source_filter=view_repo_filter, compare_cutoff_score=cutoff_score, )
     repo_merger.determine_resolutions()
-    if do_create_or_update_resolution_file(repo_merger.resolutions, resolution_store_location=work_dir,
-            resolution_name=get_resolution_name(repo_merger.source_repo, resolution_name)):
+    if do_create_or_update_resolution_file_and_resolutions(repo_merger.resolutions, resolution_store_location=work_dir,
+                                                           resolution_name=get_resolution_name(repo_merger.source_repo, resolution_name)):
         repo_merger.merge()
         repo_merger.target_repo._write()
         repo_merger.import_sweep_update_uuids()
