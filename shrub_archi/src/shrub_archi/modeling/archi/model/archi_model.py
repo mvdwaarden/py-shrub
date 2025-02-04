@@ -17,7 +17,7 @@ class ElementType(Enum):
 
 
 @dataclass
-class Identity:
+class Entity:
     unique_id: str
     name: str
     classification: str = None
@@ -31,12 +31,12 @@ class Identity:
 
 
 @dataclass
-class PropertyDefinition(Identity):
+class PropertyDefinition(Entity):
     ...
 
 
 @dataclass
-class View(Identity):
+class View(Entity):
     classification: str = None
     description: Optional[str] = None
     source: Optional[str] = None
@@ -48,11 +48,11 @@ class View(Identity):
 
 
 @dataclass
-class Relation(Identity):
+class Relation(Entity):
     source_id: Optional[str] = None
     target_id: Optional[str] = None
-    source: Optional[Identity] = None
-    target: Optional[Identity] = None
+    source: Optional[Entity] = None
+    target: Optional[Entity] = None
 
     def __hash__(self):
         return super().__hash__()
@@ -68,6 +68,6 @@ class Relation(Identity):
 
 Relations = Dict[str, Relation]
 RelationsLookup = Dict[Tuple[str, str], Relation]
-Identities = Dict[str, Identity]
+Entities = Dict[str, Entity]
 Views = Dict[str, View]
 PropertyDefinitions = Dict[str, PropertyDefinition]

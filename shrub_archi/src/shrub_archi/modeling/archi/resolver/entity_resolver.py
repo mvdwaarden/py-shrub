@@ -5,11 +5,11 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import List, Tuple, Optional
 
-from shrub_archi.modeling.archi.model.archi_model import Identity
+from shrub_archi.modeling.archi.model.archi_model import Entity
 from shrub_archi.modeling.archi.repository.repository import Repository, RepositoryFilter
 
 
-class ResolvedIdentityAction(Enum):
+class ResolvedEntityAction(Enum):
     REPLACE_TARGET_ID = 1
     REPLACE_TARGET_NAME = 2
     REPLACE_TARGET_DESCRIPTION = 4
@@ -19,9 +19,9 @@ class ResolvedIdentityAction(Enum):
 
 
 @dataclass
-class ResolvedIdentity:
-    source: "Identity"
-    target: "Identity"
+class ResolvedEntity:
+    source: "Entity"
+    target: "Entity"
     resolver_result: "ResolverResult"
 
     def __hash__(self):
@@ -40,13 +40,13 @@ class ResolverResult:
         return self.score >= self.MAX_EQUAL_SCORE
 
 
-class IdentityResolver(ABC):
-    def __init__(self, parent: "IdentityResolver" = None):
-        self.resolver_chain: List[IdentityResolver] = [self]
+class EntityResolver(ABC):
+    def __init__(self, parent: "EntityResolver" = None):
+        self.resolver_chain: List[EntityResolver] = [self]
         if parent:
             self.resolver_chain.append(*parent.resolver_chain)
 
-    def resolve(self, source: Identity, target: Identity) -> ResolverResult:
+    def resolve(self, source: Entity, target: Entity) -> ResolverResult:
         result = None
         for cmp in self.resolver_chain:
             result = cmp.do_resolve(source, target)
@@ -56,27 +56,27 @@ class IdentityResolver(ABC):
         return result
 
     @abstractmethod
-    def do_resolve(self, source: Identity, target: Identity) -> ResolverResult:
+    def do_resolve(self, source: Entity, target: Entity) -> ResolverResult:
         ...
 
 
 class RepositoryResolver:
     def classification_resolve(
         self,
-        source_identities: List[ResolvedIdentity],
-        target_identities: List[ResolvedIdentity],
-        comparator: IdentityResolver,
+        source_entities: List[ResolvedEntity],
+        target_entities: List[ResolvedEntity],
+        comparator: EntityResolver,
     ):
         result = []
         for source, target in [
             (source, target)
             for source, target in itertools.product(
-                source_identities, target_identities
+                source_entities, target_entities
             )
         ]:
             compare_result = comparator.resolve(source, target)
             if compare_result:
-                resolved_id = ResolvedIdentity(
+                resolved_id = ResolvedEntity(
                     source=source, target=target, resolver_result=compare_result
                 )
                 result.append(resolved_id)
@@ -87,7 +87,7 @@ class RepositoryResolver:
         target_repo: Repository,
         source_repo: Repository,
         source_filter: RepositoryFilter = None,
-        comparator: IdentityResolver = None,
+        comparator: EntityResolver = None,
     ):
         result = []
 
@@ -125,9 +125,9 @@ class RepositoryResolver:
         return result
 
 
-def resolutions_get_resolved_identity(
-    resolutions: List[ResolvedIdentity], unique_id: str, unique_id_should_match_source: bool = False
-) -> Tuple[bool, Optional[List[ResolvedIdentity]]]:
+def resolutions_get_resolved_entity(
+    resolutions: List[ResolvedEntity], unique_id: str, unique_id_should_match_source: bool = False
+) -> Tuple[bool, Optional[List[ResolvedEntity]]]:
     result = False
     res_ids = []
     if resolutions:

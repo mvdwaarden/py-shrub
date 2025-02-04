@@ -7,34 +7,34 @@ from difflib import SequenceMatcher
 from enum import Enum
 from typing import Optional, List
 
-from shrub_archi.modeling.archi.model.archi_model import Identity, Relation
+from shrub_archi.modeling.archi.model.archi_model import Entity, Relation
 from shrub_archi.modeling.archi.repository.repository import (
     Repository,
     RepositoryFilter,
     ViewRepositoryFilter,
 )
-from shrub_archi.modeling.archi.resolver.identity_resolver import (
-    ResolvedIdentity,
+from shrub_archi.modeling.archi.resolver.entity_resolver import (
+    ResolvedEntity,
     RepositoryResolver,
-    IdentityResolver,
+    EntityResolver,
     ResolverResult,
-    resolutions_get_resolved_identity,
+    resolutions_get_resolved_entity,
 )
 
 
-class NaiveRelationResolver(IdentityResolver):
+class NaiveRelationResolver(EntityResolver):
     def __init__(
         self,
-        resolutions: List[ResolvedIdentity],
+        resolutions: List[ResolvedEntity],
         cutoff_score: int = 80,
-        parent: IdentityResolver = None,
+        parent: EntityResolver = None,
     ):
         super().__init__(parent)
         self.resolutions = resolutions
         self.cutoff_score = cutoff_score
 
     def do_resolve(
-        self, source: Identity, target: Identity
+        self, source: Entity, target: Entity
     ) -> Optional[ResolverResult]:
         rel_result = source_result = target_result = None
 
@@ -51,7 +51,7 @@ class NaiveRelationResolver(IdentityResolver):
                 source_rel: Relation = source
                 target_rel: Relation = target
                 # check if the source of the target relation is resolved
-                found, source_results = resolutions_get_resolved_identity(
+                found, source_results = resolutions_get_resolved_entity(
                     self.resolutions, target_rel.source_id
                 )
                 target_results = []
@@ -59,7 +59,7 @@ class NaiveRelationResolver(IdentityResolver):
                 for res_id in source_results:
                     if res_id.source.unique_id == source_rel.source_id:
                         # check if the target of the target relation is resolved
-                        found, target_results = resolutions_get_resolved_identity(
+                        found, target_results = resolutions_get_resolved_entity(
                             self.resolutions, target_rel.target_id
                         )
                         source_result = res_id
@@ -98,13 +98,13 @@ class NaiveRelationResolver(IdentityResolver):
         return rel_result if rel_result else None
 
 
-class NaiveIdentityResolver(IdentityResolver):
-    def __init__(self, cutoff_score: int = 80, parent: IdentityResolver = None):
+class NaiveEntityResolver(EntityResolver):
+    def __init__(self, cutoff_score: int = 80, parent: EntityResolver = None):
         super().__init__(parent)
         self.cutoff_score = cutoff_score
 
     def do_resolve(
-        self, identity1: Identity, identity2: Identity
+        self, identity1: Entity, identity2: Entity
     ) -> Optional[ResolverResult]:
         result = None
 
@@ -169,10 +169,10 @@ class RepositoryMerger:
         self.target_repo: Repository = target_repo
         self.source_repo: Repository = source_repo
         self.source_filter: RepositoryFilter = source_filter
-        self.resolutions: List[ResolvedIdentity] = []
-        self._identity_resolver: Optional[RepositoryResolver] = None
-        self._identity_comparator: Optional[IdentityResolver] = None
-        self._relation_comparator: Optional[IdentityResolver] = None
+        self.resolutions: List[ResolvedEntity] = []
+        self._entity_resolver: Optional[RepositoryResolver] = None
+        self._entity_comparator: Optional[EntityResolver] = None
+        self._relation_comparator: Optional[EntityResolver] = None
         self.compare_cutoff_score = compare_cutoff_score if compare_cutoff_score else 85
 
     def merge(self):
@@ -182,7 +182,7 @@ class RepositoryMerger:
 
     def determine_resolutions(self):
         self.read_repositories([self.target_repo, self.source_repo])
-        self.resolutions: List[ResolvedIdentity] = []
+        self.resolutions: List[ResolvedEntity] = []
         self.resolve_elements(source_filter=self.source_filter)
         self.resolve_relations(source_filter=self.source_filter)
 
@@ -203,7 +203,7 @@ class RepositoryMerger:
                 target_repo=self.target_repo,
                 source_repo=self.source_repo,
                 source_filter=source_filter_clone,
-                comparator=self.identity_comparator,
+                comparator=self.entity_comparator,
             )
         )
         print(
@@ -261,21 +261,21 @@ class RepositoryMerger:
 
     @property
     def resolver(self) -> RepositoryResolver:
-        if not self._identity_resolver:
-            self._identity_resolver = RepositoryResolver()
+        if not self._entity_resolver:
+            self._entity_resolver = RepositoryResolver()
 
-        return self._identity_resolver
+        return self._entity_resolver
 
     @property
-    def identity_comparator(self) -> IdentityResolver:
-        if not self._identity_comparator:
-            self._identity_comparator = NaiveIdentityResolver(
+    def entity_comparator(self) -> EntityResolver:
+        if not self._entity_comparator:
+            self._entity_comparator = NaiveEntityResolver(
                 cutoff_score=self.compare_cutoff_score
             )
-        return self._identity_comparator
+        return self._entity_comparator
 
     @property
-    def relation_comparator(self) -> IdentityResolver:
+    def relation_comparator(self) -> EntityResolver:
         if not self._relation_comparator:
             self._relation_comparator = NaiveRelationResolver(
                 resolutions=self.resolutions, cutoff_score=self.compare_cutoff_score
@@ -338,7 +338,7 @@ class XmiArchiRepositoryMerger(RepositoryMerger):
                 match identity:
                     case Relation():
                         self.target_repo.add_relation(identity)
-                    case Identity():
+                    case Entity():
                         self.target_repo.add_element(identity)
 
         for property_definition in self.source_repo.property_definitions:

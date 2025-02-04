@@ -1,7 +1,7 @@
 from typing import List
 
 from shrub_archi.modeling.archi.model.archi_model import Relation
-from shrub_archi.modeling.archi.resolver.identity_resolver import ResolvedIdentity
+from shrub_archi.modeling.archi.resolver.entity_resolver import ResolvedEntity
 from shrub_archi.ui.select_ui import TableSelectModel, do_show_select_ui
 
 
@@ -18,7 +18,7 @@ class ResolutionTableSelectModel(TableSelectModel):
         "Identity2",
     ]
 
-    def __init__(self, data: List[ResolvedIdentity]):
+    def __init__(self, data: List[ResolvedEntity]):
         super().__init__(data=data)
         for row in data:
             self.set_selected(row, row.resolver_result.manual_verification)
@@ -33,7 +33,7 @@ class ResolutionTableSelectModel(TableSelectModel):
             case _:
                 return identity.name
 
-    def column_value_for(self, row: ResolvedIdentity, column: int):
+    def column_value_for(self, row: ResolvedEntity, column: int):
         match column:
             case 0:
                 return ""  # Checkbox column
@@ -54,7 +54,7 @@ class ResolutionTableSelectModel(TableSelectModel):
             case _:
                 return "?"
 
-    def hit_row(self, row: ResolvedIdentity, search_text: str):
+    def hit_row(self, row: ResolvedEntity, search_text: str):
         def hit_identity(identity):
             return (
                 search_text in self._row_name(identity).lower()
@@ -79,7 +79,7 @@ class ResolutionTableSelectModel(TableSelectModel):
         return result
 
 
-def do_show_resolve_ui(resolved_ids: List[ResolvedIdentity]) -> bool:
+def do_show_resolve_ui(resolved_ids: List[ResolvedEntity]) -> bool:
     saved, selection = do_show_select_ui(
         model=ResolutionTableSelectModel(resolved_ids), ok_text="Resolve"
     )

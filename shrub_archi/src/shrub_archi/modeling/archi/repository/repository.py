@@ -13,8 +13,8 @@ from shrub_archi.modeling.archi.model.archi_model import (
     Relation,
     Relations,
     RelationsLookup,
-    Identity,
-    Identities,
+    Entity,
+    Entities,
     Views,
     PropertyDefinition,
     PropertyDefinitions,
@@ -27,10 +27,10 @@ class RepositoryFilter:
         self.include_elements = include_elements
         self.include_relations = include_relations
 
-    def include(self, identity: Identity):
+    def include(self, identity: Entity):
         return (
             self.include_elements
-            and isinstance(identity, Identity)
+            and isinstance(identity, Entity)
             and not isinstance(identity, Relation)
         ) or (self.include_relations and isinstance(identity, Relation))
 
@@ -45,10 +45,10 @@ class RepositoryFilter:
 class Repository(ABC):
     def __init__(self, location: str):
         self.location = os.path.normpath(location)
-        self._identities: Optional[Identities] = None
+        self._identities: Optional[Entities] = None
         self._relations_lookup: Optional[RelationsLookup] = None
         self._relations: Optional[Relations] = None
-        self._elements: Optional[Identities] = None
+        self._elements: Optional[Entities] = None
         self._views: Optional[Views] = None
         self._property_definitions: Optional[PropertyDefinitions] = None
 
@@ -74,10 +74,10 @@ class Repository(ABC):
     def add_view(self, view: View):
         ...
 
-    def add_element(self, element: Identity):
+    def add_element(self, element: Entity):
         ...
 
-    def del_element(self, element: Identity):
+    def del_element(self, element: Entity):
         ...
 
     def add_property_definition(self, property_definition: PropertyDefinition):
@@ -103,7 +103,7 @@ class Repository(ABC):
             return "n.a."
 
     @property
-    def identities(self) -> List[Identity]:
+    def identities(self) -> List[Entity]:
         return list(self._identities.values()) if self._identities else []
 
     @property
@@ -123,18 +123,18 @@ class Repository(ABC):
         return list(self._relations.values()) if self._relations else []
 
     @property
-    def elements(self) -> List[Identity]:
+    def elements(self) -> List[Entity]:
         return list(self._elements.values()) if self._elements else []
 
     @property
-    def property_definitions(self) -> List[Identity]:
+    def property_definitions(self) -> List[Entity]:
         return (
             list(self._property_definitions.values())
             if self._property_definitions
             else []
         )
 
-    def get_identity_by_id(self, identifier: str) -> Identity:
+    def get_identity_by_id(self, identifier: str) -> Entity:
         if identifier in self._identities:
             return self._identities[identifier]
         else:
@@ -193,7 +193,7 @@ class ViewRepositoryFilter(RepositoryFilter):
         self.views: List[Views] = views
         self._aggregate_identities_ids: Optional[List[str]] = None
 
-    def include(self, identity: Identity):
+    def include(self, identity: Entity):
         return super().include(identity) and (
             identity.unique_id in self.aggregate_identities_ids
             or isinstance(identity, Relation)
@@ -251,8 +251,8 @@ class XmiArchiRepository(Repository):
                     )
 
             for el in root.findall("xmi:elements/xmi:element", namespaces=namespaces):
-                identity: Identity = self._read_identity_from_xml_element(
-                    el, namespaces, Identity
+                identity: Entity = self._read_identity_from_xml_element(
+                    el, namespaces, Entity
                 )
                 if identity and identity.unique_id:
                     _check_for_duplicate_identity(identity, self._identities)
@@ -312,14 +312,14 @@ class XmiArchiRepository(Repository):
             self._write_view(view.data, self._namespaces)
             self._write_organization(view, self._namespaces)
 
-    def add_element(self, element: Identity):
+    def add_element(self, element: Entity):
         if element.unique_id not in self._elements:
             self._elements[element.unique_id] = element
             self._identities[element.unique_id] = element
             self._write_element(element.data, self._namespaces)
             self._write_organization(element, self._namespaces)
 
-    def del_element(self, element: Identity):
+    def del_element(self, element: Entity):
         if element.unique_id in self._elements:
             del self._elements[element.unique_id]
             del self._identities[element.unique_id]
@@ -403,7 +403,7 @@ class XmiArchiRepository(Repository):
 
     def _read_identity_from_xml_element(
         self, el, namespaces, specialization
-    ) -> Identity | View:
+    ) -> Entity | View:
         result = None
         try:
             name = documentation = None
@@ -662,7 +662,7 @@ class CoArchiRepository(Repository):
                     case View():
                         self._views[result.unique_id] = result
                         self._identities[result.unique_id] = result
-                    case Identity():
+                    case Entity():
                         self._elements[result.unique_id] = result
                         self._identities[result.unique_id] = result
 
@@ -672,7 +672,7 @@ class CoArchiRepository(Repository):
     def _write(self) -> "Repository":
         return self
 
-    def _read_identity_from_file(self, dirpath, file) -> Identity | View:
+    def _read_identity_from_file(self, dirpath, file) -> Entity | View:
         result = None
         full_filename = os.path.join(dirpath, file)
         # logging.get_logger().error(f"start reading id from {full_filename}")
@@ -683,7 +683,7 @@ class CoArchiRepository(Repository):
             if classification.lower().endswith("diagrammodel"):
                 constructor = View
             else:
-                constructor = Identity
+                constructor = Entity
             identity = constructor(
                 unique_id=root.get("id"),
                 name=root.get("name"),

@@ -2,7 +2,7 @@ import os
 
 import networkx as nx
 
-from shrub_archi.modeling.archi.model.archi_model import Relation, Identity
+from shrub_archi.modeling.archi.model.archi_model import Relation, Entity
 from shrub_archi.modeling.archi.repository.repository import Repository
 
 
@@ -20,7 +20,7 @@ class RepositoryGrapher:
             match thingy:
                 case Relation():
                     return thingy.name if thingy.name else ""
-                case Identity():
+                case Entity():
                     return thingy.name
 
                 case _:

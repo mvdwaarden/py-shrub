@@ -3,7 +3,7 @@ import os
 import shutil
 from typing import Optional, List, Tuple
 
-from shrub_archi.modeling.archi.resolver.identity_resolver import ResolvedIdentity
+from shrub_archi.modeling.archi.resolver.entity_resolver import ResolvedEntity
 from shrub_util.core import logging as logging
 
 
@@ -19,7 +19,7 @@ class ResolutionStore:
         return self._resolutions
 
     @resolutions.setter
-    def resolutions(self, resolved_identities: List[ResolvedIdentity]):
+    def resolutions(self, resolved_identities: List[ResolvedEntity]):
         self._resolutions = {}
         for resolution in resolved_identities:
             self._resolutions[
@@ -83,7 +83,7 @@ class ResolutionStore:
         else:
             return None
 
-    def apply_to(self, resolved_ids: List[ResolvedIdentity]):
+    def apply_to(self, resolved_ids: List[ResolvedEntity]):
         for (id1, id2), manual_verification in self.resolutions.items():
             for res_id in [
                 res_id
