@@ -161,6 +161,14 @@ def do_appy_oia_operation_with_users(identities: List[Identity], operation: OiaF
             api.activate_identity(identity)
 
 
+def do_visualize_ontology(file_name: str):
+    from shrub_archi.modeling.owl.owl_transformer import owl_read_ontology, owl_verbalize
+
+    ontology = owl_read_ontology(file_name)
+    with open(f"{file_name}.csv","w") as ofp:
+        ofp.write(owl_verbalize(ontology))
+
+
 logging.configure_console()
 if __name__ == "__main__":
 
@@ -181,6 +189,7 @@ if __name__ == "__main__":
     function_create_graph = args.has_arg("graph")
     function_extract_agile = args.has_arg("agile")
     function_security = args.get_arg("sec", None)
+    function_owl = args.get_arg("owl")
     organisation = args.get_arg("org")
     cutoff_score = args.get_arg("cutoff", 85)
     resolution_name = args.get_arg("resolutions", None)
@@ -202,6 +211,8 @@ if __name__ == "__main__":
     dry_run = args.has_arg("dry-run")
     if help:
         do_print_usage()
+    elif function_owl:
+        do_visualize_ontology(file)
     elif function_security:
         test_security_tls_compliance(csv_file=file)
     elif function_extract_agile:

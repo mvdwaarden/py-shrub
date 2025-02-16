@@ -7,7 +7,7 @@ def get_loader(basepath):
     )
 
 
-def get_dictionary_loader(templates: dict):
+def _get_dictionary_loader(templates: dict):
     return DictLoader(templates)
 
 
@@ -20,7 +20,7 @@ class TemplateRenderer:
         self.environment = None
         self.get_loader = get_loader
 
-    def render(self, template, **kwargs):
+    def render(self, template, **kwargs) -> str:
         """Render the template
         template: template to use
         kwargs: template context variables
@@ -34,3 +34,8 @@ class TemplateRenderer:
             return get_loader
         else:
             return self.get_loader
+
+
+class DictionaryRenderer(TemplateRenderer):
+    def __init__(self, templates: dict):
+        super().__init__(templates, _get_dictionary_loader)

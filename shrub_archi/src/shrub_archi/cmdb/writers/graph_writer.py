@@ -3,7 +3,7 @@ from typing import Callable
 
 from shrub_archi.cmdb.model.cmdb_model import CmdbLocalView, NamedItem, ConfigurationItem, Manager, ConfigAdmin, \
     NamedItemRelation
-from shrub_util.generation.template_renderer import TemplateRenderer, get_dictionary_loader
+from shrub_util.generation.template_renderer import DictionaryRenderer
 
 
 class GraphType(Enum):
@@ -126,8 +126,8 @@ def cmdb_write_named_item_graph(local_view: CmdbLocalView, graph_type: GraphType
         def node_namer(n):
             return n.name
 
-        tr = TemplateRenderer({GraphType.DOT.value: DOT_TEMPLATE, GraphType.GRAPHML.value: GRAPHML_TEMPLATE,
-            GraphType.CYPHER.value: CYPHER_TEMPLATE}, get_loader=get_dictionary_loader)
+        tr = DictionaryRenderer({GraphType.DOT.value: DOT_TEMPLATE, GraphType.GRAPHML.value: GRAPHML_TEMPLATE,
+            GraphType.CYPHER.value: CYPHER_TEMPLATE})
         graph_output = tr.render(graph_type.value, g=g, node_filter=node_filter, dot_shaper=dot_shaper,
                                  default_node_namer=node_namer, dot_node_namer=dot_node_namer,
                                  cypher_node_namer=cypher_node_namer, cypher_relation_namer=cypher_relation_namer)

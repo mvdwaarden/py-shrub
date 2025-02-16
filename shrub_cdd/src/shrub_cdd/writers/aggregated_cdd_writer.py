@@ -3,7 +3,7 @@ from typing import Tuple
 from networkx import Graph, write_graphml
 
 from shrub_cdd.model.model import EDGE_ATTRIBUTE_WEIGHT
-from shrub_util.generation.template_renderer import TemplateRenderer, get_dictionary_loader
+from shrub_util.generation.template_renderer import DictionaryRenderer
 
 DOT_TEMPLATE = """
 digraph "{{g.name}}" {
@@ -22,7 +22,7 @@ digraph "{{g.name}}" {
 
 def write_aggregated_dot(g: Graph, file: str):
     with open(f"{file}.dot", "w") as ofp:
-        tr = TemplateRenderer({"tha_template": DOT_TEMPLATE}, get_loader=get_dictionary_loader)
+        tr = DictionaryRenderer({"tha_template": DOT_TEMPLATE})
         min_weight, max_weight = get_edge_weight_range(g)
         dot = tr.render("tha_template", g=g, min_weight=min_weight, max_weight=max_weight)
         ofp.write(dot)

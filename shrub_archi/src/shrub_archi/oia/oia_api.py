@@ -6,7 +6,7 @@ from shrub_archi.connectors.oracle.token import oracle_oia_get_token
 from shrub_archi.iam.model.iam_model import Role, ResourceType, Resource, Authorization, Authorizations
 from shrub_archi.oia.model.oia_model import Identity, OiaLocalView
 from shrub_util.api.token import Token
-from shrub_util.generation.template_renderer import TemplateRenderer, get_dictionary_loader
+from shrub_util.generation.template_renderer import DictionaryRenderer
 from shrub_util.core.str_func import str_json_encode
 
 
@@ -103,7 +103,7 @@ class OiaApi:
                     {% endfor %}  
                 ]                  
             }"""
-        tr = TemplateRenderer({"request": request_template}, get_loader=get_dictionary_loader)
+        tr = DictionaryRenderer({"request": request_template})
         request = str_json_encode(tr.render("request", identity=identity, authorizations=authorizations))
         response = requests.request("PATCH", self._get_url(self.USERS_URI), headers=self._get_headers(), data=request)
         print(f"update  {identity.email} : {response.status_code}")
