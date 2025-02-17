@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model xmlns="http://www.opengroup.org/xsd/archimate/3.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengroup.org/xsd/archimate/3.0/ http://www.opengroup.org/xsd/archimate/3.1/archimate3_Diagram.xsd" identifier="id-8cdc2b820d5e440c8dd22cbb6b12adbc">
+  <name xml:lang="en">archi_datamodel</name>
+  <elements>
+    <element identifier="id-c2fcd69d47d84766916309be65518ad4" xsi:type="BusinessObject">
+      <name xml:lang="en">B</name>
+      <documentation xml:lang="en">Child</documentation>
+    </element>
+    <element identifier="id-69d76763b6d24316bb4db73dc1c3a142" xsi:type="BusinessObject">
+      <name xml:lang="en">C</name>
+      <documentation xml:lang="en">Aggregated One</documentation>
+    </element>
+    <element identifier="id-a2f334adce064163a5c0eda285160fcc" xsi:type="BusinessObject">
+      <name xml:lang="en">D</name>
+      <documentation xml:lang="en">Contained One</documentation>
+    </element>
+    <element identifier="id-f5863fbbdf40466890128fd753739043" xsi:type="BusinessObject">
+      <name xml:lang="en">A</name>
+      <documentation xml:lang="en">Parent</documentation>
+    </element>
+  </elements>
+  <relationships>
+    <relationship identifier="id-5358afba293648438ddefe754db4fe48" source="id-c2fcd69d47d84766916309be65518ad4" target="id-69d76763b6d24316bb4db73dc1c3a142" xsi:type="Aggregation">
+      <name xml:lang="en">is aggregated by</name>
+    </relationship>
+    <relationship identifier="id-6e6c279b8a5e4dd09b5da0f01bf7dc30" source="id-c2fcd69d47d84766916309be65518ad4" target="id-a2f334adce064163a5c0eda285160fcc" xsi:type="Composition">
+      <name xml:lang="en">is containted in</name>
+    </relationship>
+    <relationship identifier="id-0f5ed790dff0436ea8210242bbdca48f" source="id-c2fcd69d47d84766916309be65518ad4" target="id-f5863fbbdf40466890128fd753739043" xsi:type="Specialization">
+      <name xml:lang="en">inherits from</name>
+    </relationship>
+  </relationships>
+  <organizations>
+    <item>
+      <label xml:lang="en">Business</label>
+      <item identifierRef="id-c2fcd69d47d84766916309be65518ad4" />
+      <item identifierRef="id-69d76763b6d24316bb4db73dc1c3a142" />
+      <item identifierRef="id-a2f334adce064163a5c0eda285160fcc" />
+      <item identifierRef="id-f5863fbbdf40466890128fd753739043" />
+    </item>
+    <item>
+      <label xml:lang="en">Relations</label>
+      <item identifierRef="id-5358afba293648438ddefe754db4fe48" />
+      <item identifierRef="id-6e6c279b8a5e4dd09b5da0f01bf7dc30" />
+      <item identifierRef="id-0f5ed790dff0436ea8210242bbdca48f" />
+    </item>
+    <item>
+      <label xml:lang="en">Views</label>
+      <item identifierRef="id-c304e640bfaa4c30b398e6be2c6a437d" />
+    </item>
+  </organizations>
+  <views>
+    <diagrams>
+      <view identifier="id-c304e640bfaa4c30b398e6be2c6a437d" xsi:type="Diagram">
+        <name xml:lang="en">Default View</name>
+        <node identifier="id-ede29cb6645644c8ab7bb8f4f2ff3ea2" elementRef="id-c2fcd69d47d84766916309be65518ad4" xsi:type="Element" x="204" y="168" w="120" h="55">
+          <style>
+            <fillColor r="255" g="255" b="181" a="100" />
+            <lineColor r="92" g="92" b="92" a="100" />
+            <font name="Lucida Grande" size="12">
+              <color r="0" g="0" b="0" />
+            </font>
+          </style>
+        </node>
+        <node identifier="id-5dd6a5e7aea149bfa88976b583e27fb1" elementRef="id-69d76763b6d24316bb4db73dc1c3a142" xsi:type="Element" x="505" y="157" w="120" h="55">
+          <style>
+            <fillColor r="255" g="255" b="181" a="100" />
+            <lineColor r="92" g="92" b="92" a="100" />
+            <font name="Lucida Grande" size="12">
+              <color r="0" g="0" b="0" />
+            </font>
+          </style>
+        </node>
+        <node identifier="id-5479dc0c1ee347cf95ae0e768d7ccf87" elementRef="id-a2f334adce064163a5c0eda285160fcc" xsi:type="Element" x="321" y="361" w="120" h="55">
+          <style>
+            <fillColor r="255" g="255" b="181" a="100" />
+            <lineColor r="92" g="92" b="92" a="100" />
+            <font name="Lucida Grande" size="12">
+              <color r="0" g="0" b="0" />
+            </font>
+          </style>
+        </node>
+        <node identifier="id-f4a1661684744f448d4ce6164ecae716" elementRef="id-f5863fbbdf40466890128fd753739043" xsi:type="Element" x="192" y="60" w="120" h="55">
+          <style>
+            <fillColor r="255" g="255" b="181" a="100" />
+            <lineColor r="92" g="92" b="92" a="100" />
+            <font name="Lucida Grande" size="12">
+              <color r="0" g="0" b="0" />
+            </font>
+          </style>
+        </node>
+        <connection identifier="id-140a77b7817d4e0da6b68629df4474de" relationshipRef="id-5358afba293648438ddefe754db4fe48" xsi:type="Relationship" source="id-ede29cb6645644c8ab7bb8f4f2ff3ea2" target="id-5dd6a5e7aea149bfa88976b583e27fb1">
+          <style>
+            <lineColor r="0" g="0" b="0" />
+            <font name="Lucida Grande" size="12">
+              <color r="0" g="0" b="0" />
+            </font>
+          </style>
+        </connection>
+        <connection identifier="id-d9503c5b66b94882a868b5eab9cfee03" relationshipRef="id-6e6c279b8a5e4dd09b5da0f01bf7dc30" xsi:type="Relationship" source="id-ede29cb6645644c8ab7bb8f4f2ff3ea2" target="id-5479dc0c1ee347cf95ae0e768d7ccf87">
+          <style>
+            <lineColor r="0" g="0" b="0" />
+            <font name="Lucida Grande" size="12">
+              <color r="0" g="0" b="0" />
+            </font>
+          </style>
+        </connection>
+        <connection identifier="id-879ac3f061354557af138e2f5068bdde" relationshipRef="id-0f5ed790dff0436ea8210242bbdca48f" xsi:type="Relationship" source="id-ede29cb6645644c8ab7bb8f4f2ff3ea2" target="id-f4a1661684744f448d4ce6164ecae716">
+          <style>
+            <lineColor r="0" g="0" b="0" />
+            <font name="Lucida Grande" size="12">
+              <color r="0" g="0" b="0" />
+            </font>
+          </style>
+        </connection>
+      </view>
+    </diagrams>
+  </views>
+</model>

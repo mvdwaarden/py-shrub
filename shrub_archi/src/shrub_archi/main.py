@@ -12,6 +12,7 @@ from shrub_archi.iam.model.iam_model import Identity
 from shrub_archi.iam.readers.json_reader import iam_read_json
 from shrub_archi.iam.writers.csv_writer import iam_write_csv
 from shrub_archi.iam.writers.json_writer import iam_write_json
+from shrub_archi.modeling.archi.model.archi_model import View
 from shrub_archi.modeling.archi.repository.repository import (Repository, XmiArchiRepository, CoArchiRepository,
                                                               ViewRepositoryFilter, )
 from shrub_archi.modeling.archi.repository.repository_graph import RepositoryGrapher
@@ -93,7 +94,7 @@ def do_merge(source, target, work_dir, resolution_name):
     target_repo = create_repository(target)
     source_repo = create_repository(source)
     source_repo.read()
-    view_repo_filter = ViewRepositoryFilter(do_select_views(source_repo))
+    view_repo_filter = ViewRepositoryFilter(views=do_select_views(source_repo))
     repo_merger = XmiArchiRepositoryMerger(target_repo=target_repo, source_repo=source_repo,
                                            source_filter=view_repo_filter, compare_cutoff_score=cutoff_score, )
     repo_merger.determine_resolutions()
@@ -112,7 +113,7 @@ def do_merge(source, target, work_dir, resolution_name):
         exporter.target_repo._write()
 
 
-def do_select_views(repo: Repository):
+def do_select_views(repo: Repository) -> List[View]:
     selected, views = do_select_diagrams_ui(repo.views)
 
     return views
@@ -168,6 +169,17 @@ def do_visualize_ontology(file_name: str):
     with open(f"{file_name}.csv","w") as ofp:
         ofp.write(owl_verbalize(ontology))
 
+def do_export_ontology(file_name: str, folder: str):
+    from shrub_archi.modeling.owl.owl_transformer import owl_read_ontology, owl_export_to_archi_csv
+    import os
+    # create path
+    try:
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+    except Exception as ex:
+        print(f"{ex}")
+    ontology = owl_read_ontology(file_name)
+    owl_export_to_archi_csv(ontology, folder)
 
 logging.configure_console()
 if __name__ == "__main__":
@@ -196,6 +208,7 @@ if __name__ == "__main__":
     function_test = args.has_arg("test")
     environment = args.get_arg("env", "ITSM_UAT")
     file = args.get_arg("file")
+    folder = args.get_arg("folder")
     emails = args.get_arg("email", "").split(",")
     cmdb_api = args.get_arg("cmdb-api")
     use_local_view = args.has_arg("use-local-view")
@@ -212,7 +225,10 @@ if __name__ == "__main__":
     if help:
         do_print_usage()
     elif function_owl:
-        do_visualize_ontology(file)
+        if function_owl == "verbalize":
+            do_visualize_ontology(file)
+        else:
+            do_export_ontology(file, folder)
     elif function_security:
         test_security_tls_compliance(csv_file=file)
     elif function_extract_agile:

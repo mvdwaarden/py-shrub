@@ -33,7 +33,7 @@ class NaiveRelationResolver(EntityResolver):
         self.resolutions = resolutions
         self.cutoff_score = cutoff_score
 
-    def do_resolve(
+    def resolve(
         self, source: Entity, target: Entity
     ) -> Optional[ResolverResult]:
         rel_result = source_result = target_result = None
@@ -103,43 +103,43 @@ class NaiveEntityResolver(EntityResolver):
         super().__init__(parent)
         self.cutoff_score = cutoff_score
 
-    def do_resolve(
-        self, identity1: Entity, identity2: Entity
+    def resolve(
+        self, source: Entity, target: Entity
     ) -> Optional[ResolverResult]:
         result = None
 
-        if isinstance(identity1, Relation) and isinstance(identity2, Relation):
+        if isinstance(source, Relation) and isinstance(target, Relation):
             ...
-        elif identity1.unique_id == identity2.unique_id:
+        elif source.unique_id == target.unique_id:
             result = ResolverResult(
                 score=ResolverResult.MAX_EQUAL_SCORE + 10, rule="ID_EXACT_RULE"
             )
-        elif identity1.classification == identity2.classification:
-            if not identity1.name or not identity2.name:
+        elif source.classification == target.classification:
+            if not source.name or not target.name:
                 ...
-            elif identity1.name.lower() == identity2.name.lower():
+            elif source.name.lower() == target.name.lower():
                 result = ResolverResult(
                     score=ResolverResult.MAX_EQUAL_SCORE + 10, rule="NAME_EXACT_RULE"
                 )
             else:
                 name_score = 0
-                if math.fabs(len(identity1.name) - len(identity2.name)) < 10:
+                if math.fabs(len(source.name) - len(target.name)) < 10:
                     name_score = int(
                         SequenceMatcher(
-                            a=identity1.name.lower(), b=identity2.name.lower()
+                            a=source.name.lower(), b=target.name.lower()
                         ).ratio()
                         * ResolverResult.MAX_EQUAL_SCORE
                     )
                 description_score = 0
                 if (
-                    identity1.description
-                    and identity2.description
-                    and len(identity1.description) > 10
-                    and len(identity2.description) > 10
+                    source.description
+                    and target.description
+                    and len(source.description) > 10
+                    and len(target.description) > 10
                 ):
                     description_score = int(
                         SequenceMatcher(
-                            a=identity1.description, b=identity2.description
+                            a=source.description, b=target.description
                         ).ratio()
                         * ResolverResult.MAX_EQUAL_SCORE
                     )

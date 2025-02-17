@@ -46,17 +46,17 @@ class EntityResolver(ABC):
         if parent:
             self.resolver_chain.append(*parent.resolver_chain)
 
-    def resolve(self, source: Entity, target: Entity) -> ResolverResult:
+    def chain_resolve(self, source: Entity, target: Entity) -> ResolverResult:
         result = None
         for cmp in self.resolver_chain:
-            result = cmp.do_resolve(source, target)
+            result = cmp.resolve(source, target)
             if result:
                 break
 
         return result
 
     @abstractmethod
-    def do_resolve(self, source: Entity, target: Entity) -> ResolverResult:
+    def resolve(self, source: Entity, target: Entity) -> ResolverResult:
         ...
 
 
@@ -74,7 +74,7 @@ class RepositoryResolver:
                 source_entities, target_entities
             )
         ]:
-            compare_result = comparator.resolve(source, target)
+            compare_result = comparator.chain_resolve(source, target)
             if compare_result:
                 resolved_id = ResolvedEntity(
                     source=source, target=target, resolver_result=compare_result

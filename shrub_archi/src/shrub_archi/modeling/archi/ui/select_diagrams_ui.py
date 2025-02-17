@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 
 from shrub_archi.modeling.archi.model.archi_model import View
 from shrub_archi.ui.select_ui import TableSelectModel, do_show_select_ui
@@ -58,7 +58,7 @@ class ViewTableSelectModel(TableSelectModel):
         return result
 
 
-def do_select_diagrams_ui(views: List[View]) -> List[View]:
+def do_select_diagrams_ui(views: List[View]) -> Tuple[bool, List[View]]:
     model = ViewTableSelectModel(views)
     selected, selection = do_show_select_ui(
         model=model, ok_text="Select", title="Select Diagrams"

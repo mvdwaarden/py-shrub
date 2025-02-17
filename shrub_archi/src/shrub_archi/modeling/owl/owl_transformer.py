@@ -1,7 +1,9 @@
 from shrub_util.generation.template_renderer import TemplateRenderer, DictionaryRenderer
 from owlready2 import get_ontology, Ontology
 import networkx as nx
-import matplotlib.pyplot as plt
+import matplotlib as plt
+import csv
+import uuid
 
 # Jinja2 template for textual representation
 OWL_RENDERER = "OWL_RENDERER"
@@ -55,6 +57,58 @@ def owl_renderer_transform(ontology: Ontology, renderer: TemplateRenderer):
     result = renderer.render(OWL_RENDERER, classes=classes, properties=properties)
     return result
 
+
+def owl_export_to_archi_csv(ontology: Ontology, folder: str):
+    classes = list(ontology.classes())
+    properties = list(ontology.object_properties())
+
+    def generate_id():
+        return f"id-gen-{uuid.uuid1()}"
+
+    def wrap_strs_with_quotes(strs: list):
+        wrap = True
+        return list([f"\"{val}\"" if wrap else val for val in strs])
+
+    # write elements
+    with open(f"{folder}/elements.csv", "w") as ofp:
+        writer = csv.writer(ofp, delimiter=',', quotechar='\'')
+        writer.writerow(wrap_strs_with_quotes(["ID", "Type", "Name", "Documentation", "Specialization"]))
+        element_id_lookup = {}
+
+        for cls in classes:
+            generated_id = generate_id()
+            element_id_lookup[cls.name] = generated_id
+            description = ""
+            writer.writerow(
+                wrap_strs_with_quotes([f"{generated_id}", "BusinessObject", f"{cls.name}", f"{description}",""]))
+    # write relations
+    with open(f"{folder}/relations.csv", "w") as ofp:
+        writer = csv.writer(ofp, delimiter=',', quotechar='\'')
+        writer.writerow(wrap_strs_with_quotes(["ID", "Type", "Name", "Documentation", "Source", "Target", "Specialization"]))
+        for prop in properties:
+            generated_id = generate_id()
+            if prop.domain and prop.range:
+                domain = prop.domain[0]
+                _range = prop.range[0]
+                source = element_id_lookup[domain.name]
+                target = element_id_lookup[_range.name]
+                writer.writerow(wrap_strs_with_quotes(
+                    [f"{generated_id}", "AggregationRelationship", f"{prop.name if prop.name else ''}","",f"{source}",
+                     f"{target}", ""]))
+        for cls in classes:
+            if cls.is_a:
+                source = element_id_lookup[cls.name]
+                for parent_cls in [cls for cls  in cls.is_a if cls.is_a]:
+                    generated_id = generate_id()
+                    target = element_id_lookup[parent_cls.name]
+                    writer.writerow(wrap_strs_with_quotes(
+                        [f"{generated_id}", "SpecializationRelationship", "", "", f"{source}",
+                         f"{target}", ""]))
+
+    #write properties
+    with open(f"{folder}/properties.csv", "w") as ofp:
+        writer = csv.writer(ofp, delimiter=',', quotechar='\'')
+        writer.writerow(wrap_strs_with_quotes(["ID", "Key", "Value"]))
 
 def owl_graph_transform(onto):
     # Create a NetworkX graph

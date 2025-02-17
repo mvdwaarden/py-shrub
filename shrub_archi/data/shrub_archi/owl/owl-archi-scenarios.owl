@@ -1,0 +1,437 @@
+<?xml version="1.0"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+     xml:base="http://owl.archi.shrub.soprasteria.com/scenarios"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     ontologyIRI="http://owl.archi.shrub.soprasteria.com/scenarios">
+    <Prefix name="" IRI="http://owl.archi.shrub.soprasteria.com/scenarios/"/>
+    <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+    <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
+    <Prefix name="xml" IRI="http://www.w3.org/XML/1998/namespace"/>
+    <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
+    <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
+    <Declaration>
+        <Class IRI="#Application"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Arrangement"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Case"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#CaseManagement"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Customer"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Data"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Detection"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#InvestmentProduct"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#LoanProduct"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#MortgageProduct"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#NaturalPerson"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Organization"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Process"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Product"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Requirements"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Risk"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#RiskAssessmentCase"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#RiskFactor"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#RiskFactorAssessmentCase"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#RiskIndicator"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#RiskyProduct"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#TrustFundProduct"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#WorkloadPlanning"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#appliesTo"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#appliesToCustomer"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#has"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#hasProduct"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#hasRisk"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#hasRiskFactors"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#hasRiskIndicators"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#hasRiskParameters"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#hasStatus"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#ownedBy"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#branchRiskParameter"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#caseClosed"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#caseEnriched"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#caseOpened"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#caseRegistered"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#caseStatus"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#clientParameter"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#organizationFormRiskParameter"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#organizationLayeringRiskParameter"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#organizationRiskParameter"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#pepRiskParameter"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#productParameter"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#productRiskParameter"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#profileDeviationRiskParameter"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#riskParameter"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#sanctionedCountryParameter"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#sarsUTRsRiskParameter"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#transactionParameter"/>
+    </Declaration>
+    <SubClassOf>
+        <Class IRI="#CaseManagement"/>
+        <Class IRI="#Application"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Detection"/>
+        <Class IRI="#Application"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#InvestmentProduct"/>
+        <Class IRI="#Product"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#LoanProduct"/>
+        <Class IRI="#Product"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#MortgageProduct"/>
+        <Class IRI="#Product"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#NaturalPerson"/>
+        <Class IRI="#Customer"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Organization"/>
+        <Class IRI="#Customer"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Requirements"/>
+        <Class IRI="#Process"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Risk"/>
+        <Class IRI="#Data"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#RiskAssessmentCase"/>
+        <Class IRI="#Case"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#RiskFactor"/>
+        <Class IRI="#Data"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#RiskFactorAssessmentCase"/>
+        <Class IRI="#Case"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#RiskIndicator"/>
+        <Class IRI="#Data"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#RiskyProduct"/>
+        <Class IRI="#Product"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#TrustFundProduct"/>
+        <Class IRI="#Product"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#WorkloadPlanning"/>
+        <Class IRI="#Application"/>
+    </SubClassOf>
+    <DisjointClasses>
+        <Class IRI="#Application"/>
+        <Class IRI="#Arrangement"/>
+        <Class IRI="#Case"/>
+        <Class IRI="#Customer"/>
+        <Class IRI="#Data"/>
+        <Class IRI="#Process"/>
+        <Class IRI="#Product"/>
+    </DisjointClasses>
+    <DisjointClasses>
+        <Class IRI="#Application"/>
+        <Class IRI="#Case"/>
+        <Class IRI="#Customer"/>
+        <Class IRI="#Data"/>
+        <Class IRI="#Process"/>
+        <Class IRI="#Product"/>
+    </DisjointClasses>
+    <DisjointClasses>
+        <Class IRI="#Application"/>
+        <Class IRI="#Case"/>
+        <Class IRI="#Data"/>
+        <Class IRI="#Process"/>
+    </DisjointClasses>
+    <DisjointClasses>
+        <Class IRI="#CaseManagement"/>
+        <Class IRI="#Detection"/>
+        <Class IRI="#WorkloadPlanning"/>
+    </DisjointClasses>
+    <DisjointClasses>
+        <Class IRI="#InvestmentProduct"/>
+        <Class IRI="#LoanProduct"/>
+        <Class IRI="#MortgageProduct"/>
+        <Class IRI="#RiskyProduct"/>
+        <Class IRI="#TrustFundProduct"/>
+    </DisjointClasses>
+    <DisjointClasses>
+        <Class IRI="#NaturalPerson"/>
+        <Class IRI="#Organization"/>
+    </DisjointClasses>
+    <DisjointClasses>
+        <Class IRI="#Risk"/>
+        <Class IRI="#RiskFactor"/>
+        <Class IRI="#RiskIndicator"/>
+    </DisjointClasses>
+    <DisjointClasses>
+        <Class IRI="#RiskAssessmentCase"/>
+        <Class IRI="#RiskFactorAssessmentCase"/>
+    </DisjointClasses>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#appliesTo"/>
+        <ObjectProperty abbreviatedIRI="owl:topObjectProperty"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#appliesToCustomer"/>
+        <ObjectProperty IRI="#appliesTo"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#has"/>
+        <ObjectProperty abbreviatedIRI="owl:topObjectProperty"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#hasProduct"/>
+        <ObjectProperty IRI="#has"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#hasRisk"/>
+        <ObjectProperty IRI="#has"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#hasRiskFactors"/>
+        <ObjectProperty IRI="#has"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#hasRiskIndicators"/>
+        <ObjectProperty IRI="#has"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#hasRiskParameters"/>
+        <ObjectProperty IRI="#has"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#hasStatus"/>
+        <ObjectProperty IRI="#has"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#ownedBy"/>
+        <ObjectProperty abbreviatedIRI="owl:topObjectProperty"/>
+    </SubObjectPropertyOf>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#hasRisk"/>
+        <Class IRI="#Customer"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#hasRiskFactors"/>
+        <Class IRI="#RiskIndicator"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#hasRiskIndicators"/>
+        <Class IRI="#Risk"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#hasProduct"/>
+        <Class IRI="#Product"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#hasRisk"/>
+        <Class IRI="#Risk"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#hasRiskFactors"/>
+        <Class IRI="#RiskFactor"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#hasRiskIndicators"/>
+        <Class IRI="#RiskIndicator"/>
+    </ObjectPropertyRange>
+    <EquivalentDataProperties>
+        <DataProperty IRI="#caseRegistered"/>
+        <DataProperty IRI="#caseStatus"/>
+    </EquivalentDataProperties>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#branchRiskParameter"/>
+        <DataProperty IRI="#organizationRiskParameter"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#caseClosed"/>
+        <DataProperty IRI="#caseStatus"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#caseEnriched"/>
+        <DataProperty IRI="#caseStatus"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#caseOpened"/>
+        <DataProperty IRI="#caseStatus"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#caseRegistered"/>
+        <DataProperty IRI="#caseStatus"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#caseStatus"/>
+        <DataProperty abbreviatedIRI="owl:topDataProperty"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#clientParameter"/>
+        <DataProperty IRI="#riskParameter"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#organizationFormRiskParameter"/>
+        <DataProperty IRI="#organizationRiskParameter"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#organizationLayeringRiskParameter"/>
+        <DataProperty IRI="#organizationRiskParameter"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#organizationRiskParameter"/>
+        <DataProperty IRI="#clientParameter"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#pepRiskParameter"/>
+        <DataProperty IRI="#organizationRiskParameter"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#productParameter"/>
+        <DataProperty IRI="#riskParameter"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#productRiskParameter"/>
+        <DataProperty IRI="#productParameter"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#profileDeviationRiskParameter"/>
+        <DataProperty IRI="#transactionParameter"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#riskParameter"/>
+        <DataProperty abbreviatedIRI="owl:topDataProperty"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#sanctionedCountryParameter"/>
+        <DataProperty IRI="#clientParameter"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#sarsUTRsRiskParameter"/>
+        <DataProperty IRI="#transactionParameter"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#transactionParameter"/>
+        <DataProperty IRI="#riskParameter"/>
+    </SubDataPropertyOf>
+    <DataPropertyDomain>
+        <DataProperty IRI="#caseStatus"/>
+        <Class IRI="#Case"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#riskParameter"/>
+        <Class IRI="#RiskFactor"/>
+    </DataPropertyDomain>
+</Ontology>
+
+
+
+<!-- Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi -->
+

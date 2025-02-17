@@ -182,7 +182,7 @@ class Repository(ABC):
 class ViewRepositoryFilter(RepositoryFilter):
     def __init__(
         self,
-        views: List[Views],
+        views: List[View],
         include_elements: bool = True,
         include_relations: bool = True,
         include_views: bool = True,
@@ -190,7 +190,7 @@ class ViewRepositoryFilter(RepositoryFilter):
         super().__init__(
             include_elements=include_elements, include_relations=include_relations
         )
-        self.views: List[Views] = views
+        self.views: List[View] = views
         self._aggregate_identities_ids: Optional[List[str]] = None
 
     def include(self, identity: Entity):
