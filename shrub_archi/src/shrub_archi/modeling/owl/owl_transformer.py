@@ -104,6 +104,7 @@ def owl_export_to_archi_csv(ontology: Ontology, folder: str):
                     writer.writerow(wrap_strs_with_quotes(
                         [f"{generated_id}", "SpecializationRelationship", "", "", f"{source}",
                          f"{target}", ""]))
+                        print(f"{ex}")
 
     #write properties
     with open(f"{folder}/properties.csv", "w") as ofp:

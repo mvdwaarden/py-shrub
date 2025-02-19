@@ -54,6 +54,13 @@ usage = """
     - source: source XMI file location
     - workdir: output directory
     
+    Mode - OWL functions
+    Function
+    - owl export
+    Parameters
+    - source: source OWL XML file
+    - target-dir: target folder for the entities, relations and properties CSV files as input for Archi
+    
     TODO:
     - feature: Option to overwrite target repository identities
 """
@@ -193,6 +200,7 @@ if __name__ == "__main__":
     help = args.has_arg("help")
     source = args.get_arg("source")
     target = args.get_arg("target")
+    target_dir = args.get_arg("target-dir")
     work_dir = args.get_arg("workdir")
     function_merge = args.has_arg("merge")
     function_oia = args.get_arg("oia")
@@ -212,7 +220,6 @@ if __name__ == "__main__":
     emails = args.get_arg("email", "").split(",")
     cmdb_api = args.get_arg("cmdb-api")
     use_local_view = args.has_arg("use-local-view")
-    source = args.get_arg("source")
     node_exclusion = args.get_arg("skip-ci-nodes", "digitalcertificate, manager").split(",")
     extra_cis = args.get_arg("extra-cis", "").split(",")
     oia_api = args.get_arg("oia-api")
@@ -228,7 +235,7 @@ if __name__ == "__main__":
         if function_owl == "verbalize":
             do_visualize_ontology(file)
         else:
-            do_export_ontology(file, folder)
+            do_export_ontology(source, target_dir)
     elif function_security:
         test_security_tls_compliance(csv_file=file)
     elif function_extract_agile:
