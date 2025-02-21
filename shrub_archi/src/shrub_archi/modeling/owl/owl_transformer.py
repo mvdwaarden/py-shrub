@@ -99,11 +99,13 @@ def owl_export_to_archi_csv(ontology: Ontology, folder: str):
             if cls.is_a:
                 source = element_id_lookup[cls.name]
                 for parent_cls in [cls for cls  in cls.is_a if cls.is_a]:
-                    generated_id = generate_id()
-                    target = element_id_lookup[parent_cls.name]
-                    writer.writerow(wrap_strs_with_quotes(
-                        [f"{generated_id}", "SpecializationRelationship", "", "", f"{source}",
-                         f"{target}", ""]))
+                    try:
+                        target = element_id_lookup[parent_cls.name]
+                        generated_id = generate_id()
+                        writer.writerow(wrap_strs_with_quotes(
+                            [f"{generated_id}", "SpecializationRelationship", "", "", f"{source}",
+                             f"{target}", ""]))
+                    except Exception as ex:
                         print(f"{ex}")
 
     #write properties
