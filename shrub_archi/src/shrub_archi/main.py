@@ -71,31 +71,39 @@ usage = f"""
     - feature: Option to overwrite target repository identities
 """
 
-class FunctionEnum(Enum):
+class OciFunction(Enum):
+    OPP_LOAD_TEST = "load-test"
     @staticmethod
     def is_operation(operation: str):
-        return operation and operation in [e.value for e in FunctionEnum.__members__]
-
-class OciFunction(FunctionEnum):
-    OPP_LOAD_TEST = "load-test"
+        return operation and operation in [e.value for e in OciFunction]
 
 
-class ArchiFunction(FunctionEnum):
+class ArchiFunction(Enum):
     OPP_MERGE = "merge"
     OPP_CREATE_GRAPH = "graph"
+    @staticmethod
+    def is_operation(operation: str):
+        return operation and operation in [e.value for e in ArchiFunction]
 
-class OiaFunction(FunctionEnum):
+
+class OiaFunction(Enum):
     OPP_UPDATE_USER_AUTHORIZATIONS = "update-authorizations"
     OPP_DELETE_USERS = "delete-users"
     OPP_ACTIVATE_USERS = "activate-users"
     OPP_CONNECT = "connect"
     OPP_EXTRACT = "extract"
+    @staticmethod
+    def is_operation(operation: str):
+        return operation and operation in [e.value for e in OiaFunction]
 
 
-class OwlFunction(FunctionEnum):
+class OwlFunction(Enum):
     OPP_EXPORT = "export"
     OPP_VERBALIZE = "verbalize"
 
+    @staticmethod
+    def is_operation(operation: str):
+        return operation and operation in [e.value for e in OwlFunction]
 
 def create_repository(location: str) -> Repository:
     if location is None or location.lower().endswith((".archimate", ".xml")):
