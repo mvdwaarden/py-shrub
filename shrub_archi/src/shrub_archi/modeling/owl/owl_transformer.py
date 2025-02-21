@@ -90,20 +90,22 @@ def owl_export_to_archi_csv(ontology: Ontology, folder: str):
             if prop.domain and prop.range:
                 domain = prop.domain[0]
                 _range = prop.range[0]
-                source = element_id_lookup[domain.name]
-                target = element_id_lookup[_range.name]
+                source_element = element_id_lookup[domain.name]
+                target_element = element_id_lookup[_range.name]
                 writer.writerow(wrap_strs_with_quotes(
-                    [f"{generated_id}", "AggregationRelationship", f"{prop.name if prop.name else ''}","",f"{source}",
-                     f"{target}", ""]))
+                    [f"{generated_id}", "AggregationRelationship", f"{prop.name if prop.name else ''}","",f"{source_element}",
+                     f"{target_element}", ""]))
         for cls in classes:
             if cls.is_a:
-                source = element_id_lookup[cls.name]
+                source_element = element_id_lookup[cls.name]
                 for parent_cls in [cls for cls  in cls.is_a if cls.is_a]:
                     generated_id = generate_id()
-                    target = element_id_lookup[parent_cls.name]
-                    writer.writerow(wrap_strs_with_quotes(
-                        [f"{generated_id}", "SpecializationRelationship", "", "", f"{source}",
-                         f"{target}", ""]))
+                    try:
+                        target_element = element_id_lookup[parent_cls.name]
+                        writer.writerow(wrap_strs_with_quotes(
+                            [f"{generated_id}", "SpecializationRelationship", "", "", f"{source_element}",
+                             f"{target_element}", ""]))
+                    except Exception as ex:
                         print(f"{ex}")
 
     #write properties

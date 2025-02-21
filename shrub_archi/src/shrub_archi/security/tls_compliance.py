@@ -38,7 +38,7 @@ def test_endpoint_compliance(endpoint: str, port: int, method: SslMethod) -> End
 def test_security_tls_compliance(csv_file: str) -> List[EndpointComplianceInfo]:
     """
         csv_file: location of the endpoint file
-        header : endpoint, port, reference, method ...
+        header : endpoint, port, reference, owner, description, method ...
     """
     result = []
     with open(f"{csv_file}.csv", "r") as ifp:

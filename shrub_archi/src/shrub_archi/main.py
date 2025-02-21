@@ -29,11 +29,11 @@ from shrub_archi.security.tls_compliance import test_security_tls_compliance
 from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
 
-usage = """
+usage = f"""
     Archi Shrubbery, assumes:
     - SHRUB_CONFIG_INI environment variable is set and points to config.ini
     - The directory location of the config.ini is config_path,
-      and can be referred to in the configuration as {config_path}
+      and can be referred to in the configuration as {{config_path}}
     - The config.ini contains the connections definitions. Connection sections
       have the name [ExternalApi-<connection name>]
 
@@ -54,6 +54,12 @@ usage = """
     - source: source XMI file location
     - workdir: output directory
     
+    Mode - security
+    Function
+    - sec
+    Parameters:
+    - file: endpoint file  
+    Doc: >>{test_security_tls_compliance.__doc__}<<<
     Mode - OWL functions
     Function
     - owl export
@@ -64,6 +70,31 @@ usage = """
     TODO:
     - feature: Option to overwrite target repository identities
 """
+
+class FunctionEnum(Enum):
+    @staticmethod
+    def is_operation(operation: str):
+        return operation and operation in [e.value for e in FunctionEnum.__members__]
+
+class OciFunction(FunctionEnum):
+    OPP_LOAD_TEST = "load-test"
+
+
+class ArchiFunction(FunctionEnum):
+    OPP_MERGE = "merge"
+    OPP_CREATE_GRAPH = "graph"
+
+class OiaFunction(FunctionEnum):
+    OPP_UPDATE_USER_AUTHORIZATIONS = "update-authorizations"
+    OPP_DELETE_USERS = "delete-users"
+    OPP_ACTIVATE_USERS = "activate-users"
+    OPP_CONNECT = "connect"
+    OPP_EXTRACT = "extract"
+
+
+class OwlFunction(FunctionEnum):
+    OPP_EXPORT = "export"
+    OPP_VERBALIZE = "verbalize"
 
 
 def create_repository(location: str) -> Repository:
@@ -124,18 +155,6 @@ def do_select_views(repo: Repository) -> List[View]:
     selected, views = do_select_diagrams_ui(repo.views)
 
     return views
-
-
-class OiaFunction(Enum):
-    OPP_UPDATE_USER_AUTHORIZATIONS = "update-authorizations"
-    OPP_DELETE_USERS = "delete-users"
-    OPP_ACTIVATE_USERS = "activate-users"
-    OPP_CONNECT = "connect"
-    OPP_EXTRACT = "extract"
-
-    @staticmethod
-    def is_operation(operation: str):
-        return operation and operation in [e.value for e in OiaFunction]
 
 
 def do_appy_oia_operation_with_users(identities: List[Identity], operation: OiaFunction, prompt: bool = True,
@@ -202,11 +221,10 @@ if __name__ == "__main__":
     target = args.get_arg("target")
     target_dir = args.get_arg("target-dir")
     work_dir = args.get_arg("workdir")
-    function_merge = args.has_arg("merge")
+    function_archi = args.get_arg("archi")
     function_oia = args.get_arg("oia")
     function_oci = args.get_arg("oci")
     function_extract_cmdb = args.has_arg("cmdb")
-    function_create_graph = args.has_arg("graph")
     function_extract_agile = args.has_arg("agile")
     function_security = args.get_arg("sec", None)
     function_owl = args.get_arg("owl")
@@ -231,8 +249,8 @@ if __name__ == "__main__":
     dry_run = args.has_arg("dry-run")
     if help:
         do_print_usage()
-    elif function_owl:
-        if function_owl == "verbalize":
+    elif OwlFunction.is_operation(function_owl):
+        if function_owl == OwlFunction.OPP_VERBALIZE:
             do_visualize_ontology(file)
         else:
             do_export_ontology(source, target_dir)
@@ -254,12 +272,13 @@ if __name__ == "__main__":
         from shrub_archi.modeling.archi.model import ElementType
 
         ArchiCsvGenerator().cleanup().write_elements_csv(it_risk.IT_RISKS_ISO_IEC_27001, ElementType.CONSTRAINT)
-    elif function_merge:
-        do_merge(source, target, work_dir, resolution_name)
-    elif function_create_graph:
-        source_repo = create_repository(source)
-        source_repo.read()
-        RepositoryGrapher().create_graph(source_repo, work_dir=work_dir)
+    elif ArchiFunction.is_operation(function_archi):
+        if function_archi == ArchiFunction.OPP_MERGE.value:
+            do_merge(source, target, work_dir, resolution_name)
+        elif function_archi == ArchiFunction.OPP_CREATE_GRAPH.value:
+            source_repo = create_repository(source)
+            source_repo.read()
+            RepositoryGrapher().create_graph(source_repo, work_dir=work_dir)
     elif OiaFunction.is_operation(function_oia):
         if use_local_view:
             local_view = OiaLocalView()
@@ -297,8 +316,8 @@ if __name__ == "__main__":
                     print(token.access_token[:20])
                 except Exception as ex:
                     print(f"getting token for environment {env} failed {ex}")
-    elif function_oci:
-        if function_oci == "load-test":
+    elif OciFunction.is_operation(function_oci):
+        if function_oci == OciFunction.OPP_LOAD_TEST.value:
             api = OciApi(environment=environment, base_url=oci_api)
             api.load_test()
         elif function_oci == "export":
@@ -311,8 +330,6 @@ if __name__ == "__main__":
                 return node.type.lower() not in node_exclusion
             else:
                 return node.__class__.__name__.lower() not in node_exclusion
-
-
         if use_local_view:
             local_view = CmdbLocalView()
             cmdb_read_json(local_view, file)
