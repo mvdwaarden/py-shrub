@@ -59,10 +59,10 @@ class Relation(Entity):
 
     def connects(self, id1: str, id2: str) -> bool:
         return (
-            self.source_id == id1
-            and self.target_id == id2
-            or self.source_id == id2
-            and self.target_id == id1
+                self.source_id == id1
+                and self.target_id == id2
+                or self.source_id == id2
+                and self.target_id == id1
         )
 
 

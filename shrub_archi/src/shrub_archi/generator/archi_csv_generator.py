@@ -2,7 +2,7 @@ from typing import List
 import os
 import os.path
 import pathlib
-from shrub_archi.modeling.archi.model import ElementType
+from shrub_archi.modeling.archi.model.archi_model import ElementType
 import uuid
 
 

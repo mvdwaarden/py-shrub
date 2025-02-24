@@ -13,7 +13,7 @@ from shrub_archi.iam.readers.json_reader import iam_read_json
 from shrub_archi.iam.writers.csv_writer import iam_write_csv
 from shrub_archi.iam.writers.json_writer import iam_write_json
 from shrub_archi.modeling.archi.model.archi_model import View
-from shrub_archi.modeling.archi.repository.repository import (Repository, XmiArchiRepository, CoArchiRepository,
+from shrub_archi.modeling.archi.repository.repository import (Repository, XmiArchiRepository,
                                                               ViewRepositoryFilter, )
 from shrub_archi.modeling.archi.repository.repository_graph import RepositoryGrapher
 from shrub_archi.modeling.archi.repository.repository_merger import (XmiArchiRepositoryMerger, )
@@ -71,14 +71,19 @@ usage = f"""
     - feature: Option to overwrite target repository identities
 """
 
-class OciFunction(Enum):
+class FunctionEnum(Enum):
+    @staticmethod
+    def test_is_operation(cls_enum, operation: str):
+        return operation and operation in [e.value for e in cls_enum]
+
+class OciFunction(FunctionEnum):
     OPP_LOAD_TEST = "load-test"
     @staticmethod
     def is_operation(operation: str):
         return operation and operation in [e.value for e in OciFunction]
 
 
-class ArchiFunction(Enum):
+class ArchiFunction(FunctionEnum):
     OPP_MERGE = "merge"
     OPP_CREATE_GRAPH = "graph"
     @staticmethod
@@ -86,7 +91,7 @@ class ArchiFunction(Enum):
         return operation and operation in [e.value for e in ArchiFunction]
 
 
-class OiaFunction(Enum):
+class OiaFunction(FunctionEnum):
     OPP_UPDATE_USER_AUTHORIZATIONS = "update-authorizations"
     OPP_DELETE_USERS = "delete-users"
     OPP_ACTIVATE_USERS = "activate-users"
@@ -97,20 +102,17 @@ class OiaFunction(Enum):
         return operation and operation in [e.value for e in OiaFunction]
 
 
-class OwlFunction(Enum):
+class OwlFunction(FunctionEnum):
     OPP_EXPORT = "export"
     OPP_VERBALIZE = "verbalize"
 
     @staticmethod
     def is_operation(operation: str):
+        result = FunctionEnum.test_is_operation(OwlFunction, operation)
         return operation and operation in [e.value for e in OwlFunction]
 
 def create_repository(location: str) -> Repository:
-    if location is None or location.lower().endswith((".archimate", ".xml")):
-        return XmiArchiRepository(location)
-    else:
-        return CoArchiRepository(location)
-
+    return XmiArchiRepository(location)
 
 def get_resolution_name(repo: Repository, resolution_name):
     return resolution_name if resolution_name else repo.name

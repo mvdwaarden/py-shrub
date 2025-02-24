@@ -198,7 +198,7 @@ class TableSelectUI(QWidget):
         # Implement the save logic here
         self.close()
         self.ok = True
-    
+
     def close(self):
         if not self._screen_data:
             self._screen_data = {}
@@ -207,7 +207,7 @@ class TableSelectUI(QWidget):
 
     def _screen_data_key(self):
         return self.title if self.title else "default_screen"
-    
+
     def _read_screen_data(self):
         screens_data = None
         if os.path.exists("./archi_screens.dat"):
@@ -232,7 +232,7 @@ class TableSelectUI(QWidget):
 
 
 def do_show_select_ui(
-    model: TableSelectModel, ok_text: str = None, title: str = None
+        model: TableSelectModel, ok_text: str = None, title: str = None
 ) -> Tuple[bool, Dict[Any, Optional[bool]]]:
     # Initialize and run the application
     app = QApplication(sys.argv)
@@ -262,9 +262,9 @@ def do_show_select_furniture_test():
 
         def hit_row(self, row, search_text: str):
             return (
-                search_text in row["name"].lower()
-                or search_text in row["type"].lower()
-                or search_text in row["material"].lower()
+                    search_text in row["name"].lower()
+                    or search_text in row["type"].lower()
+                    or search_text in row["material"].lower()
             )
 
         def row_hash(self, row):

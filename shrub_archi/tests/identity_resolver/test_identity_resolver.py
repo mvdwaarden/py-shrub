@@ -1,22 +1,23 @@
 from shrub_archi.modeling.archi.model.archi_model import Entity, Entities
 from shrub_archi.modeling.archi.repository.repository_merger import NaiveEntityResolver
 from shrub_archi.modeling.archi.resolver.entity_resolver import (
-    RepositoryResolver,
+    RepositoryEntityResolver,
     ResolvedEntityAction,
 )
 from shrub_archi.modeling.archi.resolver.resolution_store import ResolutionStore
+from typing import Dict
+from shrub_archi.modeling.archi.repository.repository import Repository
 
+def test_entity_resolver():
+    source_ids: Dict[str,Entity] = {}
+    target_ids: Dict[str,Entity] = {}
 
-def test_Entity_resolver():
-    ids1: Entities = {}
-    ids2: Entities = {}
+    source_ids["1"] = Entity(unique_id="1", name="piet", classification="")
+    source_ids["2"] = Entity(unique_id="2", name="klaas", classification="")
+    target_ids["11"] = Entity(unique_id="11", name="pieto", classification="")
+    target_ids["22"] = Entity(unique_id="22", name="klaasj", classification="")
 
-    ids1["1"] = Entity(unique_id="1", name="piet", classification="")
-    ids1["2"] = Entity(unique_id="2", name="klaas", classification="")
-    ids2["11"] = Entity(unique_id="11", name="pieto", classification="")
-    ids2["22"] = Entity(unique_id="22", name="klaasj", classification="")
-
-    for resolved_Entity in RepositoryResolver().resolve(ids1, ids2):
+    for resolved_Entity in RepositoryEntityResolver().resolve(Repository(source_ids), target_ids):
         print(resolved_Entity)
 
 
@@ -31,14 +32,14 @@ def test_stacked_action():
     assert ResolvedEntityAction.REPLACE_TARGET_DESCRIPTION.part_of(actions) is False
 
 
-def test_Entity_resolver_with_resolutions():
-    ids1: Entities = {}
-    ids2: Entities = {}
+def test_entity_resolver_with_resolutions():
+    source_ids: Dict[str,Entity] = {}
+    target_ids: Dict[str,Entity] = {}
 
-    ids1["1"] = Entity(unique_id="1", name="piet", classification="")
-    ids1["2"] = Entity(unique_id="2", name="klaas", classification="")
-    ids2["11"] = Entity(unique_id="11", name="pieto", classification="")
-    ids2["22"] = Entity(unique_id="22", name="klaasj", classification="")
+    source_ids["1"] = Entity(unique_id="1", name="piet", classification="")
+    source_ids["2"] = Entity(unique_id="2", name="klaas", classification="")
+    target_ids["11"] = Entity(unique_id="11", name="pieto", classification="")
+    target_ids["22"] = Entity(unique_id="22", name="klaasj", classification="")
 
     res_store = ResolutionStore()
     res_store.read_from_string(
@@ -46,7 +47,7 @@ def test_Entity_resolver_with_resolutions():
             "1": "11"
         }"""
     )
-    for resolved_Entity in RepositoryResolver().resolve(
-        ids1, ids2, comparator=NaiveEntityResolver()
+    for resolved_Entity in RepositoryEntityResolver().resolve(
+        source_ids, target_ids, comparator=NaiveEntityResolver()
     ):
         print(resolved_Entity)

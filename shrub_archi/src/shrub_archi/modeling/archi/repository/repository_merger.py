@@ -15,7 +15,7 @@ from shrub_archi.modeling.archi.repository.repository import (
 )
 from shrub_archi.modeling.archi.resolver.entity_resolver import (
     ResolvedEntity,
-    RepositoryResolver,
+    RepositoryEntityResolver,
     EntityResolver,
     ResolverResult,
     resolutions_get_resolved_entity,
@@ -24,24 +24,24 @@ from shrub_archi.modeling.archi.resolver.entity_resolver import (
 
 class NaiveRelationResolver(EntityResolver):
     def __init__(
-        self,
-        resolutions: List[ResolvedEntity],
-        cutoff_score: int = 80,
-        parent: EntityResolver = None,
+            self,
+            resolutions: List[ResolvedEntity],
+            cutoff_score: int = 80,
+            parent: EntityResolver = None,
     ):
         super().__init__(parent)
         self.resolutions = resolutions
         self.cutoff_score = cutoff_score
 
     def resolve(
-        self, source: Entity, target: Entity
+            self, source: Entity, target: Entity
     ) -> Optional[ResolverResult]:
         rel_result = source_result = target_result = None
 
         if (
-            isinstance(source, Relation)
-            and isinstance(target, Relation)
-            and source.classification == target.classification
+                isinstance(source, Relation)
+                and isinstance(target, Relation)
+                and source.classification == target.classification
         ):
             if source.unique_id == target.unique_id:
                 rel_result = ResolverResult(
@@ -66,20 +66,20 @@ class NaiveRelationResolver(EntityResolver):
                         break
                 # check if the target of the source relation exists in the resolved source ids for the target
                 for res_id in target_results:
-                     if res_id.source.unique_id == source_rel.target_id:
+                    if res_id.source.unique_id == source_rel.target_id:
                         # check if the target of the target relation is resolved
                         target_result = res_id
                         break
                 if target_result:
                     if (
-                        not source_rel.name
-                        or not target_rel.name
-                        or source_rel.name.lower() == target_rel.name.lower()
+                            not source_rel.name
+                            or not target_rel.name
+                            or source_rel.name.lower() == target_rel.name.lower()
                     ):
                         rel_result = ResolverResult(
                             score=source_result.resolver_result.score
-                            * target_result.resolver_result.score
-                            / ResolverResult.MAX_EQUAL_SCORE,
+                                  * target_result.resolver_result.score
+                                  / ResolverResult.MAX_EQUAL_SCORE,
                             rule="REL_SOURCE_TARGET_NAME_NAME_EXACT_RULE",
                         )
                     elif math.fabs(len(source.name) - len(target.name)) < 10:
@@ -104,7 +104,7 @@ class NaiveEntityResolver(EntityResolver):
         self.cutoff_score = cutoff_score
 
     def resolve(
-        self, source: Entity, target: Entity
+            self, source: Entity, target: Entity
     ) -> Optional[ResolverResult]:
         result = None
 
@@ -132,10 +132,10 @@ class NaiveEntityResolver(EntityResolver):
                     )
                 description_score = 0
                 if (
-                    source.description
-                    and target.description
-                    and len(source.description) > 10
-                    and len(target.description) > 10
+                        source.description
+                        and target.description
+                        and len(source.description) > 10
+                        and len(target.description) > 10
                 ):
                     description_score = int(
                         SequenceMatcher(
@@ -155,22 +155,22 @@ class NaiveEntityResolver(EntityResolver):
 
 class RepositoryMerger:
     """Merges repository 2 to repository 1, considers
-    - if identities in repo1 already exists, the copied identity is ignored
+    - if entities in repo1 already exists, the copied entity is ignored
     - if an artefact is copied, all resolved id's that exist in repo 1 are replaced
     """
 
     def __init__(
-        self,
-        target_repo: Repository,
-        source_repo: Repository,
-        source_filter: RepositoryFilter,
-        compare_cutoff_score=None,
+            self,
+            target_repo: Repository,
+            source_repo: Repository,
+            source_filter: RepositoryFilter,
+            compare_cutoff_score=None,
     ):
         self.target_repo: Repository = target_repo
         self.source_repo: Repository = source_repo
         self.source_filter: RepositoryFilter = source_filter
         self.resolutions: List[ResolvedEntity] = []
-        self._entity_resolver: Optional[RepositoryResolver] = None
+        self._entity_resolver: Optional[RepositoryEntityResolver] = None
         self._entity_comparator: Optional[EntityResolver] = None
         self._relation_comparator: Optional[EntityResolver] = None
         self.compare_cutoff_score = compare_cutoff_score if compare_cutoff_score else 85
@@ -191,7 +191,7 @@ class RepositoryMerger:
             futures = {exec.submit(repo.read): repo for repo in repos}
             for future in concurrent.futures.as_completed(futures):
                 repo = future.result()
-                print(f"finished {futures[future]} identities {len(repo.identities)}")
+                print(f"finished {futures[future]} entities {len(repo.entities)}")
 
     def resolve_elements(self, source_filter: RepositoryFilter = None):
         st = time.time()
@@ -233,7 +233,7 @@ class RepositoryMerger:
             resolution
             for resolution in self.resolutions
             if resolution.source.unique_id == unique_id
-            and resolution.resolver_result.manual_verification is True
+               and resolution.resolver_result.manual_verification is True
         ]:
             result.append(resolution.target.unique_id)
         return sorted(result)
@@ -260,9 +260,9 @@ class RepositoryMerger:
         return content
 
     @property
-    def resolver(self) -> RepositoryResolver:
+    def resolver(self) -> RepositoryEntityResolver:
         if not self._entity_resolver:
-            self._entity_resolver = RepositoryResolver()
+            self._entity_resolver = RepositoryEntityResolver()
 
         return self._entity_resolver
 
@@ -294,16 +294,17 @@ class RepositoryMerger:
 class XmiArchiRepositoryMerger(RepositoryMerger):
     """Merges repository 2 to repository 1 (from source -> destination), it:
     - determines resolutions
-        => identities that could be the same in the source and the destination.
-        => a user needs to identify which identities are the same
+        => entities that could be the same in the source and the destination.
+        => a user needs to identify which entities are the same
     - performs a merge also using the resolution specification
     """
+
     def __init__(
-        self,
-        target_repo: Repository,
-        source_repo: Repository,
-        source_filter: ViewRepositoryFilter,
-        compare_cutoff_score=None,
+            self,
+            target_repo: Repository,
+            source_repo: Repository,
+            source_filter: ViewRepositoryFilter,
+            compare_cutoff_score=None,
     ):
         super().__init__(
             target_repo=target_repo,
@@ -318,28 +319,28 @@ class XmiArchiRepositoryMerger(RepositoryMerger):
         # read ID from source, check if it is resolved
         # resolved: do not copy
         # not resolved : copy, make sure to replace all resolved ID's with repo 1 UUID
-        to_import_identities = []
+        to_import_entities = []
         for view in self.source_filter.views:
-            to_import_identities += view.referenced_elements
-            to_import_identities += view.referenced_relations
-            to_import_identities += self.source_repo.get_implicit_relations_not_in_view(
+            to_import_entities += view.referenced_elements
+            to_import_entities += view.referenced_relations
+            to_import_entities += self.source_repo.get_implicit_relations_not_in_view(
                 view
             )
 
         # import elements not in target repo, take resolution store info into account
-        for unique_id in set(to_import_identities):
-            # find resolutions for ID in target repo (multiple source identities can map to same target identity)
+        for unique_id in set(to_import_entities):
+            # find resolutions for ID in target repo (multiple source entities can map to same target entity)
             found = False
             target_ids = self.get_target_ids_for_source_id(unique_id)
             # if NOT found -> ADD
             if len(target_ids) == 0:
-                # find identity in source repo
-                identity = self.source_repo.get_identity_by_id(unique_id)
-                match identity:
+                # find entity in source repo
+                entity = self.source_repo.get_entity_by_id(unique_id)
+                match entity:
                     case Relation():
-                        self.target_repo.add_relation(identity)
+                        self.target_repo.add_relation(entity)
                     case Entity():
-                        self.target_repo.add_element(identity)
+                        self.target_repo.add_element(entity)
 
         for property_definition in self.source_repo.property_definitions:
             self.target_repo.add_property_definition(property_definition)
@@ -353,7 +354,7 @@ class XmiArchiRepositoryMerger(RepositoryMerger):
             content = self.update_uuids_in_str(ifp.read())
         if content:
             with open(
-                self.target_repo.get_dry_run_location(), "w", encoding="utf8"
+                    self.target_repo.get_dry_run_location(), "w", encoding="utf8"
             ) as ofp:
                 ofp.write(content)
 

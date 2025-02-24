@@ -40,6 +40,3 @@ def read_aggregated_graph(json_str: str, graph_name: str):
             g.add_edge(src_node, dst_node, unique_name=f"{src_node.id}-{dst_node.id}", weight=cnt)
 
     return g
-
-
-

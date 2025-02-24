@@ -60,12 +60,12 @@ class EntityResolver(ABC):
         ...
 
 
-class RepositoryResolver:
+class RepositoryEntityResolver:
     def classification_resolve(
-        self,
-        source_entities: List[ResolvedEntity],
-        target_entities: List[ResolvedEntity],
-        comparator: EntityResolver,
+            self,
+            source_entities: List[ResolvedEntity],
+            target_entities: List[ResolvedEntity],
+            comparator: EntityResolver,
     ):
         result = []
         for source, target in [
@@ -83,22 +83,22 @@ class RepositoryResolver:
         return result
 
     def resolve(
-        self,
-        target_repo: Repository,
-        source_repo: Repository,
-        source_filter: RepositoryFilter = None,
-        comparator: EntityResolver = None,
+            self,
+            target_repo: Repository,
+            source_repo: Repository,
+            source_filter: RepositoryFilter = None,
+            comparator: EntityResolver = None,
     ):
         result = []
 
         def to_segmented_map_by_classification(
-            repository: Repository, repo_filter: RepositoryFilter = None
+                repository: Repository, repo_filter: RepositoryFilter = None
         ):
-            # build map from repository items based on filter and identities
-            # it segments all the identities in the repository on classification
+            # build map from repository items based on filter and entities
+            # it segments all the entities in the repository on classification
             map_ids1 = {}
             for k, g in itertools.groupby(
-                repository.filter(repo_filter), lambda id: id.classification
+                    repository.filter(repo_filter), lambda id: id.classification
             ):
                 if k not in map_ids1:
                     map_ids1[k] = list(g)
@@ -126,14 +126,14 @@ class RepositoryResolver:
 
 
 def resolutions_get_resolved_entity(
-    resolutions: List[ResolvedEntity], unique_id: str, unique_id_should_match_source: bool = False
+        resolutions: List[ResolvedEntity], unique_id: str, unique_id_should_match_source: bool = False
 ) -> Tuple[bool, Optional[List[ResolvedEntity]]]:
     result = False
     res_ids = []
     if resolutions:
         for res_id in [
             res_id for res_id in resolutions if (unique_id_should_match_source and res_id.source.unique_id == unique_id)
-                or res_id.target.unique_id == unique_id
+                                                or res_id.target.unique_id == unique_id
         ]:
             result = True
             if not res_ids:

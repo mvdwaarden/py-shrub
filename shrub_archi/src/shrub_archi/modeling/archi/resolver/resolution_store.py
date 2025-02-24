@@ -19,16 +19,16 @@ class ResolutionStore:
         return self._resolutions
 
     @resolutions.setter
-    def resolutions(self, resolved_identities: List[ResolvedEntity]):
+    def resolutions(self, resolved_entities: List[ResolvedEntity]):
         self._resolutions = {}
-        for resolution in resolved_identities:
+        for resolution in resolved_entities:
             self._resolutions[
                 resolution.source.unique_id, resolution.target.unique_id
             ] = resolution.resolver_result.manual_verification
 
     def _get_resolution_file(self, name) -> str:
         return os.path.join(
-            self.location, f"{name if name else 'resolved_identities'}.json"
+            self.location, f"{name if name else 'resolved_entities'}.json"
         )
 
     def _read_from_string(self, resolutions: str):

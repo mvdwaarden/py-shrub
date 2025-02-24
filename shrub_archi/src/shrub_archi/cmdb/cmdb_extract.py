@@ -10,8 +10,7 @@ from shrub_util.core.iteration_helpers import list_block_iterator
 
 
 def cmdb_extract(environment: str, emails: list, cmdb_api: str, source: str, extra_cis: list = None,
-                 local_view: CmdbLocalView = None, test_only: bool =False) -> CmdbLocalView:
-
+                 local_view: CmdbLocalView = None, test_only: bool = False) -> CmdbLocalView:
     token = azure_get_token(environment)
     api = CmdbApi(base_uri=cmdb_api, token=token,
                   source=source)
@@ -55,14 +54,16 @@ def cmdb_get_configuration_items_by_authorization(api: CmdbApi, factory: CmdbApi
     return cis
 
 
-def cmdb_get_info_for_configuration_item_by_key(api: CmdbApi, factory: CmdbApiObjectFactory, keys: list) -> ConfigurationItem:
+def cmdb_get_info_for_configuration_item_by_key(api: CmdbApi, factory: CmdbApiObjectFactory,
+                                                keys: list) -> ConfigurationItem:
     response_json = api.get_configuration_item_info_by_key(keys)
     cis = factory.create_configuration_item_from_retrieve_ci_info_result_json(response_json)
 
     return cis
 
 
-def cmdb_get_relation_ships_by_configuration_item(api: CmdbApi, factory: CmdbApiObjectFactory, ci: ConfigurationItem) -> list:
+def cmdb_get_relation_ships_by_configuration_item(api: CmdbApi, factory: CmdbApiObjectFactory,
+                                                  ci: ConfigurationItem) -> list:
     response_json = api.get_relation_ships_by_configuration_item_name(ci.name)
     downstream = upstream = False
     relations = []

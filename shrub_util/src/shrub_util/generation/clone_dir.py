@@ -44,7 +44,7 @@ def clone_directory(src_dir, target_dir=None, dry_run=False, **kwargs):
     renderer = CloneDirectoryTemplateRenderer(fq_src_dir)
     for src_root, src_subdirs, src_files in os.walk(fq_src_dir):
         if len(src_root) > len(fq_src_dir):
-            src_reldir = src_root[len(fq_src_dir) + 1 :]
+            src_reldir = src_root[len(fq_src_dir) + 1:]
         else:
             src_reldir = ""
         dest_root = os.path.join(target_dir, src_reldir)

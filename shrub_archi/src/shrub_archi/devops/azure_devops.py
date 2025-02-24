@@ -72,7 +72,8 @@ class AzureDevOpsApi:
         return response.json()
 
     def get_work_items(self, project: str):
-        response = requests.get(self._get_url(self.FUNCTION_PROJECT_WORK_ITEMS, project=project), auth=self._get_authorization())
+        response = requests.get(self._get_url(self.FUNCTION_PROJECT_WORK_ITEMS, project=project),
+                                auth=self._get_authorization())
         return response
 
 

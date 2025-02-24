@@ -22,5 +22,3 @@ class Identity(IamIdentity):
 class OiaLocalView(IamLocalView):
     def _create_identity(self) -> Identity:
         return Identity()
-
-

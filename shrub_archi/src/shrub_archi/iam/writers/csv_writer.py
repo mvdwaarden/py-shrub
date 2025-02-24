@@ -6,4 +6,3 @@ def iam_write_csv(local_view: IamLocalView, file: str):
         ofp.write("email;groups\n")
         for u in [u for u in local_view.map_identities.values() if u.email]:
             ofp.write(f"{u.email};t.b.d.\n")
-

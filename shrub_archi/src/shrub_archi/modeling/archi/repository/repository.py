@@ -27,12 +27,12 @@ class RepositoryFilter:
         self.include_elements = include_elements
         self.include_relations = include_relations
 
-    def include(self, identity: Entity):
+    def include(self, entity: Entity):
         return (
-            self.include_elements
-            and isinstance(identity, Entity)
-            and not isinstance(identity, Relation)
-        ) or (self.include_relations and isinstance(identity, Relation))
+                self.include_elements
+                and isinstance(entity, Entity)
+                and not isinstance(entity, Relation)
+        ) or (self.include_relations and isinstance(entity, Relation))
 
     def clone(self, target: "RepositoryFilter" = None):
         if not target:
@@ -45,7 +45,7 @@ class RepositoryFilter:
 class Repository(ABC):
     def __init__(self, location: str):
         self.location = os.path.normpath(location)
-        self._identities: Optional[Entities] = None
+        self._entities: Optional[Entities] = None
         self._relations_lookup: Optional[RelationsLookup] = None
         self._relations: Optional[Relations] = None
         self._elements: Optional[Entities] = None
@@ -53,8 +53,8 @@ class Repository(ABC):
         self._property_definitions: Optional[PropertyDefinitions] = None
 
     def read(self) -> "Repository":
-        if self._identities is None:
-            self._identities = {}
+        if self._entities is None:
+            self._entities = {}
             self._elements = {}
             self._relations = {}
             self._views = {}
@@ -103,8 +103,8 @@ class Repository(ABC):
             return "n.a."
 
     @property
-    def identities(self) -> List[Entity]:
-        return list(self._identities.values()) if self._identities else []
+    def entities(self) -> List[Entity]:
+        return list(self._entities.values()) if self._entities else []
 
     @property
     def views(self) -> List[View]:
@@ -113,9 +113,9 @@ class Repository(ABC):
 
     def filter(self, repo_filter: RepositoryFilter):
         return [
-            identity
-            for identity in self.identities
-            if not repo_filter or repo_filter.include(identity)
+            entity
+            for entity in self.entities
+            if not repo_filter or repo_filter.include(entity)
         ]
 
     @property
@@ -134,9 +134,9 @@ class Repository(ABC):
             else []
         )
 
-    def get_identity_by_id(self, identifier: str) -> Entity:
-        if identifier in self._identities:
-            return self._identities[identifier]
+    def get_entity_by_id(self, identifier: str) -> Entity:
+        if identifier in self._entities:
+            return self._entities[identifier]
         else:
             return None
 
@@ -150,19 +150,19 @@ class Repository(ABC):
         self._relations_lookup = {}
         i = 0
         for relation in self._relations.values():
-            if relation.source_id in self._identities:
-                relation.source = self._identities[relation.source_id]
-            if relation.target_id in self._identities:
-                relation.target = self._identities[relation.target_id]
+            if relation.source_id in self._entities:
+                relation.source = self._entities[relation.source_id]
+            if relation.target_id in self._entities:
+                relation.target = self._entities[relation.target_id]
             self._relations_lookup[i] = relation
             i += 1
             self._relations_lookup[(relation.source_id, relation.target_id)] = relation
         return self._relations_lookup
 
-    def get_implicit_relations_not_in_view(self, view: View) -> Relations:
-        implicit_relations: List[View] = []
+    def get_implicit_relations_not_in_view(self, view: View) -> List[str]:
+        implicit_relations: List[str] = []
 
-        def connects_one_off(rel: Relation, combinations: list[()]) -> bool:
+        def connects_one_off(rel: Relation, combinations: [()]) -> bool:
             for a, b in combinations:
                 if rel.connects(a, b):
                     return True
@@ -181,39 +181,39 @@ class Repository(ABC):
 
 class ViewRepositoryFilter(RepositoryFilter):
     def __init__(
-        self,
-        views: List[View],
-        include_elements: bool = True,
-        include_relations: bool = True,
-        include_views: bool = True,
+            self,
+            views: List[View],
+            include_elements: bool = True,
+            include_relations: bool = True,
+            include_views: bool = True,
     ):
         super().__init__(
             include_elements=include_elements, include_relations=include_relations
         )
         self.views: List[View] = views
-        self._aggregate_identities_ids: Optional[List[str]] = None
+        self._aggregated_entity_ids: Optional[List[str]] = None
 
-    def include(self, identity: Entity):
-        return super().include(identity) and (
-            identity.unique_id in self.aggregate_identities_ids
-            or isinstance(identity, Relation)
-            and identity.source_id in self.aggregate_identities_ids
-            and identity.target_id in self.aggregate_identities_ids
+    def include(self, entity: Entity):
+        return super().include(entity) and (
+                entity.unique_id in self.aggregate_entity_ids
+                or isinstance(entity, Relation)
+                and entity.source_id in self.aggregate_entity_ids
+                and entity.target_id in self.aggregate_entity_ids
         )
 
     @property
-    def aggregate_identities_ids(self) -> List[str]:
-        if self.views and not self._aggregate_identities_ids:
-            self._aggregate_identities_ids = []
+    def aggregate_entity_ids(self) -> List[str]:
+        if self.views and not self._aggregated_entity_ids:
+            self._aggregated_entity_ids = []
             for view in self.views:
                 if self.include_elements:
-                    self._aggregate_identities_ids += view.referenced_elements
+                    self._aggregated_entity_ids += view.referenced_elements
                 if self.include_relations:
-                    self._aggregate_identities_ids += view.referenced_relations
-            return self._aggregate_identities_ids
-        elif not self._aggregate_identities_ids:
-            self._aggregate_identities_ids = []
-        return self._aggregate_identities_ids
+                    self._aggregated_entity_ids += view.referenced_relations
+            return self._aggregated_entity_ids
+        elif not self._aggregated_entity_ids:
+            self._aggregated_entity_ids = []
+        return self._aggregated_entity_ids
 
     def clone(self, target: "ViewRepositoryFilter" = None):
         if not target:
@@ -244,34 +244,34 @@ class XmiArchiRepository(Repository):
             root = self.element_tree
             namespaces = self._namespaces
 
-            def _check_for_duplicate_identity(identity, identity_dictionary):
-                if identity.unique_id in self._identities:
+            def _check_for_duplicate_entity(entity, entity_dictionary):
+                if entity.unique_id in self._entities:
                     print(
-                        f"found duplicate identity {identity.unique_id} - {identity.classification} - {identity.name}"
+                        f"found duplicate entity {entity.unique_id} - {entity.classification} - {entity.name}"
                     )
 
             for el in root.findall("xmi:elements/xmi:element", namespaces=namespaces):
-                identity: Entity = self._read_identity_from_xml_element(
+                entity: Entity = self._read_entity_from_xml_element(
                     el, namespaces, Entity
                 )
-                if identity and identity.unique_id:
-                    _check_for_duplicate_identity(identity, self._identities)
-                    self._identities[identity.unique_id] = identity
-                    self._elements[identity.unique_id] = identity
+                if entity and entity.unique_id:
+                    _check_for_duplicate_entity(entity, self._entities)
+                    self._entities[entity.unique_id] = entity
+                    self._elements[entity.unique_id] = entity
             for el in root.findall(
-                "xmi:relationships/xmi:relationship", namespaces=namespaces
+                    "xmi:relationships/xmi:relationship", namespaces=namespaces
             ):
                 relation: Relation = self._read_relation_from_xml_element(
                     el, namespaces
                 )
                 if relation and relation.unique_id:
-                    _check_for_duplicate_identity(relation, self._identities)
-                    self._identities[relation.unique_id] = relation
+                    _check_for_duplicate_entity(relation, self._entities)
+                    self._entities[relation.unique_id] = relation
                     self._relations[relation.unique_id] = relation
             for el in root.findall(
-                "xmi:views/xmi:diagrams/xmi:view", namespaces=namespaces
+                    "xmi:views/xmi:diagrams/xmi:view", namespaces=namespaces
             ):
-                view: View = self._read_identity_from_xml_element(el, namespaces, View)
+                view: View = self._read_entity_from_xml_element(el, namespaces, View)
                 if view and view.unique_id:
                     (
                         view.referenced_elements,
@@ -280,11 +280,11 @@ class XmiArchiRepository(Repository):
                         el, namespaces
                     )
                     view.data = el
-                    _check_for_duplicate_identity(view, self._identities)
-                    self._identities[view.unique_id] = view
+                    _check_for_duplicate_entity(view, self._entities)
+                    self._entities[view.unique_id] = view
                     self._views[view.unique_id] = view
             for el in root.findall(
-                "xmi:propertyDefinitions/xmi:propertyDefinition", namespaces=namespaces
+                    "xmi:propertyDefinitions/xmi:propertyDefinition", namespaces=namespaces
             ):
                 property_definition: PropertyDefinition = (
                     self._read_property_definition_from_xml_element(el, namespaces)
@@ -295,7 +295,7 @@ class XmiArchiRepository(Repository):
                     ] = property_definition
 
         except Exception as ex:
-            logging.get_logger().error(f"problem with file {self.location}", ex)
+            logging.get_logger().error(f"problem with file {self.location}", ex=ex)
 
         self._create_relations_lookup()
         return self
@@ -308,21 +308,21 @@ class XmiArchiRepository(Repository):
     def add_view(self, view: View):
         if view.unique_id not in self._views:
             self._views[view.unique_id] = view
-            self._identities[view.unique_id] = view
+            self._entities[view.unique_id] = view
             self._write_view(view.data, self._namespaces)
             self._write_organization(view, self._namespaces)
 
     def add_element(self, element: Entity):
         if element.unique_id not in self._elements:
             self._elements[element.unique_id] = element
-            self._identities[element.unique_id] = element
+            self._entities[element.unique_id] = element
             self._write_element(element.data, self._namespaces)
             self._write_organization(element, self._namespaces)
 
     def del_element(self, element: Entity):
         if element.unique_id in self._elements:
             del self._elements[element.unique_id]
-            del self._identities[element.unique_id]
+            del self._entities[element.unique_id]
             self._delete_element(element, self._namespaces)
             self._delete_organization(element, self._namespaces)
             logging.get_logger().error(f"deleted element {element}")
@@ -336,14 +336,14 @@ class XmiArchiRepository(Repository):
 
     def add_relation(self, relation: Relation):
         if relation.unique_id not in self._relations:
-            self._identities[relation.unique_id] = relation
+            self._entities[relation.unique_id] = relation
             self._relations[relation.unique_id] = relation
             self._write_relation(relation.data, self._namespaces)
             self._write_organization(relation, self._namespaces)
 
     def del_relation(self, relation: Relation):
         if relation.unique_id in self._relations:
-            del self._identities[relation.unique_id]
+            del self._entities[relation.unique_id]
             del self._relations[relation.unique_id]
             self._delete_relation(relation, self._namespaces)
             self._delete_organization(relation, self._namespaces)
@@ -401,8 +401,8 @@ class XmiArchiRepository(Repository):
 
         return self._element_tree
 
-    def _read_identity_from_xml_element(
-        self, el, namespaces, specialization
+    def _read_entity_from_xml_element(
+            self, el, namespaces, specialization
     ) -> Entity | View:
         result = None
         try:
@@ -421,11 +421,11 @@ class XmiArchiRepository(Repository):
                 data=el,
             )
         except Exception as ex:
-            logging.get_logger().error(f"problem reading element {el}", ex)
+            logging.get_logger().error(f"problem reading element {el}", ex=ex)
         return result
 
     def _read_property_definition_from_xml_element(
-        self, el, namespaces
+            self, el, namespaces
     ) -> PropertyDefinition:
         result = None
         try:
@@ -444,7 +444,7 @@ class XmiArchiRepository(Repository):
                 data=el,
             )
         except Exception as ex:
-            logging.get_logger().error(f"problem reading property definition {el}", ex)
+            logging.get_logger().error(f"problem reading property definition {el}", ex=ex)
         return result
 
     def _read_relation_from_xml_element(self, el, namespaces) -> Relation:
@@ -468,26 +468,26 @@ class XmiArchiRepository(Repository):
                 data=el,
             )
         except Exception as ex:
-            logging.get_logger().error(f"problem reading element {el}", ex)
+            logging.get_logger().error(f"problem reading element {el}", ex=ex)
         return result
 
     def _read_referenced_elements_and_relations_from_xml_element(
-        self, el, namespaces
+            self, el, namespaces
     ) -> Tuple[List[str], List[str]]:
         element_refs = []
         relation_refs = []
         try:
             xsi_type = f"{{{namespaces['xsi']}}}type"
             for child in el.findall(
-                f".//xmi:node[@{xsi_type}='Element']", namespaces=namespaces
+                    f".//xmi:node[@{xsi_type}='Element']", namespaces=namespaces
             ):
                 element_refs.append(child.get("elementRef"))
             for child in el.findall(
-                f".//xmi:connection[@{xsi_type}='Relationship']", namespaces=namespaces
+                    f".//xmi:connection[@{xsi_type}='Relationship']", namespaces=namespaces
             ):
                 relation_refs.append(child.get("relationshipRef"))
         except Exception as ex:
-            logging.get_logger().error(f"problem reading element {el}", ex)
+            logging.get_logger().error(f"problem reading element {el}", ex=ex)
         return element_refs, relation_refs
 
     def _write_view(self, view, namespaces):
@@ -498,7 +498,7 @@ class XmiArchiRepository(Repository):
             )
             diagrams[0].append(view)
         except Exception as ex:
-            logging.get_logger().error(f"problem writing view {view}", ex)
+            logging.get_logger().error(f"problem writing view {view}", ex=ex)
 
     def _write_element(self, element, namespaces):
         try:
@@ -506,7 +506,7 @@ class XmiArchiRepository(Repository):
             elements = root.findall("xmi:elements", namespaces=self._namespaces)
             elements[0].append(element)
         except Exception as ex:
-            logging.get_logger().error(f"problem writing element {element}", ex)
+            logging.get_logger().error(f"problem writing element {element}", ex=ex)
 
     def _delete_element(self, element, namespaces):
         try:
@@ -519,7 +519,7 @@ class XmiArchiRepository(Repository):
             if len(rel):
                 relations[0].remove(rel[0])
         except Exception as ex:
-            logging.get_logger().error(f"problem deleting element {element}", ex)
+            logging.get_logger().error(f"problem deleting element {element}", ex=ex)
 
     def _write_relation(self, relation, namespaces):
         try:
@@ -527,7 +527,7 @@ class XmiArchiRepository(Repository):
             relations = root.findall("xmi:relationships", namespaces=self._namespaces)
             relations[0].append(relation)
         except Exception as ex:
-            logging.get_logger().error(f"problem writing relation {relation}", ex)
+            logging.get_logger().error(f"problem writing relation {relation}", ex=ex)
 
     def _delete_relation(self, relation, namespaces):
         try:
@@ -540,9 +540,9 @@ class XmiArchiRepository(Repository):
             if len(rel):
                 relations[0].remove(rel[0])
         except Exception as ex:
-            logging.get_logger().error(f"problem deleting relation {relation}", ex)
+            logging.get_logger().error(f"problem deleting relation {relation}", ex=ex)
 
-    def _write_organization(self, identity, namespaces):
+    def _write_organization(self, entity, namespaces):
         try:
             organization = "Imports"
             root = self.element_tree
@@ -568,25 +568,25 @@ class XmiArchiRepository(Repository):
                 # find folder item (Python has limited XPath support
                 # xmi:organizations/xmi:item[xmi:label[.='{organization}']] does not work
                 for item in root.findall(
-                    "xmi:organizations/xmi:item", namespaces=self._namespaces
+                        "xmi:organizations/xmi:item", namespaces=self._namespaces
                 ):
                     if (
-                        item.find("xmi:label", namespaces=self._namespaces).text
-                        == organization
+                            item.find("xmi:label", namespaces=self._namespaces).text
+                            == organization
                     ):
                         folder_item = item
                         break
             item_ref = SubElement(
                 folder_item,
                 f"{{{self._namespaces['xmi']}}}item",
-                attrib={"identifierRef": identity.unique_id},
+                attrib={"identifierRef": entity.unique_id},
             )
         except Exception as ex:
             logging.get_logger().error(
-                f"problem writing identity {identity} to organizations", ex
+                f"problem writing entity {entity} to organizations", ex=ex
             )
 
-    def _delete_organization(self, identity, namespaces):
+    def _delete_organization(self, entity, namespaces):
         try:
 
             def remove_item(item, unique_id) -> bool:
@@ -605,13 +605,13 @@ class XmiArchiRepository(Repository):
                 return removed
 
             for item in self.element_tree.findall(
-                f"xmi:organizations/xmi:item", namespaces=namespaces
+                    f"xmi:organizations/xmi:item", namespaces=namespaces
             ):
-                remove_item(item, identity.unique_id)
+                remove_item(item, entity.unique_id)
 
         except Exception as ex:
             logging.get_logger().error(
-                f"problem deleting identity {identity} in organizations", ex
+                f"problem deleting entity {entity} in organizations", ex=ex
             )
 
     def _write_property_definition(self, property_definition, namespaces):
@@ -632,100 +632,5 @@ class XmiArchiRepository(Repository):
             property_definitions[0].append(property_definition)
         except Exception as ex:
             logging.get_logger().error(
-                f"problem writing property definition {property_definition}", ex
+                f"problem writing property definition {property_definition}", ex=ex
             )
-
-
-class CoArchiRepository(Repository):
-    def __init__(self, location: str):
-        super().__init__(location)
-
-    def _read(self) -> "CoArchiRepository":
-        with ThreadPoolExecutor(max_workers=128) as exec:
-            futures = {}
-            for dirpath, dirs, file in self:
-                if "relationship" in file.lower():
-                    futures[
-                        exec.submit(self._read_relation_from_file, dirpath, file)
-                    ] = file
-                else:
-                    futures[
-                        exec.submit(self._read_identity_from_file, dirpath, file)
-                    ] = file
-            for future in concurrent.futures.as_completed(futures):
-                result = future.result()
-                match result:
-                    case Relation():
-                        self._relations[result.unique_id] = result
-                        # relation can also be a target
-                        self._identities[result.unique_id] = result
-                    case View():
-                        self._views[result.unique_id] = result
-                        self._identities[result.unique_id] = result
-                    case Entity():
-                        self._elements[result.unique_id] = result
-                        self._identities[result.unique_id] = result
-
-        self._create_relations_lookup()
-        return self
-
-    def _write(self) -> "Repository":
-        return self
-
-    def _read_identity_from_file(self, dirpath, file) -> Entity | View:
-        result = None
-        full_filename = os.path.join(dirpath, file)
-        # logging.get_logger().error(f"start reading id from {full_filename}")
-        try:
-            et = ElementTree.parse(full_filename)
-            root = et.getroot()
-            classification = root.tag.split("}")[-1]
-            if classification.lower().endswith("diagrammodel"):
-                constructor = View
-            else:
-                constructor = Entity
-            identity = constructor(
-                unique_id=root.get("id"),
-                name=root.get("name"),
-                description=root.get("documentation"),
-                classification=classification,
-                location=full_filename,
-            )
-            if identity.unique_id and identity.name:
-                result = identity
-        except Exception as ex:
-            logging.get_logger().error(f"problem with file {full_filename}", ex)
-        return result
-
-    def _read_relation_from_file(self, dirpath, file) -> Relation:
-        result = None
-        full_filename = os.path.join(dirpath, file)
-        # logging.get_logger().error(f"start reading id from {full_filename}")
-        try:
-            et = ElementTree.parse(full_filename)
-            root = et.getroot()
-            for child in root:
-                match child.tag:
-                    case "source":
-                        source = child
-                    case "target":
-                        target = child
-            relation = Relation(
-                unique_id=root.get("id"),
-                name=root.get("name"),
-                description=root.get("documentation"),
-                classification=root.tag.split("}")[-1],
-                source_id=source.get("href").split("#")[1],
-                target_id=target.get("href").split("#")[1],
-                location=full_filename,
-            )
-            if relation.unique_id:
-                result = relation
-        except Exception as ex:
-            logging.get_logger().error(f"problem with file {full_filename}", ex)
-        return result
-
-    def __iter__(self):
-        return FileLocationIterator(
-            self.location, mode=FileLocationIteratorMode.MODE_FILE
-        )

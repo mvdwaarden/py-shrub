@@ -6,6 +6,7 @@ import shrub_util.core.logging as logging
 
 from .arguments import Arguments
 
+
 class Config:
     """Purpose: configuration implementation.
     Author: Mando van der Waarden
@@ -139,6 +140,7 @@ class Config:
             "GetGroups": "/groups/get"
         }
     """
+
     def get_settings_dictionary(self, section, key_prefix: str, no_warn=False) -> dict:
         result = {}
         try:
@@ -185,6 +187,7 @@ class ConfigSection:
             key1=secret1
             ...
         """
+
     def get_secret_reference(self) -> str:
         raw_secret_reference = self.get_setting("SecretReference")
         if not raw_secret_reference:
@@ -197,4 +200,3 @@ class ConfigSection:
         else:
             secret_reference = f"{self.section}-{raw_secret_reference}"
         return secret_reference
-

@@ -26,6 +26,7 @@ if __name__ == "__main__":
         qotd = QuoteOfTheDay().get_quote()
         print(usage + f"\n    {qotd['quote']} - {qotd['source']}")
 
+
     args = Arguments()
     help = args.has_arg("help")
     file = args.get_arg("file")
@@ -43,4 +44,3 @@ if __name__ == "__main__":
         print(f"graph {g} ->  {ag}")
         write_aggregated_graph(ag, file=f"{file}.ag")
         write_aggregated_graph(g, file=f"{file}.g")
-

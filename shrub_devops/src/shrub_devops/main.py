@@ -7,7 +7,6 @@ from shrub_util.generation.template_renderer import TemplateRenderer
 from abc import ABC, abstractmethod
 from typing import Dict
 
-
 usage = """
     Shrubbery DevOPS utilities, assumes:
     - SHRUB_DEVOPS_CONFIG_ROOT environment variable is set 
@@ -223,7 +222,7 @@ class Repository(BuildObject):
                 f
                 for f in files
                 if re.match(".*[\\\\/]src[\\\\/].*", root) is not None
-                and f == "package_info.py"
+                   and f == "package_info.py"
             ]:
                 package_info_file = os.path.join(root, file)
                 project_info = None
@@ -244,8 +243,10 @@ class Repository(BuildObject):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
+
     def do_print_usage():
         print(usage)
+
 
     file = Config.get_arg("file")
     name = Config.get_arg("name")

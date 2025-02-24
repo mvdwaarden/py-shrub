@@ -14,4 +14,3 @@ def iam_write_json(local_view: IamLocalView, file: str):
         data = json.dumps([u.email for u in local_view.map_identities.values() if u.email])
         print(f"write {l_file} with SHA1 hash {hashlib.sha1(data.encode()).hexdigest()}")
         ofp.write(data)
-

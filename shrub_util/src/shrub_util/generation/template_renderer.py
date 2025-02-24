@@ -15,7 +15,7 @@ class TemplateRenderer:
     SECTION_PREFIX = "Renderer"
     LOADER_KEY = "Loader"
 
-    def __init__(self, loader_initializer = None, get_loader=None):
+    def __init__(self, loader_initializer=None, get_loader=None):
         self.loader_initializer = loader_initializer
         self.environment = None
         self.get_loader = get_loader

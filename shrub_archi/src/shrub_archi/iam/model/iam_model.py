@@ -228,4 +228,5 @@ class Authorizations:
         return self.lookup_resources_for_identity[identity.get_resolve_key()]
 
     def get_roles_for_identity_resource(self, identity: Identity, resource: Resource) -> List[Resource]:
-        return self.lookup_roles_for_identity_resource[self._get_lookup_authorization_by_user_resource_key(identity, resource)]
+        return self.lookup_roles_for_identity_resource[
+            self._get_lookup_authorization_by_user_resource_key(identity, resource)]

@@ -13,4 +13,3 @@ class Token:
     def expires_in_actual(self) -> int:
         d = datetime.datetime.now() - self.creation_time
         return self.expires_in - d.seconds
-

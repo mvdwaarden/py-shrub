@@ -40,8 +40,10 @@ class EndpointComplianceInfo:
 
     @staticmethod
     def get_csv_header():
-        return ["reference_number", "endpoint", "port", "environment", "forced_method", "negotiated_method", "ciphers", "error"]
+        return ["reference_number", "endpoint", "port", "environment", "forced_method", "negotiated_method", "ciphers",
+                "error"]
 
     def get_csv_row(self):
-        return [self.reference_number, self.endpoint, self.port, self.environment, self.forced_method, self.negotiated_method, self.ciphers,
+        return [self.reference_number, self.endpoint, self.port, self.environment, self.forced_method,
+                self.negotiated_method, self.ciphers,
                 self.error]

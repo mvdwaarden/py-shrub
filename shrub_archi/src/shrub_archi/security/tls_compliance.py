@@ -77,6 +77,3 @@ def test_security_tls_compliance(csv_file: str) -> List[EndpointComplianceInfo]:
             print(f"could not write to {csv_file}, {ex}")
 
     return result
-
-
-

@@ -124,7 +124,8 @@ class ConfigurationItem(NamedItem):
             the_dict["business_owner"] = self.business_owner.id if isinstance(self.business_owner,
                                                                               Manager) else self.business_owner
         if self.system_owner:
-            the_dict["system_owner"] = self.system_owner.id if isinstance(self.system_owner, Manager) else self.system_owner
+            the_dict["system_owner"] = self.system_owner.id if isinstance(self.system_owner,
+                                                                          Manager) else self.system_owner
         if self.description:
             the_dict["description"] = self.description
         if self.title:
@@ -386,6 +387,7 @@ class CmdbLocalView:
                     return False
                 else:
                     return param_node_filter(n)
+
             node_filter = local_node_filter
 
         self.refresh_object_reference_relations(include_object_reference)

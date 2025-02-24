@@ -11,6 +11,7 @@ from xml.etree.ElementTree import register_namespace
 import json
 import re
 
+
 def clone_xml(xml: str) -> str:
     for event, el in parse(xml):
         print(f"{type(el)}{event}")

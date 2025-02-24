@@ -80,7 +80,8 @@ CREATE ({{ s.__class__.__name__ }}{{ s.id }}) -[:{{ cypher_relation_namer(relati
 
 
 def cmdb_write_named_item_graph(local_view: CmdbLocalView, graph_type: GraphType, file: str,
-                                include_object_reference: bool = True, node_filter: Callable[[NamedItem], bool] = False):
+                                include_object_reference: bool = True,
+                                node_filter: Callable[[NamedItem], bool] = False):
     g = local_view.build_graph(include_object_reference=include_object_reference, node_filter=node_filter)
 
     with open(f"{file}.{graph_type.value}", "w") as ofp:
@@ -127,7 +128,7 @@ def cmdb_write_named_item_graph(local_view: CmdbLocalView, graph_type: GraphType
             return n.name
 
         tr = DictionaryRenderer({GraphType.DOT.value: DOT_TEMPLATE, GraphType.GRAPHML.value: GRAPHML_TEMPLATE,
-            GraphType.CYPHER.value: CYPHER_TEMPLATE})
+                                 GraphType.CYPHER.value: CYPHER_TEMPLATE})
         graph_output = tr.render(graph_type.value, g=g, node_filter=node_filter, dot_shaper=dot_shaper,
                                  default_node_namer=node_namer, dot_node_namer=dot_node_namer,
                                  cypher_node_namer=cypher_node_namer, cypher_relation_namer=cypher_relation_namer)

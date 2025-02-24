@@ -47,13 +47,13 @@ class LogDecorator:
         self.logger.log(level, msg, *args, **kwargs)
 
     def error(
-        self,
-        msg,
-        err_context: str = None,
-        err_no: int = None,
-        ex: Exception = None,
-        *args,
-        **kwargs,
+            self,
+            msg,
+            err_context: str = None,
+            err_no: int = None,
+            ex: Exception = None,
+            *args,
+            **kwargs,
     ):
         if LogDecorator.g_verbose:
             trace_file = io.StringIO()

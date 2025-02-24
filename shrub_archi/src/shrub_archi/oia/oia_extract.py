@@ -29,4 +29,3 @@ def test_extract():
         local_view_read_back.from_dict(json.loads(ipf.read()))
     with open("oia_local_view_read_back.json", "w") as ofp:
         ofp.write(json.dumps(local_view_read_back.to_dict()))
-

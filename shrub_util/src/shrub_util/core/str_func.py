@@ -1,5 +1,6 @@
 import json
 
+
 def strip_leading_chars(value: str, chars_to_strip: str):
     if value is not None:
         idx = 0
@@ -130,7 +131,7 @@ class StringAppendBuffer:
             self.buffer = bytearray(self.reserve_size)
         while len(self.buffer) < new_size:
             self.buffer += bytearray(self.reserve_size)
-        self.buffer[self.write_pos : new_size] = bytes_value
+        self.buffer[self.write_pos: new_size] = bytes_value
         self.write_pos += len(bytes_value)
 
     def strip_trailing_chars(self, chars_to_strip: str):
@@ -150,7 +151,7 @@ class StringAppendBuffer:
     def get_value(self):
         if self.buffer is None:
             return "null"
-        result = str(self.buffer[0 : self.write_pos], self.encoding)
+        result = str(self.buffer[0: self.write_pos], self.encoding)
         return result
 
 
