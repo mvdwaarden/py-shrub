@@ -31,15 +31,25 @@ from shrub_util.qotd.qotd import QuoteOfTheDay
 
 usage = f"""
     Archi Shrubbery, assumes:
-    - SHRUB_CONFIG_INI environment variable is set and points to config.ini
+    - Either
+      - SHRUB_CONFIG_INI environment variable is set and points to config.ini
+      - config-ini argument is passed and points to config.ini
     - The directory location of the config.ini is config_path,
       and can be referred to in the configuration as {{config_path}}
     - The config.ini contains the connections definitions. Connection sections
       have the name [ExternalApi-<connection name>]
 
-    Mode - import source repository into target repository
+    Mode - [archi] functions 
     Function:
-    - import    
+    - archi merge    
+    Parameters:    
+    - source: source XMI file location
+    - target: target XMI file location
+    - workdir: work directory
+    - cutoff: cut off for comparison
+    - resolutions: name of the resolutions file (without .json) in the work directory
+     Function:
+    - archi merge    
     Parameters:    
     - source: source XMI file location
     - target: target XMI file location
@@ -47,20 +57,20 @@ usage = f"""
     - cutoff: cut off for comparison
     - resolutions: name of the resolutions file (without .json) in the work directory
     
-    Mode - create graph
     Function:
-    - graph
+    - archi graph
     Parameters:    
     - source: source XMI file location
     - workdir: output directory
     
-    Mode - security
+    Mode - [sec]urity function
     Function
     - sec
     Parameters:
     - file: endpoint file  
     Doc: >>{test_security_tls_compliance.__doc__}<<<
-    Mode - OWL functions
+    
+    Mode - OWL [owl] functions
     Function
     - owl export
     Parameters

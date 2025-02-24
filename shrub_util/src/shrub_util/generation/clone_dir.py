@@ -20,6 +20,17 @@ class CloneDirectoryTemplateRenderer:
     def snake_to_camel(self, value):
         return "".join(part.capitalize() or "_" for part in value.split("_"))
 
+    def to_upper(self,  value):
+        return value.upper() if isinstance(value, str) else str(value).upper() if value else ""
+
+    def snake_get_first(self, value):
+        if isinstance(value, str):
+            idx = value.find("_")
+            if idx >=0:
+                return value[:idx]
+        return value
+
+
     def render(self, template, **kwargs):
         """Render the template
         template: template to use
@@ -33,6 +44,8 @@ class CloneDirectoryTemplateRenderer:
                 )
             )
             self.environment.filters["snake_to_camel"] = self.snake_to_camel
+            self.environment.filters["upper"] = self.to_upper
+            self.environment.filters["snake_get_first"] = self.snake_get_first
         return self.environment.get_template(template).render(**kwargs)
 
 

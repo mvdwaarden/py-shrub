@@ -1,11 +1,14 @@
 import shrub_util.core.logging as logging
 from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
+from shrub_util.core.config import Config
 
 
 usage = """
     {{ build_object.description }}, assumes:
-    - SHRUB_CONFIG_INI environment variable is set and points to config.ini
+    - Either
+      - {{ build_object.name | snake_get_first | upper }}_CONFIG_INI environment variable is set and points to config.ini
+      - config-ini argument is passed and points to config.ini
     - The directory location of the config.ini is config_path,
       and can be referred to in the configuration as {config_path}
     - The config.ini contains the connections definitions. Connection sections
@@ -18,6 +21,7 @@ usage = """
 """
 
 logging.configure_console()
+Config.ENV_CONFIG_INI =  "{{ build_object.name | snake_get_first | upper }}_CONFIG_INI"
 if __name__ == "__main__":
 
     def do_print_usage():

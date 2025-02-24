@@ -87,8 +87,8 @@ class Version:
 
 
 class Config:
-    ENVIRONMENT_VAR = "SHRUB_DEVOPS_CONFIG_ROOT"
-    ARG_VAR = "shrub-devops-config-root"
+    ENVIRONMENT_VAR = "DEVOPS_CONFIG_ROOT"
+    ARG_VAR = "config-root"
     dry_run = False
 
     @staticmethod
