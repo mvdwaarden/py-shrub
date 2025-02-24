@@ -4,3 +4,4 @@ class ShrubArchi:
     CONFIGURATION_SECTION = "ShrubArchi"
     LOG_CONFIGURATION_SECTION = "LogConfiguration"
     LOG_CONFIG_FILE = "LogConfigFile"
+    EMPTY_REPOSITORY_FILE_NAME = "EmptyRepositoryFilename"

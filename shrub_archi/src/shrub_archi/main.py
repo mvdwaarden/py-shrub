@@ -28,6 +28,7 @@ from shrub_archi.oia.oia_extract import oia_extract_authorizations
 from shrub_archi.security.tls_compliance import test_security_tls_compliance
 from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
+from shrub_util.core.config import Config
 
 usage = f"""
     Archi Shrubbery, assumes:
@@ -48,7 +49,7 @@ usage = f"""
     - workdir: work directory
     - cutoff: cut off for comparison
     - resolutions: name of the resolutions file (without .json) in the work directory
-     Function:
+    Function:
     - archi merge    
     Parameters:    
     - source: source XMI file location
@@ -56,12 +57,15 @@ usage = f"""
     - workdir: work directory
     - cutoff: cut off for comparison
     - resolutions: name of the resolutions file (without .json) in the work directory
-    
     Function:
     - archi graph
     Parameters:    
     - source: source XMI file location
     - workdir: output directory
+    Function:
+    - archi extract
+    Parameters:    
+    - source: source XMI file location    
     
     Mode - [sec]urity function
     Function
@@ -95,6 +99,7 @@ class OciFunction(FunctionEnum):
 
 class ArchiFunction(FunctionEnum):
     OPP_MERGE = "merge"
+    OPP_EXTRACT = "extract"
     OPP_CREATE_GRAPH = "graph"
     @staticmethod
     def is_operation(operation: str):
@@ -125,7 +130,7 @@ def create_repository(location: str) -> Repository:
     return XmiArchiRepository(location)
 
 def get_resolution_name(repo: Repository, resolution_name):
-    return resolution_name if resolution_name else repo.name
+    return resolution_name if resolution_name else repo.file_name
 
 
 def do_create_or_update_resolution_file_and_resolutions(resolutions, resolution_store_location, resolution_name: str) -> bool:
@@ -146,6 +151,25 @@ def do_create_or_update_resolution_file_and_resolutions(resolutions, resolution_
         res_store.write(resolution_name)
         created = True
     return created
+
+
+def do_extract(source, purpose):
+    target_repo = create_repository(f"{source} - {purpose}")
+    target_repo.read()
+    target_repo.name = f"{target_repo.file_name}"
+    source_repo = create_repository(source)
+    source_repo.read()
+    view_repo_filter = ViewRepositoryFilter(views=do_select_views(source_repo))
+    if len(view_repo_filter.views) > 0:
+        views = ",".join([v.name for v in view_repo_filter.views])
+    else:
+        views = target_repo.description if target_repo.description else "empty repository"
+    target_repo.description = f"work with {views} for {purpose}"
+    repo_merger = XmiArchiRepositoryMerger(target_repo=target_repo, source_repo=source_repo,
+                                           source_filter=view_repo_filter, compare_cutoff_score=cutoff_score, )
+
+    repo_merger.merge()
+    target_repo._write()
 
 
 def do_merge(source, target, work_dir, resolution_name):
@@ -239,6 +263,7 @@ if __name__ == "__main__":
     help = args.has_arg("help")
     source = args.get_arg("source")
     target = args.get_arg("target")
+    purpose = args.get_arg("purpose","n.a")
     target_dir = args.get_arg("target-dir")
     work_dir = args.get_arg("workdir")
     function_archi = args.get_arg("archi")
@@ -295,6 +320,8 @@ if __name__ == "__main__":
     elif ArchiFunction.is_operation(function_archi):
         if function_archi == ArchiFunction.OPP_MERGE.value:
             do_merge(source, target, work_dir, resolution_name)
+        elif function_archi == ArchiFunction.OPP_EXTRACT.value:
+            do_extract(source, purpose)
         elif function_archi == ArchiFunction.OPP_CREATE_GRAPH.value:
             source_repo = create_repository(source)
             source_repo.read()

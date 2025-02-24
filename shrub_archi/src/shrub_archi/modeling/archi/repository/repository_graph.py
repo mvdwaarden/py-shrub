@@ -27,7 +27,7 @@ class RepositoryGrapher:
                     return "?"
 
         filename = os.path.join(
-            f"{work_dir if work_dir else 'tmp'}", f"{repo.name}.gml"
+            f"{work_dir if work_dir else 'tmp'}", f"{repo.file_name}.gml"
         )
         nx.write_gml(g, filename, to_stringer)
         return g

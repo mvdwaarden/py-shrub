@@ -1,13 +1,14 @@
-import concurrent.futures
 import itertools
 import os
 from abc import ABC, abstractmethod
-from concurrent.futures import ThreadPoolExecutor
 from typing import Optional, List, Tuple
 from xml.etree.ElementTree import SubElement, Element, register_namespace
 
+
 import shrub_util.core.logging as logging
 from defusedxml import ElementTree
+
+from shrub_archi.config.consts import ShrubArchi
 from shrub_archi.modeling.archi.model.archi_model import (
     View,
     Relation,
@@ -19,7 +20,8 @@ from shrub_archi.modeling.archi.model.archi_model import (
     PropertyDefinition,
     PropertyDefinitions,
 )
-from shrub_util.core.file import FileLocationIterator, FileLocationIteratorMode
+from shrub_archi.modeling.archi.repository.repository_consts import XMI_EMPTY_REPOSITORY
+from shrub_util.core.config import Config
 
 
 class RepositoryFilter:
@@ -44,6 +46,8 @@ class RepositoryFilter:
 
 class Repository(ABC):
     def __init__(self, location: str):
+        self.name = ""
+        self.description = ""
         self.location = os.path.normpath(location)
         self._entities: Optional[Entities] = None
         self._relations_lookup: Optional[RelationsLookup] = None
@@ -51,6 +55,7 @@ class Repository(ABC):
         self._elements: Optional[Entities] = None
         self._views: Optional[Views] = None
         self._property_definitions: Optional[PropertyDefinitions] = None
+
 
     def read(self) -> "Repository":
         if self._entities is None:
@@ -92,8 +97,9 @@ class Repository(ABC):
     def get_dry_run_location(self, filename: str = None):
         return f"{self.location}{filename if filename else ''}.backup.xml"
 
+
     @property
-    def name(self) -> str:
+    def file_name(self) -> str:
         if self.location:
             drive, full_filename = os.path.splitdrive(self.location)
             path, filename_with_extension = os.path.split(full_filename)
@@ -244,6 +250,13 @@ class XmiArchiRepository(Repository):
             root = self.element_tree
             namespaces = self._namespaces
 
+            for el in root.findall("xmi:name", namespaces=namespaces):
+                self._name = el.text
+                break
+
+            self.name = self._read_name()
+            self.description = self._read_description()
+
             def _check_for_duplicate_entity(entity, entity_dictionary):
                 if entity.unique_id in self._entities:
                     print(
@@ -301,6 +314,8 @@ class XmiArchiRepository(Repository):
         return self
 
     def _write(self) -> "XmiArchiRepository":
+        self._write_name(self.name)
+        self._write_description(self.description)
         with open(self.get_dry_run_location(), "w") as ofp:
             ofp.write(str(ElementTree.tostring(self.element_tree), encoding="utf8"))
         return self
@@ -356,50 +371,32 @@ class XmiArchiRepository(Repository):
             if os.path.exists(self.location):
                 self._element_tree = ElementTree.parse(self.location).getroot()
             else:
-                self._element_tree = ElementTree.fromstring(
-                    f"""<?xml version="1.0" encoding="UTF-8"?>
-                            <model xmlns="http://www.opengroup.org/xsd/archimate/3.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengroup.org/xsd/archimate/3.0/ http://www.opengroup.org/xsd/archimate/3.1/archimate3_Diagram.xsd" identifier="id-d4622bfd7e0d4cdab01dc008fae135ec">
-                              <name xml:lang="en">new</name>
-                              <elements>
-                                <element identifier="id-63adb6dfcd744d95af09544775c2def7" xsi:type="BusinessObject">
-                                  <name xml:lang="en">Business Object</name>
-                                </element>
-                                <element identifier="id-7d5242910f42421b8d860dd99f788b13" xsi:type="BusinessObject">
-                                  <name xml:lang="en">Business Object</name>
-                                </element>
-                              </elements>
-                              <relationships>
-                                <relationship identifier="id-769ffc86f4ab495c8ed582ca7c762db1" source="id-63adb6dfcd744d95af09544775c2def7" target="id-7d5242910f42421b8d860dd99f788b13" xsi:type="Association" />
-                                <relationship identifier="id-5f46601ce2a84acbb1fa6582fd169463" source="id-63adb6dfcd744d95af09544775c2def7" target="id-63adb6dfcd744d95af09544775c2def7" xsi:type="Association" />
-                              </relationships>
-                              <organizations>
-                                <item>
-                                  <label xml:lang="en">Business</label>
-                                  <item identifierRef="id-63adb6dfcd744d95af09544775c2def7" />
-                                  <item identifierRef="id-7d5242910f42421b8d860dd99f788b13" />
-                                </item>
-                                <item>
-                                  <label xml:lang="en">Relations</label>
-                                  <item identifierRef="id-769ffc86f4ab495c8ed582ca7c762db1" />
-                                  <item identifierRef="id-5f46601ce2a84acbb1fa6582fd169463" />
-                                </item>
-                                <item>
-                                  <label xml:lang="en">Views</label>
-                                  <item identifierRef="id-a391959582744211b3145e30c20e8546" />
-                                </item>
-                              </organizations>
-                              <views>
-                                <diagrams>
-                                  <view identifier="id-a391959582744211b3145e30c20e8546" xsi:type="Diagram">
-                                    <name xml:lang="en">Default View</name>        
-                                  </view>
-                                </diagrams>
-                              </views>
-                            </model>
-                            """
-                )
+                empty_repository = XMI_EMPTY_REPOSITORY
+                # check if there is an empty repository override in the configuration
+                empty_repository_file_name = Config().get_setting(ShrubArchi.CONFIGURATION_SECTION, ShrubArchi.EMPTY_REPOSITORY_FILE_NAME)
+                if os.path.exists(empty_repository_file_name):
+                    with open(empty_repository_file_name) as ifp:
+                        empty_repository = ifp.read()
+
+                self._element_tree = ElementTree.fromstring(empty_repository)
 
         return self._element_tree
+
+    def _read_name(self) -> str:
+        root = self.element_tree
+        el = root.find("xmi:name", namespaces=self._namespaces)
+        if el is not None:
+            return el.text
+        else:
+            return None
+
+    def _read_description(self) -> str:
+        root = self.element_tree
+        el = root.find("xmi:documentation", namespaces=self._namespaces)
+        if el is not None:
+            return el.text
+        else:
+            return None
 
     def _read_entity_from_xml_element(
             self, el, namespaces, specialization
@@ -489,6 +486,28 @@ class XmiArchiRepository(Repository):
         except Exception as ex:
             logging.get_logger().error(f"problem reading element {el}", ex=ex)
         return element_refs, relation_refs
+
+    def _write_name(self,  name: str):
+        try:
+            root = self.element_tree
+            el = root.find("xmi:name", namespaces=self._namespaces)
+            if el is None:
+                el = Element(f"name")
+                root.insert(0,el)
+            el.text = name
+        except Exception as ex:
+            logging.get_logger().error(f"problem writing name {self.name}", ex=ex)
+
+    def _write_description(self, description: str):
+        try:
+            root = self.element_tree
+            el = root.find("xmi:documentation", namespaces=self._namespaces)
+            if el is None:
+                el = Element(f"documentation")
+                root.insert(1, el)
+            el.text = description
+        except Exception as ex:
+            logging.get_logger().error(f"problem writing documentation {description}", ex=ex)
 
     def _write_view(self, view, namespaces):
         try:

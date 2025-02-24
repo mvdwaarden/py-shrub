@@ -37,7 +37,7 @@
         <bounds x="505" y="157" width="120" height="55"/>
       </child>
       <child xsi:type="archimate:DiagramObject" id="id-5479dc0c1ee347cf95ae0e768d7ccf87" targetConnections="id-d9503c5b66b94882a868b5eab9cfee03" archimateElement="id-a2f334adce064163a5c0eda285160fcc">
-        <bounds x="321" y="361" width="120" height="55"/>
+        <bounds x="204" y="324" width="120" height="55"/>
       </child>
       <child xsi:type="archimate:DiagramObject" id="id-f4a1661684744f448d4ce6164ecae716" targetConnections="id-879ac3f061354557af138e2f5068bdde" archimateElement="id-f5863fbbdf40466890128fd753739043">
         <bounds x="192" y="60" width="120" height="55"/>
