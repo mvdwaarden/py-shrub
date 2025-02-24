@@ -48,24 +48,17 @@ usage = f"""
     - target: target XMI file location
     - workdir: work directory
     - cutoff: cut off for comparison
-    - resolutions: name of the resolutions file (without .json) in the work directory
+    - resolutions: name of the resolutions file (without .json) in the work directory    
     Function:
-    - archi merge    
+    - archi extract
     Parameters:    
-    - source: source XMI file location
-    - target: target XMI file location
-    - workdir: work directory
-    - cutoff: cut off for comparison
-    - resolutions: name of the resolutions file (without .json) in the work directory
+    - source: source XMI file location    
+    - purpose: purpose for the extract (will be added to the target filename and documentation)
     Function:
     - archi graph
     Parameters:    
     - source: source XMI file location
     - workdir: output directory
-    Function:
-    - archi extract
-    Parameters:    
-    - source: source XMI file location    
     
     Mode - [sec]urity function
     Function
