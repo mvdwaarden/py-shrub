@@ -7,3 +7,5 @@ defusedxml
 msal
 neo4j
 networkx
+pyopenssl
+pillow
