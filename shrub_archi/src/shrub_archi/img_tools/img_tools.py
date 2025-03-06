@@ -1,5 +1,7 @@
 from PIL import Image
 import numpy as np
+import os
+from shrub_util.core.arguments import Arguments
 
 
 def remove_white_background(input_image_path, output_image_path, lower_threshold=200, upper_threshold=255):
@@ -31,15 +33,24 @@ def remove_white_background(input_image_path, output_image_path, lower_threshold
     print(f"Image saved as {output_image_path}")
 
 
-def test_remove_white_background():
+def test_remove_white_background(file):
     # Example usage:
-    input_image_path = "input_image.jpg"
-    output_image_path = "output_image.png"
-    lower_threshold = 200  # Minimum white value for the removal
+    input_image_path = f"{file}"
+    output_image_path = f"{file}.png"
+    lower_threshold = 235  # Minimum white value for the removal
     upper_threshold = 255  # Maximum white value for the removal
 
     remove_white_background(input_image_path, output_image_path, lower_threshold, upper_threshold)
 
 
 if __name__ == "__main__":
-    test_remove_white_background()
+    folder = Arguments().get_arg("folder")
+    img_files = []
+    for root, dirs, files in os.walk(folder, followlinks=False):
+        for file in files:
+            if file.lower().endswith(".jpg"):
+                img_file = "\\".join([root, file])
+                img_files.append(img_file)
+
+    for file in img_files:
+        test_remove_white_background(file)
