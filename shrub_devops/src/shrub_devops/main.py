@@ -9,9 +9,17 @@ from typing import Dict
 
 usage = """
     Shrubbery DevOPS utilities, assumes:
-    - SHRUB_DEVOPS_CONFIG_ROOT environment variable is set 
-    - or shrub-devops-config-root argument is defined  
+    - DEVOPS_CONFIG_ROOT environment variable is set 
+    - or -config-root argument is defined  
     - or {{sys.prefix}}/data/shrub_devops folder exists
+    The variable points to a folder which contains the following folders:
+    - templates
+    --- builtin
+    --- init_project
+    --- init_repo
+    - meta_data 
+    --- init_project.yaml
+    --- init_repo.yaml
     Parameters:    
     - create: <repo|project>    
     - prepare-release: <major|minor|patch|build>
@@ -109,6 +117,9 @@ class Config:
 
         logging.info(f"use configuration at [{result}]")
 
+        if not os.path.exists(result):
+            logging.error(f"directory {result} does not exits")
+            exit(-2)
         return result
 
     @staticmethod

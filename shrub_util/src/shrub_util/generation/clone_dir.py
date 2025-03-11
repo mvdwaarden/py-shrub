@@ -50,6 +50,12 @@ class CloneDirectoryTemplateRenderer:
 
 
 def clone_directory(src_dir, target_dir=None, dry_run=False, **kwargs):
+    """ clone_directory supports:
+        replacement of variables passed in the **kwargs in:
+        - directory names
+        - jinja template files
+        Iterations are not supported on directory names
+    """
     fq_src_dir = src_dir
     if target_dir is None:
         target_dir = os.getcwd()
