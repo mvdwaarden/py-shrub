@@ -10,7 +10,7 @@ from shrub_util.core.iteration_helpers import list_block_iterator
 
 
 def cmdb_extract(environment: str, emails: list, cmdb_api: str, source: str, extra_cis: list = None,
-                 local_view: CmdbLocalView = None, test_only: bool = False) -> CmdbLocalView:
+                 local_view: CmdbLocalView = None, max_recursion_count=1, test_only: bool = False) -> CmdbLocalView:
     token = azure_get_token(environment)
     api = CmdbApi(base_uri=cmdb_api, token=token,
                   source=source)
@@ -27,7 +27,6 @@ def cmdb_extract(environment: str, emails: list, cmdb_api: str, source: str, ext
             cis.append(ci)
     recursion_count = 0
     max_block_size = 100
-    max_recursion_count = 3
     map_ci_retrieval_cache = {}
     while len(cis) > 0 and recursion_count < max_recursion_count:
         for cis_block in list_block_iterator(cis, max_block_size):

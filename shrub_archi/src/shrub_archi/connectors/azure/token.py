@@ -24,6 +24,24 @@ def azure_get_confidential_application(application: str) -> ConfidentialClientAp
 
 
 def azure_get_token(application: str) -> Token:
+    """ Typically the configuration consists of two parts
+    1) In config.ini
+    [Secrets]
+    Filename={config_path}/secrets.ini
+
+    [Token-$application]
+    Provider=Azure
+    Url=https://login.microsoftonline.com/$tenant_id //Tenant ID can be found when logged in in the Azure portal
+    #Alternative
+    #Url=https://login.microsoftonline.com/$tenant_id/oauth2/v2.0/token
+    ClientId=$client_id //This is the Application Client ID as shown in Azure
+    SecretReference=$secret_reference
+
+    2) In secrets.ini (see above)
+    [Token-$application-$secret_reference]
+    ClientSecret=lIf8Q~-_do_fmRsK.7QuN39oLs9oABnk9U1BvdAG
+    Scopes=.default
+    """
     section = _get_config_section(application)
     scopes = Secrets().get_secret(section.get_secret_reference(), "Scopes").split(",")
     # Acquire a token

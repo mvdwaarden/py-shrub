@@ -74,6 +74,18 @@ usage = f"""
     - source: source OWL XML file
     - target-dir: target folder for the entities, relations and properties CSV files as input for Archi
     
+    Mode - CMDB
+    Function
+    - cmdb export
+    Parameters
+    - use-local-view: determines if $file specifies input or output. Present: read otherwise write
+    - env: configuration section, f.e. for getting tokens [Token-${{env}}] 
+    - file: file name to export to OR file name to read from 
+    - cmdb-api: API endpoint 
+    - source: name of the CMDB application
+    - email: email adresses of the owners (can be comma separated)
+    - extra-cis: comma separated list of CI's to query
+    
     TODO:
     - feature: Option to overwrite target repository identities
 """
@@ -88,6 +100,20 @@ class OciFunction(FunctionEnum):
     @staticmethod
     def is_operation(operation: str):
         return operation and operation in [e.value for e in OciFunction]
+
+
+class CmdbFunction(FunctionEnum):
+    OPP_EXTRACT = "extract"
+    @staticmethod
+    def is_operation(operation: str):
+        return operation and operation in [e.value for e in CmdbFunction]
+
+
+class AzureFunction(FunctionEnum):
+    OPP_EXTRACT_AGILE = "extract-agile"
+    @staticmethod
+    def is_operation(operation: str):
+        return operation and operation in [e.value for e in AzureFunction]
 
 
 class ArchiFunction(FunctionEnum):
@@ -262,8 +288,8 @@ if __name__ == "__main__":
     function_archi = args.get_arg("archi")
     function_oia = args.get_arg("oia")
     function_oci = args.get_arg("oci")
-    function_extract_cmdb = args.has_arg("cmdb")
-    function_extract_agile = args.has_arg("agile")
+    function_cmdb = args.get_arg("cmdb")
+    function_azure = args.get_arg("azure")
     function_security = args.get_arg("sec", None)
     function_owl = args.get_arg("owl")
     organisation = args.get_arg("org")
@@ -294,7 +320,7 @@ if __name__ == "__main__":
             do_export_ontology(source, target_dir)
     elif function_security:
         test_security_tls_compliance(csv_file=file)
-    elif function_extract_agile:
+    elif AzureFunction.is_operation(function_azure):
         from shrub_archi.devops.azure_devops import AzureDevOpsApi, AzureDevOpsLocalView, azure_dev_ops_get_projects, \
             azure_dev_ops_get_work_items_for_project
 
@@ -364,7 +390,7 @@ if __name__ == "__main__":
             local_view = oci_extract_users(environment=environment, base_url=oci_api)
             iam_write_json(local_view=local_view, file=file)
             iam_write_csv(local_view=local_view, file=file)
-    elif function_extract_cmdb:
+    elif CmdbFunction.is_operation(function_cmdb):
         def node_filter(node: NamedItem) -> bool:
             if isinstance(node, ConfigurationItem) and node.type:
                 return node.type.lower() not in node_exclusion
