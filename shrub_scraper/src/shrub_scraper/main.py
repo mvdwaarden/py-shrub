@@ -1,9 +1,11 @@
+import csv
+
 import shrub_util.core.logging as logging
 from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
 from shrub_util.core.config import Config
 from shrub_scraper.events.architecture_events import scrape_danw_architecture_events, scrape_knvi_architecture_events
-
+from shrub_scraper.events.model import Event
 
 usage = """
     Web scraper functionality, assumes:
@@ -31,17 +33,16 @@ if __name__ == "__main__":
 
     args = Arguments()
     help = args.has_arg("help")
-
+    file = args.get_arg("file")
     if help:
         do_print_usage()
     else:
-        for fn in [scrape_danw_architecture_events, scrape_knvi_architecture_events]:
-            events = fn()
-            for event in events:
-                # Print event details
-                print(f"Title: {event.title}")
-                print(f"Date: {event.date}")
-                print(f"Description: {event.description}")
-                print(f"URL: {event.url}")
-                print('-' * 40)
-            print(f"Found {len(events)}")
+        with open(file, "w") as ofp:
+            writer = csv.DictWriter(ofp, fieldnames=vars(Event()).keys(), delimiter=";")
+            writer.writeheader()
+            for fn in [scrape_danw_architecture_events, scrape_knvi_architecture_events]:
+                events = fn()
+                for event in events:
+                    print(f"title: {event.title} @ {event.date}")
+                    writer.writerow(vars(event))
+

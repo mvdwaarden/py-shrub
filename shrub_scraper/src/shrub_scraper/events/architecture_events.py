@@ -63,7 +63,6 @@ def scrape_danw_architecture_events() -> List[Event]:
     url = 'https://www.danw.nl/events'
 
     urls = set([url])
-    add_paginator_pages = False
     while len(urls) > 0:
         # Send a GET request to the URL
         items_url = urls.pop()
@@ -74,7 +73,7 @@ def scrape_danw_architecture_events() -> List[Event]:
             # Parse the page content using BeautifulSoup
             soup = BeautifulSoup(response.text, 'html.parser')
 
-            # Find the event container (you need to inspect the page to find the correct tags)
+            # Find the event container
             event_table = soup.find('table', class_='table act')
             if event_table is not None:
                 events = event_table.find_all('tr')
