@@ -39,7 +39,7 @@ def azure_get_token(application: str) -> Token:
 
     2) In secrets.ini (see above)
     [Token-$application-$secret_reference]
-    ClientSecret=lIf8Q~-_do_fmRsK.7QuN39oLs9oABnk9U1BvdAG
+    ClientSecret=$the_secret
     Scopes=.default
     """
     section = _get_config_section(application)
