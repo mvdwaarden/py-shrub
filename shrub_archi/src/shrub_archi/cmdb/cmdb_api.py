@@ -148,9 +148,10 @@ class CmdbApi:
             data=request)
         if response.ok:
             result = response.json()[function]
+            logging.get_logger().info(f"done calling {function} : OK")
         else:
             result = None
-        logging.get_logger().info(f"done calling {function}")
+            logging.get_logger().info(f"done calling {function} : NOK {response.status_code}")
         return result
 
     def get_relation_ships_by_configuration_item_name(self, name: str):

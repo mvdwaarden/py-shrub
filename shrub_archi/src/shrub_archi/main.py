@@ -76,14 +76,14 @@ usage = f"""
     
     Mode - CMDB
     Function
-    - cmdb export
+    - cmdb extract
     Parameters
     - use-local-view: determines if $file specifies input or output. Present: read otherwise write
     - env: configuration section, f.e. for getting tokens [Token-${{env}}] 
-    - file: file name to export to OR file name to read from 
+    - file: file name to extract into to OR file name to read from 
     - cmdb-api: API endpoint 
-    - source: name of the CMDB application
-    - email: email adresses of the owners (can be comma separated)
+    - source: name of the CMDB application (make sure it is a valid name!)
+    - email: email adresses of the owners (can be comma separated, can be empty)
     - extra-cis: comma separated list of CI's to query
     
     TODO:
@@ -292,10 +292,11 @@ if __name__ == "__main__":
     function_azure = args.get_arg("azure")
     function_security = args.get_arg("sec", None)
     function_owl = args.get_arg("owl")
+    function_test = args.has_arg("test")
     organisation = args.get_arg("org")
     cutoff_score = args.get_arg("cutoff", 85)
     resolution_name = args.get_arg("resolutions", None)
-    function_test = args.has_arg("test")
+
     environment = args.get_arg("env", "ITSM_UAT")
     file = args.get_arg("file")
     folder = args.get_arg("folder")
@@ -329,7 +330,7 @@ if __name__ == "__main__":
         projects = azure_dev_ops_get_projects(api, local_view)
 
         print(projects)
-        azure_dev_ops_get_work_items_for_project(api, local_view, projects[0].name)
+        #azure_dev_ops_get_work_items_for_project(api, local_view, projects[0].name)
     elif function_test:
         from shrub_archi.generator.archi_csv_generator import ArchiCsvGenerator
         import shrub_archi.data.risk.it.it_risk as it_risk
@@ -408,7 +409,7 @@ if __name__ == "__main__":
                                         include_object_reference=False)
         else:
             local_view = cmdb_extract(environment, emails=emails, cmdb_api=cmdb_api, source=source, extra_cis=extra_cis,
-                                      test_only=False)
+                                      test_only=False, max_recursion_count=4)
             cmdb_write_json(local_view, file)
             cmdb_write_named_item_graph(local_view, GraphType.DOT, file, node_filter=node_filter)
             cmdb_write_named_item_graph(local_view, GraphType.GRAPHML, file, node_filter=node_filter)
