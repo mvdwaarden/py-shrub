@@ -30,6 +30,7 @@ from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
 from shrub_util.core.config import Config
 from shrub_archi.ui.jwt_parser_ui import show_jwt_parser_ui
+from shrub_archi.analysis.relations import relations_2_cypher
 
 usage = f"""
     Archi Shrubbery, assumes:
@@ -77,14 +78,14 @@ usage = f"""
     
     Mode - CMDB
     Function
-    - cmdb export
+    - cmdb extract
     Parameters
     - use-local-view: determines if $file specifies input or output. Present: read otherwise write
     - env: configuration section, f.e. for getting tokens [Token-${{env}}] 
-    - file: file name to export to OR file name to read from 
+    - file: file name to extract into to OR file name to read from 
     - cmdb-api: API endpoint 
-    - source: name of the CMDB application
-    - email: email adresses of the owners (can be comma separated)
+    - source: name of the CMDB application (make sure it is a valid name!)
+    - email: email adresses of the owners (can be comma separated, can be empty)
     - extra-cis: comma separated list of CI's to query
     
     TODO:
@@ -105,6 +106,7 @@ class OciFunction(FunctionEnum):
 
 class CmdbFunction(FunctionEnum):
     OPP_EXTRACT = "extract"
+    OPP_CREATE_RELATION_MODEL = "create-rel-model"
     @staticmethod
     def is_operation(operation: str):
         return operation and operation in [e.value for e in CmdbFunction]
@@ -300,10 +302,11 @@ if __name__ == "__main__":
     function_azure = args.get_arg("azure")
     function_security = args.get_arg("sec", None)
     function_owl = args.get_arg("owl")
+    function_test = args.has_arg("test")
     organisation = args.get_arg("org")
     cutoff_score = args.get_arg("cutoff", 85)
     resolution_name = args.get_arg("resolutions", None)
-    function_test = args.has_arg("test")
+
     environment = args.get_arg("env", "ITSM_UAT")
     file = args.get_arg("file")
     folder = args.get_arg("folder")
@@ -402,25 +405,28 @@ if __name__ == "__main__":
             iam_write_json(local_view=local_view, file=file)
             iam_write_csv(local_view=local_view, file=file)
     elif CmdbFunction.is_operation(function_cmdb):
-        def node_filter(node: NamedItem) -> bool:
-            if isinstance(node, ConfigurationItem) and node.type:
-                return node.type.lower() not in node_exclusion
-            else:
-                return node.__class__.__name__.lower() not in node_exclusion
-        if use_local_view:
-            local_view = CmdbLocalView()
-            cmdb_read_json(local_view, file)
-            cmdb_write_named_item_graph(local_view, GraphType.GRAPHML, file, node_filter=node_filter)
-            cmdb_write_named_item_graph(local_view, GraphType.GRAPHML, f"{file}-without-refs", node_filter=node_filter,
-                                        include_object_reference=False)
-            cmdb_write_named_item_graph(local_view, GraphType.CYPHER, file, node_filter=node_filter)
-            cmdb_write_named_item_graph(local_view, GraphType.DOT, file, node_filter=node_filter)
-            cmdb_write_named_item_graph(local_view, GraphType.DOT, f"{file}-without-refs", node_filter=node_filter,
-                                        include_object_reference=False)
+        if function_cmdb == CmdbFunction.OPP_CREATE_RELATION_MODEL.value:
+            relations_2_cypher(file)
         else:
-            local_view = cmdb_extract(environment, emails=emails, cmdb_api=cmdb_api, source=source, extra_cis=extra_cis,
-                                      test_only=False)
-            cmdb_write_json(local_view, file)
-            cmdb_write_named_item_graph(local_view, GraphType.DOT, file, node_filter=node_filter)
-            cmdb_write_named_item_graph(local_view, GraphType.GRAPHML, file, node_filter=node_filter)
-            cmdb_write_named_item_graph(local_view, GraphType.CYPHER, file, node_filter=node_filter)
+            def node_filter(node: NamedItem) -> bool:
+                if isinstance(node, ConfigurationItem) and node.type:
+                    return node.type.lower() not in node_exclusion
+                else:
+                    return node.__class__.__name__.lower() not in node_exclusion
+            if use_local_view:
+                local_view = CmdbLocalView()
+                cmdb_read_json(local_view, file)
+                cmdb_write_named_item_graph(local_view, GraphType.GRAPHML, file, node_filter=node_filter)
+                cmdb_write_named_item_graph(local_view, GraphType.GRAPHML, f"{file}-without-refs", node_filter=node_filter,
+                                            include_object_reference=False)
+                cmdb_write_named_item_graph(local_view, GraphType.CYPHER, file, node_filter=node_filter)
+                cmdb_write_named_item_graph(local_view, GraphType.DOT, file, node_filter=node_filter)
+                cmdb_write_named_item_graph(local_view, GraphType.DOT, f"{file}-without-refs", node_filter=node_filter,
+                                            include_object_reference=False)
+            else:
+                local_view = cmdb_extract(environment, emails=emails, cmdb_api=cmdb_api, source=source, extra_cis=extra_cis,
+                                          test_only=False, max_recursion_count=4)
+                cmdb_write_json(local_view, file)
+                cmdb_write_named_item_graph(local_view, GraphType.DOT, file, node_filter=node_filter)
+                cmdb_write_named_item_graph(local_view, GraphType.GRAPHML, file, node_filter=node_filter)
+                cmdb_write_named_item_graph(local_view, GraphType.CYPHER, file, node_filter=node_filter)

@@ -84,7 +84,7 @@ def cmdb_write_named_item_graph(local_view: CmdbLocalView, graph_type: GraphType
                                 node_filter: Callable[[NamedItem], bool] = False):
     g = local_view.build_graph(include_object_reference=include_object_reference, node_filter=node_filter)
 
-    with open(f"{file}.{graph_type.value}", "w") as ofp:
+    with open(f"{file}.{graph_type.value}", "w", encoding="utf-8") as ofp:
         def dot_shaper(n) -> str:
             return "Mrecord"
 
