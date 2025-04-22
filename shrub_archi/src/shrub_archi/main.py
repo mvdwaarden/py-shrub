@@ -29,6 +29,7 @@ from shrub_archi.security.tls_compliance import test_security_tls_compliance
 from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
 from shrub_util.core.config import Config
+from shrub_archi.ui.jwt_parser_ui import show_jwt_parser_ui
 
 usage = f"""
     Archi Shrubbery, assumes:
@@ -124,6 +125,12 @@ class ArchiFunction(FunctionEnum):
     def is_operation(operation: str):
         return operation and operation in [e.value for e in ArchiFunction]
 
+
+class ToolsFunction(FunctionEnum):
+    OPP_JWT_PARSER = "jwt"
+    @staticmethod
+    def is_operation(operation: str):
+        return operation and operation in [e.value for e in ToolsFunction]
 
 class OiaFunction(FunctionEnum):
     OPP_UPDATE_USER_AUTHORIZATIONS = "update-authorizations"
@@ -285,6 +292,7 @@ if __name__ == "__main__":
     purpose = args.get_arg("purpose","n.a")
     target_dir = args.get_arg("target-dir")
     work_dir = args.get_arg("workdir")
+    function_tools = args.get_arg("tools")
     function_archi = args.get_arg("archi")
     function_oia = args.get_arg("oia")
     function_oci = args.get_arg("oci")
@@ -320,6 +328,9 @@ if __name__ == "__main__":
             do_export_ontology(source, target_dir)
     elif function_security:
         test_security_tls_compliance(csv_file=file)
+    elif ToolsFunction.is_operation(function_tools):
+        if function_tools == ToolsFunction.OPP_JWT_PARSER.value:
+            show_jwt_parser_ui()
     elif AzureFunction.is_operation(function_azure):
         from shrub_archi.devops.azure_devops import AzureDevOpsApi, AzureDevOpsLocalView, azure_dev_ops_get_projects, \
             azure_dev_ops_get_work_items_for_project

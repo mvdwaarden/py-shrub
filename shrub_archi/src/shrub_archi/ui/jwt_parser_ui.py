@@ -68,12 +68,14 @@ class JWTParserUI(QWidget):
         decoded_bytes = jwt.utils.base64url_decode(base64_string.encode('utf-8'))
         return decoded_bytes.decode('utf-8')
 
-
-def main():
+def show_jwt_parser_ui():
     app = QApplication(sys.argv)
     window = JWTParserUI()
     window.show()
     sys.exit(app.exec())
+
+def main():
+    show_jwt_parser_ui()
 
 
 if __name__ == "__main__":
