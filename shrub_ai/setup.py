@@ -7,7 +7,7 @@ import re
 parent_dir = Path(__file__).parent
 
 # Get the version info in package_info.py
-full_filename = parent_dir / "src" / "shrub_ml" / "package_info.py"
+full_filename = parent_dir / "src" / "shrub_ai" / "package_info.py"
 default_requirements = parent_dir / "requirements" / "default.txt"
 
 package_info_vars = {}

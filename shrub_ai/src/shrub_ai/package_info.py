@@ -1,12 +1,12 @@
 """Package metadata."""
 
-__title__ = "shrub_ml"
+__title__ = "shrub_ai"
 
 __package_name__ = __title__
 
 __author__ = "None"
 
-__description__ = "Machine Learning Shrubbery"
+__description__ = "AI"
 
 __author_email__ = "None"
 

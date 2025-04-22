@@ -1,4 +1,4 @@
-# Machine Learning Shrubbery
+# AI
 
 ## Requirements
 Use python 3.6 or newer
