@@ -336,14 +336,20 @@ if __name__ == "__main__":
             show_jwt_parser_ui()
     elif AzureFunction.is_operation(function_azure):
         from shrub_archi.devops.azure_devops import AzureDevOpsApi, AzureDevOpsLocalView, azure_dev_ops_get_projects, \
-            azure_dev_ops_get_work_items_for_project
-
+            azure_dev_ops_get_work_items_for_project, azure_dev_ops_get_project_teams
+        team_name = args.get_arg("team")
+        project_name = args.get_arg("project")
         api = AzureDevOpsApi(organisation=organisation)
         local_view = AzureDevOpsLocalView()
         projects = azure_dev_ops_get_projects(api, local_view)
 
-        print(projects)
-        azure_dev_ops_get_work_items_for_project(api, local_view, projects[0].name)
+        print(list([p.name for p in projects]))
+        prj = [p for p in projects if p.name == project_name][0]
+        teams = azure_dev_ops_get_project_teams(api, local_view, prj)
+        team = [t for t in teams if t.name == team_name][0]
+        print(list([t.name for t in teams]))
+        work_items = azure_dev_ops_get_work_items_for_project(api, local_view, prj, team,max_result=30)
+        print(list([wi.id for wi in work_items]))
     elif function_test:
         from shrub_archi.generator.archi_csv_generator import ArchiCsvGenerator
         import shrub_archi.data.risk.it.it_risk as it_risk
