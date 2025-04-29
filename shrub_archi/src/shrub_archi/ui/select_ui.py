@@ -1,5 +1,5 @@
-import sys
 from abc import abstractmethod
+from shrub_archi.ui.core_ui import get_ui_app, do_ui_execute
 from typing import List, Optional, Dict, Any, Tuple
 import os
 import yaml
@@ -12,7 +12,6 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QPushButton,
     QTableView,
-    QApplication,
 )
 
 
@@ -235,10 +234,10 @@ def do_show_select_ui(
         model: TableSelectModel, ok_text: str = None, title: str = None
 ) -> Tuple[bool, Dict[Any, Optional[bool]]]:
     # Initialize and run the application
-    app = QApplication(sys.argv)
+    get_ui_app()
     widget = TableSelectUI(model=model, ok_text=ok_text, title=title)
     widget.show()
-    app.exec()
+    do_ui_execute( )
     if widget.ok:
         return True, {row: selected for row, selected in model._tristate_data.items()}
     else:

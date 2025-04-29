@@ -31,6 +31,7 @@ class AzureDevOpsApiObjectFactory:
     def __init__(self, local_view: AzureDevOpsLocalView):
         self.local_view = local_view
 
+
     def get_projects_from_get_projects_result_json(self, json_dict: dict) -> list:
         result = []
         if int(json_dict['count']) > 0:

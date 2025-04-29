@@ -28,8 +28,8 @@ from shrub_archi.oia.oia_extract import oia_extract_authorizations
 from shrub_archi.security.tls_compliance import test_security_tls_compliance
 from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
-from shrub_util.core.config import Config
 from shrub_archi.ui.jwt_parser_ui import show_jwt_parser_ui
+from shrub_archi.ui.file_open_ui import do_show_file_open_ui
 from shrub_archi.analysis.relations import relations_2_cypher
 
 usage = f"""
@@ -351,6 +351,9 @@ if __name__ == "__main__":
 
         ArchiCsvGenerator().cleanup().write_elements_csv(it_risk.IT_RISKS_ISO_IEC_27001, ElementType.CONSTRAINT)
     elif ArchiFunction.is_operation(function_archi):
+        overriden_source =  do_show_file_open_ui(source)
+        if overriden_source is  not None:
+            source = overriden_source
         if function_archi == ArchiFunction.OPP_MERGE.value:
             do_merge(source, target, work_dir, resolution_name)
         elif function_archi == ArchiFunction.OPP_EXTRACT.value:
