@@ -312,10 +312,12 @@ if __name__ == "__main__":
     folder = args.get_arg("folder")
     emails = args.get_arg("email", "").split(",")
     cmdb_api = args.get_arg("cmdb-api")
+    cmdb_skip_source_cis = args.has_arg("skip-source-cis")
     use_local_view = args.has_arg("use-local-view")
     node_exclusion = args.get_arg("skip-ci-nodes", "digitalcertificate, manager").split(",")
     extra_cis = args.get_arg("extra-cis", "").split(",")
     oia_api = args.get_arg("oia-api")
+    max_depth = args.get_arg("max-depth", 1)
     yes = args.has_arg("y")
     oci_api = args.get_arg("oci-api")
     export_options = args.get_arg("export-options", "all")
@@ -434,7 +436,7 @@ if __name__ == "__main__":
                                             include_object_reference=False)
             else:
                 local_view = cmdb_extract(environment, emails=emails, cmdb_api=cmdb_api, source=source, extra_cis=extra_cis,
-                                          test_only=False, max_recursion_count=4)
+                                          test_only=False, skip_source_cis=cmdb_skip_source_cis, max_recursion_count=max_depth)
                 cmdb_write_json(local_view, file)
                 cmdb_write_named_item_graph(local_view, GraphType.DOT, file, node_filter=node_filter)
                 cmdb_write_named_item_graph(local_view, GraphType.GRAPHML, file, node_filter=node_filter)

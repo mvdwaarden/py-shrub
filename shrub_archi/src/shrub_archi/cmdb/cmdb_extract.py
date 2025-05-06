@@ -10,7 +10,8 @@ from shrub_util.core.iteration_helpers import list_block_iterator
 
 
 def cmdb_extract(environment: str, emails: list, cmdb_api: str, source: str, extra_cis: list = None,
-                 local_view: CmdbLocalView = None, max_recursion_count=1, test_only: bool = False) -> CmdbLocalView:
+                 local_view: CmdbLocalView = None, max_recursion_count=1, test_only: bool = False,
+                 skip_source_cis: bool = False) -> CmdbLocalView:
     token = azure_get_token(environment)
     api = CmdbApi(base_uri=cmdb_api, token=token,
                   source=source)
@@ -20,7 +21,10 @@ def cmdb_extract(environment: str, emails: list, cmdb_api: str, source: str, ext
     else:
         result = CmdbLocalView()
     factory = CmdbApiObjectFactory(local_view=result)
-    cis = cmdb_get_configuration_items_by_authorization(api, factory, emails)
+    if not skip_source_cis:
+        cis = cmdb_get_configuration_items_by_authorization(api, factory, emails)
+    else:
+        cis = []
 
     if extra_cis:
         for ci in [ci for ci in extra_cis if ci not in cis]:
@@ -48,7 +52,10 @@ def cmdb_extract(environment: str, emails: list, cmdb_api: str, source: str, ext
 
 def cmdb_get_configuration_items_by_authorization(api: CmdbApi, factory: CmdbApiObjectFactory, emails: str) -> []:
     response_json = api.get_configuration_items_by_authorization(emails)
-    cis = factory.get_configuration_item_ids_from_retreive_ci_by_authorization_result(response_json)
+    if response_json is None:
+        cis = []
+    else:
+        cis = factory.get_configuration_item_ids_from_retreive_ci_by_authorization_result(response_json)
 
     return cis
 
