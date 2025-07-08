@@ -28,8 +28,8 @@ from shrub_archi.oia.oia_extract import oia_extract_authorizations
 from shrub_archi.security.tls_compliance import test_security_tls_compliance
 from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
-from shrub_archi.ui.jwt_parser_ui import show_jwt_parser_ui
-from shrub_archi.ui.file_open_ui import do_show_file_open_ui
+from shrub_ui.ui.jwt_parser_ui import show_jwt_parser_ui
+from shrub_ui.ui.file_open_ui import do_show_file_open_ui
 from shrub_archi.analysis.relations import relations_2_cypher
 
 usage = f"""

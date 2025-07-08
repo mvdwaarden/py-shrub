@@ -1,7 +1,6 @@
 xmlschema
 owlready2
 rdflib
-PyQt6
 cst
 defusedxml
 msal

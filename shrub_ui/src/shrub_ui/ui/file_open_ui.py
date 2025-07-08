@@ -1,6 +1,5 @@
-from PyQt6.QtWidgets import QFileDialog, QWidget, QMessageBox
-import requests
-from shrub_archi.ui.core_ui import get_ui_app, do_ui_execute, UIWidget
+from PyQt6.QtWidgets import QFileDialog, QWidget
+from shrub_ui.ui.core_ui import get_ui_app
 from typing import Optional
 
 

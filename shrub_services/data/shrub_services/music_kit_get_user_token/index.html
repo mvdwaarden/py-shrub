@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Apple Music User Token Login</title>
+  <script src="https://js-cdn.music.apple.com/musickit/v1/musickit.js"></script>
+</head>
+<body>
+  <h1>Apple Music User Token Demo</h1>
+
+  <label for="devToken">Enter Developer Token:</label><br />
+  <textarea id="devToken" rows="5" cols="60" placeholder="Paste your developer token here..."></textarea><br><br>
+  <label for="userToken">User Token:</label><br />
+  <textarea id="userToken" rows="5" cols="60" placeholder="Paste your developer token here..."></textarea><br><br>
+
+  <button onclick="initializeMusicKit()">Initialize MusicKit</button>
+  <button onclick="authorizeUser()" disabled id="loginButton">Sign in to Apple Music</button>
+
+  <h3>Result:</h3>
+  <pre id="output"></pre>
+
+  <script>
+    let music;
+
+    function initializeMusicKit() {
+      const devToken = document.getElementById('devToken').value.trim();
+
+      if (!devToken) {
+        alert("Please enter a valid developer token.");
+        return;
+      }
+
+      try {
+        music = MusicKit.configure({
+          developerToken: devToken,
+          app: {
+            name: 'nl.mib.spotify-synch.music',
+            build: '1.0.0',
+          },
+        });
+
+        document.getElementById('loginButton').disabled = false;
+        document.getElementById('output').textContent = "MusicKit initialized successfully.";
+      } catch (e) {
+        console.error("Error initializing MusicKit:", e);
+        document.getElementById('output').textContent = "Error: " + e.message;
+      }
+    }
+
+    function authorizeUser() {
+      if (!music) {
+        alert("Please initialize MusicKit first.");
+        return;
+      }
+
+      music.authorize().then(userToken => {
+        document.getElementById('output').textContent = "User Token:\n" + userToken;
+        console.log("User Token:", userToken);
+      }).catch(err => {
+        console.error("Authorization failed:", err);
+        document.getElementById('output').textContent = "Authorization failed: " + err.message;
+      });
+    }
+  </script>
+</body>
+</html>

@@ -2,7 +2,7 @@ from typing import List
 
 from shrub_archi.modeling.archi.model.archi_model import Relation
 from shrub_archi.modeling.archi.resolver.entity_resolver import ResolvedEntity
-from shrub_archi.ui.select_ui import TableSelectModel, do_show_select_ui
+from shrub_ui.src.shrub_ui.ui import TableSelectModel, do_show_select_ui
 
 
 class ResolutionTableSelectModel(TableSelectModel):

@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from shrub_archi.ui.core_ui import get_ui_app, do_ui_execute
+from shrub_ui.ui.core_ui import get_ui_app, do_ui_execute
 from typing import List, Optional, Dict, Any, Tuple
 import os
 import yaml
