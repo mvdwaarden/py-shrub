@@ -68,6 +68,6 @@ if __name__ == "__main__":
             #     s_cln.get_playlist(playlist)
             #t_cln = AppleMusicApi()
             syncher = Synchronizer(src=s_cln, dst=s_cln)
-            syncher.sychronize()
+            syncher.sychronize_playlists()
     else:
         pass

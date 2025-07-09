@@ -1,11 +1,11 @@
+import concurrent.futures
+
 from spotipy.oauth2 import SpotifyOAuth
 from spotipy import Spotify
 import requests
-import argparse
 from typing import List
-from sqlalchemy.sql.operators import from_
-from unidecode import unidecode
 from shrub_ui.ui.select_ui import do_show_select_ui, TableSelectModel
+from concurrent.futures import ThreadPoolExecutor
 
 
 class Song:
@@ -238,12 +238,21 @@ class Synchronizer:
             result = []
         return result
 
-    def sychronize(self):
+    def sychronize_playlists(self):
         playlists = self.src.get_playlists()
 
 
-        selection = self.select_playlists(playlists)
-        print(selection)
+        selected_playlists = self.select_playlists(playlists)
+        futures = []
+        with ThreadPoolExecutor() as executor:
+            for playlist in selected_playlists:
+                futures.append(executor.submit(self.synchronize_playlist, playlist))
+            for future in concurrent.futures.as_completed(futures):
+                print(future.result())
+
+
+    def synchronize_playlist(self, playlist: PlayList):
+        print(f"synchronized playlist {playlist.name}")
 
     def transfer_playlist(self, playlist: PlayList):
         ...
