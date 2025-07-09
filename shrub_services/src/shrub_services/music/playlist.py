@@ -203,41 +203,46 @@ class Synchronizer:
         self.src: MusicServiceApi = src
         self.dst: MusicServiceApi = dst
 
+    def select_playlists(self, playlists: List[PlayList]):
+        class PlaylistSelectModel(TableSelectModel):
+            COL_COUNT = 4  # Number of columns including checkbox
+            HEADER_LABELS = ["", "Name", "Descriptions", "Owner", "#Songs"]  # Headers for your columns
+
+            def column_value_for(self, row, column: int):
+                if column == 0:  # Assuming the first column is for checkbox
+                    return ""
+                elif column == 1:
+                    return row.name
+                elif column == 2:
+                    return row.description
+                elif column == 3:
+                    return row.owner
+                elif column == 4:
+                    return len(row.songs)
+
+            def hit_row(self, row, search_text: str):
+                return (
+                        search_text in row.name.lower()
+                        or search_text in row.description.lower()
+                        or search_text in row.owner.lower()
+                )
+
+            def row_hash(self, row):
+                return row
+
+        ok, selection = do_show_select_ui(PlaylistSelectModel(playlists, "Select Playlists"))
+
+        if ok:
+            result = list([playlist for playlist, selected in selection.items() if selected])
+        else:
+            result = []
+        return result
+
     def sychronize(self):
         playlists = self.src.get_playlists()
 
-        def select_playlists():
-            class PlaylistSelectModel(TableSelectModel):
-                COL_COUNT = 4  # Number of columns including checkbox
-                HEADER_LABELS = ["", "Name", "Descriptions", "Owner", "#Songs"]  # Headers for your columns
 
-                def column_value_for(self, row, column: int):
-                    if column == 0:  # Assuming the first column is for checkbox
-                        return ""
-                    elif column == 1:
-                        return row["name"]
-                    elif column == 2:
-                        return row["description"]
-                    elif column == 3:
-                        return row["owner"]
-                    elif column == 4:
-                        return row["count"]
-
-                def hit_row(self, row, search_text: str):
-                    return (
-                            search_text in row["name"].lower()
-                            or search_text in row["description"].lower()
-                            or search_text in row["owner"].lower()
-                    )
-
-                def row_hash(self, row):
-                    return row["name"]
-
-            selection = do_show_select_ui(PlaylistSelectModel([{"name": playlist.name, "description": playlist.description,
-                                                    "owner": playlist.owner, "count": len(playlist.songs)} for playlist
-                                                   in playlists]), "select playlists", )
-            return selection
-        selection = select_playlists()
+        selection = self.select_playlists(playlists)
         print(selection)
 
     def transfer_playlist(self, playlist: PlayList):
