@@ -58,16 +58,20 @@ if __name__ == "__main__":
             apple_get_dev_token(team, key, path)
     elif SynchronizeFunction.is_operation(func_synchronize):
         if SynchronizeFunction.OPP_SYNCHRONIZE_PLAYLISTS.value == func_synchronize:
-            client_id = args.get_arg("client_id")
-            client_secret = args.get_arg("client_secret")
+            client_id = args.get_arg("client-id")
+            client_secret = args.get_arg("client-secret")
             path = args.get_arg("path")
-            redirect_uri = args.get_arg("redirect_uri")
+            redirect_uri = args.get_arg("redirect-uri", "http://localhost:8888/callback/")
+            dev_token_file = args.get_arg("dev-token")
+            user_token_file = args.get_arg("user-token")
+            with open(dev_token_file, "r") as ifp:
+                dev_token = ifp.read()
+            with open(user_token_file, "r") as ifp:
+                user_token = ifp.read()
             s_cln = SpotifyApi(client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri)
-            playlists = s_cln.get_playlists()
-            # for playlist in playlists:
-            #     s_cln.get_playlist(playlist)
-            #t_cln = AppleMusicApi()
-            syncher = Synchronizer(src=s_cln, dst=s_cln)
+            t_cln = AppleMusicApi(dev_token=dev_token, user_token=user_token)
+            #t_cln.search_song(name="Samira Meskina", artist="Souad Massi")
+            syncher = Synchronizer(src=s_cln, dst=t_cln)
             syncher.sychronize_playlists()
     else:
         pass

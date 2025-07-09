@@ -1,4 +1,5 @@
 import concurrent.futures
+import logging
 
 from spotipy.oauth2 import SpotifyOAuth
 from spotipy import Spotify
@@ -59,7 +60,7 @@ class MusicServiceApi:
     def get_playlists(self) -> List[PlayList]:
         ...
 
-    def create_or_update_playlists(self, playlists: List[PlayList]):
+    def create_or_update_playlist(self, playlist: PlayList):
         ...
 
 
@@ -72,18 +73,26 @@ class AppleMusicApi(MusicServiceApi):
         self.user_token = user_token
 
     def search_song(self, name, artist) -> Song:
-
         query = f"{name} {artist}"
         response = requests.get(
             url=f"{self.APPLE_MUSIC_API_BASE}/catalog/us/search",
             headers=self._get_headers(),
             params={'term': query, 'limit': 1, 'types': 'songs'}
         )
-        results = response.json()
         try:
-            return results['results']['songs']['data'][0]['id']
-        except (KeyError, IndexError):
-            return None
+            results = response.json()
+            item = results["results"]["songs"]["data"][0]
+            result = Song(
+                id=item["id"],
+                artist=item["attributes"]["artistName"],
+                name=item["attributes"]["name"],
+                href=item["href"],
+                album=item["attributes"]["albumName"]
+            )
+        except Exception as ex:
+            logging.getLogger().error(f"problem finding song name({name}),artist({artist}) : error({ex})")
+            result = None
+        return result
 
     def create_or_update_playlist(self, playlist: PlayList):
         data = {
@@ -126,6 +135,7 @@ class AppleMusicApi(MusicServiceApi):
         }
         if has_request:
             headers['Content-Type'] = 'application/json'
+        return headers
 
 
 class SpotifyApi(MusicServiceApi):
@@ -190,11 +200,11 @@ class SpotifyApi(MusicServiceApi):
         except IndexError:
             return None
 
-    def create_spotify_playlist(self, name, track_uris):
+    def create_or_update_playlist(self, playlist: PlayList):
         user_id = self._get_spotify_handle().current_user()['id']
-        playlist = self._get_spotify_handle().user_playlist_create(user=user_id, name=name, public=False)
+        playlist = self._get_spotify_handle().user_playlist_create(user=user_id, name=playlist.name, public=False)
         self._get_spotify_handle().playlist_add_items(playlist_id=playlist['id'],
-                                                      items=[uri for uri in track_uris if uri])
+                                                      items=[song.href for song in playlist.songs])
         print(f"Spotify playlist created: {playlist['external_urls']['spotify']}")
 
 
@@ -230,7 +240,7 @@ class Synchronizer:
             def row_hash(self, row):
                 return row
 
-        ok, selection = do_show_select_ui(PlaylistSelectModel(playlists, "Select Playlists"))
+        ok, selection = do_show_select_ui(model=PlaylistSelectModel(playlists), ok_text="Select Playlists")
 
         if ok:
             result = list([playlist for playlist, selected in selection.items() if selected])
@@ -241,7 +251,6 @@ class Synchronizer:
     def sychronize_playlists(self):
         playlists = self.src.get_playlists()
 
-
         selected_playlists = self.select_playlists(playlists)
         futures = []
         with ThreadPoolExecutor() as executor:
@@ -250,9 +259,21 @@ class Synchronizer:
             for future in concurrent.futures.as_completed(futures):
                 print(future.result())
 
-
     def synchronize_playlist(self, playlist: PlayList):
-        print(f"synchronized playlist {playlist.name}")
+        not_found = 0
+        target_playlist = PlayList()
+        target_playlist.name = playlist.name
+        target_playlist.description = playlist.description
+        self.src.get_playlist(playlist)
+        for song in playlist.songs:
+            s = self.dst.search_song(song.name, song.artists[0])
+            if not s:
+                not_found += 1
+            else:
+                target_playlist.add_song(s)
+            print(f"{song.id} : {song.name}")
+        self.dst.create_or_update_playlist(playlist)
+        print(f"synchronized playlist {playlist.name}, could not find {not_found} songs")
 
     def transfer_playlist(self, playlist: PlayList):
         ...
