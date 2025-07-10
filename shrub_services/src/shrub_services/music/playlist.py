@@ -7,46 +7,7 @@ import requests
 from typing import List
 from shrub_ui.ui.select_ui import do_show_select_ui, TableSelectModel
 from concurrent.futures import ThreadPoolExecutor
-
-
-class Song:
-    def __init__(self, **kwargs):
-        self.id = self.name = self.album = None
-        self.artists = []
-        if "id" in kwargs:
-            self.id = kwargs["id"]
-        if "name" in kwargs:
-            self.name = kwargs["name"]
-        if "href" in kwargs:
-            self.href = kwargs["href"]
-        if "artist" in kwargs:
-            self.artists.append(kwargs["artist"])
-        if "artists" in kwargs:
-            for artist in kwargs["artists"]:
-                self.artists.append(artist)
-        if "album" in kwargs:
-            self.album = kwargs["album"]
-
-
-class PlayList:
-    def __init__(self, **kwargs):
-        if "id" in kwargs:
-            self.id = kwargs["id"]
-        if "href" in kwargs:
-            self.href = kwargs["href"]
-        if "name" in kwargs:
-            self.name = kwargs["name"]
-        if "description" in kwargs:
-            self.description = kwargs["description"]
-        if "owner" in kwargs:
-            self.owner = kwargs["owner"]
-        if "public" in kwargs:
-            self.public = kwargs["public"]
-
-        self.songs: List[Song] = []
-
-    def add_song(self, song: Song):
-        self.songs.append(song)
+from shrub_services.music.music_model import PlayList, Song, MusicLocalView
 
 
 class MusicServiceApi:
