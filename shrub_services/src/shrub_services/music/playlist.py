@@ -5,9 +5,6 @@ from spotipy.oauth2 import SpotifyOAuth
 from spotipy import Spotify
 import requests
 from typing import List
-
-from sqlalchemy import result_tuple
-
 from shrub_ui.ui.select_ui import do_show_select_ui, TableSelectModel
 from concurrent.futures import ThreadPoolExecutor
 

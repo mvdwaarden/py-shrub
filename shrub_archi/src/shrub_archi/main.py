@@ -351,7 +351,8 @@ if __name__ == "__main__":
         team = [t for t in teams if t.name == team_name][0]
         print(list([t.name for t in teams]))
         work_items = azure_dev_ops_get_work_items_for_project(api, local_view, prj, team,max_result=30)
-        print(list([wi.id for wi in work_items]))
+        ids = list([wi.id for wi in work_items])
+        print(ids)
     elif function_test:
         from shrub_archi.generator.archi_csv_generator import ArchiCsvGenerator
         import shrub_archi.data.risk.it.it_risk as it_risk

@@ -1,7 +1,7 @@
 from typing import List, Tuple
 
 from shrub_archi.modeling.archi.model.archi_model import View
-from shrub_ui.src.shrub_ui.ui import TableSelectModel, do_show_select_ui
+from shrub_ui.ui.select_ui import TableSelectModel, do_show_select_ui
 
 
 class ViewTableSelectModel(TableSelectModel):

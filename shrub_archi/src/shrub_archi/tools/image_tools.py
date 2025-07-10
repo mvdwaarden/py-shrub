@@ -37,8 +37,8 @@ def test_remove_white_background(file):
     # Example usage:
     input_image_path = f"{file}"
     output_image_path = f"{file}.png"
-    lower_threshold = 235  # Minimum white value for the removal
-    upper_threshold = 255  # Maximum white value for the removal
+    lower_threshold = 0  # Minimum white value for the removal
+    upper_threshold = 25  # Maximum white value for the removal
 
     remove_white_background(input_image_path, output_image_path, lower_threshold, upper_threshold)
 
