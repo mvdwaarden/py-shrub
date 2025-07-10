@@ -1,10 +1,13 @@
 import concurrent.futures
 import logging
-
+import json
 from spotipy.oauth2 import SpotifyOAuth
 from spotipy import Spotify
 import requests
 from typing import List
+
+from sqlalchemy import result_tuple
+
 from shrub_ui.ui.select_ui import do_show_select_ui, TableSelectModel
 from concurrent.futures import ThreadPoolExecutor
 
@@ -40,6 +43,8 @@ class PlayList:
             self.description = kwargs["description"]
         if "owner" in kwargs:
             self.owner = kwargs["owner"]
+        if "public" in kwargs:
+            self.public = kwargs["public"]
 
         self.songs: List[Song] = []
 
@@ -65,7 +70,7 @@ class MusicServiceApi:
 
 
 class AppleMusicApi(MusicServiceApi):
-    APPLE_MUSIC_API_BASE = "https://api.music.apple.com/v1/"
+    APPLE_MUSIC_API_BASE = "https://api.music.apple.com/v1"
 
     def __init__(self, dev_token, user_token):
         super().__init__()
@@ -89,39 +94,66 @@ class AppleMusicApi(MusicServiceApi):
                 href=item["href"],
                 album=item["attributes"]["albumName"]
             )
+            logging.getLogger().info(f"found song name({name}),artist({artist}) -> id({result.id})")
         except Exception as ex:
             logging.getLogger().error(f"problem finding song name({name}),artist({artist}) : error({ex})")
             result = None
         return result
 
     def create_or_update_playlist(self, playlist: PlayList):
-        data = {
-            'attributes': {
-                'name': playlist.name,
-                'description': playlist.description
-            },
-            'relationships': {
-                'tracks': {
-                    'data': [{'id': song.id, 'type': 'songs'} for song in playlist.songs]
+        def create_playlist(playlist: PlayList) -> str:
+            data = {
+                'attributes': {
+                    'name': playlist.name,
+                    'description': playlist.description,
+                    'isPublic': False#playlist.public
                 }
             }
-        }
-        response = requests.post(
+            response = requests.post(
+                url=f"{self.APPLE_MUSIC_API_BASE}/me/library/playlists",
+                headers=self._get_headers(has_request=True),
+                json=data)
+            playlist_id = None
+            if response.status_code == 201:
+                result = response.json()
+                playlist_id = result["data"][0]["id"]
+                logging.getLogger().info(f"Apple Music playlist created with name({playlist.name}), id({playlist_id})")
+            else:
+                logging.getLogger().info(f"Failed to create Apple Music playlist with name({playlist.name}, id({response.text}))")
+            return playlist_id
+
+        def add_playlist_songs(playlist_id: str, songs: List[Song]):
+            data = {"data": [{
+                    'id': song.id,
+                    'type': 'songs'
+
+                } for song in songs]}
+            response = requests.post(
+                url=f"{self.APPLE_MUSIC_API_BASE}/me/library/playlists/{playlist_id}/tracks",
+                headers=self._get_headers(has_request=True),
+                json=data
+            )
+            if 200 <= response.status_code < 300 :
+                logging.getLogger().info(f"Added {len(songs)} songs to Apple Music playlist name({playlist.name})")
+        playlist_id = create_playlist(playlist)
+        if playlist_id:
+            add_playlist_songs(playlist_id, playlist.songs)
+
+
+    def get_playlists(self) -> List[PlayList]:
+        response = requests.get(
             url=f"{self.APPLE_MUSIC_API_BASE}/me/library/playlists",
-            headers=self._get_headers(has_request=True),
-            json=data)
+            headers=self._get_headers())
+
         if response.status_code == 201:
             print("Apple Music playlist created.")
         else:
             print("Failed to create Apple Music playlist:", response.text)
 
-    def get_playlists(self) -> List[PlayList]:
-        ...
-
     def get_playlist(self, playlist: PlayList) -> PlayList:
         response = requests.get(
             url=f"{self.APPLE_MUSIC_API_BASE}/me/library/playlists",
-            headers=self._get_headers(has_request=True))
+            headers=self._get_headers())
 
         if response.status_code == 201:
             print("Apple Music playlist created.")
@@ -164,7 +196,7 @@ class SpotifyApi(MusicServiceApi):
         for item in result["items"]:
             playlists.append(
                 PlayList(id=item["id"], description=item["description"], name=item["name"], href=item["href"],
-                         owner=item["owner"]["display_name"]))
+                         owner=item["owner"]["display_name"], public=item["public"]))
         return playlists
 
     def get_playlist(self, playlist: PlayList) -> PlayList:
@@ -209,11 +241,12 @@ class SpotifyApi(MusicServiceApi):
 
 
 class Synchronizer:
-    def __init__(self, src: MusicServiceApi, dst: MusicServiceApi):
-        self.src: MusicServiceApi = src
-        self.dst: MusicServiceApi = dst
+    def __init__(self, source: MusicServiceApi, target: MusicServiceApi):
+        self.source: MusicServiceApi = source
+        self.target: MusicServiceApi = target
 
-    def select_playlists(self, playlists: List[PlayList]):
+    @staticmethod
+    def select_playlists(playlists: List[PlayList]):
         class PlaylistSelectModel(TableSelectModel):
             COL_COUNT = 4  # Number of columns including checkbox
             HEADER_LABELS = ["", "Name", "Descriptions", "Owner", "#Songs"]  # Headers for your columns
@@ -248,37 +281,34 @@ class Synchronizer:
             result = []
         return result
 
-    def sychronize_playlists(self):
-        playlists = self.src.get_playlists()
-
-        selected_playlists = self.select_playlists(playlists)
-        futures = []
-        with ThreadPoolExecutor() as executor:
+    def synchronize_playlists(self):
+        playlists = self.source.get_playlists()
+        selected_playlists = Synchronizer.select_playlists(playlists)
+        concurrent = False
+        if concurrent:
+            futures = []
+            with ThreadPoolExecutor() as executor:
+                for playlist in selected_playlists:
+                    futures.append(executor.submit(self.synchronize_playlist, playlist))
+                for future in concurrent.futures.as_completed(futures):
+                    print(future.result())
+        else:
             for playlist in selected_playlists:
-                futures.append(executor.submit(self.synchronize_playlist, playlist))
-            for future in concurrent.futures.as_completed(futures):
-                print(future.result())
+                self.synchronize_playlist(playlist)
+
 
     def synchronize_playlist(self, playlist: PlayList):
         not_found = 0
         target_playlist = PlayList()
         target_playlist.name = playlist.name
         target_playlist.description = playlist.description
-        self.src.get_playlist(playlist)
-        for song in playlist.songs:
-            s = self.dst.search_song(song.name, song.artists[0])
-            if not s:
+        self.source.get_playlist(playlist)
+        for src_song in playlist.songs:
+            target_song = self.target.search_song(src_song.name, src_song.artists[0])
+            if not target_song:
                 not_found += 1
             else:
-                target_playlist.add_song(s)
-            print(f"{song.id} : {song.name}")
-        self.dst.create_or_update_playlist(playlist)
-        print(f"synchronized playlist {playlist.name}, could not find {not_found} songs")
-
-    def transfer_playlist(self, playlist: PlayList):
-        ...
-        # print("Fetching Spotify playlist...")
-        # tracks = get_spotify_playlist_tracks(playlist_id)
-        # print("Searching Apple Music...")
-        # apple_ids = [search_apple_music_track(t['name'], t['artist']) for t in tracks]
-        # create_apple_music_playlist("From Spotify", apple_ids)
+                target_playlist.add_song(target_song)
+        msg = f"could not find {not_found} songs" if not_found > 0 else "found ALL songs"
+        logging.getLogger().info(f"synchronized playlist {playlist.name}, {msg}")
+        self.target.create_or_update_playlist(target_playlist)

@@ -393,8 +393,8 @@ class CmdbLocalView:
         self.refresh_object_reference_relations(include_object_reference)
         for key, named_entity_map, constructor in self.all_maps:
             if issubclass(constructor, NamedItemRelation):
-                for v in [v for v in named_entity_map.values() if node_filter(v.src) and node_filter(v.dst)]:
-                    g.add_edge(v.src, v.dst, relation_type=v.type)
+                for v in [v for v in named_entity_map.values() if node_filter(v.source) and node_filter(v.target)]:
+                    g.add_edge(v.source, v.target, relation_type=v.type)
             else:
                 for v in named_entity_map.values():
                     if node_filter(v):

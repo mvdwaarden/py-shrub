@@ -68,10 +68,9 @@ if __name__ == "__main__":
                 dev_token = ifp.read()
             with open(user_token_file, "r") as ifp:
                 user_token = ifp.read()
-            s_cln = SpotifyApi(client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri)
-            t_cln = AppleMusicApi(dev_token=dev_token, user_token=user_token)
-            #t_cln.search_song(name="Samira Meskina", artist="Souad Massi")
-            syncher = Synchronizer(src=s_cln, dst=t_cln)
-            syncher.sychronize_playlists()
+            src_service = SpotifyApi(client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri)
+            target_service = AppleMusicApi(dev_token=dev_token, user_token=user_token)
+            syncher = Synchronizer(source=src_service, target=target_service)
+            syncher.synchronize_playlists()
     else:
         pass

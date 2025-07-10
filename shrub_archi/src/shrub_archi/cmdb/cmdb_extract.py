@@ -41,10 +41,10 @@ def cmdb_extract(environment: str, emails: list, cmdb_api: str, source: str, ext
         for resolved_ci in resolved_cis:
             relations = cmdb_get_relation_ships_by_configuration_item(api, factory, resolved_ci)
             for relation in relations:
-                if relation.src.key not in map_ci_retrieval_cache and relation.src.key not in cis:
-                    cis.append(relation.src.key)
-                if relation.dst.key not in map_ci_retrieval_cache and relation.dst.key not in cis:
-                    cis.append(relation.dst.key)
+                if relation.source.key not in map_ci_retrieval_cache and relation.source.key not in cis:
+                    cis.append(relation.source.key)
+                if relation.target.key not in map_ci_retrieval_cache and relation.target.key not in cis:
+                    cis.append(relation.target.key)
         recursion_count += 1
 
     return result
