@@ -3,8 +3,12 @@ from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
 from shrub_util.core.config import Config
 from shrub_services.music.get_token import apple_get_dev_token
-from shrub_services.music.playlist import SpotifyApi, Synchronizer, AppleMusicApi
+from shrub_services.music.playlist import SpotifyApi, Synchronizer, AppleMusicApi, MusicLocalViewApi
+from shrub_services.music.model.music_model import MusicLocalView
+from shrub_services.music.writers.json_writer import music_write_json
+from shrub_services.music.readers.json_reader import music_read_json
 from enum import Enum
+import datetime
 
 usage = """
     Shrubbery Subscription Services Tools, assumes:
@@ -58,6 +62,8 @@ if __name__ == "__main__":
             apple_get_dev_token(team, key, path)
     elif SynchronizeFunction.is_operation(func_synchronize):
         if SynchronizeFunction.OPP_SYNCHRONIZE_PLAYLISTS.value == func_synchronize:
+            profile = args.get_arg("profile")
+            dry_run = args.has_arg("dry-run")
             client_id = args.get_arg("client-id")
             client_secret = args.get_arg("client-secret")
             path = args.get_arg("path")
@@ -68,9 +74,16 @@ if __name__ == "__main__":
                 dev_token = ifp.read()
             with open(user_token_file, "r") as ifp:
                 user_token = ifp.read()
-            src_service = SpotifyApi(client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri)
+            src_service = None
+            if profile:
+                local_view: MusicLocalView = MusicLocalView()
+                music_read_json (local_view, profile)
+                src_service = MusicLocalViewApi(local_view)
+            else:
+                src_service = SpotifyApi(client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri)
             target_service = AppleMusicApi(dev_token=dev_token, user_token=user_token)
-            syncher = Synchronizer(source=src_service, target=target_service)
+            syncher = Synchronizer(source=src_service, target=target_service, dry_run=dry_run)
             syncher.synchronize_playlists()
+            music_write_json(src_service.local_view, f"music_profile_{datetime.datetime.now().strftime("%Y%m%d-%H:%M:%S")}")
     else:
         pass

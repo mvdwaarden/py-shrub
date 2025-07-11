@@ -1,5 +1,5 @@
 import json
-from shrub_services.music.music_model import MusicLocalView
+from shrub_services.music.model.music_model import MusicLocalView
 
 
 def music_write_json(local_view: MusicLocalView, file: str):

@@ -1,4 +1,4 @@
-from shrub_services.music.music_model import MusicLocalView
+from shrub_services.music.model.music_model import MusicLocalView
 import json
 
 def music_read_json(local_view: MusicLocalView, file: str):
