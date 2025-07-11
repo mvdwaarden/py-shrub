@@ -89,7 +89,7 @@ class AppleMusicApi(MusicServiceApi):
             data = {
                 'attributes': {
                     'name': playlist.name,
-                    'description': playlist.description,
+                    'description': playlist.description if playlist.description else '',
                     'isPublic': False  # playlist.public
                 }
             }

@@ -1,4 +1,4 @@
-from typing import List, TypeVar, Mapping
+from typing import List, TypeVar, MutableMapping
 
 T = TypeVar("T")
 
@@ -67,7 +67,7 @@ class Artist:
 
 class Song:
     def __init__(self, **kwargs):
-        self.id = self.name = self.album = None
+        self.id = self.name = self.album = self.href = None
         self.artists = []
         if "id" in kwargs:
             self.id = kwargs["id"]
@@ -148,16 +148,16 @@ class MusicLocalView:
     def __init__(self):
         self.uuid = 0
         self.all_maps = []
-        self.map_playlists: Mapping[str,PlayList] = {}
-        self.map_songs: Mapping[str, Song] = {}
-        self.map_artists: Mapping[str, Artist] = {}
-        self.map_albums: Mapping[str, Album] = {}
+        self.map_playlists: MutableMapping[str,PlayList] = {}
+        self.map_songs: MutableMapping[str, Song] = {}
+        self.map_artists: MutableMapping[str, Artist] = {}
+        self.map_albums: MutableMapping[str, Album] = {}
         self.all_maps.append(("playlists", self.map_playlists, PlayList))
         self.all_maps.append(("songs", self.map_songs, Song))
         self.all_maps.append(("albums", self.map_albums, Album))
         self.all_maps.append(("artists", self.map_artists, Artist))
 
-    def resolve_item(self, item: T, item_map: Mapping[str,T]) -> T:
+    def resolve_item(self, item: T, item_map: MutableMapping[str,T]) -> T:
         result = item
         if item.id not in item_map:
             item_map[item.id] = item
@@ -182,7 +182,7 @@ class MusicLocalView:
     def to_dict(self) -> dict:
         the_dict = {}
 
-        def add_item_map_to_dict(name: str, item_map: Mapping[str, T]):
+        def add_item_map_to_dict(name: str, item_map: MutableMapping[str, T]):
             the_dict[name] = []
             for v in item_map.values():
                 the_dict[name].append(v.to_dict())
