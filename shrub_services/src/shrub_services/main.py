@@ -83,7 +83,7 @@ if __name__ == "__main__":
                 src_service = SpotifyApi(client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri)
             target_service = AppleMusicApi(dev_token=dev_token, user_token=user_token)
             syncher = Synchronizer(source=src_service, target=target_service, dry_run=dry_run)
-            syncher.synchronize_playlists()
+            syncher.synchronize_profile()
             music_write_json(src_service.local_view, f"music_profile_{datetime.datetime.now().strftime("%Y%m%d-%H:%M:%S")}")
     else:
         pass

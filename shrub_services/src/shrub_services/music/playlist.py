@@ -33,10 +33,10 @@ class MusicServiceApi:
         ...
 
     def get_followed_artists(self) -> List[Artist]:
-        ...
+        return [artist for artist in self.local_view.map_artists.values() if artist.followed]
 
     def get_liked_albums(self) -> List[Album]:
-        ...
+        return [album for album in self.local_view.map_albums.values() if album.liked]
 
     def create_or_update_playlist(self, playlist: PlayList):
         ...
@@ -117,6 +117,27 @@ class AppleMusicApi(MusicServiceApi):
             result = None
         return result
 
+    def search_album(self, album: Album) -> Album:
+        query = f"{album.name} {album.artists[0].name}"
+        response = requests.get(
+            url=f"{self.APPLE_MUSIC_API_BASE}/catalog/us/search",
+            headers=self._get_headers(),
+            params={'term': query, 'limit': 1, 'types': 'albums'}
+        )
+        try:
+            results = response.json()
+            item = results["results"]["albums"]["data"][0]
+            result = self.local_view.resolve_album(Album(
+                id=item["id"],
+                name=item["attributes"]["name"],
+                href=item["href"])
+            )
+            logging.getLogger().info(f"found album({album.name} from {album.artists[0].name}) -> id({result.id})")
+        except Exception as ex:
+            logging.getLogger().error(f"problem finding album({album.name}) from {album.artists[0].name}: error({ex})")
+            result = None
+        return result
+
     def create_or_update_playlist(self, playlist: PlayList):
         def create_playlist(playlist: PlayList) -> str:
             data = {
@@ -180,7 +201,7 @@ class AppleMusicApi(MusicServiceApi):
         else:
             logging.getLogger().error(f"Failed to create Apple Music playlist: {response.text}, code({response.status_code})")
 
-    def _add_to_favourites(self, id: str, types: str):
+    def _add_to_favourites(self, id: str, name: str, types: str):
         data = {
             f"ids[{types}]" : [id]
         }
@@ -190,17 +211,17 @@ class AppleMusicApi(MusicServiceApi):
             )
 
         if response.status_code == 202:
-            logging.getLogger().info("Added to favourites")
+            logging.getLogger().info(f"Added {name} to favourite {types}")
         else:
-            logging.getLogger().error(f"Failed to add to favourites: {response.text}, code({response.status_code})")
+            logging.getLogger().error(f"Failed to add {name} to favourite {types}: {response.text}, code({response.status_code})")
 
     def set_liked_albums(self, albums: List[Album]):
         for album in albums:
-            self._add_to_favourites(id=album.id,types="albums")
+            self._add_to_favourites(id=album.id, name=album.name, types="albums")
 
     def set_followed_artists(self, artists: List[Artist]):
         for artist in artists:
-            self._add_to_favourites(id=artist.id, types="artists")
+            self._add_to_favourites(id=artist.id, name=artist.name, types="artists")
 
     def _get_headers(self, has_request: bool = False):
         headers = {
@@ -317,40 +338,86 @@ class SpotifyApi(MusicServiceApi):
         print(f"Spotify playlist created: {playlist['external_urls']['spotify']}")
 
 
-class Synchronizer:
-    def __init__(self, source: MusicServiceApi, target: MusicServiceApi, dry_run):
-        self.source: MusicServiceApi = source
-        self.target: MusicServiceApi = target
-        self.dry_run = dry_run
+class PlaylistSelectModel(TableSelectModel):
+    COL_COUNT = 5  # Number of columns including checkbox
+    HEADER_LABELS = ["", "Name", "Descriptions", "Owner", "#Songs"]  # Headers for your columns
 
+    def __init__(self, playlists: List[PlayList]):
+        super().__init__(data=playlists, tristate=False)
+
+    def column_value_for(self, row, column: int):
+        if column == 0:  # Assuming the first column is for checkbox
+            return ""
+        elif column == 1:
+            return row.name
+        elif column == 2:
+            return row.description
+        elif column == 3:
+            return row.owner
+        elif column == 4:
+            return len(row.songs)
+
+    def hit_row(self, row, search_text: str):
+        return (
+                search_text in row.name.lower()
+                or search_text in row.description.lower()
+                or search_text in row.owner.lower()
+        )
+
+    def row_hash(self, row):
+        return row
+
+
+class AlbumSelectModel(TableSelectModel):
+    COL_COUNT = 3  # Number of columns including checkbox
+    HEADER_LABELS = ["", "Name", "Artists"]  # Headers for your columns
+
+    def __init__(self, albums: List[Album]):
+        super().__init__(data=albums, tristate=False)
+
+    def column_value_for(self, row, column: int):
+        if column == 0:  # Assuming the first column is for checkbox
+            return ""
+        elif column == 1:
+            return row.name
+        elif column == 2:
+            return ",".join([artist.name for artist in row.artists])
+
+    def hit_row(self, row, search_text: str):
+        return (
+                search_text in row.name.lower()
+                or search_text in [artist.name.lower() for artist in row.artists]
+        )
+
+    def row_hash(self, row):
+        return row
+
+class ArtistSelectModel(TableSelectModel):
+    COL_COUNT = 2  # Number of columns including checkbox
+    HEADER_LABELS = ["", "Name"]  # Headers for your columns
+
+    def __init__(self, artists:List[Artist]):
+        super().__init__(data=artists, tristate=False)
+
+    def column_value_for(self, row, column: int):
+        if column == 0:  # Assuming the first column is for checkbox
+            return ""
+        elif column == 1:
+            return row.name
+
+    def hit_row(self, row, search_text: str):
+        return (
+                search_text in row.name.lower()
+                or search_text in row.description.lower()
+                or search_text in row.owner.lower()
+        )
+
+    def row_hash(self, row):
+        return row
+
+class Selector:
     @staticmethod
     def select_playlists(playlists: List[PlayList]):
-        class PlaylistSelectModel(TableSelectModel):
-            COL_COUNT = 4  # Number of columns including checkbox
-            HEADER_LABELS = ["", "Name", "Descriptions", "Owner", "#Songs"]  # Headers for your columns
-
-            def column_value_for(self, row, column: int):
-                if column == 0:  # Assuming the first column is for checkbox
-                    return ""
-                elif column == 1:
-                    return row.name
-                elif column == 2:
-                    return row.description
-                elif column == 3:
-                    return row.owner
-                elif column == 4:
-                    return len(row.songs)
-
-            def hit_row(self, row, search_text: str):
-                return (
-                        search_text in row.name.lower()
-                        or search_text in row.description.lower()
-                        or search_text in row.owner.lower()
-                )
-
-            def row_hash(self, row):
-                return row
-
         ok, selection = do_show_select_ui(model=PlaylistSelectModel(playlists), ok_text="Select Playlists")
 
         if ok:
@@ -359,11 +426,36 @@ class Synchronizer:
             result = []
         return result
 
-    def synchronize_playlists(self):
+    @staticmethod
+    def select_followed_artists(artists: List[Artist]):
+        ok, selection = do_show_select_ui(model=ArtistSelectModel(artists), ok_text="Select Artists")
+
+        if ok:
+            result = list([artist for artist, selected in selection.items() if selected])
+        else:
+            result = []
+        return result
+
+    @staticmethod
+    def select_liked_albums(albums: List[Album]):
+        ok, selection = do_show_select_ui(model=AlbumSelectModel(albums), ok_text="Select Albums")
+
+        if ok:
+            result = list([album for album, selected in selection.items() if selected])
+        else:
+            result = []
+        return result
+
+class Synchronizer:
+    def __init__(self, source: MusicServiceApi, target: MusicServiceApi, dry_run):
+        self.source: MusicServiceApi = source
+        self.target: MusicServiceApi = target
+        self.dry_run = dry_run
+
+    def synchronize_profile(self):
+        # playlists
         playlists = self.source.get_playlists()
-        albums = self.source.get_liked_albums()
-        artists = self.source.get_followed_artists()
-        selected_playlists = Synchronizer.select_playlists(playlists)
+        selected_playlists = Selector.select_playlists(playlists)
         concurrent = False
         if concurrent:
             futures = []
@@ -375,6 +467,25 @@ class Synchronizer:
         else:
             for playlist in selected_playlists:
                 self.synchronize_playlist(playlist)
+        # liked albums
+        albums = self.source.get_liked_albums()
+        selected_albums = Selector.select_liked_albums(albums)
+        target_albums = []
+        for album in selected_albums:
+            target_album = self.target.search_album(album)
+            if target_album:
+                target_albums.append(target_album)
+
+        self.target.set_liked_albums(target_albums)
+        # followed artists
+        artists = self.source.get_followed_artists()
+        selected_artists = Selector.select_followed_artists(artists)
+        target_artists = []
+        for artist in selected_artists:
+            target_artist = self.target.search_artist(artist)
+            if target_artist:
+                target_artists.append(target_artist)
+        self.target.set_followed_artists(target_artists)
 
     def synchronize_playlist(self, playlist: PlayList):
         not_found = 0
