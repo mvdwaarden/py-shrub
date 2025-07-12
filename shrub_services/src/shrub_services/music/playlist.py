@@ -26,17 +26,17 @@ class MusicServiceApi:
     def search_artist(self, artist: Artist) -> Artist:
         ...
 
-    def get_playlist(self, playlist: PlayList) -> PlayList:
+    def get_playlist_songs(self, playlist: PlayList) -> PlayList:
         ...
 
     def get_playlists(self) -> List[PlayList]:
         ...
 
     def get_followed_artists(self) -> List[Artist]:
-        return [artist for artist in self.local_view.map_artists.values() if artist.followed]
+        ...
 
     def get_liked_albums(self) -> List[Album]:
-        return [album for album in self.local_view.map_albums.values() if album.liked]
+        ...
 
     def create_or_update_playlist(self, playlist: PlayList):
         ...
@@ -48,21 +48,24 @@ class MusicServiceApi:
         ...
 
 
-class MusicLocalViewApi(MusicServiceApi):
+class MusicLocalViewReaderApi(MusicServiceApi):
     def __init__(self, local_view: MusicLocalView):
         super().__init__(local_view)
 
     def search_song(self, name, artist) -> Song:
         ...
 
-    def get_playlist(self, playlist: PlayList) -> PlayList:
+    def get_playlist_songs(self, playlist: PlayList) -> PlayList:
         return self.local_view.resolve_playlist(playlist=playlist)
 
     def get_playlists(self) -> List[PlayList]:
         return list(self.local_view.map_playlists.values())
 
-    def create_or_update_playlist(self, playlist: PlayList):
-        ...
+    def get_followed_artists(self) -> List[Artist]:
+        return [artist for artist in self.local_view.map_artists.values() if artist.followed]
+
+    def get_liked_albums(self) -> List[Album]:
+        return [album for album in self.local_view.map_albums.values() if album.liked]
 
 
 class AppleMusicApi(MusicServiceApi):
@@ -75,82 +78,60 @@ class AppleMusicApi(MusicServiceApi):
 
     def search_song(self, name, artist) -> Song:
         query = f"{name} {artist.name}"
-        response = requests.get(
-            url=f"{self.APPLE_MUSIC_API_BASE}/catalog/us/search",
-            headers=self._get_headers(),
-            params={'term': query, 'limit': 1, 'types': 'songs'}
-        )
+        response = requests.get(url=f"{self.APPLE_MUSIC_API_BASE}/catalog/us/search", headers=self._get_headers(),
+            params={'term': query, 'limit': 1, 'types': 'songs'})
         try:
             results = response.json()
             item = results["results"]["songs"]["data"][0]
-            result = Song(
-                id=item["id"],
-                artist=item["attributes"]["artistName"],
-                name=item["attributes"]["name"],
-                href=item["href"],
-                album=item["attributes"]["albumName"]
-            )
+            result = Song(id=item["id"], artist=item["attributes"]["artistName"], name=item["attributes"]["name"],
+                href=item["href"], album=item["attributes"]["albumName"])
             logging.getLogger().info(f"found song name({name}),artist({artist}) -> id({result.id})")
         except Exception as ex:
-            logging.getLogger().error(f"problem finding song name({name}),artist({artist}) : error({ex})")
+            logging.getLogger().error(
+                f"problem finding song name({name}),artist({artist}) : error({ex}), {response.text}, code({response.status_code})")
             result = None
         return result
 
     def search_artist(self, artist: Artist) -> Artist:
         query = f"{artist.name}"
-        response = requests.get(
-            url=f"{self.APPLE_MUSIC_API_BASE}/catalog/us/search",
-            headers=self._get_headers(),
-            params={'term': query, 'limit': 1, 'types': 'artists'}
-        )
+        response = requests.get(url=f"{self.APPLE_MUSIC_API_BASE}/catalog/us/search", headers=self._get_headers(),
+            params={'term': query, 'limit': 1, 'types': 'artists'})
         try:
             results = response.json()
             item = results["results"]["artists"]["data"][0]
-            result = self.local_view.resolve_artist(Artist(
-                id=item["id"],
-                name=item["attributes"]["name"],
-                href=item["href"])
-            )
+            result = self.local_view.resolve_artist(
+                Artist(id=item["id"], name=item["attributes"]["name"], href=item["href"]))
             logging.getLogger().info(f"found artist({artist.name}) -> id({result.id})")
         except Exception as ex:
-            logging.getLogger().error(f"problem finding artist({artist.name}): error({ex})")
+            logging.getLogger().error(
+                f"problem finding artist({artist.name}): error({ex}), {response.text}, code({response.status_code})")
             result = None
         return result
 
     def search_album(self, album: Album) -> Album:
         query = f"{album.name} {album.artists[0].name}"
-        response = requests.get(
-            url=f"{self.APPLE_MUSIC_API_BASE}/catalog/us/search",
-            headers=self._get_headers(),
-            params={'term': query, 'limit': 1, 'types': 'albums'}
-        )
+        response = requests.get(url=f"{self.APPLE_MUSIC_API_BASE}/catalog/us/search", headers=self._get_headers(),
+            params={'term': query, 'limit': 1, 'types': 'albums'})
         try:
             results = response.json()
             item = results["results"]["albums"]["data"][0]
-            result = self.local_view.resolve_album(Album(
-                id=item["id"],
-                name=item["attributes"]["name"],
-                href=item["href"])
-            )
+            result = self.local_view.resolve_album(
+                Album(id=item["id"], name=item["attributes"]["name"], href=item["href"]))
             logging.getLogger().info(f"found album({album.name} from {album.artists[0].name}) -> id({result.id})")
         except Exception as ex:
-            logging.getLogger().error(f"problem finding album({album.name}) from {album.artists[0].name}: error({ex})")
+            logging.getLogger().error(
+                f"problem finding album({album.name}) from {album.artists[0].name}: error({ex}), {response.text}, code({response.status_code})")
             result = None
         return result
 
     def create_or_update_playlist(self, playlist: PlayList):
         def create_playlist(playlist: PlayList) -> str:
-            data = {
-                'attributes': {
-                    'name': playlist.name,
-                    'description': playlist.description if playlist.description else '',
-                    'isPublic': False  # playlist.public
-                }
-            }
-            response = requests.post(
-                url=f"{self.APPLE_MUSIC_API_BASE}/me/library/playlists",
-                headers=self._get_headers(has_request=True),
-                json=data)
+            data = {'attributes': {'name': playlist.name,
+                'description': playlist.description if playlist.description else '', 'isPublic': False
+                # playlist.public
+            }}
+            response = requests.post(url=f"{self.APPLE_MUSIC_API_BASE}/me/library/playlists",
+                headers=self._get_headers(has_request=True), json=data)
             playlist_id = None
             if response.status_code == 201:
                 result = response.json()
@@ -162,58 +143,103 @@ class AppleMusicApi(MusicServiceApi):
             return playlist_id
 
         def add_playlist_songs(playlist_id: str, songs: List[Song]):
-            data = {"data": [{
-                'id': song.id,
-                'type': 'songs'
+            data = {"data": [{'id': song.id, 'type': 'songs'
 
             } for song in songs]}
-            response = requests.post(
-                url=f"{self.APPLE_MUSIC_API_BASE}/me/library/playlists/{playlist_id}/tracks",
-                headers=self._get_headers(has_request=True),
-                json=data
-            )
+            response = requests.post(url=f"{self.APPLE_MUSIC_API_BASE}/me/library/playlists/{playlist_id}/tracks",
+                headers=self._get_headers(has_request=True), json=data)
             if 200 <= response.status_code < 300:
                 logging.getLogger().info(f"Added {len(songs)} songs to Apple Music playlist name({playlist.name})")
             else:
-                logging.getLogger().error(f"Failed to add songs to to Apple Music playlist name({playlist.name}: {response.text}, code({response.status_code})")
+                logging.getLogger().error(
+                    f"Failed to add songs to to Apple Music playlist name({playlist.name}): {response.text}, code({response.status_code})")
 
         playlist_id = create_playlist(playlist)
         if playlist_id:
             add_playlist_songs(playlist_id, playlist.songs)
 
     def get_playlists(self) -> List[PlayList]:
-        response = requests.get(
-            url=f"{self.APPLE_MUSIC_API_BASE}/me/library/playlists",
-            headers=self._get_headers())
+        response = requests.get(url=f"{self.APPLE_MUSIC_API_BASE}/me/library/playlists", headers=self._get_headers())
+        playlists: List[PlayList] = []
+        if 200 <= response.status_code < 300:
+            data = response.json()
+            if "data" in data:
+                for item in data["data"]:
+                    description = item["attributes"]["description"]["standard"] if "description" in item[
+                        "attributes"] else ""
+                    playlists.append(self.local_view.resolve_playlist(
+                        PlayList(id=item["id"], href=item["href"], name=item["attributes"]["name"],
+                                 description=description, public=item["attributes"]["isPublic"],
+                                 owner=f"not defined, but {'can edit' if item['attributes']['canEdit'] else 'can NOT edit'}"), ))
 
-        if response.status_code == 201:
-            logging.getLogger().info("Apple Music playlist created.")
         else:
-            logging.getLogger().error(f"Failed to create Apple Music playlist: {response.text}, code({response.status_code})")
+            logging.getLogger().error(
+                f"Failed to get Apple Music playlist: {response.text}, code({response.status_code})")
+        return playlists
 
-    def get_playlist(self, playlist: PlayList) -> PlayList:
-        response = requests.get(
-            url=f"{self.APPLE_MUSIC_API_BASE}/me/library/playlists",
+    def get_playlist_songs(self, playlist: PlayList) -> PlayList:
+        response = requests.get(url=f"{self.APPLE_MUSIC_API_BASE}/me/library/playlists/{playlist.id}/tracks",
             headers=self._get_headers())
-
-        if response.status_code == 201:
-            logging.getLogger().info("Apple Music playlist created.")
+        if 200 <= response.status_code < 300:
+            data = response.json()
+            if "data" in data:
+                for item in data["data"]:
+                    song = self.local_view.resolve_song(
+                        Song(id=item["id"], href=item["href"], name=item["attributes"]["name"],
+                             album=self.local_view.resolve_album(Album(name=item["attributes"]["albumName"])),
+                             artist=self.local_view.resolve_artist(Artist(name=item["attributes"]["artistName"]))))
+                    playlist.add_song(song)
         else:
-            logging.getLogger().error(f"Failed to create Apple Music playlist: {response.text}, code({response.status_code})")
+            logging.getLogger().error(
+                f"Failed to get songs for Apple Music playlist {playlist.name}: {response.text}, code({response.status_code})")
+        return playlist
+
+
+    def get_followed_artists(self) -> List[Artist]:
+        artists = []
+        response = requests.get(url=f"{self.APPLE_MUSIC_API_BASE}/me/library/artists",
+            headers=self._get_headers())
+        if 200 <= response.status_code < 300:
+            data = response.json()
+            if "data" in data:
+                for item in data["data"]:
+                    artist = self.local_view.resolve_artist(
+                        Artist(id=item["id"], href=item["href"], name=item["attributes"]["name"]))
+                    artist.followed = True
+                    artists.append(artist)
+        else:
+            logging.getLogger().error(
+                f"Failed to get followed artists for user on Apple Music : {response.text}, code({response.status_code})")
+        return artists
+
+    def get_liked_albums(self) -> List[Album]:
+        albums = []
+        response = requests.get(url=f"{self.APPLE_MUSIC_API_BASE}/me/library/albums",
+                                headers=self._get_headers())
+        if 200 <= response.status_code < 300:
+            data = response.json()
+            if "data" in data:
+                for item in data["data"]:
+                    album = self.local_view.resolve_album(
+                        Album(id=item["id"], href=item["href"], name=item["attributes"]["name"],
+                              artist=self.local_view.resolve_artist(
+                                    Artist(name=item["attributes"]["artistName"]))))
+                    album.liked = True
+                    albums.append(album)
+        else:
+            logging.getLogger().error(f"Failed to get liked albums for user on Apple Music : {response.text}, code({response.status_code})")
+        return albums
 
     def _add_to_favourites(self, id: str, name: str, types: str):
-        data = {
-            f"ids[{types}]" : [id]
-        }
-        response = requests.post(
-            url=f"{self.APPLE_MUSIC_API_BASE}/me/favorites?ids[{types}]={id}",
-            headers=self._get_headers(has_request=False)
-            )
+        data = {f"ids[{types}]": [id]}
+        response = requests.post(url=f"{self.APPLE_MUSIC_API_BASE}/me/favorites?ids[{types}]={id}",
+            headers=self._get_headers(has_request=False))
 
         if response.status_code == 202:
             logging.getLogger().info(f"Added {name} to favourite {types}")
         else:
-            logging.getLogger().error(f"Failed to add {name} to favourite {types}: {response.text}, code({response.status_code})")
+            logging.getLogger().error(
+                f"Failed to add {name} to favourite {types}: {response.text}, code({response.status_code})")
 
     def set_liked_albums(self, albums: List[Album]):
         for album in albums:
@@ -224,10 +250,7 @@ class AppleMusicApi(MusicServiceApi):
             self._add_to_favourites(id=artist.id, name=artist.name, types="artists")
 
     def _get_headers(self, has_request: bool = False):
-        headers = {
-            'Authorization': f'Bearer {self.dev_token}',
-            'Music-User-Token': self.user_token
-        }
+        headers = {'Authorization': f'Bearer {self.dev_token}', 'Music-User-Token': self.user_token}
         if has_request:
             headers['Content-Type'] = 'application/json'
         return headers
@@ -246,13 +269,56 @@ class SpotifyApi(MusicServiceApi):
 
     def _get_spotify_handle(self) -> Spotify:
         if not self.sp_handle:
-            self.sp_handle = Spotify(auth_manager=SpotifyOAuth(
-                client_id=self.client_id,
-                client_secret=self.client_secret,
-                redirect_uri=self.redirect_uri,
-                scope=SpotifyApi.SCOPE
-            ))
+            self.sp_handle = Spotify(
+                auth_manager=SpotifyOAuth(client_id=self.client_id, client_secret=self.client_secret,
+                    redirect_uri=self.redirect_uri, scope=SpotifyApi.SCOPE))
         return self.sp_handle
+
+    def search_song(self, name, artist) -> Song:
+        query = f"{name} {artist.name}"
+        response = self._get_spotify_handle().search(q=query, type='track', limit=1)
+        result = None
+        try:
+            item = response['tracks']['items'][0]
+            result = self.local_view.resolve_song(Song(id=item['id'], name=item['name'],
+                album=self.local_view.resolve_album(
+                    Album(id=item["album"]["id"], name=item["album"]["name"], href=item["album"]["href"], artists=[
+                        self.local_view.resolve_artist(
+                            Artist(id=artist["id"], name=artist["name"], href=artist["href"])) for artist in
+                        item["album"]["artists"]])), artists=[
+                    self.local_view.resolve_artist(Artist(id=artist["id"], name=artist["name"], href=artist["href"]))
+                    for artist in item["album"]["artists"]]))
+            logging.getLogger().info(f"found song name({name}),artist({artist.name}) -> id({result.id})")
+        except Exception as ex:
+            logging.getLogger().error(f"problem finding song name({name}),artist({artist.name}) : error({ex})")
+        return result
+
+    def search_artist(self, artist: Artist) -> Artist:
+        query = f"{artist.name}"
+        response = self._get_spotify_handle().search(q=query, type='artist', limit=1)
+        result = None
+        try:
+            item = response['artists']['items'][0]
+            result = self.local_view.resolve_artist(Artist(id=item["id"], name=item["name"], href=item["href"]))
+            logging.getLogger().info(f"found artist name({artist.name}) -> id({result.id})")
+        except Exception as ex:
+            logging.getLogger().error(f"problem finding artist name({artist.name}): error({ex})")
+        return result
+
+    def search_album(self, album: Album):
+        query = f"{album.name} {album.artists[0].name}"
+        response = self._get_spotify_handle().search(q=query, type='album', limit=1)
+        result = None
+        try:
+            item = response['albums']['items'][0]
+            result = self.local_view.resolve_album(
+                Album(id=item["album"]["id"], name=item["album"]["name"], href=item["album"]["href"], artists=[
+                    self.local_view.resolve_artist(Artist(id=artist["id"], name=artist["name"], href=artist["href"]))
+                    for artist in item["album"]["artists"]]))
+            logging.getLogger().info(f"found album({album.name} from {album.artists[0].name}) -> id({result.id})")
+        except Exception as ex:
+            logging.getLogger().error(f"problem finding album({album.name}) from {album.artists[0].name}: error({ex})")
+        return result
 
     def get_playlists(self) -> List[PlayList]:
         playlists = []
@@ -269,23 +335,21 @@ class SpotifyApi(MusicServiceApi):
 
         return playlists
 
-    def get_playlist(self, playlist: PlayList) -> PlayList:
+    def get_playlist_songs(self, playlist: PlayList) -> PlayList:
         result = self._get_spotify_handle().playlist_items(playlist_id=playlist.id, limit=self.api_page_size,
                                                            fields="items(track(id,name,href,album(id,name),artists(id,name)")
         while result and "items" in result:
             for item in result["items"]:
                 if "track" in item:
                     try:
-                        playlist.add_song(
-                            self.local_view.resolve_song(Song(
-                                id=item["track"]["id"],
-                                artists=[self.local_view.resolve_artist(Artist(id=artist["id"], name=artist["name"]))
-                                         for artist in item["track"]["artists"]],
-                                name=item["track"]["name"], album=self.local_view.resolve_album(
-                                    Album(id=item["track"]["album"]["id"], name=item["track"]["album"]["name"])),
-                                href=item["track"]["href"])))
+                        playlist.add_song(self.local_view.resolve_song(Song(id=item["track"]["id"],
+                            artists=[self.local_view.resolve_artist(Artist(id=artist["id"], name=artist["name"])) for
+                                     artist in item["track"]["artists"]], name=item["track"]["name"],
+                            album=self.local_view.resolve_album(
+                                Album(id=item["track"]["album"]["id"], name=item["track"]["album"]["name"])),
+                            href=item["track"]["href"])))
                     except Exception as ex:
-                        ...
+                        logging.getLogger().error(f"problem adding song to playlist {ex} from item({item})")
             if "next" in result:
                 result = self._get_spotify_handle().next(result)
             else:
@@ -312,8 +376,10 @@ class SpotifyApi(MusicServiceApi):
         while result and "items" in result:
             for item in result["items"]:
                 album = self.local_view.resolve_album(
-                    Album(id=item["album"]["id"], name=item["album"]["name"], href=item["album"]["href"],
-                          artists=[self.local_view.resolve_artist(Artist(id=artist["id"], name=artist["name"], href=artist["href"])) for artist in item["album"]["artists"]]))
+                    Album(id=item["album"]["id"], name=item["album"]["name"], href=item["album"]["href"], artists=[
+                        self.local_view.resolve_artist(
+                            Artist(id=artist["id"], name=artist["name"], href=artist["href"])) for artist in
+                        item["album"]["artists"]]))
                 album.liked = True
                 albums.append(album)
             if "next" in result:
@@ -322,20 +388,12 @@ class SpotifyApi(MusicServiceApi):
                 break
         return albums
 
-    def search_song(self, name, artist):
-        query = f"{name} {artist.name}"
-        result = self._get_spotify_handle().search(q=query, type='track', limit=1)
-        try:
-            return result['tracks']['items'][0]['uri']
-        except IndexError:
-            return None
-
     def create_or_update_playlist(self, playlist: PlayList):
         user_id = self._get_spotify_handle().current_user()['id']
         playlist = self._get_spotify_handle().user_playlist_create(user=user_id, name=playlist.name, public=False)
         self._get_spotify_handle().playlist_add_items(playlist_id=playlist['id'],
                                                       items=[song.href for song in playlist.songs])
-        print(f"Spotify playlist created: {playlist['external_urls']['spotify']}")
+        logging.getLogger().info(f"Spotify playlist created: {playlist['external_urls']['spotify']}")
 
 
 class PlaylistSelectModel(TableSelectModel):
@@ -359,10 +417,7 @@ class PlaylistSelectModel(TableSelectModel):
 
     def hit_row(self, row, search_text: str):
         return (
-                search_text in row.name.lower()
-                or search_text in row.description.lower()
-                or search_text in row.owner.lower()
-        )
+                search_text in row.name.lower() or search_text in row.description.lower() or search_text in row.owner.lower())
 
     def row_hash(self, row):
         return row
@@ -384,19 +439,17 @@ class AlbumSelectModel(TableSelectModel):
             return ",".join([artist.name for artist in row.artists])
 
     def hit_row(self, row, search_text: str):
-        return (
-                search_text in row.name.lower()
-                or search_text in [artist.name.lower() for artist in row.artists]
-        )
+        return (search_text in row.name.lower() or search_text in [artist.name.lower() for artist in row.artists])
 
     def row_hash(self, row):
         return row
+
 
 class ArtistSelectModel(TableSelectModel):
     COL_COUNT = 2  # Number of columns including checkbox
     HEADER_LABELS = ["", "Name"]  # Headers for your columns
 
-    def __init__(self, artists:List[Artist]):
+    def __init__(self, artists: List[Artist]):
         super().__init__(data=artists, tristate=False)
 
     def column_value_for(self, row, column: int):
@@ -407,13 +460,11 @@ class ArtistSelectModel(TableSelectModel):
 
     def hit_row(self, row, search_text: str):
         return (
-                search_text in row.name.lower()
-                or search_text in row.description.lower()
-                or search_text in row.owner.lower()
-        )
+                search_text in row.name.lower() or search_text in row.description.lower() or search_text in row.owner.lower())
 
     def row_hash(self, row):
         return row
+
 
 class Selector:
     @staticmethod
@@ -446,6 +497,7 @@ class Selector:
             result = []
         return result
 
+
 class Synchronizer:
     def __init__(self, source: MusicServiceApi, target: MusicServiceApi, dry_run):
         self.source: MusicServiceApi = source
@@ -463,7 +515,7 @@ class Synchronizer:
                 for playlist in selected_playlists:
                     futures.append(executor.submit(self.synchronize_playlist, playlist))
                 for future in concurrent.futures.as_completed(futures):
-                    print(future.result())
+                    logging.getLogger().info(future.result())
         else:
             for playlist in selected_playlists:
                 self.synchronize_playlist(playlist)
@@ -475,8 +527,8 @@ class Synchronizer:
             target_album = self.target.search_album(album)
             if target_album:
                 target_albums.append(target_album)
-
-        self.target.set_liked_albums(target_albums)
+        if not self.dry_run:
+            self.target.set_liked_albums(target_albums)
         # followed artists
         artists = self.source.get_followed_artists()
         selected_artists = Selector.select_followed_artists(artists)
@@ -485,14 +537,15 @@ class Synchronizer:
             target_artist = self.target.search_artist(artist)
             if target_artist:
                 target_artists.append(target_artist)
-        self.target.set_followed_artists(target_artists)
+        if not self.dry_run:
+            self.target.set_followed_artists(target_artists)
 
     def synchronize_playlist(self, playlist: PlayList):
         not_found = 0
         target_playlist = PlayList()
         target_playlist.name = playlist.name
         target_playlist.description = playlist.description
-        self.source.get_playlist(playlist)
+        self.source.get_playlist_songs(playlist)
         for src_song in playlist.songs:
             target_song = self.target.search_song(src_song.name, src_song.artists[0])
             if not target_song:
@@ -503,4 +556,3 @@ class Synchronizer:
         logging.getLogger().info(f"synchronized playlist {playlist.name}, {msg}")
         if not self.dry_run:
             self.target.create_or_update_playlist(target_playlist)
-

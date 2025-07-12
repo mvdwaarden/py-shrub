@@ -3,7 +3,7 @@ from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
 from shrub_util.core.config import Config
 from shrub_services.music.get_token import apple_get_dev_token
-from shrub_services.music.playlist import SpotifyApi, Synchronizer, AppleMusicApi, MusicLocalViewApi
+from shrub_services.music.playlist import SpotifyApi, Synchronizer, AppleMusicApi, MusicLocalViewReaderApi
 from shrub_services.music.model.music_model import MusicLocalView
 from shrub_services.music.writers.json_writer import music_write_json
 from shrub_services.music.readers.json_reader import music_read_json
@@ -74,16 +74,29 @@ if __name__ == "__main__":
                 dev_token = ifp.read()
             with open(user_token_file, "r") as ifp:
                 user_token = ifp.read()
-            src_service = None
-            if profile:
-                local_view: MusicLocalView = MusicLocalView()
-                music_read_json (local_view, profile)
-                src_service = MusicLocalViewApi(local_view)
+            spotify_or_profile_to_apple_music = False
+            if spotify_or_profile_to_apple_music:
+                src_service = None
+                if profile:
+                    local_view: MusicLocalView = MusicLocalView()
+                    music_read_json (local_view, profile)
+                    src_service = MusicLocalViewReaderApi(local_view)
+                else:
+                    src_service = SpotifyApi(client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri)
+                target_service = AppleMusicApi(dev_token=dev_token, user_token=user_token)
+                syncher = Synchronizer(source=src_service, target=target_service, dry_run=dry_run)
+                syncher.synchronize_profile()
             else:
-                src_service = SpotifyApi(client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri)
-            target_service = AppleMusicApi(dev_token=dev_token, user_token=user_token)
-            syncher = Synchronizer(source=src_service, target=target_service, dry_run=dry_run)
-            syncher.synchronize_profile()
+                src_service = None
+                if profile and False:
+                    local_view: MusicLocalView = MusicLocalView()
+                    music_read_json(local_view, profile)
+                    src_service = MusicLocalViewReaderApi(local_view)
+                else:
+                    src_service = AppleMusicApi(dev_token=dev_token, user_token=user_token)
+                target_service = SpotifyApi(client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri)
+                syncher = Synchronizer(source=src_service, target=target_service, dry_run=True)
+                syncher.synchronize_profile()
             music_write_json(src_service.local_view, f"music_profile_{datetime.datetime.now().strftime("%Y%m%d-%H:%M:%S")}")
     else:
         pass

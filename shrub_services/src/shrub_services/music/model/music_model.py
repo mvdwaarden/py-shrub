@@ -1,4 +1,5 @@
 from typing import List, TypeVar, MutableMapping
+import uuid
 
 T = TypeVar("T")
 
@@ -157,9 +158,25 @@ class MusicLocalView:
         self.all_maps.append(("albums", self.map_albums, Album))
         self.all_maps.append(("artists", self.map_artists, Artist))
 
+    def _find_item_by_name(self,name: str,  item_map: MutableMapping[str, T]):
+        result = None
+        for item in item_map.values():
+            if hasattr(item, "name"):
+                if item.name == name:
+                    result = item
+                    break
+        return result
+
     def resolve_item(self, item: T, item_map: MutableMapping[str,T]) -> T:
         result = item
-        if item.id not in item_map:
+        if (not hasattr(item,"id") or not item.id) and hasattr(item, "name"):
+            resolved_item = self._find_item_by_name(item.name, item_map)
+            if resolved_item:
+                result = resolved_item
+            else:
+                item.id = f"shrub_generated-{uuid.uuid4()}"
+                item_map[item.id] = item
+        elif item.id not in item_map:
             item_map[item.id] = item
         else:
             result = item_map[item.id]
