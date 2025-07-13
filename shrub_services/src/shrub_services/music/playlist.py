@@ -577,8 +577,9 @@ class Synchronizer:
             if not target_song:
                 not_found += 1
             else:
+
                 target_playlist.add_song(target_song)
-        msg = f"could not find {not_found} songs" if not_found > 0 else "found ALL songs"
+        msg = f"could not find {not_found} songs" if not_found > 0 else f"found ALL ({len(target_playlist.songs)})songs"
         logging.getLogger().info(f"synchronized playlist {playlist.name}, {msg}")
         if not self.dry_run:
             self.target.create_or_update_playlist(target_playlist)
