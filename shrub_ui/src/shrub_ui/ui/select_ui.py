@@ -129,10 +129,12 @@ class TableSelectUI(QWidget):
 
     def initUI(self):
         # Set window title
+        help_text = "Press SPACE or T to mark selected rows"
         window_title = (
-            self.title if self.title else "Press SPACE or T to mark selected rows"
+            self.title if self.title else help_text
         )
         self.setWindowTitle(window_title)
+        self.setToolTip(help_text)
         # read screen data
         self._read_screen_data()
         # set size
@@ -199,7 +201,7 @@ class TableSelectUI(QWidget):
         self.ok = True
 
     def close(self):
-        if not self._screen_data:
+        if self._screen_data is None:
             self._screen_data = {}
         self._write_screen_data()
         super().close()
@@ -219,7 +221,7 @@ class TableSelectUI(QWidget):
         return screens_data
 
     def _write_screen_data(self):
-        if self._screen_data:
+        if self._screen_data is not None:
             screens_data = self._read_screen_data()
             self._screen_data["x"] = self.geometry().x()
             self._screen_data["y"] = self.geometry().y()

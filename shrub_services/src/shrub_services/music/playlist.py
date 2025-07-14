@@ -523,7 +523,7 @@ class ArtistSelectModel(TableSelectModel):
 class Selector:
     @staticmethod
     def select_playlists(playlists: List[PlayList]):
-        ok, selection = do_show_select_ui(model=PlaylistSelectModel(playlists), ok_text="Select Playlists")
+        ok, selection = do_show_select_ui(model=PlaylistSelectModel(playlists), ok_text="Continue", title="Select Playlists")
 
         if ok:
             result = list([playlist for playlist, selected in selection.items() if selected])
@@ -533,7 +533,7 @@ class Selector:
 
     @staticmethod
     def select_followed_artists(artists: List[Artist]):
-        ok, selection = do_show_select_ui(model=ArtistSelectModel(artists), ok_text="Select Artists")
+        ok, selection = do_show_select_ui(model=ArtistSelectModel(artists), ok_text="Continue", title="Select Followed Artists")
 
         if ok:
             result = list([artist for artist, selected in selection.items() if selected])
@@ -543,7 +543,7 @@ class Selector:
 
     @staticmethod
     def select_liked_albums(albums: List[Album]):
-        ok, selection = do_show_select_ui(model=AlbumSelectModel(albums), ok_text="Select Albums")
+        ok, selection = do_show_select_ui(model=AlbumSelectModel(albums), ok_text="Continue", title="Select Liked Albums")
 
         if ok:
             result = list([album for album, selected in selection.items() if selected])
