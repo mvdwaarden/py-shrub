@@ -90,6 +90,10 @@ class LogDecorator:
         self.logger.critical(msg, *args, **kwargs)
 
 
+def getLogger(path=None)-> LogDecorator:
+    return get_logger(path)
+
+
 def get_logger(path=None) -> LogDecorator:
     return LogDecorator(logger=pylogging.getLogger(_get_module(path)))
 

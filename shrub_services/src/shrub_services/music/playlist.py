@@ -1,4 +1,4 @@
-import logging
+import shrub_util.core.logging as logging
 from concurrent.futures import ThreadPoolExecutor
 from typing import List
 
@@ -118,7 +118,8 @@ class AppleMusicApi(MusicServiceApi):
             results = response.json()
             item = results["results"]["albums"]["data"][0]
             result = self.local_view.resolve_album(
-                Album(id=item["id"], name=item["attributes"]["name"], href=item["href"]))
+                Album(id=item["id"], name=item["attributes"]["name"], href=item["href"],
+                      artist=self.local_view.resolve_artist(Artist(name=item["attributes"]["albumName"]))))
             logging.getLogger().info(f"found album({album.name} from {album.artists[0].name}) -> id({result.id})")
         except Exception as ex:
             logging.getLogger().error(
@@ -405,7 +406,7 @@ class SpotifyApi(MusicServiceApi):
                     Album(id=item["album"]["id"], name=item["album"]["name"], href=item["album"]["href"], artists=[
                         self.local_view.resolve_artist(
                             Artist(id=artist["id"], name=artist["name"], href=artist["href"])) for artist in
-                        item["album"]["artists"]]))
+                                item["album"]["artists"]]))
                 album.liked = True
                 albums.append(album)
             if "next" in result:

@@ -35,6 +35,7 @@ class KeyFunction(Enum):
 
 class SynchronizeFunction(Enum):
     OPP_SYNCHRONIZE_PLAYLISTS = "playlists"
+    OPP_SYNCHRONIZE_PROFILE = "profile"
     @staticmethod
     def is_operation(operation: str):
         return operation and operation in [e.value for e in SynchronizeFunction]
@@ -61,7 +62,7 @@ if __name__ == "__main__":
         if KeyFunction.OPP_APPLE_DEV_TOKEN.value == func_get_key:
             apple_get_dev_token(team, key, path)
     elif SynchronizeFunction.is_operation(func_synchronize):
-        if SynchronizeFunction.OPP_SYNCHRONIZE_PLAYLISTS.value == func_synchronize:
+        if True or SynchronizeFunction.OPP_SYNCHRONIZE_PLAYLISTS.value == func_synchronize:
             profile = args.get_arg("profile")
             dry_run = args.has_arg("dry-run")
             client_id = args.get_arg("client-id")
@@ -70,33 +71,31 @@ if __name__ == "__main__":
             redirect_uri = args.get_arg("redirect-uri", "http://localhost:8888/callback/")
             dev_token_file = args.get_arg("dev-token")
             user_token_file = args.get_arg("user-token")
+            from_provider = args.get_arg("from")
+            to_provider = args.get_arg("to")
             with open(dev_token_file, "r") as ifp:
                 dev_token = ifp.read()
             with open(user_token_file, "r") as ifp:
                 user_token = ifp.read()
-            spotify_or_profile_to_apple_music = False
-            if spotify_or_profile_to_apple_music:
-                src_service = None
-                if profile:
-                    local_view: MusicLocalView = MusicLocalView()
-                    music_read_json (local_view, profile)
-                    src_service = MusicLocalViewReaderApi(local_view)
-                else:
-                    src_service = SpotifyApi(client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri)
-                target_service = AppleMusicApi(dev_token=dev_token, user_token=user_token)
-                syncher = Synchronizer(source=src_service, target=target_service, dry_run=dry_run)
-                syncher.synchronize_profile()
+            apple_provider = AppleMusicApi(dev_token=dev_token, user_token=user_token)
+            spotify_provider = SpotifyApi(client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri)
+            local_view_provider = MusicLocalView()
+            if profile:
+                music_read_json(local_view_provider, profile)
+                src_service = local_view_provider
+            elif from_provider == "spotify":
+                src_service = spotify_provider
             else:
-                src_service = None
-                if profile:
-                    local_view: MusicLocalView = MusicLocalView()
-                    music_read_json(local_view, profile)
-                    src_service = MusicLocalViewReaderApi(local_view)
-                else:
-                    src_service = AppleMusicApi(dev_token=dev_token, user_token=user_token)
-                target_service = SpotifyApi(client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri)
-                syncher = Synchronizer(source=src_service, target=target_service, dry_run=True)
-                syncher.synchronize_profile()
+                src_service = apple_provider
+            if to_provider == "apple":
+                target_service = apple_provider
+            else:
+                target_service = spotify_provider
+
+            logging.getLogger().info(f"synchronize from {src_service.__class__.__name__} to {target_service.__class__.__name__}")
+
+            syncher = Synchronizer(source=src_service, target=target_service, dry_run=True)
+            syncher.synchronize_profile()
             music_write_json(src_service.local_view, f"music_profile_{datetime.datetime.now().strftime("%Y%m%d-%H:%M:%S")}")
     else:
         pass

@@ -1,18 +1,48 @@
+import shrub_util.core.logging as logging
 from typing import List, TypeVar, MutableMapping
 import uuid
 
 T = TypeVar("T")
 
-class Album:
+class MusicServiceItem:
     def __init__(self, **kwargs):
-        self.id = self.name = self.href = self.liked = None
-        self.artists = []
+        self.id = self.name = self.href = None
         if "id" in kwargs:
             self.id = kwargs["id"]
         if "name" in kwargs:
             self.name = kwargs["name"]
         if "href" in kwargs:
             self.href = kwargs["href"]
+
+    def get_resolve_key(self) -> str:
+        result = None
+        if self.id:
+            result = self.id
+        elif self.name:
+            result = self.name
+        else:
+            logging.getLogger().warning(f"unable to determine resolve key")
+        return result
+
+    def to_dict(self) -> dict:
+        the_dict = {}
+        if self.id:
+            the_dict["id"] = self.id
+        if self.name:
+            the_dict["name"] = self.name
+        if self.href:
+            the_dict["href"] = self.href
+        return the_dict
+
+    def from_dict(self, the_dict: dict):
+        self.__init__(**the_dict)
+
+
+class Album(MusicServiceItem):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.liked = None
+        self.artists = []
         if "liked" in kwargs:
             self.liked = kwargs["liked"]
         if "artist" in kwargs:
@@ -21,14 +51,21 @@ class Album:
             for artist in kwargs["artists"]:
                 self.artists.append(artist)
 
-    def to_dict(self) -> dict:
-        the_dict = {}
+    def get_resolve_key(self) -> str:
+        result = None
         if self.id:
-            the_dict["id"] = self.id
-        if self.name:
-            the_dict["name"] = self.name
-        if self.href:
-            the_dict["href"] = self.href
+            result = self.id
+        elif self.name and self.artists and len(self.artists) > 0:
+            result = f"{self.name}-{self.artists[0].name}"
+        elif self.name:
+            result = f"{self.name}"
+            logging.getLogger().warning(f"using name({self.name}) of the album as resolve key, uniqueness not guaranteed")
+        else:
+            logging.getLogger().warning(f"unable to determine resolve key for album")
+        return result
+
+    def to_dict(self) -> dict:
+        the_dict = super().to_dict()
         if self.liked:
             the_dict["liked"] = self.liked
         if self.artists:
@@ -36,46 +73,25 @@ class Album:
 
         return the_dict
 
-    def from_dict(self, the_dict: dict):
-        self.__init__(**the_dict)
 
-class Artist:
+class Artist(MusicServiceItem):
     def __init__(self, **kwargs):
-        self.id = self.name = self.href = self.followed = None
-        if "id" in kwargs:
-            self.id = kwargs["id"]
-        if "name" in kwargs:
-            self.name = kwargs["name"]
-        if "href" in kwargs:
-            self.href = kwargs["href"]
+        super().__init__(**kwargs)
+        self.followed = None
         if "followed" in kwargs:
             self.followed = kwargs["followed"]
 
     def to_dict(self) -> dict:
-        the_dict = {}
-        if self.id:
-            the_dict["id"] = self.id
-        if self.name:
-            the_dict["name"] = self.name
-        if self.href:
-            the_dict["href"] = self.href
+        the_dict = super().to_dict()
         if self.followed:
             the_dict["followed"] = self.followed
         return the_dict
 
-    def from_dict(self, the_dict: dict):
-        self.__init__(**the_dict)
 
-class Song:
+class Song(MusicServiceItem):
     def __init__(self, **kwargs):
-        self.id = self.name = self.album = self.href = None
+        super().__init__(**kwargs)
         self.artists = []
-        if "id" in kwargs:
-            self.id = kwargs["id"]
-        if "name" in kwargs:
-            self.name = kwargs["name"]
-        if "href" in kwargs:
-            self.href = kwargs["href"]
         if "artist" in kwargs:
             self.artists.append(kwargs["artist"])
         if "artists" in kwargs:
@@ -85,34 +101,30 @@ class Song:
             self.album = kwargs["album"]
 
     def to_dict(self) -> dict:
-        the_dict = {}
-        if self.id:
-            the_dict["id"] = self.id
-        if self.name:
-            the_dict["name"] = self.name
-        if self.href:
-            the_dict["href"] = self.href
+        the_dict = super().to_dict()
         if self.artists:
             the_dict["artists"] = list([artist.id for artist in self.artists])
         if self.album:
             the_dict["album"] = self.album.id
         return the_dict
 
-    def from_dict(self, the_dict: dict):
-        self.__init__(**the_dict)
+    def get_resolve_key(self) -> str:
+        result = None
+        if self.id:
+            result = self.id
+        elif self.name and self.artists:
+            result = f"{self.name}-{self.artists[0].name}"
+        else:
+            logging.getLogger().warning(f"unable to determine resolve key for song")
+        return result
 
 
 
-class PlayList:
+class PlayList(MusicServiceItem):
     def __init__(self, **kwargs):
-        self.id = self.href = self.name = self.description = self.owner = self.public = None
+        super().__init__(**kwargs)
+        self.description = self.owner = self.public = None
         self.songs: List[Song] = []
-        if "id" in kwargs:
-            self.id = kwargs["id"]
-        if "href" in kwargs:
-            self.href = kwargs["href"]
-        if "name" in kwargs:
-            self.name = kwargs["name"]
         if "description" in kwargs:
             self.description = kwargs["description"]
         if "owner" in kwargs:
@@ -141,9 +153,6 @@ class PlayList:
 
         return the_dict
 
-    def from_dict(self, the_dict: dict):
-        self.__init__(**the_dict)
-
 
 class MusicLocalView:
     def __init__(self):
@@ -158,7 +167,19 @@ class MusicLocalView:
         self.all_maps.append(("albums", self.map_albums, Album))
         self.all_maps.append(("artists", self.map_artists, Artist))
 
-    def _find_item_by_name(self,name: str,  item_map: MutableMapping[str, T]):
+    def _get_resolve_key(self, item: T) -> str:
+        rk = None
+        if hasattr(item, "get_resolve_key"):
+            rk = item.get_resolve_key()
+        if not rk:
+            if hasattr(item,"id") and item.id:
+                rk = item.id
+        if not rk:
+            if hasattr(item,"name") and item.name:
+                rk = item.name
+        return rk
+
+    def _find_item_by_resolve_key(self,name: str,  item_map: MutableMapping[str, T]):
         result = None
         for item in item_map.values():
             if hasattr(item, "name"):
@@ -169,8 +190,8 @@ class MusicLocalView:
 
     def resolve_item(self, item: T, item_map: MutableMapping[str,T]) -> T:
         result = item
-        if (not hasattr(item,"id") or not item.id) and hasattr(item, "name"):
-            resolved_item = self._find_item_by_name(item.name, item_map)
+        if not hasattr(item,"id") or not item.id:
+            resolved_item = self._find_item_by_resolve_key(self._get_resolve_key(item), item_map)
             if resolved_item:
                 result = resolved_item
             else:
@@ -193,7 +214,11 @@ class MusicLocalView:
         return self.resolve_item(artist, self.map_artists)
 
     def resolve_album(self, album: Album) -> Album:
-        return self.resolve_item(album, self.map_albums)
+        resolved_album = self.resolve_item(album, self.map_albums)
+        if resolved_album != album and (album.artists and len(album.artists) > 0) and resolved_album.artists and len(resolved_album.artists) == 0:
+            for artist in album.artists:
+                resolved_album.artists.append(artist)
+        return resolved_album
 
 
     def to_dict(self) -> dict:
