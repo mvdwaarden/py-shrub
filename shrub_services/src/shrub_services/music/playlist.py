@@ -471,7 +471,7 @@ class PlaylistSelectModel(TableSelectModel):
 
     def hit_row(self, row, search_text: str):
         return (
-                search_text in row.name.lower() or (row.description and search_text in row.description.lower()) or (
+                (row.name and search_text in row.name.lower()) or (row.description and search_text in row.description.lower()) or (
                     row.owner and search_text in row.owner.lower()))
 
     def row_hash(self, row):
