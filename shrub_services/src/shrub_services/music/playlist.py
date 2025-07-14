@@ -338,9 +338,9 @@ class SpotifyApi(MusicServiceApi):
         try:
             item = response['albums']['items'][0]
             result = self.local_view.resolve_album(
-                Album(id=item["album"]["id"], name=item["album"]["name"], href=item["album"]["href"], artists=[
+                Album(id=item["id"], name=item["name"], href=item["href"], artists=[
                     self.local_view.resolve_artist(Artist(id=artist["id"], name=artist["name"], href=artist["href"]))
-                    for artist in item["album"]["artists"]]))
+                    for artist in item["artists"]]))
             logging.getLogger().info(f"found album({album.name} from {album.artists[0].name}) -> id({result.id})")
         except Exception as ex:
             logging.getLogger().error(f"problem finding album({album.name}) from {album.artists[0].name}: error({ex})")

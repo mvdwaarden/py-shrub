@@ -88,7 +88,7 @@ if __name__ == "__main__":
                 syncher.synchronize_profile()
             else:
                 src_service = None
-                if profile and False:
+                if profile:
                     local_view: MusicLocalView = MusicLocalView()
                     music_read_json(local_view, profile)
                     src_service = MusicLocalViewReaderApi(local_view)
