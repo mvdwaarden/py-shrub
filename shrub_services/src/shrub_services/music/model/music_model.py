@@ -162,10 +162,10 @@ class MusicLocalView:
         self.map_songs: MutableMapping[str, Song] = {}
         self.map_artists: MutableMapping[str, Artist] = {}
         self.map_albums: MutableMapping[str, Album] = {}
-        self.all_maps.append(("playlists", self.map_playlists, PlayList))
-        self.all_maps.append(("songs", self.map_songs, Song))
-        self.all_maps.append(("albums", self.map_albums, Album))
-        self.all_maps.append(("artists", self.map_artists, Artist))
+        self.all_maps.append(("map_playlists", self.map_playlists, PlayList))
+        self.all_maps.append(("map_songs", self.map_songs, Song))
+        self.all_maps.append(("map_albums", self.map_albums, Album))
+        self.all_maps.append(("map_artists", self.map_artists, Artist))
 
     def _get_resolve_key(self, item: T) -> str:
         rk = None
@@ -237,9 +237,10 @@ class MusicLocalView:
     def from_dict(self, the_dict: dict):
         def add_dict_to_item_to_map(name: str, item_map: dict, constructor: T):
             for v in the_dict[name]:
-                ne = constructor()
-                ne.from_dict(v)
-                item_map[ne.id] = ne
+                if v:
+                    ne = constructor()
+                    ne.from_dict(v)
+                    item_map[ne.id] = ne
 
         for name, item_map, constructor in self.all_maps:
             add_dict_to_item_to_map(name, item_map, constructor)
@@ -250,7 +251,10 @@ class MusicLocalView:
 
         for song in self.map_songs.values():
             song.artists = [self.resolve_artist(Artist(id=id)) for id in song.artists]
-            song.album = self.resolve_album(Album(id=song.album))
+            if not hasattr(song, "album"):
+                logging.getLogger().error(f"song ({song.name}) has no album")
+            else:
+                song.album = self.resolve_album(Album(id=song.album))
 
         for album in self.map_albums.values():
             album.artists = [self.resolve_artist(Artist(id=id)) for id in album.artists]

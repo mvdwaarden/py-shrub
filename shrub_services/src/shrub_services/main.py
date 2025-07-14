@@ -79,9 +79,9 @@ if __name__ == "__main__":
                 user_token = ifp.read()
             apple_provider = AppleMusicApi(dev_token=dev_token, user_token=user_token)
             spotify_provider = SpotifyApi(client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri)
-            local_view_provider = MusicLocalView()
+            local_view_provider = MusicLocalViewReaderApi(MusicLocalView())
             if profile:
-                music_read_json(local_view_provider, profile)
+                music_read_json(local_view_provider.local_view, profile)
                 src_service = local_view_provider
             elif from_provider == "spotify":
                 src_service = spotify_provider
@@ -94,7 +94,7 @@ if __name__ == "__main__":
 
             logging.getLogger().info(f"synchronize from {src_service.__class__.__name__} to {target_service.__class__.__name__}")
 
-            syncher = Synchronizer(source=src_service, target=target_service, dry_run=True)
+            syncher = Synchronizer(source=src_service, target=target_service, dry_run=dry_run)
             syncher.synchronize_profile()
             music_write_json(src_service.local_view, f"music_profile_{datetime.datetime.now().strftime("%Y%m%d-%H:%M:%S")}")
     else:

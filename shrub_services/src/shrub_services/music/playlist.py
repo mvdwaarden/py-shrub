@@ -270,7 +270,7 @@ class AppleMusicApi(MusicServiceApi):
 
     def set_liked_albums(self, albums: List[Album]):
         for album in albums:
-            self._add_to_favourites(id=album.id, name=album.name, types="albums")
+            self._add_to_favourites(id=album.id, name=f"{album.name} from {album.artists[0].name}", types="albums")
 
     def set_followed_artists(self, artists: List[Artist]):
         for artist in artists:
@@ -535,6 +535,14 @@ class Synchronizer:
         # playlists
         playlists = self.source.get_playlists()
         selected_playlists = Selector.select_playlists(playlists)
+        # liked albums
+        albums = self.source.get_liked_albums()
+        selected_albums = Selector.select_liked_albums(albums)
+        # followed artists
+        artists = self.source.get_followed_artists()
+        selected_artists = Selector.select_followed_artists(artists)
+
+        # synchronize playlists
         concurrent = False
         if concurrent:
             futures = []
@@ -545,42 +553,47 @@ class Synchronizer:
                     logging.getLogger().info(future.result())
         else:
             for playlist in selected_playlists:
+                self.source.get_playlist_songs(playlist)
                 self.synchronize_playlist(playlist)
-        # liked albums
-        albums = self.source.get_liked_albums()
-        selected_albums = Selector.select_liked_albums(albums)
+        # synchronize liked albums
+        self.synchronize_albums(selected_albums)
+        # synchronized followed artists
+        self.synchronize_artists(selected_artists)
+
+    def synchronize_albums(self, albums: List[Album]):
         target_albums = []
-        for album in selected_albums:
-            target_album = self.target.search_album(album)
-            if target_album:
-                target_albums.append(target_album)
+        if not self.dry_run or self.dry_run == "verify":
+            for album in albums:
+                target_album = self.target.search_album(album)
+                if target_album:
+                    target_albums.append(target_album)
         if not self.dry_run:
             self.target.set_liked_albums(target_albums)
-        # followed artists
-        artists = self.source.get_followed_artists()
-        selected_artists = Selector.select_followed_artists(artists)
+
+    def synchronize_artists(self, artists: List[Artist]):
         target_artists = []
-        for artist in selected_artists:
-            target_artist = self.target.search_artist(artist)
-            if target_artist:
-                target_artists.append(target_artist)
+        if not self.dry_run or self.dry_run == "verify":
+            for artist in artists:
+                target_artist = self.target.search_artist(artist)
+                if target_artist:
+                    target_artists.append(target_artist)
         if not self.dry_run:
             self.target.set_followed_artists(target_artists)
 
     def synchronize_playlist(self, playlist: PlayList):
-        not_found = 0
-        target_playlist = PlayList()
-        target_playlist.name = playlist.name
-        target_playlist.description = playlist.description
-        self.source.get_playlist_songs(playlist)
-        for src_song in playlist.songs:
-            target_song = self.target.search_song(src_song.name, src_song.artists[0])
-            if not target_song:
-                not_found += 1
-            else:
+        if not self.dry_run or self.dry_run == "verify":
+            not_found_songs = 0
+            target_playlist = PlayList()
+            target_playlist.name = playlist.name
+            target_playlist.description = playlist.description
 
-                target_playlist.add_song(target_song)
-        msg = f"could not find {not_found} songs" if not_found > 0 else f"found ALL ({len(target_playlist.songs)})songs"
-        logging.getLogger().info(f"synchronized playlist {playlist.name}, {msg}")
+            for src_song in playlist.songs:
+                target_song = self.target.search_song(src_song.name, src_song.artists[0])
+                if not target_song:
+                    not_found_songs += 1
+                else:
+
+                    target_playlist.add_song(target_song)
+            msg = f"could not find {not_found_songs} songs" if not_found_songs > 0 else f"found ALL ({len(playlist.songs)})songs"
         if not self.dry_run:
             self.target.create_or_update_playlist(target_playlist)
