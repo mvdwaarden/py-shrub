@@ -1,7 +1,7 @@
 import requests
 from requests.auth import AuthBase, HTTPBasicAuth
 from shrub_util.core.secrets import Secrets
-from typing import TypeVar
+from typing import TypeVar, List
 
 
 class DevOpsItem:
@@ -22,6 +22,8 @@ class Team(DevOpsItem):
 class WorkItem(DevOpsItem):
     def __init__(self):
         super().__init__()
+        self.title = self.state = self.reason = self.work_item_type = None
+        self.project: Project = None
 
 class AzureDevOpsLocalView:
     def __init__(self):
@@ -69,6 +71,33 @@ class AzureDevOpsApiObjectFactory:
 
         return doi
 
+    def assign_work_item_values_from_work_item_details(self, value_dict: dict, work_item: WorkItem):
+        attributes = [
+            ("System.Title","title"),
+            ("System.State", "state"),
+            ("System.WorkItemType", "work_item_type"),
+            ("System.Reason", "reason")
+            # Microsoft.VSTS.Common
+            #   .Priority
+            #   .ValueArea
+            #   .BacklogPriority
+            # Microsoft.VSTS.Scheduling
+            #   .TargetDate
+
+            #
+            #
+        ]
+
+
+        for dict_key, wi_attrib in attributes:
+            if dict_key in value_dict["fields"]:
+                setattr(work_item, wi_attrib,value_dict["fields"][dict_key])
+        if "System.TeamProject" in value_dict["fields"]:
+            prj = Project()
+            prj.name = value_dict["fields"]["System.TeamProject"]
+            work_item.project = self.local_view.resolve_project(prj)
+        return work_item
+
     def get_projects_from_get_projects_result_json(self, json_dict: dict) -> list:
         result = []
         if int(json_dict['count']) > 0:
@@ -100,6 +129,14 @@ class AzureDevOpsApiObjectFactory:
                 result.append(resolved_work_item)
         return result
 
+    def get_work_item_from_work_item_detail(self, json_dict) -> WorkItem:
+        resolved_work_item = self.local_view.resolve_work_item(
+            work_item=self._assign_default_devops_item_values_from_value_json(json_dict, WorkItem()))
+        self.assign_work_item_values_from_work_item_details(json_dict, resolved_work_item)
+
+        return resolved_work_item
+
+
 
 class AzureDevOpsApi:
     FUNCTION_PROJECTS = "{organisation}/_apis/projects"
@@ -130,13 +167,32 @@ class AzureDevOpsApi:
         return response.json()
 
     def get_work_items(self, project: Project, team: Team, max_result: int=-1):
-        query = "select * from workitems where system.workitemtype == 'Epic' "
+        use_this = True
+        if use_this:
+            query = """ SELECT 
+                            [System.WorkItemType],
+                            [System.Title],
+                            [System.State],
+                            [Microsoft.VSTS.Scheduling.Effort],
+                            [Microsoft.VSTS.Common.BusinessValue],
+                            [Microsoft.VSTS.Common.ValueArea],
+                            [System.Tags]
+                        FROM
+                            WorkItems 
+                        WHERE System.WorkItemType == 'Epic' 
+            """
+        else:
+            query = "select * from workitems where system.workitemtype == 'Epic' and System "
         response = requests.post(self._get_url(self.FUNCTION_PROJECT_WORK_ITEMS, project=project, team=team) +
                                  (f"&$top={max_result}" if max_result > 0 else ""),
                                 json={"query": f"{query}"},
                                 auth=self._get_authorization())
         return response.json()
 
+    def get_work_item_details(self, work_item: WorkItem):
+        response = requests.get(work_item.url,
+                                auth=self._get_authorization())
+        return response.json()
 
 def azure_dev_ops_get_projects(api: AzureDevOpsApi, local_view: AzureDevOpsLocalView):
     factory = AzureDevOpsApiObjectFactory(local_view)
@@ -147,6 +203,14 @@ def azure_dev_ops_get_project_teams(api: AzureDevOpsApi, local_view: AzureDevOps
     return factory.get_teams_from_get_project_teams_result_json(api.get_project_teams(project))
 
 
-def azure_dev_ops_get_work_items_for_project(api: AzureDevOpsApi, local_view: AzureDevOpsLocalView, project: Project, team: Team,max_result=-1):
+def azure_dev_ops_get_work_items_for_project(api: AzureDevOpsApi, local_view: AzureDevOpsLocalView, project: Project, team: Team,max_result=-1) -> List[WorkItem]:
     factory = AzureDevOpsApiObjectFactory(local_view)
-    return factory.get_work_items_from_work_items_by_wiql(api.get_work_items(project=project, team=team, max_result=max_result))
+    result =  factory.get_work_items_from_work_items_by_wiql(api.get_work_items(project=project, team=team, max_result=max_result))
+    for wi in result:
+        azure_dev_ops_get_work_item_details(wi, api, local_view)
+
+    return result
+
+def azure_dev_ops_get_work_item_details(work_item: WorkItem, api: AzureDevOpsApi, local_view: AzureDevOpsLocalView):
+    factory = AzureDevOpsApiObjectFactory(local_view)
+    return factory.get_work_item_from_work_item_detail(api.get_work_item_details(work_item))

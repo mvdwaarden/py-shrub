@@ -8,3 +8,4 @@ neo4j
 networkx
 pyopenssl
 pillow
+jinja2
