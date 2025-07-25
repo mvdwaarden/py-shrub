@@ -1,0 +1,77 @@
+    node BakerStreet [pos="0.15,0.2,0.5",shape=sphere,color=brown,size=8];
+    node RegentPark [pos="0.25,0.2,0.5",shape=sphere,color=brown,size=8];
+    node OxfordCircus [pos="0.35,0.2,0.5",shape=sphere,color=red,size=8];
+    node PiccadillyCircus [pos="0.45,0.2,0.5",shape=sphere,color=blue,size=8];
+    node LeicesterSquare [pos="0.55,0.2,0.5",shape=sphere,color=blue,size=8];
+    node CoventGarden [pos="0.65,0.2,0.5",shape=sphere,color=blue,size=8];
+    node TottenhamCourtRoad [pos="0.25,0.3,0.5",shape=sphere,color=central,size=8];
+    node ChanceryLane [pos="0.35,0.3,0.5",shape=sphere,color=central,size=8];
+    node Holborn [pos="0.45,0.3,0.5",shape=sphere,color=central,size=8];
+    node StPauls [pos="0.55,0.3,0.5",shape=sphere,color=central,size=8];
+    node Bank [pos="0.55,0.4,0.5",shape=sphere,color=jubilee,size=8];
+    node Monument [pos="0.65,0.4,0.5",shape=sphere,color=jubilee,size=8];
+    node LondonBridge [pos="0.75,0.4,0.5",shape=sphere,color=jubilee,size=8];
+    node CanaryWharf [pos="0.85,0.4,0.5",shape=sphere,color=jubilee,size=8];
+    node CanadaWater [pos="0.75,0.5,0.5",shape=sphere,color=jubilee,size=8];
+    node Bermondsey [pos="0.65,0.5,0.5",shape=sphere,color=jubilee,size=8];
+    node Waterloo [pos="0.45,0.4,0.5",shape=sphere,color=jubilee,size=8];
+    node Embankment [pos="0.35,0.4,0.5",shape=sphere,color=jubilee,size=8];
+    node Westminster [pos="0.25,0.4,0.5",shape=sphere,color=jubilee,size=8];
+    node GreenPark [pos="0.15,0.4,0.5",shape=sphere,color=piccadilly,size=8];
+    node HydeParkCorner [pos="0.15,0.5,0.5",shape=sphere,color=piccadilly,size=8];
+    node Knightsbridge [pos="0.15,0.6,0.5",shape=sphere,color=piccadilly,size=8];
+    node SouthKensington [pos="0.15,0.7,0.5",shape=sphere,color=piccadilly,size=8];
+    node SloaneSquare [pos="0.15,0.8,0.5",shape=sphere,color=piccadilly,size=8];
+    node Victoria [pos="0.25,0.5,0.5",shape=sphere,color=victoria,size=8];
+    node Pimlico [pos="0.25,0.6,0.5",shape=sphere,color=victoria,size=8];
+    node Vauxhall [pos="0.25,0.7,0.5",shape=sphere,color=victoria,size=8];
+    node Stockwell [pos="0.25,0.8,0.5",shape=sphere,color=victoria,size=8];
+    node ElephantCastle [pos="0.25,0.9,0.5",shape=sphere,color=northern,size=8];
+    node Kennington [pos="0.35,0.9,0.5",shape=sphere,color=northern,size=8];
+    node Oval [pos="0.45,0.9,0.5",shape=sphere,color=northern,size=8];
+    node ClaphamNorth [pos="0.55,0.9,0.5",shape=sphere,color=northern,size=8];
+    node ClaphamCommon [pos="0.65,0.9,0.5",shape=sphere,color=northern,size=8];
+    node ClaphamSouth [pos="0.75,0.9,0.5",shape=sphere,color=northern,size=8];
+    node Balham [pos="0.85,0.9,0.5",shape=sphere,color=northern,size=8];
+    node TootingBec [pos="0.85,0.8,0.5",shape=sphere,color=northern,size=8];
+    node TootingBroadway [pos="0.85,0.7,0.5",shape=sphere,color=northern,size=8];
+
+    # Bakerloo Line (brown)
+    BakerStreet -- RegentPark [type=solid,color=brown,width=2];
+    RegentPark -- OxfordCircus [type=solid,color=brown,width=2];
+
+    # Central Line (red)
+    OxfordCircus -- TottenhamCourtRoad [type=solid,color=red,width=2];
+    TottenhamCourtRoad -- ChanceryLane [type=solid,color=red,width=2];
+    ChanceryLane -- Holborn [type=solid,color=red,width=2];
+    Holborn -- TottenhamCourtRoad [type=solid,color=red,width=2];
+    Holborn -- TottenhamCourtRoad [type=solid,color=red,width=2];
+
+    # Piccadilly Line (blue)
+    GreenPark -- HydeParkCorner [type=solid,color=blue,width=2];
+    HydeParkCorner -- Knightsbridge [type=solid,color=blue,width=2];
+    Knightsbridge -- SouthKensington [type=solid,color=blue,width=2];
+    SouthKensington -- SloaneSquare [type=solid,color=blue,width=2];
+
+    # Jubilee Line (grey)
+    Westminster -- Waterloo [type=solid,color=jubilee,width=2];
+    Waterloo -- LondonBridge [type=solid,color=jubilee,width=2];
+    LondonBridge -- Bermondsey [type=solid,color=jubilee,width=2];
+    Bermondsey -- CanadaWater [type=solid,color=jubilee,width=2];
+    CanadaWater -- CanaryWharf [type=solid,color=jubilee,width=2];
+    CanaryWharf -- CanadaWater [type=solid,color=jubilee,width=2];
+
+    # Victoria Line (lightblue)
+    Victoria -- Pimlico [type=solid,color=lightblue,width=2];
+    Pimlico -- Vauxhall [type=solid,color=lightblue,width=2];
+    Vauxhall -- Stockwell [type=solid,color=lightblue,width=2];
+
+    # Northern Line (black)
+    ElephantCastle -- Kennington [type=solid,color=black,width=2];
+    Kennington -- Oval [type=solid,color=black,width=2];
+    Oval -- ClaphamNorth [type=solid,color=black,width=2];
+    ClaphamNorth -- ClaphamCommon [type=solid,color=black,width=2];
+    ClaphamCommon -- ClaphamSouth [type=solid,color=black,width=2];
+    ClaphamSouth -- Balham [type=solid,color=black,width=2];
+    Balham -- TootingBec [type=solid,color=black,width=2];
+    TootingBec -- TootingBroadway [type=solid,color=black,width=2];
