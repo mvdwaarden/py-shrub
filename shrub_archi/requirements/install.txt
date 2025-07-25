@@ -9,3 +9,5 @@ networkx
 pyopenssl
 pillow
 jinja2
+dash
+plotly

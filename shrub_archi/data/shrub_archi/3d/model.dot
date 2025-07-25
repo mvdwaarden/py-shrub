@@ -1,0 +1,7 @@
+node1 [pos="0.2,0.2,0.2",shape=sphere,color=red,size=18];
+node2 [pos="0.8,0.2,0.2",shape=pyramid,color=green,size=24];
+node3 [pos="0.5,0.8,0.2",shape=cube,color=blue,size=28];
+node4 [pos="0.8,0.2,0.8",shape=pyramid,color=white,size=30];
+node1 -- node2 [type=dotted,color=magenta,width=2];
+node1 -- node2 [type=dotted,color=green,width=2];
+node4 -- node1 [type=dotted,color=blue,width=2];

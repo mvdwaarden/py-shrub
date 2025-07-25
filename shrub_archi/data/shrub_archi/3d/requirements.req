@@ -1,0 +1,51 @@
+**Goal:** Build a Dash app that visualizes a configurable 3D cube with:
+
+1. **Nodes** defined in DOTTY syntax:
+
+   * Syntax: `nodeName [pos="x,y,z", shape=<sphere|cube|pyramid>, color=<color>, size=<int>];`
+   * Parsed first to collect positions, shapes, colors, sizes.
+   * Automatically scale/center to fill 80% of the cube interior.
+
+2. **Edges (Vertices)** defined in DOTTY syntax:
+
+   * Syntax: `node1 -- node2 [type=<solid|dashed|dotted>, color=<color>, width=<int>];`
+   * Parsed in a second step, after nodes, to resolve endpoints.
+   * Rendered as both a 3D cylinder (thickness) and an overlaid line with dash style.
+   * The edges connect the nodes
+   * Ignore edges for which the nodes can not be found, log an error if that is not the case
+
+
+3. **Cube faces** projecting internal node positions:
+
+   * Six faces (left, right, top, bottom, front, back).
+   * Each face shows a 2D projection from a camera perpendicular to the face.
+   * Sidebar displays these 2D face views as images (64×64 px).
+
+4. **Interactive transparency controls:**
+
+   * Slider per face to set opacity (0–1), default 0.5.
+   * Options to group sliders: Left/Right, Top/Bottom, Front/Back.
+
+5. **Resizable sidebar UI:**
+
+   * Sidebar containing DOTTY input, slider controls, face views.
+   * User can drag its right edge to resize.
+   * Sidebar width should be adjustable
+
+6. **3D cube canvas:**
+
+   * Plotly `Surface` traces for textured faces with projected images.
+   * Plotly `Scatter3d` for nodes (shape markers).
+   * Plotly `Surface` + `Scatter3d` for edges.
+   * Fully interactive: rotate, pan, zoom.
+
+**Tech stack:**
+
+* Dash (dash, dcc, html) for UI.
+* Plotly for 3D visualization.
+* PIL for generating face projection images.
+* NumPy for math.
+
+**Next step:** Implement the app based on these requirements.
+
+
