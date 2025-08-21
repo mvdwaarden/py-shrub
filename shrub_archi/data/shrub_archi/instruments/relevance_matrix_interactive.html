@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Relevance Matrix — Interactive</title>
+<script src="relevance_data.js"></script>
+<style>
+  :root {
+    --border:#d1d5db; --ink:#0f172a; --muted:#64748b; --bg:#ffffff;
+    --core:#22c55e; --secondary:#bbf7d0; --off:#f8fafc; --accent:#0ea5e9;
+  }
+  html, body { margin:0; padding:0; background:var(--bg); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; }
+  .wrap { max-width: 1200px; margin: 18px auto; padding: 0 14px; display:grid; grid-template-columns: 1fr 340px; gap: 14px; }
+  h1 { font-size: 20px; margin: 0 0 10px; }
+  .legend { background:#f8fafc; border:1px solid var(--border); border-radius:10px; padding:8px 10px; font-size:12px; color:#111827; margin-bottom: 8px; }
+  .controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom: 8px; }
+  select, button { font-size: 13px; padding: 6px 8px; border:1px solid var(--border); border-radius: 8px; background: #fff; }
+  button { cursor:pointer; }
+  .grid { border:1px solid var(--border); border-radius:12px; overflow:auto; }
+  table { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 720px; }
+  th, td { border-bottom:1px solid var(--border); border-right:1px solid var(--border); }
+  th:first-child, td:first-child { border-left:1px solid var(--border); }
+  tr:last-child td { border-bottom:1px solid var(--border); }
+  thead th { background:#f8fafc; }
+  th { padding:8px; font-size:12px; }
+  th .hdr { max-width: 160px; white-space: normal; line-height:1.2; font-weight:600; }
+  td { width: 118px; height: 72px; position: relative; }
+  td .cellbtn { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:14px; background: transparent; border:0; cursor:pointer; }
+  td.level-0 { background: var(--off); }
+  td.level-1 { background: var(--secondary); }
+  td.level-2 { background: linear-gradient(135deg, var(--core), #86efac); }
+  td:hover { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .fw-bars { position:absolute; left:4px; right:4px; bottom:4px; height:8px; display:flex; gap:3px; justify-content:flex-start; align-items:flex-end; pointer-events:none; }
+  .fw-bar { width:10px; height:6px; border-radius:2px; }
+  td.selectedCell { outline: 3px solid var(--accent); outline-offset: -3px; }
+  .aside { border:1px solid var(--border); border-radius:12px; padding: 10px; position: sticky; top: 12px; align-self: start; background:#fff; }
+  .aside h2 { font-size: 16px; margin: 0 0 6px; }
+  .aside .muted { color: var(--muted); font-size: 12px; }
+  .section { border:1px solid var(--border); border-radius:8px; padding:0; background:#fff; overflow:hidden; }
+  .section summary { list-style:none; cursor:pointer; padding:8px 10px; font-weight:600; }
+  .section summary::-webkit-details-marker { display:none; }
+  .section .content { padding:8px 10px; border-top:1px dashed var(--border); }
+  .legendRow { display:flex; gap:8px; align-items:center; font-size:12px; color:#0f172a; margin-top:6px; }
+  .sw { width: 14px; height: 14px; border-radius:4px; border:1px solid var(--border); }
+  .sw.core { background: linear-gradient(135deg, var(--core), #86efac); }
+  .sw.secondary { background: var(--secondary); }
+  .sw.off { background: var(--off); }
+  .hint { color: var(--muted); font-size: 12px; margin-top: 6px; }
+  .err { display:none; background:#fee2e2; border:1px solid #fecaca; color:#7f1d1d; padding:8px; border-radius:8px; margin: 8px 0; font-size:12px; }
+  @media (max-width: 980px) { .wrap { grid-template-columns: 1fr; } .aside { position: relative; } }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div>
+      <h1>Relevance Matrix — Interactive</h1>
+      <div id="err" class="err"></div>
+      <div class="legend">
+        <div style="margin-bottom:6px;"><strong>Axes Legend</strong></div>
+        <div style="font-size:12px; margin-bottom:6px;">
+          <em>Rows — Added Values:</em> Intended benefits of architecture.<br>
+          <em>Columns — Dimensions:</em> Conditions that influence relevance.
+        </div>
+        <div class="legendRow"><span class="sw core"></span> Core (2) &nbsp; <span class="sw secondary"></span> Secondary (1) &nbsp; <span class="sw off"></span> Not relevant (0)</div>
+        <div class="hint">Hover to preview. Click to cycle relevance (0→1→2). <strong>Shift+Click</strong> cycles coverage for selected frameworks.</div>
+      </div>
+      
+      <details id="roadmapSection" style="margin-top:10px; border:1px solid var(--border); border-radius:8px; padding:6px; background:#f8fafc;">
+        <summary style="font-weight:600; cursor:pointer;">Next Steps (Roadmap)</summary>
+        <div style="font-size:13px; color:#111827; padding:6px 8px;">
+          <p>This section outlines potential future enhancements to evolve the matrix into a full decision-support tool.</p>
+          <ul style="margin:0 0 8px 16px; padding:0;">
+            <li>Weight Added Values and Dimensions to reflect organizational priorities.</li>
+            <li>Calculate framework fit scores based on weighted coverage.</li>
+            <li>Capture current scope and requirements via a short assessment form.</li>
+            <li>Translate requirements into dimension weights automatically.</li>
+            <li>Model trade-offs and interactions between dimensions.</li>
+            <li>Recommend sequencing for framework adoption and integration.</li>
+            <li>Add analytics panel for gap hotspots, overlaps, and optimization suggestions.</li>
+          </ul>
+          <label style="display:flex; align-items:center; gap:6px; font-size:12px; color:#374151;">
+            <input type="checkbox" id="hideRoadmap"/> Hide permanently
+          </label>
+        </div>
+      </details>
+      <script>
+        (function(){
+          const hideFlag = localStorage.getItem('hideRoadmapSection');
+          const roadmap = document.getElementById('roadmapSection');
+          const hideCb = document.getElementById('hideRoadmap');
+          if(hideFlag === 'true'){ roadmap.style.display = 'none'; }
+          hideCb?.addEventListener('change', () => {
+            if(hideCb.checked){
+              localStorage.setItem('hideRoadmapSection','true');
+              roadmap.style.display = 'none';
+            }
+          });
+        })();
+      </script>
+<div class="legend" style="margin-top:8px;">
+        <strong>Editing tips</strong>
+        <ul style="margin:6px 0 0 16px; padding:0; font-size:12px; color:#374151;">
+          <li><strong>Click</strong> a cell to cycle <em>relevance</em>: 0 → 1 → 2.</li>
+          <li><strong>Shift+Click</strong> a cell to cycle <em>coverage</em> for selected frameworks: 0 → 1 → 2.</li>
+          <li><strong>Hover</strong> a cell to preview details; the panel shows rationale, example, and framework coverage.</li>
+          <li>Use the <strong>Frameworks</strong> checkboxes to choose overlays (colored bars at the bottom of each cell).</li>
+        </ul>
+      </div>
+      <div class="controls">
+        <label>View
+          <select id="viewMode">
+            <option value="all">All cells</option>
+            <option value="relevant">Relevant only (≥1)</option>
+            <option value="core">Core only (=2)</option>
+          </select>
+        </label>
+        <label>Frameworks</label><span id="fwList" style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;"></span>
+        <button id="exportBtn">Export CSV</button>
+        <button id="saveBtn">Save JSON</button> <input type="file" id="dataFile" accept=".js,.json"> <button id="showRoadmapBtn" style="display:none;">Show Roadmap</button>
+      </div>
+      <div class="grid" id="grid"></div>
+    </div>
+
+    <aside class="aside">
+      <h2>Details</h2>
+      <div class="muted">Hover/select a cell to see details.</div>
+      <div id="detailBox" style="margin-top:8px; display:flex; flex-direction:column; gap:10px;"></div>
+    </aside>
+  </div>
+
+<script>
+(function(){
+  const errBox = document.getElementById('err');
+  function showErr(e){ errBox.style.display='block'; errBox.textContent = 'Error: ' + e; console.error(e); }
+
+  try {
+    if (!window.RELEVANCE_DATA) throw new Error('relevance_data.js not found. Place this HTML next to relevance_data.js.');
+
+    const ADDED_VALUES = window.RELEVANCE_DATA.added_values || [];
+    const DIMENSIONS = window.RELEVANCE_DATA.dimensions || [];
+    let RELEVANCE = structuredClone(window.RELEVANCE_DATA.relevance || {});
+    let RATIONALES = structuredClone(window.RELEVANCE_DATA.rationales || {});
+    let EXAMPLES = structuredClone(window.RELEVANCE_DATA.examples || {});
+    const ADDED_VALUE_DESCS = window.RELEVANCE_DATA.added_value_descriptions || {};
+    const DIMENSION_DESCS = window.RELEVANCE_DATA.dimension_descriptions || {};
+    let FRAMEWORKS = structuredClone(window.RELEVANCE_DATA.frameworks || {});
+    let FW_COLORS = structuredClone(window.RELEVANCE_DATA.framework_colors || {});
+    let NONREL = structuredClone(window.RELEVANCE_DATA.non_relevance_reason || {});
+    let FW_NOTES = structuredClone(window.RELEVANCE_DATA.framework_notes || {});
+
+    const grid = document.getElementById('grid');
+    const detailBox = document.getElementById('detailBox');
+    const viewMode = document.getElementById('viewMode');
+    const exportBtn = document.getElementById('exportBtn');
+    const saveBtn = document.getElementById('saveBtn');
+    const fwList = document.getElementById('fwList');
+    const dataFile = document.getElementById('dataFile');
+
+    let selectedCell = null; // { av, dm }
+
+    function levelClass(lvl) { return 'level-' + (lvl || 0); }
+    function cycle(level) { return (level + 1) % 3; } // 0->1->2->0
+    function matchesMode(level) {
+      if (viewMode.value === 'all') return true;
+      if (viewMode.value === 'relevant') return level >= 1;
+      if (viewMode.value === 'core') return level === 2;
+    }
+
+    // Framework selector
+    let selectedFrameworks = Object.keys(FRAMEWORKS);
+    function renderFwList(){
+      fwList.innerHTML='';
+      Object.keys(FRAMEWORKS).forEach(fw => {
+        const id = 'fw_'+fw.replace(/\W+/g,'_');
+        const wrap = document.createElement('label'); wrap.style.display='inline-flex'; wrap.style.alignItems='center'; wrap.style.gap='4px';
+        const cb = document.createElement('input'); cb.type='checkbox'; cb.id=id; cb.checked = selectedFrameworks.includes(fw);
+        cb.addEventListener('change', ()=>{
+          if (cb.checked){ if (!selectedFrameworks.includes(fw)) selectedFrameworks.push(fw); }
+          else { selectedFrameworks = selectedFrameworks.filter(x=>x!==fw); }
+          render();
+        });
+        const sw = document.createElement('span'); sw.style.display='inline-block'; sw.style.width='10px'; sw.style.height='10px'; sw.style.borderRadius='2px'; sw.style.background = FW_COLORS[fw] || '#999';
+        const txt = document.createElement('span'); txt.textContent = fw; txt.style.fontSize='12px';
+        wrap.appendChild(cb); wrap.appendChild(sw); wrap.appendChild(txt); fwList.appendChild(wrap);
+      });
+    }
+
+    function section(title, bodyHTML, open=true) {
+      const det = document.createElement('details');
+      if (open) det.setAttribute('open','');
+      det.className = 'section';
+      const sum = document.createElement('summary');
+      sum.textContent = title;
+      const content = document.createElement('div');
+      content.className = 'content';
+      content.innerHTML = bodyHTML;
+      det.appendChild(sum); det.appendChild(content);
+      return det;
+    }
+
+    function showDetails(av, dm, source) {
+      const level = (RELEVANCE?.[av]?.[dm]) || 0;
+      const why = (RATIONALES?.[av]?.[dm]) || '(no rationale yet)';
+      const ex = (EXAMPLES?.[av]?.[dm]) || '(no example yet)';
+      const avDesc = (ADDED_VALUE_DESCS?.[av]) || '';
+      const dmDesc = (DIMENSION_DESCS?.[dm]) || '';
+      const metaNoRel = (NONREL?.[av]?.[dm]) || '';
+
+      const overviewHTML = `
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+          <div>
+            <div style="font-weight:600;">Added Value</div>
+            <div>${av}</div>
+            <div style="font-size:12px; color:#374151;"><em>${avDesc}</em></div>
+          </div>
+          <div>
+            <div style="font-weight:600;">Dimension</div>
+            <div>${dm}</div>
+            <div style="font-size:12px; color:#374151;"><em>${dmDesc}</em></div>
+          </div>
+        </div>`;
+
+      const metaHTML = `
+        <div class="muted" style="margin-bottom:6px;">Relevance (matrix): ${level} (${level===2?'Core':level===1?'Secondary':'Not relevant'})${source ? ' ('+source+')' : ''}</div>
+        ${level===0 ? `<div><strong>Why no relevance:</strong> ${metaNoRel || '(n/a)'}</div>` : ''}`;
+
+      const rationaleHTML = `
+        <div style="margin-bottom:6px;"><strong>Why:</strong> ${why}</div>
+        <div><strong>${level ? 'Example' : 'Note'}:</strong> ${ex}</div>`;
+
+      const fwListHTML = (selectedFrameworks.length ? selectedFrameworks : Object.keys(FRAMEWORKS)).map(fw => {
+        const cov = (((FRAMEWORKS||{})[fw]||{})[av]||{})[dm] || 0;
+        const label = cov===2?'Explicit (2)':(cov===1?'Partial (1)':'None (0)');
+        const how = (((FW_NOTES||{})[fw]||{})[av]||{})[dm]?.how || '';
+        const whyNot = (((FW_NOTES||{})[fw]||{})[av]||{})[dm]?.why_not || '';
+        const detail = cov>0 ? how : whyNot;
+        const chip = `<span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${FW_COLORS[fw]||'#999'};opacity:${cov===2?1:cov===1?.5:.2}"></span>`;
+        return `<div style="margin:6px 0;">
+          <span style="display:inline-flex;align-items:center;gap:6px;margin-right:10px;">${chip}<strong>${fw}</strong>: ${label}</span>
+          ${detail ? `<div style="margin-left:18px; color:#111827;">${detail}</div>` : ''}
+        </div>`;
+      }).join('');
+
+      // assemble sections
+      detailBox.innerHTML = '';
+      detailBox.appendChild(section('Overview', overviewHTML, true));
+      detailBox.appendChild(section('Meta-level relevance', metaHTML, true));
+      detailBox.appendChild(section('Rationale & Example', rationaleHTML, true));
+      detailBox.appendChild(section('Framework coverage', fwListHTML || '<div class="muted">No frameworks selected.</div>', true));
+    }
+
+    function render() {
+      const tbl = document.createElement('table');
+      const thead = document.createElement('thead');
+      const trh = document.createElement('tr');
+      const th0 = document.createElement('th');
+      th0.innerHTML = '<div class="hdr">Added Value ↓ / Dimension →</div>';
+      trh.appendChild(th0);
+      DIMENSIONS.forEach(dm => {
+        const th = document.createElement('th');
+        th.innerHTML = `<div class="hdr">${dm}</div>`;
+        th.title = DIMENSION_DESCS[dm] || '';
+        trh.appendChild(th);
+      });
+      thead.appendChild(trh);
+      tbl.appendChild(thead);
+
+      const tbody = document.createElement('tbody');
+      ADDED_VALUES.forEach(av => {
+        const tr = document.createElement('tr');
+        const tdTitle = document.createElement('th');
+        tdTitle.innerHTML = `<div class="hdr">${av}</div>`;
+        tdTitle.title = ADDED_VALUE_DESCS[av] || '';
+        tr.appendChild(tdTitle);
+        DIMENSIONS.forEach(dm => {
+          const level = (RELEVANCE?.[av]?.[dm]) || 0;
+          const td = document.createElement('td');
+          const visibleLevel = matchesMode(level) ? level : 0;
+          td.className = levelClass(visibleLevel);
+          if (selectedCell && selectedCell.av === av && selectedCell.dm === dm) { td.classList.add('selectedCell'); }
+          const btn = document.createElement('button');
+          btn.className = 'cellbtn';
+          btn.title = ((RATIONALES?.[av]?.[dm] || '') + (EXAMPLES?.[av]?.[dm] ? ('\n' + EXAMPLES[av][dm]) : '')).trim();
+          btn.textContent = level === 2 ? '✓✓' : (level === 1 ? '✓' : '');
+          btn.addEventListener('click', (e) => {
+            selectedCell = { av, dm };
+            e.stopPropagation();
+            if (e.shiftKey){
+              // cycle coverage for all selected frameworks
+              const targets = selectedFrameworks.length ? selectedFrameworks : Object.keys(FRAMEWORKS);
+              targets.forEach(fw => {
+                const curr = ((((FRAMEWORKS||{})[fw]||{})[av]||{})[dm]) || 0;
+                const next = (curr + 1) % 3; // 0->1->2->0
+                if (!FRAMEWORKS[fw]) FRAMEWORKS[fw] = {};
+                if (!FRAMEWORKS[fw][av]) FRAMEWORKS[fw][av] = {};
+                FRAMEWORKS[fw][av][dm] = next;
+              });
+              render();
+              showDetails(av, dm, 'coverage (Shift+Click)');
+            } else {
+              const next = cycle(level);
+              if (!RELEVANCE[av]) RELEVANCE[av] = {};
+              RELEVANCE[av][dm] = next;
+              render();
+              showDetails(av, dm, 'relevance');
+            }
+          });
+          btn.addEventListener('mouseenter', () => { showDetails(av, dm, 'hover'); });
+          td.addEventListener('mouseenter', () => { showDetails(av, dm, 'hover'); });
+          td.appendChild(btn);
+
+          // framework bars overlay
+          const bars = document.createElement('div'); bars.className='fw-bars';
+          const targets = selectedFrameworks.length ? selectedFrameworks : Object.keys(FRAMEWORKS);
+          targets.forEach(fw => {
+            const cov = (((FRAMEWORKS||{})[fw]||{})[av]||{})[dm] || 0; // 0/1/2
+            if (cov>0){
+              const bar = document.createElement('div'); bar.className='fw-bar'; bar.style.background = FW_COLORS[fw] || '#999';
+              bar.style.opacity = cov===2 ? '1' : '0.5';
+              bars.appendChild(bar);
+            }
+          });
+          td.appendChild(bars);
+
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+      tbl.appendChild(tbody);
+
+      grid.innerHTML = '';
+      grid.appendChild(tbl);
+      if (selectedCell) { showDetails(selectedCell.av, selectedCell.dm, 'selected'); }
+    }
+
+    // Export CSV
+    exportBtn.addEventListener('click', () => {
+      const rows = [['Added Value','Dimension','Level','Rationale','Example']];
+      ADDED_VALUES.forEach(av => {
+        DIMENSIONS.forEach(dm => {
+          rows.push([av, dm, RELEVANCE?.[av]?.[dm] || 0, (RATIONALES?.[av]?.[dm]) || '', (EXAMPLES?.[av]?.[dm]) || '']);
+        });
+      });
+      const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+      const blob = new Blob([csv], {type:'text/csv'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'relevance_matrix.csv';
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    // Save JSON
+    saveBtn.addEventListener('click', () => {
+      const out = {
+        added_values: ADDED_VALUES,
+        dimensions: DIMENSIONS,
+        relevance: RELEVANCE,
+        rationales: RATIONALES,
+        examples: EXAMPLES,
+        added_value_descriptions: ADDED_VALUE_DESCS,
+        dimension_descriptions: DIMENSION_DESCS,
+        frameworks: FRAMEWORKS,
+        framework_colors: FW_COLORS,
+        non_relevance_reason: NONREL,
+        framework_notes: FW_NOTES
+      };
+      const blob = new Blob([`window.RELEVANCE_DATA = ${JSON.stringify(out, null, 2)};`], {type:'application/javascript'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'relevance_data.js';
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    
+    // Roadmap hide/show using localStorage
+    const roadmap = document.getElementById('roadmap');
+    const hideChk = document.getElementById('hideRoadmapChk');
+    const showRoadmapBtn = document.getElementById('showRoadmapBtn');
+    const LS_KEY = 'relevance_matrix_hide_roadmap';
+
+    function applyRoadmapVisibility(){
+      const hidden = localStorage.getItem(LS_KEY) === '1';
+      if (roadmap) roadmap.style.display = hidden ? 'none' : '';
+      if (showRoadmapBtn) showRoadmapBtn.style.display = hidden ? '' : 'none';
+    }
+
+    if (hideChk){
+      hideChk.addEventListener('change', () => {
+        if (hideChk.checked) { localStorage.setItem(LS_KEY, '1'); }
+        else { localStorage.removeItem(LS_KEY); }
+        applyRoadmapVisibility();
+      });
+    }
+    if (showRoadmapBtn){
+      showRoadmapBtn.addEventListener('click', () => {
+        localStorage.removeItem(LS_KEY);
+        if (hideChk) hideChk.checked = false;
+        applyRoadmapVisibility();
+      });
+    }
+    // Initialize state on load
+    const hiddenAtLoad = localStorage.getItem(LS_KEY) === '1';
+    if (hideChk) hideChk.checked = hiddenAtLoad;
+    applyRoadmapVisibility();
+
+    
+    function parseDataset(text){
+      try { return JSON.parse(text); }
+      catch(e){
+        const m = text.match(/window\s*\.\s*RELEVANCE_DATA\s*=\s*([\s\S]*?);\s*$/);
+        if (m && m[1]) { return JSON.parse(m[1]); }
+        throw new Error('Unrecognized data format. Expect JSON or a JS file that assigns window.RELEVANCE_DATA.');
+      }
+    }
+    function applyDataset(ds){
+      if (!ds) throw new Error('Empty dataset');
+      window.RELEVANCE_DATA = ds;
+      // We intentionally keep ADDED_VALUES and DIMENSIONS stable in this version
+      RELEVANCE = structuredClone(ds.relevance || {});
+      RATIONALES = structuredClone(ds.rationales || {});
+      EXAMPLES = structuredClone(ds.examples || {});
+      FRAMEWORKS = structuredClone(ds.frameworks || {});
+      FW_COLORS = structuredClone(ds.framework_colors || {});
+      NONREL = structuredClone(ds.non_relevance_reason || {});
+      FW_NOTES = structuredClone(ds.framework_notes || {});
+      selectedCell = null;
+      renderFwList();
+      render();
+    }
+    if (dataFile){
+      dataFile.addEventListener('change', async (e) => {
+        const f = e.target.files[0];
+        if (!f) return;
+        const text = await f.text();
+        try {
+          const ds = parseDataset(text);
+          applyDataset(ds);
+        } catch (err) { alert('Failed to load dataset: ' + err.message); }
+      });
+    }
+    renderFwList();
+    viewMode.addEventListener('change', () => { render(); });
+    render();
+        
+        
+  } catch (e) {
+    showErr(e.message || e);
+  }
+})();
+</script>
+</body>
+</html>

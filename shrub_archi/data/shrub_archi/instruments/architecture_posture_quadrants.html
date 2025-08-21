@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Quadrant Explorer</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-white">
+    <div id="root"></div>
+    <script type="text/babel">
+      const { useState, useMemo } = React;
+
+      const ALT_NAMES = {
+        Drift: ["Wild", "Autopoietic", "Sprawl"],
+        Adaptive: ["Guided Emergence", "Steering", "Enabling"],
+        Illusory: ["Theatre", "Cargo Cult", "Pretence"],
+        Directive: ["Programmatic", "Engineered", "Designed"],
+      };
+
+      const PRESETS = [
+        { name: "Lean Startup (discovery)", x: 70, y: 60 },
+        { name: "Scrum (mature team)", x: 80, y: 70 },
+        { name: "Kanban (flow)", x: 75, y: 65 },
+        { name: "Open Source Community", x: 85, y: 55 },
+        { name: "Waterfall", x: 20, y: 85 },
+        { name: "Six Sigma", x: 15, y: 92 },
+        { name: "Innovation Theatre", x: 20, y: 30 },
+        { name: "Unowned Platform Drift", x: 88, y: 22 },
+        { name: "Hackathon", x: 92, y: 35 },
+        { name: "TOGAF", x: 25, y: 80 },
+        { name: "DYA", x: 40, y: 75 },
+        { name: "NORA", x: 30, y: 78 },
+        { name: "SAFe", x: 35, y: 85 },
+      ];
+
+      function classifyQuadrant(x, y) {
+        if (x <= 50 && y >= 50) return "Directive";
+        if (x > 50 && y >= 50) return "Adaptive";
+        if (x <= 50 && y < 50) return "Illusory";
+        return "Drift";
+      }
+
+      const PRESET_COLORS = [
+        "#ef4444", "#3b82f6", "#10b981", "#f59e0b",
+        "#8b5cf6", "#22c55e", "#ec4899", "#14b8a6", "#a855f7",
+        "#6366f1", "#84cc16", "#e11d48", "#0ea5e9"
+      ];
+
+      const overlayOptions = ["none", "architecture", "cynefin", "stacey", "control"];
+
+      function QuadrantExplorer() {
+        const [x, setX] = useState(50);
+        const [y, setY] = useState(50);
+        const [overlay, setOverlay] = useState("none");
+        const [overlayColored, setOverlayColored] = useState(true);
+        const [altLabels, setAltLabels] = useState(false);
+        const [activePresets, setActivePresets] = useState([]);
+        const [showPresetLabels, setShowPresetLabels] = useState(true);
+
+        const quadrant = useMemo(() => classifyQuadrant(x, y), [x, y]);
+        const labelFor = (key) => (altLabels ? ALT_NAMES[key][0] : key);
+
+        const togglePreset = (preset) => {
+          setActivePresets((prev) =>
+            prev.includes(preset.name)
+              ? prev.filter((n) => n !== preset.name)
+              : [...prev, preset.name]
+          );
+        };
+
+        const presetIndex = (name) => PRESETS.findIndex((p) => p.name === name);
+        const colorForPreset = (name) => PRESET_COLORS[presetIndex(name) % PRESET_COLORS.length];
+
+        return (
+          <div className="w-full min-h-screen bg-white text-slate-900 p-6">
+            <div className="max-w-6xl mx-auto grid md:grid-cols-5 gap-6">
+              <div className="md:col-span-2 space-y-6">
+                <h1 className="text-2xl font-semibold">Intentionality × Control</h1>
+                <div className="space-y-4 p-4 rounded-2xl shadow bg-slate-50">
+                  <div>
+                    <label className="block text-sm font-medium">
+                      Intentionality (Intentional → Emergent)
+                    </label>
+                    <input type="range" min={0} max={100} value={x}
+                      onChange={(e) => setX(parseInt(e.target.value))} className="w-full" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium">
+                      Control (Uncontrolled → Controlled)
+                    </label>
+                    <input type="range" min={0} max={100} value={y}
+                      onChange={(e) => setY(parseInt(e.target.value))} className="w-full" />
+                  </div>
+                  <div className="flex gap-2 flex-wrap">
+                    {overlayOptions.map((opt) => (
+                      <button key={opt}
+                        onClick={() => setOverlay(overlay === opt ? "none" : opt)}
+                        className={`px-3 py-1 rounded-xl text-sm border ${overlay === opt ? "bg-slate-900 text-white" : "bg-white"}`}
+                      >
+                        {opt === "none" ? "No overlay" : `Overlay: ${opt[0].toUpperCase() + opt.slice(1)}`}
+                      </button>
+                    ))}
+                    <button onClick={() => setAltLabels(!altLabels)}
+                      className="px-3 py-1 rounded-xl text-sm border">
+                      Alt quadrant labels
+                    </button>
+                    <label className="text-sm flex items-center gap-2">
+                      <input type="checkbox" checked={overlayColored}
+                        onChange={(e) => setOverlayColored(e.target.checked)} />
+                      Colored overlays
+                    </label>
+                    <label className="text-sm flex items-center gap-2 ml-auto">
+                      <input type="checkbox" checked={showPresetLabels}
+                        onChange={(e) => setShowPresetLabels(e.target.checked)} />
+                      Show preset labels
+                    </label>
+                  </div>
+                </div>
+
+                <h2 className="font-medium">Presets (toggle to show/hide)</h2>
+                <div className="grid grid-cols-1 gap-2">
+                  {PRESETS.map((p) => {
+                    const active = activePresets.includes(p.name);
+                    return (
+                      <button key={p.name} onClick={() => togglePreset(p)}
+                        className={`flex items-center justify-between w-full px-3 py-2 rounded-xl border text-left ${active ? "bg-slate-900 text-white" : "bg-white"}`}>
+                        <span className="text-sm">{p.name}</span>
+                        <span className="flex items-center gap-2">
+                          <span className="inline-block w-3 h-3 rounded" style={{ backgroundColor: colorForPreset(p.name) }}></span>
+                          <span className="text-xs opacity-70">({p.x}, {p.y})</span>
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-50 shadow">
+                  <h2 className="font-medium mb-2">Current Quadrant: {labelFor(quadrant)}</h2>
+                </div>
+              </div>
+
+              <div className="md:col-span-3">
+                <div className="relative aspect-square bg-white rounded-2xl shadow overflow-hidden">
+                  {overlay !== "none" && <OverlayRegions overlay={overlay} colored={overlayColored} />}
+
+                  <div className="absolute left-2 top-1/2 -translate-y-1/2 -rotate-90 text-xs text-slate-600">
+                    Uncontrolled ⟶ Controlled
+                  </div>
+                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-xs text-slate-600">
+                    Intentional ⟶ Emergent
+                  </div>
+
+                  <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 pointer-events-none">
+                    <div className="flex items-start justify-start p-3 text-slate-500 text-xs">{labelFor("Directive")}</div>
+                    <div className="flex items-start justify-end p-3 text-slate-500 text-xs">{labelFor("Adaptive")}</div>
+                    <div className="flex items-end justify-start p-3 text-slate-500 text-xs">{labelFor("Illusory")}</div>
+                    <div className="flex items-end justify-end p-3 text-slate-500 text-xs">{labelFor("Drift")}</div>
+                  </div>
+
+                  <div className="absolute w-4 h-4 rounded-full bg-slate-900 shadow-lg"
+                    style={{ left: `calc(${x}% - 8px)`, bottom: `calc(${y}% - 8px)` }}
+                    title={`You: (${x}, ${y})`} />
+
+                  {PRESETS.filter(p => activePresets.includes(p.name)).map((p) => {
+                    const color = colorForPreset(p.name);
+                    return (
+                      <div key={p.name}>
+                        <div className="absolute w-3 h-3 rounded-full shadow-lg ring-2 ring-white"
+                          style={{ left: `calc(${p.x}% - 6px)`, bottom: `calc(${p.y}% - 6px)`, backgroundColor: color }}
+                          title={p.name}></div>
+                        {showPresetLabels && (
+                          <div className="absolute text-[10px] bg-white/80 rounded px-1 py-0.5"
+                            style={{ left: `calc(${p.x}% + 6px)`, bottom: `calc(${p.y}% + 6px)` }}>
+                            {p.name}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+
+                  <div className="absolute left-1/2 top-0 bottom-0 w-px bg-slate-200" />
+                  <div className="absolute top-1/2 left-0 right-0 h-px bg-slate-200" />
+                </div>
+
+                {overlay !== "none" && <OverlayLegend overlay={overlay} />}
+                {activePresets.length > 0 && (
+                  <div className="mt-4 text-xs text-slate-600">
+                    <div className="font-medium mb-1">Preset legend</div>
+                    <ul className="grid grid-cols-1 gap-1">
+                      {activePresets.map((name) => (
+                        <li key={name} className="flex items-center gap-2">
+                          <span className="inline-block w-3 h-3 rounded" style={{ backgroundColor: colorForPreset(name) }}></span>
+                          <span>{name}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      function OverlayRegions({ overlay, colored }) {
+        return (
+          <div className="absolute inset-0 pointer-events-none">
+            {overlay === "architecture" && <ArchitectureOverlay colored={colored} />}
+            {overlay === "cynefin" && <CynefinOverlay colored={colored} />}
+            {overlay === "stacey" && <StaceyOverlay colored={colored} />}
+            {overlay === "control" && <ControlOverlay colored={colored} />}
+          </div>
+        );
+      }
+
+      function ArchitectureOverlay({ colored }) {
+        if (!colored) return null;
+        return (
+          <div className="absolute inset-0 grid grid-cols-2 grid-rows-2">
+            <div className="bg-amber-50"></div>
+            <div className="bg-green-50"></div>
+            <div className="bg-rose-50"></div>
+            <div className="bg-blue-50"></div>
+          </div>
+        );
+      }
+
+      function CynefinOverlay({ colored }) {
+        return (
+          <>
+            {/* Chaotic = uncontrolled zone (bottom band) */}
+            <div className={`absolute left-0 right-0 bottom-0 h-[35%] ${colored ? "bg-red-200/30" : "bg-red-200/10"}`} />
+            {/* Complex = controlled + emergent (top-right quadrant) */}
+            <div className={`absolute right-0 top-1/2 bottom-0 left-1/2 ${colored ? "bg-emerald-200/30" : "bg-emerald-200/10"}`} />
+            {/* Complicated/Obvious = controlled + intentional (top-left quadrant) */}
+            <div className={`absolute left-0 top-1/2 bottom-0 right-1/2 ${colored ? "bg-yellow-200/30" : "bg-yellow-200/10"}`} />
+          </>
+        );
+      }
+
+      function StaceyOverlay({ colored }) {
+        return (
+          <>
+            <div className={`absolute left-0 right-0 bottom-0 h-[35%] ${colored ? "bg-indigo-200/20" : "bg-indigo-200/5"}`} />
+            <div className={`absolute left-0 right-[50%] top-0 bottom-[50%] ${colored ? "bg-fuchsia-200/20" : "bg-fuchsia-200/5"}`} />
+          </>
+        );
+      }
+
+      function ControlOverlay({ colored }) {
+        return (
+          <>
+            {/* Open-loop / low loop gain = uncontrolled (bottom band) */}
+            <div className={`absolute left-0 right-0 bottom-0 h-[35%] ${colored ? "bg-sky-200/20" : "bg-sky-200/5"}`} />
+            {/* Good closed-loop controllability = controlled + intentional (top-left quadrant) */}
+            <div className={`absolute left-0 top-1/2 bottom-0 right-1/2 ${colored ? "bg-lime-200/20" : "bg-lime-200/5"}`} />
+          </>
+        );
+      }
+
+      function OverlayLegend({ overlay }) {
+        if (overlay === "architecture") {
+          return (
+            <div className="mt-4 text-xs text-slate-600 space-y-1">
+              <div className="font-medium">Architecture posture quadrants</div>
+              <p><span className="inline-block w-3 h-3 bg-amber-50 mr-1"></span> Directive (Controlled + Intentional)</p>
+              <p><span className="inline-block w-3 h-3 bg-green-50 mr-1"></span> Adaptive (Controlled + Emergent)</p>
+              <p><span className="inline-block w-3 h-3 bg-rose-50 mr-1"></span> Illusory (Uncontrolled + Intentional)</p>
+              <p><span className="inline-block w-3 h-3 bg-blue-50 mr-1"></span> Drift (Uncontrolled + Emergent)</p>
+            </div>
+          );
+        }
+        if (overlay === "cynefin") {
+          return (
+            <div className="mt-4 text-xs text-slate-600 space-y-1">
+              <div className="font-medium">Cynefin (illustrative)</div>
+              <p><span className="inline-block w-3 h-3 bg-red-200 mr-1"></span> Chaotic (low control)</p>
+              <p><span className="inline-block w-3 h-3 bg-emerald-200 mr-1"></span> Complex (emergent + controlled → Adaptive)</p>
+              <p><span className="inline-block w-3 h-3 bg-yellow-200 mr-1"></span> Complicated/Obvious (intentional + controlled → Directive)</p>
+            </div>
+          );
+        }
+        if (overlay === "stacey") {
+          return (
+            <div className="mt-4 text-xs text-slate-600 space-y-1">
+              <div className="font-medium">Stacey Matrix (illustrative)</div>
+              <p><span className="inline-block w-3 h-3 bg-indigo-200 mr-1"></span> High uncertainty (low control)</p>
+              <p><span className="inline-block w-3 h-3 bg-fuchsia-200 mr-1"></span> High disagreement (intent without alignment)</p>
+            </div>
+          );
+        }
+        if (overlay === "control") {
+          return (
+            <div className="mt-4 text-xs text-slate-600 space-y-1">
+              <div className="font-medium">Control theory (illustrative)</div>
+              <p><span className="inline-block w-3 h-3 bg-sky-200 mr-1"></span> Open-loop / low loop gain (uncontrolled zone)</p>
+              <p><span className="inline-block w-3 h-3 bg-lime-200 mr-1"></span> Good closed-loop controllability (controlled + intentional)</p>
+            </div>
+          );
+        }
+        return null;
+      }
+
+      ReactDOM.createRoot(document.getElementById("root")).render(<QuadrantExplorer />);
+    </script>
+  </body>
+</html>

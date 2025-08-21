@@ -1,7 +1,6 @@
 from shrub_util.generation.template_renderer import TemplateRenderer, DictionaryRenderer
 from owlready2 import get_ontology, Ontology
 import networkx as nx
-import matplotlib as plt
 import csv
 import uuid
 
@@ -69,6 +68,12 @@ def owl_export_to_archi_csv(ontology: Ontology, folder: str):
         wrap = True
         return list([f"\"{val}\"" if wrap else val for val in strs])
 
+    def format_name(name: str):
+        result = name
+        if result.startswith("/"):
+            result = result[1:]
+        return result
+
     # write elements
     with open(f"{folder}/elements.csv", "w") as ofp:
         writer = csv.writer(ofp, delimiter=',', quotechar='\'')
@@ -80,7 +85,7 @@ def owl_export_to_archi_csv(ontology: Ontology, folder: str):
             element_id_lookup[cls.name] = generated_id
             description = ""
             writer.writerow(
-                wrap_strs_with_quotes([f"{generated_id}", "BusinessObject", f"{cls.name}", f"{description}",""]))
+                wrap_strs_with_quotes([f"{generated_id}", "BusinessObject", f"{format_name(cls.name)}", f"{description}",""]))
     # write relations
     with open(f"{folder}/relations.csv", "w") as ofp:
         writer = csv.writer(ofp, delimiter=',', quotechar='\'')
@@ -93,7 +98,7 @@ def owl_export_to_archi_csv(ontology: Ontology, folder: str):
                 source_element = element_id_lookup[domain.name]
                 target_element = element_id_lookup[_range.name]
                 writer.writerow(wrap_strs_with_quotes(
-                    [f"{generated_id}", "AggregationRelationship", f"{prop.name if prop.name else ''}","",f"{source_element}",
+                    [f"{generated_id}", "AggregationRelationship", f"{format_name(prop.name if prop.name else '')}","",f"{source_element}",
                      f"{target_element}", ""]))
         for cls in classes:
             if cls.is_a:

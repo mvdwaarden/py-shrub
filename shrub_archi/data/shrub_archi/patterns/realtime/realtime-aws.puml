@@ -1,0 +1,42 @@
+@startuml
+skinparam componentStyle rectangle
+
+title "Real-Time Risk Detection & Execution" on AWS
+
+package "Data Ingestion" {
+    [API Gateway] --> [Lambda Ingest]
+    [Lambda Ingest] --> [Kinesis Stream]
+}
+
+package "Real-Time Risk Detection" {
+    [Kinesis Stream] --> [Flink Processor]
+    [Flink Processor] --> [Redis (Feature Store)]
+    [Flink Processor] --> [SageMaker Model Endpoint]
+    [SageMaker Model Endpoint] --> [Flink Processor]
+    [Flink Processor] --> [Enriched Event]
+}
+
+package "Risk Execution" {
+    [Enriched Event] --> [Step Functions]
+    [Step Functions] --> [Block Action API]
+    [Step Functions] --> [Allow Action API]
+    [Step Functions] --> [SNS Notification]
+}
+
+package "Traceability & Logging" {
+    [Enriched Event] --> [DynamoDB (Trace DB)]
+    [Enriched Event] --> [S3 (Audit Logs)]
+    [Enriched Event] --> [OpenSearch (Searchable Logs)]
+    [SageMaker Model Endpoint] --> [CloudWatch Logs]
+}
+
+package "Feedback Loop & Model Management" {
+    [Human Review UI] --> [Labeled Events API]
+    [Labeled Events API] --> [S3 (Training Data)]
+    [S3 (Training Data)] --> [SageMaker Pipelines]
+    [SageMaker Pipelines] --> [SageMaker Model Endpoint]
+    [Flink Processor] --> [Model Monitor]
+    [Model Monitor] --> [CloudWatch Alarms]
+}
+
+@enduml

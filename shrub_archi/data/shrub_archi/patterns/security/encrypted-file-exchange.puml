@@ -1,0 +1,24 @@
+@startuml
+actor "OCDD" as MachineA
+actor "OIA" as MachineB
+participant "Azure Key Vault\n(KEK)" as AKV
+database "Secure Storage\n(e.g., Blob Storage)" as Storage
+
+== File Encryption and Upload ==
+
+MachineA -> MachineA: Generate DEK (AES-256)
+MachineA -> AKV: wrapKey(DEK)
+AKV --> MachineA: Wrapped DEK (ciphertext)
+
+MachineA -> MachineA: Encrypt File using DEK
+MachineA -> Storage: Upload Encrypted File + Wrapped DEK
+
+== File Retrieval and Decryption ==
+
+MachineB -> Storage: Download Encrypted File + Wrapped DEK
+MachineB -> AKV: unwrapKey(Wrapped DEK)
+AKV --> MachineB: Unwrapped DEK
+
+MachineB -> MachineB: Decrypt File using DEK
+
+@enduml

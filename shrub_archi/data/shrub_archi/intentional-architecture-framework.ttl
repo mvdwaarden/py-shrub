@@ -1,0 +1,2453 @@
+@prefix : <https://example.org/arch#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix arch: <https://example.org/arch#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <https://example.org/arch#> .
+
+<https://example.org/arch#> rdf:type owl:Ontology ;
+                             rdfs:comment "Domain-agnostic ontology capturing Premises, Added Values, Principles, Frameworks (as vehicles), Framework Pieces, Interventions, EA patterns, and mapping classes for weights/explanations." ;
+                             rdfs:label "Architecture Value & IA/Emergence Ontology (T-Box)" .
+
+#################################################################
+#    Annotation properties
+#################################################################
+
+###  https://example.org/arch#pieceOf
+arch:pieceOf rdf:type owl:AnnotationProperty .
+
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  https://example.org/arch#addressesPremise
+arch:addressesPremise rdf:type owl:ObjectProperty ;
+                      rdfs:domain arch:IAIntervention ;
+                      rdfs:range arch:Premise ;
+                      rdfs:label "addressesPremise" .
+
+
+###  https://example.org/arch#containsPiece
+arch:containsPiece rdf:type owl:ObjectProperty ;
+                   rdfs:domain arch:Framework ;
+                   rdfs:range arch:FrameworkPiece ;
+                   rdfs:comment "Framework (vehicle) composition." ;
+                   rdfs:label "containsPiece" .
+
+
+###  https://example.org/arch#coversAddedValue
+arch:coversAddedValue rdf:type owl:ObjectProperty ;
+                      rdfs:domain arch:FrameworkCoverageMapping ;
+                      rdfs:range arch:AddedValue ;
+                      rdfs:label "coversAddedValue" .
+
+
+###  https://example.org/arch#coversFramework
+arch:coversFramework rdf:type owl:ObjectProperty ;
+                     rdfs:domain arch:FrameworkCoverageMapping ;
+                     rdfs:range arch:Framework ;
+                     rdfs:label "coversFramework" .
+
+
+###  https://example.org/arch#coversPremise
+arch:coversPremise rdf:type owl:ObjectProperty ;
+                   rdfs:domain arch:FrameworkCoverageMapping ;
+                   rdfs:range arch:Premise ;
+                   rdfs:label "coversPremise" .
+
+
+###  https://example.org/arch#ddAddedValue
+arch:ddAddedValue rdf:type owl:ObjectProperty ;
+                  rdfs:domain arch:DrillDownContent ;
+                  rdfs:range arch:AddedValue ;
+                  rdfs:label "ddAddedValue" .
+
+
+###  https://example.org/arch#ddPremise
+arch:ddPremise rdf:type owl:ObjectProperty ;
+               rdfs:domain arch:DrillDownContent ;
+               rdfs:range arch:Premise ;
+               rdfs:label "ddPremise" .
+
+
+###  https://example.org/arch#embodiedInPiece
+arch:embodiedInPiece rdf:type owl:ObjectProperty ;
+                     rdfs:domain arch:PrincipleEmbodiment ;
+                     rdfs:range arch:FrameworkPiece ;
+                     rdfs:label "embodiedInPiece" .
+
+
+###  https://example.org/arch#embodiesPrinciple
+arch:embodiesPrinciple rdf:type owl:ObjectProperty ;
+                       rdfs:domain arch:PrincipleEmbodiment ;
+                       rdfs:range arch:Principle ;
+                       rdfs:label "embodiesPrinciple" .
+
+
+###  https://example.org/arch#evidencedBy
+arch:evidencedBy rdf:type owl:ObjectProperty ;
+                 rdfs:domain arch:Consequence ;
+                 rdfs:range arch:ConsequenceIndicator ;
+                 rdfs:label "evidencedBy" .
+
+
+###  https://example.org/arch#explainedBy
+arch:explainedBy rdf:type owl:ObjectProperty ;
+                 rdfs:domain arch:Premise ;
+                 rdfs:range arch:Principle ;
+                 rdfs:comment "Which general mechanism explains how IA addresses this premise." ;
+                 rdfs:label "explainedBy" .
+
+
+###  https://example.org/arch#hasEmergentPattern
+arch:hasEmergentPattern rdf:type owl:ObjectProperty ;
+                        rdfs:domain arch:Domain ;
+                        rdfs:range arch:EmergentPattern ;
+                        rdfs:label "hasEmergentPattern" .
+
+
+###  https://example.org/arch#justifiesPremise
+arch:justifiesPremise rdf:type owl:ObjectProperty ;
+                      rdfs:domain arch:PremisePrincipleJustif ;
+                      rdfs:range arch:Premise ;
+                      rdfs:label "justifiesPremise" .
+
+
+###  https://example.org/arch#justifiesPrinciple
+arch:justifiesPrinciple rdf:type owl:ObjectProperty ;
+                        rdfs:domain arch:PremisePrincipleJustif ;
+                        rdfs:range arch:Principle ;
+                        rdfs:label "justifiesPrinciple" .
+
+
+###  https://example.org/arch#mapsAddedValue
+arch:mapsAddedValue rdf:type owl:ObjectProperty ;
+                    rdfs:domain arch:RelevanceMapping ;
+                    rdfs:range arch:AddedValue ;
+                    rdfs:label "mapsAddedValue" .
+
+
+###  https://example.org/arch#mapsPremise
+arch:mapsPremise rdf:type owl:ObjectProperty ;
+                 rdfs:domain arch:RelevanceMapping ;
+                 rdfs:range arch:Premise ;
+                 rdfs:label "mapsPremise" .
+
+
+###  https://example.org/arch#mayLeadTo
+arch:mayLeadTo rdf:type owl:ObjectProperty ;
+               rdfs:domain arch:Premise ;
+               rdfs:range arch:Consequence ;
+               rdfs:comment "Premise -> Consequence (if unmanaged)." ;
+               rdfs:label "mayLeadTo" .
+
+
+###  https://example.org/arch#measuredBy
+arch:measuredBy rdf:type owl:ObjectProperty ;
+                rdfs:domain arch:Premise ;
+                rdfs:range arch:PremiseIndicator ;
+                rdfs:label "measuredBy" .
+
+
+###  https://example.org/arch#providedByFramework
+arch:providedByFramework rdf:type owl:ObjectProperty ;
+                         rdfs:domain arch:IAIntervention ;
+                         rdfs:range arch:Framework ;
+                         rdfs:label "providedByFramework" .
+
+
+###  https://example.org/arch#usesPiece
+arch:usesPiece rdf:type owl:ObjectProperty ;
+               rdfs:domain arch:IAIntervention ;
+               rdfs:range arch:FrameworkPiece ;
+               rdfs:label "usesPiece" .
+
+
+#################################################################
+#    Data properties
+#################################################################
+
+###  https://example.org/arch#actions
+arch:actions rdf:type owl:DatatypeProperty ;
+             rdfs:range xsd:string ;
+             rdfs:label "actions" .
+
+
+###  https://example.org/arch#codeName
+arch:codeName rdf:type owl:DatatypeProperty ;
+              rdfs:range xsd:string ;
+              rdfs:comment "Safe identifier for UI/diagrams (A–Z, a–z, 0–9, _ only)" ;
+              rdfs:label "code name" .
+
+
+###  https://example.org/arch#intrusiveness
+arch:intrusiveness rdf:type owl:DatatypeProperty ;
+                   rdfs:range xsd:string ;
+                   rdfs:label "intrusiveness" .
+
+
+###  https://example.org/arch#narrative
+arch:narrative rdf:type owl:DatatypeProperty ;
+               rdfs:range xsd:string ;
+               rdfs:label "narrative" .
+
+
+###  https://example.org/arch#rationale
+arch:rationale rdf:type owl:DatatypeProperty ;
+               rdfs:range xsd:string ;
+               rdfs:label "rationale" .
+
+
+###  https://example.org/arch#weight
+arch:weight rdf:type owl:DatatypeProperty ;
+            rdfs:range xsd:integer ;
+            rdfs:comment "0 = none (gap), 1 = secondary, 2 = core. Use on mapping individuals." ;
+            rdfs:label "weight" .
+
+
+#################################################################
+#    Classes
+#################################################################
+
+###  https://example.org/arch#AddedValue
+arch:AddedValue rdf:type owl:Class ;
+                rdfs:comment "Canonical benefits of IA (Clarity of purpose, Coherence & integration, etc.)." ;
+                rdfs:label "AddedValue" .
+
+
+###  https://example.org/arch#Consequence
+arch:Consequence rdf:type owl:Class ;
+                 rdfs:comment "Negative outcome if a premise is unmanaged (brittleness, outages, injustice, etc.)." ;
+                 rdfs:label "Consequence" .
+
+
+###  https://example.org/arch#ConsequenceIndicator
+arch:ConsequenceIndicator rdf:type owl:Class ;
+                          rdfs:subClassOf arch:Indicator ;
+                          rdfs:label "ConsequenceIndicator" .
+
+
+###  https://example.org/arch#Domain
+arch:Domain rdf:type owl:Class ;
+            rdfs:comment "Context of application of IA (IT, Society, Biology, etc.)." ;
+            rdfs:label "Domain" .
+
+
+###  https://example.org/arch#DrillDownContent
+arch:DrillDownContent rdf:type owl:Class ;
+                      rdfs:comment "Narrative for a specific Premise × AddedValue (used in collapsible UI)." ;
+                      rdfs:label "DrillDownContent" .
+
+
+###  https://example.org/arch#EmergentPattern
+arch:EmergentPattern rdf:type owl:Class ;
+                     rdfs:comment "Self-organizing structures/behaviors that arise without central design in a given domain." ;
+                     rdfs:label "EmergentPattern" .
+
+
+###  https://example.org/arch#Framework
+arch:Framework rdf:type owl:Class ;
+               rdfs:comment "Vehicle that carries principles via FrameworkPieces (e.g., TOGAF, SAFe, ISO 42010, Ostrom)." ;
+               rdfs:label "Framework" .
+
+
+###  https://example.org/arch#FrameworkCoverageMapping
+arch:FrameworkCoverageMapping rdf:type owl:Class ;
+                              rdfs:comment "Associates a Framework, Premise, and AddedValue; carries coverage weight 0/1/2." ;
+                              rdfs:label "FrameworkCoverageMapping" .
+
+
+###  https://example.org/arch#FrameworkPiece
+arch:FrameworkPiece rdf:type owl:Class ;
+                    rdfs:comment "Concrete construct/artifact inside a framework (e.g., Capability Map, Inspect & Adapt, Nested Enterprises)." ;
+                    rdfs:label "FrameworkPiece" .
+
+
+###  https://example.org/arch#IAIntervention
+arch:IAIntervention rdf:type owl:Class ;
+                    rdfs:comment "Minimally intrusive action that tunes EA; may reference FrameworkPieces; may be absent (gap) for a Premise×Framework." ;
+                    rdfs:label "IAIntervention" .
+
+
+###  https://example.org/arch#Indicator
+arch:Indicator rdf:type owl:Class ;
+               rdfs:comment "Measurement item (Premise indicators are leading; Consequence indicators are lagging/observables)." ;
+               rdfs:label "Indicator" .
+
+
+###  https://example.org/arch#Premise
+arch:Premise rdf:type owl:Class ;
+             rdfs:comment "Condition under which intentional architecture becomes relevant (8 canonical items)." ;
+             rdfs:label "Premise" .
+
+
+###  https://example.org/arch#PremiseIndicator
+arch:PremiseIndicator rdf:type owl:Class ;
+                      rdfs:subClassOf arch:Indicator ;
+                      rdfs:label "PremiseIndicator" .
+
+
+###  https://example.org/arch#PremisePrincipleJustif
+arch:PremisePrincipleJustif rdf:type owl:Class ;
+                            rdfs:comment "Associates a Premise and a Principle with a textual rationale (why this principle explains the premise)." ;
+                            rdfs:label "PremisePrincipleJustification" .
+
+
+###  https://example.org/arch#Principle
+arch:Principle rdf:type owl:Class ;
+               rdfs:comment "Cross-domain explanatory mechanism (e.g., CAS, feedback/cybernetics, pattern language, fractals)." ;
+               rdfs:label "Principle" .
+
+
+###  https://example.org/arch#PrincipleEmbodiment
+arch:PrincipleEmbodiment rdf:type owl:Class ;
+                         rdfs:comment "Associates a Principle with one or more FrameworkPieces (many-to-many embodiment)." ;
+                         rdfs:label "PrincipleEmbodiment" .
+
+
+###  https://example.org/arch#RelevanceMapping
+arch:RelevanceMapping rdf:type owl:Class ;
+                      rdfs:comment "Associates a Premise with an AddedValue (conceptual relevance; logical weight 0/1/2 lives here if used)." ;
+                      rdfs:label "RelevanceMapping" .
+
+
+#################################################################
+#    Individuals
+#################################################################
+
+###  https://example.org/arch#AV_AdaptabilityLongevity
+arch:AV_AdaptabilityLongevity rdf:type owl:NamedIndividual ,
+                                       arch:AddedValue ;
+                              arch:codeName "AV_AdaptabilityLongevity" ;
+                              rdfs:label "Adaptability and longevity" .
+
+
+###  https://example.org/arch#AV_ClarityPurpose
+arch:AV_ClarityPurpose rdf:type owl:NamedIndividual ,
+                                arch:AddedValue ;
+                       arch:codeName "AV_ClarityPurpose" ;
+                       rdfs:label "Clarity of purpose" .
+
+
+###  https://example.org/arch#AV_CoherenceIntegration
+arch:AV_CoherenceIntegration rdf:type owl:NamedIndividual ,
+                                      arch:AddedValue ;
+                             arch:codeName "AV_CoherenceIntegration" ;
+                             rdfs:label "Coherence and integration" .
+
+
+###  https://example.org/arch#AV_ConsistentQuality
+arch:AV_ConsistentQuality rdf:type owl:NamedIndividual ,
+                                   arch:AddedValue ;
+                          arch:codeName "AV_ConsistentQuality" ;
+                          rdfs:label "Consistent quality" .
+
+
+###  https://example.org/arch#AV_DecisionLeverage
+arch:AV_DecisionLeverage rdf:type owl:NamedIndividual ,
+                                  arch:AddedValue ;
+                         arch:codeName "AV_DecisionLeverage" ;
+                         rdfs:label "Decision leverage" .
+
+
+###  https://example.org/arch#AV_OptimizationConstraints
+arch:AV_OptimizationConstraints rdf:type owl:NamedIndividual ,
+                                         arch:AddedValue ;
+                                arch:codeName "AV_OptimizationConstraints" ;
+                                rdfs:label "Optimization under constraints" .
+
+
+###  https://example.org/arch#AV_RiskReduction
+arch:AV_RiskReduction rdf:type owl:NamedIndividual ,
+                               arch:AddedValue ;
+                      arch:codeName "AV_RiskReduction" ;
+                      rdfs:label "Risk reduction" .
+
+
+###  https://example.org/arch#AV_SharedMentalModel
+arch:AV_SharedMentalModel rdf:type owl:NamedIndividual ,
+                                   arch:AddedValue ;
+                          arch:codeName "AV_SharedMentalModel" ;
+                          rdfs:label "Shared mental model" .
+
+
+###  https://example.org/arch#CI_Comp_Incident
+arch:CI_Comp_Incident rdf:type owl:NamedIndividual ,
+                               arch:ConsequenceIndicator ;
+                      arch:narrative "Incidents attributable to dependency issues." ;
+                      rdfs:label "Integration incident rate" .
+
+
+###  https://example.org/arch#CI_Comp_MTTR
+arch:CI_Comp_MTTR rdf:type owl:NamedIndividual ,
+                           arch:ConsequenceIndicator ;
+                  arch:narrative "Mean time to recovery after integration failures." ;
+                  rdfs:label "MTTR" .
+
+
+###  https://example.org/arch#CI_Con_DefectLeak
+arch:CI_Con_DefectLeak rdf:type owl:NamedIndividual ,
+                                arch:ConsequenceIndicator ;
+                       arch:narrative "Escaped defects due to rushed/underbuilt work." ;
+                       rdfs:label "Defect leakage" .
+
+
+###  https://example.org/arch#CI_Con_OverrunDelta
+arch:CI_Con_OverrunDelta rdf:type owl:NamedIndividual ,
+                                  arch:ConsequenceIndicator ;
+                         arch:narrative "Deviation vs. budget/schedule baseline." ;
+                         rdfs:label "Overrun delta" .
+
+
+###  https://example.org/arch#CI_Coord_Blockers
+arch:CI_Coord_Blockers rdf:type owl:NamedIndividual ,
+                                arch:ConsequenceIndicator ;
+                       arch:narrative "Open blockers beyond SLA." ;
+                       rdfs:label "Unresolved cross-team blockers" .
+
+
+###  https://example.org/arch#CI_Coord_FailedInt
+arch:CI_Coord_FailedInt rdf:type owl:NamedIndividual ,
+                                 arch:ConsequenceIndicator ;
+                        arch:narrative "Rate of failed merges/integrations." ;
+                        rdfs:label "Failed integrations" .
+
+
+###  https://example.org/arch#CI_Div_DupAsset
+arch:CI_Div_DupAsset rdf:type owl:NamedIndividual ,
+                              arch:ConsequenceIndicator ;
+                     arch:narrative "Count/value of redundant solutions." ;
+                     rdfs:label "Duplicate assets discovered" .
+
+
+###  https://example.org/arch#CI_Div_InteropDefect
+arch:CI_Div_InteropDefect rdf:type owl:NamedIndividual ,
+                                   arch:ConsequenceIndicator ;
+                          arch:narrative "Failures at boundaries between heterogeneous parts." ;
+                          rdfs:label "Interoperability defect rate" .
+
+
+###  https://example.org/arch#CI_Long_DefectAge
+arch:CI_Long_DefectAge rdf:type owl:NamedIndividual ,
+                                arch:ConsequenceIndicator ;
+                       arch:narrative "Aging of unresolved quality issues." ;
+                       rdfs:label "Average defect age" .
+
+
+###  https://example.org/arch#CI_Long_RewriteCost
+arch:CI_Long_RewriteCost rdf:type owl:NamedIndividual ,
+                                  arch:ConsequenceIndicator ;
+                         arch:narrative "Share of budget/time spent on rewrites." ;
+                         rdfs:label "Rewrite cost share" .
+
+
+###  https://example.org/arch#CI_QC_AttrDrift
+arch:CI_QC_AttrDrift rdf:type owl:NamedIndividual ,
+                              arch:ConsequenceIndicator ;
+                     arch:narrative "Deviation from target attribute thresholds." ;
+                     rdfs:label "Quality attribute drift" .
+
+
+###  https://example.org/arch#CI_QC_Nonconform
+arch:CI_QC_Nonconform rdf:type owl:NamedIndividual ,
+                               arch:ConsequenceIndicator ;
+                      arch:narrative "Detected nonconformities against quality criteria." ;
+                      rdfs:label "Nonconformities" .
+
+
+###  https://example.org/arch#CI_Risk_LossAmt
+arch:CI_Risk_LossAmt rdf:type owl:NamedIndividual ,
+                              arch:ConsequenceIndicator ;
+                     arch:narrative "Cost/harm quantified per incident." ;
+                     rdfs:label "Loss amount" .
+
+
+###  https://example.org/arch#CI_Risk_SevIdx
+arch:CI_Risk_SevIdx rdf:type owl:NamedIndividual ,
+                             arch:ConsequenceIndicator ;
+                    arch:narrative "Composite severity of realized incidents." ;
+                    rdfs:label "Severity index" .
+
+
+###  https://example.org/arch#CI_Scale_DupWork
+arch:CI_Scale_DupWork rdf:type owl:NamedIndividual ,
+                               arch:ConsequenceIndicator ;
+                      arch:narrative "Detected duplicate artifacts/workstreams." ;
+                      rdfs:label "Duplicated work items" .
+
+
+###  https://example.org/arch#CI_Scale_SlipRate
+arch:CI_Scale_SlipRate rdf:type owl:NamedIndividual ,
+                                arch:ConsequenceIndicator ;
+                       arch:narrative "Share of milestones missed at program level." ;
+                       rdfs:label "Milestone slip rate" .
+
+
+###  https://example.org/arch#C_Comp_Brittle
+arch:C_Comp_Brittle rdf:type owl:NamedIndividual ,
+                             arch:Consequence ;
+                    arch:evidencedBy arch:CI_Comp_Incident ;
+                    rdfs:label "Brittle integrations" .
+
+
+###  https://example.org/arch#C_Comp_Cascade
+arch:C_Comp_Cascade rdf:type owl:NamedIndividual ,
+                             arch:Consequence ;
+                    arch:evidencedBy arch:CI_Comp_MTTR ;
+                    rdfs:label "Cascading failures" .
+
+
+###  https://example.org/arch#C_Con_Overruns
+arch:C_Con_Overruns rdf:type owl:NamedIndividual ,
+                             arch:Consequence ;
+                    arch:evidencedBy arch:CI_Con_OverrunDelta ;
+                    rdfs:label "Overruns & shortfalls" .
+
+
+###  https://example.org/arch#C_Con_Shortcuts
+arch:C_Con_Shortcuts rdf:type owl:NamedIndividual ,
+                              arch:Consequence ;
+                     arch:evidencedBy arch:CI_Con_DefectLeak ;
+                     rdfs:label "Shortcuts and brittle hacks" .
+
+
+###  https://example.org/arch#C_Coord_Drift
+arch:C_Coord_Drift rdf:type owl:NamedIndividual ,
+                            arch:Consequence ;
+                   arch:evidencedBy arch:CI_Coord_Blockers ;
+                   rdfs:label "Team drift & conflict" .
+
+
+###  https://example.org/arch#C_Coord_MergeHell
+arch:C_Coord_MergeHell rdf:type owl:NamedIndividual ,
+                                arch:Consequence ;
+                       arch:evidencedBy arch:CI_Coord_FailedInt ;
+                       rdfs:label "Integration failure" .
+
+
+###  https://example.org/arch#C_Div_Silos
+arch:C_Div_Silos rdf:type owl:NamedIndividual ,
+                          arch:Consequence ;
+                 arch:evidencedBy arch:CI_Div_InteropDefect ;
+                 rdfs:label "Silos & incompatibility" .
+
+
+###  https://example.org/arch#C_Div_Waste
+arch:C_Div_Waste rdf:type owl:NamedIndividual ,
+                          arch:Consequence ;
+                 arch:evidencedBy arch:CI_Div_DupAsset ;
+                 rdfs:label "Duplicated/wasted effort" .
+
+
+###  https://example.org/arch#C_Long_Entropy
+arch:C_Long_Entropy rdf:type owl:NamedIndividual ,
+                             arch:Consequence ;
+                    arch:evidencedBy arch:CI_Long_DefectAge ;
+                    rdfs:label "Structural entropy" .
+
+
+###  https://example.org/arch#C_Long_Rewrites
+arch:C_Long_Rewrites rdf:type owl:NamedIndividual ,
+                              arch:Consequence ;
+                     arch:evidencedBy arch:CI_Long_RewriteCost ;
+                     rdfs:label "Premature rewrites" .
+
+
+###  https://example.org/arch#C_QC_Erosion
+arch:C_QC_Erosion rdf:type owl:NamedIndividual ,
+                           arch:Consequence ;
+                  arch:evidencedBy arch:CI_QC_AttrDrift ;
+                  rdfs:label "Attribute erosion" .
+
+
+###  https://example.org/arch#C_QC_Incidents
+arch:C_QC_Incidents rdf:type owl:NamedIndividual ,
+                             arch:Consequence ;
+                    arch:evidencedBy arch:CI_QC_Nonconform ;
+                    rdfs:label "Quality incidents" .
+
+
+###  https://example.org/arch#C_Risk_Incident
+arch:C_Risk_Incident rdf:type owl:NamedIndividual ,
+                              arch:Consequence ;
+                     arch:evidencedBy arch:CI_Risk_SevIdx ;
+                     rdfs:label "Major incident" .
+
+
+###  https://example.org/arch#C_Risk_Loss
+arch:C_Risk_Loss rdf:type owl:NamedIndividual ,
+                          arch:Consequence ;
+                 arch:evidencedBy arch:CI_Risk_LossAmt ;
+                 rdfs:label "Material loss / harm" .
+
+
+###  https://example.org/arch#C_Scale_Collapse
+arch:C_Scale_Collapse rdf:type owl:NamedIndividual ,
+                               arch:Consequence ;
+                      arch:evidencedBy arch:CI_Scale_SlipRate ;
+                      rdfs:label "Program collapse under weight" .
+
+
+###  https://example.org/arch#C_Scale_ScopeDrift
+arch:C_Scale_ScopeDrift rdf:type owl:NamedIndividual ,
+                                 arch:Consequence ;
+                        arch:evidencedBy arch:CI_Scale_DupWork ;
+                        rdfs:label "Scope drift & duplication" .
+
+
+###  https://example.org/arch#DD_Comp_Adapt
+arch:DD_Comp_Adapt rdf:type owl:NamedIndividual ,
+                            arch:DrillDownContent ;
+                   arch:ddAddedValue arch:AV_AdaptabilityLongevity ;
+                   arch:ddPremise arch:Premise_Complexity ;
+                   arch:narrative "Modular parts evolve or swap without destabilizing the whole." .
+
+
+###  https://example.org/arch#DD_Comp_CohInt
+arch:DD_Comp_CohInt rdf:type owl:NamedIndividual ,
+                             arch:DrillDownContent ;
+                    arch:ddAddedValue arch:AV_CoherenceIntegration ;
+                    arch:ddPremise arch:Premise_Complexity ;
+                    arch:narrative "Explicit seams and contracts turn hidden couplings into reliable interfaces." .
+
+
+###  https://example.org/arch#DD_Comp_Risk
+arch:DD_Comp_Risk rdf:type owl:NamedIndividual ,
+                           arch:DrillDownContent ;
+                  arch:ddAddedValue arch:AV_RiskReduction ;
+                  arch:ddPremise arch:Premise_Complexity ;
+                  arch:narrative "Safeguards and monitoring stop local faults from escalating system-wide." .
+
+
+###  https://example.org/arch#DD_Comp_SMM
+arch:DD_Comp_SMM rdf:type owl:NamedIndividual ,
+                          arch:DrillDownContent ;
+                 arch:ddAddedValue arch:AV_SharedMentalModel ;
+                 arch:ddPremise arch:Premise_Complexity ;
+                 arch:narrative "Shared understanding of dependencies prevents accidental breakage." .
+
+
+###  https://example.org/arch#DD_Con_Clarity
+arch:DD_Con_Clarity rdf:type owl:NamedIndividual ,
+                             arch:DrillDownContent ;
+                    arch:ddAddedValue arch:AV_ClarityPurpose ;
+                    arch:ddPremise arch:Premise_Constraint ;
+                    arch:narrative "Clear objectives strip away nice-to-haves that drain scarce resources." .
+
+
+###  https://example.org/arch#DD_Con_ConsQ
+arch:DD_Con_ConsQ rdf:type owl:NamedIndividual ,
+                           arch:DrillDownContent ;
+                  arch:ddAddedValue arch:AV_ConsistentQuality ;
+                  arch:ddPremise arch:Premise_Constraint ;
+                  arch:narrative "Fit-for-purpose bars prevent false economies that backfire later." .
+
+
+###  https://example.org/arch#DD_Con_DecLev
+arch:DD_Con_DecLev rdf:type owl:NamedIndividual ,
+                            arch:DrillDownContent ;
+                   arch:ddAddedValue arch:AV_DecisionLeverage ;
+                   arch:ddPremise arch:Premise_Constraint ;
+                   arch:narrative "Explicit trade rules guide fast choices when time and budget are tight." .
+
+
+###  https://example.org/arch#DD_Con_Opt
+arch:DD_Con_Opt rdf:type owl:NamedIndividual ,
+                         arch:DrillDownContent ;
+                arch:ddAddedValue arch:AV_OptimizationConstraints ;
+                arch:ddPremise arch:Premise_Constraint ;
+                arch:narrative "Focus on essentials, reuse, and efficiency to make scarcity a design input." .
+
+
+###  https://example.org/arch#DD_Coord_Clarity
+arch:DD_Coord_Clarity rdf:type owl:NamedIndividual ,
+                               arch:DrillDownContent ;
+                      arch:ddAddedValue arch:AV_ClarityPurpose ;
+                      arch:ddPremise arch:Premise_Coordination ;
+                      arch:narrative "Aligned outcomes prevent parallel efforts from diverging." .
+
+
+###  https://example.org/arch#DD_Coord_CohInt
+arch:DD_Coord_CohInt rdf:type owl:NamedIndividual ,
+                              arch:DrillDownContent ;
+                     arch:ddAddedValue arch:AV_CoherenceIntegration ;
+                     arch:ddPremise arch:Premise_Coordination ;
+                     arch:narrative "Predictable interfaces and cadences make integration routine." .
+
+
+###  https://example.org/arch#DD_Coord_ConsQ
+arch:DD_Coord_ConsQ rdf:type owl:NamedIndividual ,
+                             arch:DrillDownContent ;
+                    arch:ddAddedValue arch:AV_ConsistentQuality ;
+                    arch:ddPremise arch:Premise_Coordination ;
+                    arch:narrative "Shared practices mean outputs mesh cleanly at integration time." .
+
+
+###  https://example.org/arch#DD_Coord_SMM
+arch:DD_Coord_SMM rdf:type owl:NamedIndividual ,
+                           arch:DrillDownContent ;
+                  arch:ddAddedValue arch:AV_SharedMentalModel ;
+                  arch:ddPremise arch:Premise_Coordination ;
+                  arch:narrative "Everyone knows who does what, when, and how it fits together." .
+
+
+###  https://example.org/arch#DD_Div_Clarity
+arch:DD_Div_Clarity rdf:type owl:NamedIndividual ,
+                             arch:DrillDownContent ;
+                    arch:ddAddedValue arch:AV_ClarityPurpose ;
+                    arch:ddPremise arch:Premise_Diversity ;
+                    arch:narrative "A unifying intent aligns differing goals and incentives." .
+
+
+###  https://example.org/arch#DD_Div_CohInt
+arch:DD_Div_CohInt rdf:type owl:NamedIndividual ,
+                            arch:DrillDownContent ;
+                   arch:ddAddedValue arch:AV_CoherenceIntegration ;
+                   arch:ddPremise arch:Premise_Diversity ;
+                   arch:narrative "Standards and interfaces let diverse parts interoperate." .
+
+
+###  https://example.org/arch#DD_Div_Opt
+arch:DD_Div_Opt rdf:type owl:NamedIndividual ,
+                         arch:DrillDownContent ;
+                arch:ddAddedValue arch:AV_OptimizationConstraints ;
+                arch:ddPremise arch:Premise_Diversity ;
+                arch:narrative "Reuse and convergence avoid re-solving the same problems." .
+
+
+###  https://example.org/arch#DD_Div_SMM
+arch:DD_Div_SMM rdf:type owl:NamedIndividual ,
+                         arch:DrillDownContent ;
+                arch:ddAddedValue arch:AV_SharedMentalModel ;
+                arch:ddPremise arch:Premise_Diversity ;
+                arch:narrative "A shared vocabulary allows disciplines to collaborate." .
+
+
+###  https://example.org/arch#DD_Long_Adapt
+arch:DD_Long_Adapt rdf:type owl:NamedIndividual ,
+                            arch:DrillDownContent ;
+                   arch:ddAddedValue arch:AV_AdaptabilityLongevity ;
+                   arch:ddPremise arch:Premise_Longevity ;
+                   arch:narrative "Designing for change keeps long-lived systems fit without expensive rebuilds." .
+
+
+###  https://example.org/arch#DD_Long_ConsQ
+arch:DD_Long_ConsQ rdf:type owl:NamedIndividual ,
+                            arch:DrillDownContent ;
+                   arch:ddAddedValue arch:AV_ConsistentQuality ;
+                   arch:ddPremise arch:Premise_Longevity ;
+                   arch:narrative "Stable practices slow entropy and preserve baseline quality." .
+
+
+###  https://example.org/arch#DD_Long_DecLev
+arch:DD_Long_DecLev rdf:type owl:NamedIndividual ,
+                             arch:DrillDownContent ;
+                    arch:ddAddedValue arch:AV_DecisionLeverage ;
+                    arch:ddPremise arch:Premise_Longevity ;
+                    arch:narrative "Long-horizon principles prevent short-term choices that block future options." .
+
+
+###  https://example.org/arch#DD_Long_Risk
+arch:DD_Long_Risk rdf:type owl:NamedIndividual ,
+                           arch:DrillDownContent ;
+                  arch:ddAddedValue arch:AV_RiskReduction ;
+                  arch:ddPremise arch:Premise_Longevity ;
+                  arch:narrative "Lifecycle planning reduces obsolescence and replacement risks." .
+
+
+###  https://example.org/arch#DD_QC_CohInt
+arch:DD_QC_CohInt rdf:type owl:NamedIndividual ,
+                           arch:DrillDownContent ;
+                  arch:ddAddedValue arch:AV_CoherenceIntegration ;
+                  arch:ddPremise arch:Premise_QualityCriticality ;
+                  arch:narrative "Quality expectations flow across seams and interfaces consistently." .
+
+
+###  https://example.org/arch#DD_QC_ConsQ
+arch:DD_QC_ConsQ rdf:type owl:NamedIndividual ,
+                          arch:DrillDownContent ;
+                 arch:ddAddedValue arch:AV_ConsistentQuality ;
+                 arch:ddPremise arch:Premise_QualityCriticality ;
+                 arch:narrative "Quality is designed-in and verified systematically, not bolted on." .
+
+
+###  https://example.org/arch#DD_QC_DecLev
+arch:DD_QC_DecLev rdf:type owl:NamedIndividual ,
+                           arch:DrillDownContent ;
+                  arch:ddAddedValue arch:AV_DecisionLeverage ;
+                  arch:ddPremise arch:Premise_QualityCriticality ;
+                  arch:narrative "Principled trade-offs balance competing qualities transparently." .
+
+
+###  https://example.org/arch#DD_QC_Risk
+arch:DD_QC_Risk rdf:type owl:NamedIndividual ,
+                         arch:DrillDownContent ;
+                arch:ddAddedValue arch:AV_RiskReduction ;
+                arch:ddPremise arch:Premise_QualityCriticality ;
+                arch:narrative "Assurance reduces the chance and impact of quality failures." .
+
+
+###  https://example.org/arch#DD_Risk_CohInt
+arch:DD_Risk_CohInt rdf:type owl:NamedIndividual ,
+                             arch:DrillDownContent ;
+                    arch:ddAddedValue arch:AV_CoherenceIntegration ;
+                    arch:ddPremise arch:Premise_Risk ;
+                    arch:narrative "Coherent cross-boundary designs remove fragile failure paths." .
+
+
+###  https://example.org/arch#DD_Risk_ConsQ
+arch:DD_Risk_ConsQ rdf:type owl:NamedIndividual ,
+                            arch:DrillDownContent ;
+                   arch:ddAddedValue arch:AV_ConsistentQuality ;
+                   arch:ddPremise arch:Premise_Risk ;
+                   arch:narrative "Quality practices ensure safeguards are built-in and applied consistently." .
+
+
+###  https://example.org/arch#DD_Risk_DecLev
+arch:DD_Risk_DecLev rdf:type owl:NamedIndividual ,
+                             arch:DrillDownContent ;
+                    arch:ddAddedValue arch:AV_DecisionLeverage ;
+                    arch:ddPremise arch:Premise_Risk ;
+                    arch:narrative "Explicit trade-offs and escalation paths make risk decisions transparent and timely." .
+
+
+###  https://example.org/arch#DD_Risk_RiskRed
+arch:DD_Risk_RiskRed rdf:type owl:NamedIndividual ,
+                              arch:DrillDownContent ;
+                     arch:ddAddedValue arch:AV_RiskReduction ;
+                     arch:ddPremise arch:Premise_Risk ;
+                     arch:narrative "Prevention, containment, and recovery reduce both probability and impact." .
+
+
+###  https://example.org/arch#DD_Scale_Clarity
+arch:DD_Scale_Clarity rdf:type owl:NamedIndividual ,
+                               arch:DrillDownContent ;
+                      arch:ddAddedValue arch:AV_ClarityPurpose ;
+                      arch:ddPremise arch:Premise_Scale ;
+                      arch:narrative "Shared vision and boundaries prevent uncontrolled sprawl as initiatives grow." .
+
+
+###  https://example.org/arch#DD_Scale_CohInt
+arch:DD_Scale_CohInt rdf:type owl:NamedIndividual ,
+                              arch:DrillDownContent ;
+                     arch:ddAddedValue arch:AV_CoherenceIntegration ;
+                     arch:ddPremise arch:Premise_Scale ;
+                     arch:narrative "Common structures/interfaces keep many moving parts aligned as scope expands." .
+
+
+###  https://example.org/arch#DD_Scale_DecLev
+arch:DD_Scale_DecLev rdf:type owl:NamedIndividual ,
+                              arch:DrillDownContent ;
+                     arch:ddAddedValue arch:AV_DecisionLeverage ;
+                     arch:ddPremise arch:Premise_Scale ;
+                     arch:narrative "Principles/policies enable fast, consistent decisions with outsized impact at scale." .
+
+
+###  https://example.org/arch#DD_Scale_SMM
+arch:DD_Scale_SMM rdf:type owl:NamedIndividual ,
+                           arch:DrillDownContent ;
+                  arch:ddAddedValue arch:AV_SharedMentalModel ;
+                  arch:ddPremise arch:Premise_Scale ;
+                  arch:narrative "A common language lets large groups collaborate without constant renegotiation." .
+
+
+###  https://example.org/arch#Domain_Biology
+arch:Domain_Biology rdf:type owl:NamedIndividual ,
+                             arch:Domain ;
+                    arch:hasEmergentPattern arch:EP_EcosystemBalance ;
+                    rdfs:label "Biology / Ecology" .
+
+
+###  https://example.org/arch#Domain_IT
+arch:Domain_IT rdf:type owl:NamedIndividual ,
+                        arch:Domain ;
+               arch:hasEmergentPattern arch:EP_ShadowIT ;
+               rdfs:label "IT / Digital Systems" .
+
+
+###  https://example.org/arch#Domain_Society
+arch:Domain_Society rdf:type owl:NamedIndividual ,
+                             arch:Domain ;
+                    arch:hasEmergentPattern arch:EP_NormsNetworks ;
+                    rdfs:label "Society / Governance" .
+
+
+###  https://example.org/arch#EP_EcosystemBalance
+arch:EP_EcosystemBalance rdf:type owl:NamedIndividual ,
+                                  arch:EmergentPattern ;
+                         rdfs:comment "Self-regulation via species interactions (pro: resilience; con: regime shifts if perturbed)." ;
+                         rdfs:label "Ecosystem Balancing" .
+
+
+###  https://example.org/arch#EP_NormsNetworks
+arch:EP_NormsNetworks rdf:type owl:NamedIndividual ,
+                               arch:EmergentPattern ;
+                      rdfs:comment "Trust, reciprocity, and reputation guide behavior (pro: cohesion; con: exclusion/bias)." ;
+                      rdfs:label "Local Norms & Informal Networks" .
+
+
+###  https://example.org/arch#EP_ShadowIT
+arch:EP_ShadowIT rdf:type owl:NamedIndividual ,
+                          arch:EmergentPattern ;
+                 rdfs:comment "Teams self-solve with tools/patterns outside central governance (pro: speed; con: fragmentation)." ;
+                 rdfs:label "Shadow IT / Local Workarounds" .
+
+
+###  https://example.org/arch#Embod_BAutonomy_ART
+arch:Embod_BAutonomy_ART rdf:type owl:NamedIndividual ,
+                                  arch:PrincipleEmbodiment ;
+                         arch:embodiedInPiece arch:Piece_ART ;
+                         arch:embodiesPrinciple arch:Principle_BoundedAutonomy ;
+                         arch:narrative "Local autonomy within system guardrails." .
+
+
+###  https://example.org/arch#Embod_Boundary_Views
+arch:Embod_Boundary_Views rdf:type owl:NamedIndividual ,
+                                   arch:PrincipleEmbodiment ;
+                          arch:embodiedInPiece arch:Piece_Viewpoints ;
+                          arch:embodiesPrinciple arch:Principle_BoundaryObjects ;
+                          arch:narrative "Shared views as boundary objects across roles." .
+
+
+###  https://example.org/arch#Embod_CAS_ADM
+arch:Embod_CAS_ADM rdf:type owl:NamedIndividual ,
+                            arch:PrincipleEmbodiment ;
+                   arch:embodiedInPiece arch:Piece_ADMIteration ;
+                   arch:embodiesPrinciple arch:Principle_CAS ;
+                   arch:narrative "Feedback/adaptation via iterative ADM cycles." .
+
+
+###  https://example.org/arch#Embod_CAS_ART
+arch:Embod_CAS_ART rdf:type owl:NamedIndividual ,
+                            arch:PrincipleEmbodiment ;
+                   arch:embodiedInPiece arch:Piece_ART ;
+                   arch:embodiesPrinciple arch:Principle_CAS ;
+                   arch:narrative "Bounded autonomy in semi-autonomous trains." .
+
+
+###  https://example.org/arch#Embod_CAS_CapMap
+arch:Embod_CAS_CapMap rdf:type owl:NamedIndividual ,
+                               arch:PrincipleEmbodiment ;
+                      arch:embodiedInPiece arch:Piece_CapabilityMap ;
+                      arch:embodiesPrinciple arch:Principle_CAS ;
+                      arch:narrative "Modularity via capability-based decomposition." .
+
+
+###  https://example.org/arch#Embod_CAS_LocalRules
+arch:Embod_CAS_LocalRules rdf:type owl:NamedIndividual ,
+                                   arch:PrincipleEmbodiment ;
+                          arch:embodiedInPiece arch:Piece_LocalRules ;
+                          arch:embodiesPrinciple arch:Principle_CAS ;
+                          arch:narrative "Local autonomy within system guardrails." .
+
+
+###  https://example.org/arch#Embod_CAS_Patterns
+arch:Embod_CAS_Patterns rdf:type owl:NamedIndividual ,
+                                 arch:PrincipleEmbodiment ;
+                        arch:embodiedInPiece arch:Piece_Patterns ;
+                        arch:embodiesPrinciple arch:Principle_CAS ;
+                        arch:narrative "Reusable building blocks that compose across scales." .
+
+
+###  https://example.org/arch#Embod_Cyb_CorrRules
+arch:Embod_Cyb_CorrRules rdf:type owl:NamedIndividual ,
+                                  arch:PrincipleEmbodiment ;
+                         arch:embodiedInPiece arch:Piece_CorrespondenceRules ;
+                         arch:embodiesPrinciple arch:Principle_Cybernetics ;
+                         arch:narrative "Cross-view consistency checks as control loops." .
+
+
+###  https://example.org/arch#Embod_Cyb_SLOs
+arch:Embod_Cyb_SLOs rdf:type owl:NamedIndividual ,
+                             arch:PrincipleEmbodiment ;
+                    arch:embodiedInPiece arch:Piece_SLOs ;
+                    arch:embodiesPrinciple arch:Principle_Cybernetics ;
+                    arch:narrative "Measure, compare to target, act (SLO/SLI loops)." .
+
+
+###  https://example.org/arch#Embod_Cyb_SystemDemo
+arch:Embod_Cyb_SystemDemo rdf:type owl:NamedIndividual ,
+                                   arch:PrincipleEmbodiment ;
+                          arch:embodiedInPiece arch:Piece_SystemDemo ;
+                          arch:embodiesPrinciple arch:Principle_Cybernetics ;
+                          arch:narrative "Regular integrated feedback on whole system behavior." .
+
+
+###  https://example.org/arch#Embod_Fractals_Nested
+arch:Embod_Fractals_Nested rdf:type owl:NamedIndividual ,
+                                    arch:PrincipleEmbodiment ;
+                           arch:embodiedInPiece arch:Piece_NestedEnterprises ;
+                           arch:embodiesPrinciple arch:Principle_FractalsScale ;
+                           arch:narrative "Nested governance levels (subsidiarity)." .
+
+
+###  https://example.org/arch#Embod_Lifecycle_ADM
+arch:Embod_Lifecycle_ADM rdf:type owl:NamedIndividual ,
+                                  arch:PrincipleEmbodiment ;
+                         arch:embodiedInPiece arch:Piece_ArchRepository ;
+                         arch:embodiesPrinciple arch:Principle_Lifecycle ;
+                         arch:narrative "Institutional memory and evolution through managed assets." .
+
+
+###  https://example.org/arch#Embod_Opt_ErrorBudget
+arch:Embod_Opt_ErrorBudget rdf:type owl:NamedIndividual ,
+                                    arch:PrincipleEmbodiment ;
+                           arch:embodiedInPiece arch:Piece_ErrorBudget ;
+                           arch:embodiesPrinciple arch:Principle_Optimization ;
+                           arch:narrative "Allocate failure budget to optimize delivery vs reliability." .
+
+
+###  https://example.org/arch#Embod_Patterns_PatternClusters
+arch:Embod_Patterns_PatternClusters rdf:type owl:NamedIndividual ,
+                                             arch:PrincipleEmbodiment ;
+                                    arch:embodiedInPiece arch:Piece_PatternClusters ;
+                                    arch:embodiesPrinciple arch:Principle_PatternLanguage ;
+                                    arch:narrative "Composing patterns into larger wholes." .
+
+
+###  https://example.org/arch#Embod_Reliab_SysML
+arch:Embod_Reliab_SysML rdf:type owl:NamedIndividual ,
+                                 arch:PrincipleEmbodiment ;
+                        arch:embodiedInPiece arch:Piece_SysMLReqts ;
+                        arch:embodiesPrinciple arch:Principle_Reliability ;
+                        arch:narrative "Trace critical requirements and mitigations." .
+
+
+###  https://example.org/arch#Embod_Reliab_Viewpoints
+arch:Embod_Reliab_Viewpoints rdf:type owl:NamedIndividual ,
+                                      arch:PrincipleEmbodiment ;
+                             arch:embodiedInPiece arch:Piece_Viewpoints ;
+                             arch:embodiesPrinciple arch:Principle_Reliability ;
+                             arch:narrative "Hazard/operational viewpoints reveal failure modes." .
+
+
+###  https://example.org/arch#Embod_Sync_PI
+arch:Embod_Sync_PI rdf:type owl:NamedIndividual ,
+                            arch:PrincipleEmbodiment ;
+                   arch:embodiedInPiece arch:Piece_PIPlanning ;
+                   arch:embodiesPrinciple arch:Principle_Synchronization ;
+                   arch:narrative "Cadenced alignment of objectives and dependencies." .
+
+
+###  https://example.org/arch#Embod_Tradeoff_Studies
+arch:Embod_Tradeoff_Studies rdf:type owl:NamedIndividual ,
+                                     arch:PrincipleEmbodiment ;
+                            arch:embodiedInPiece arch:Piece_TradeStudies ;
+                            arch:embodiesPrinciple arch:Principle_TradeoffDesignX ;
+                            arch:narrative "Make trade-offs explicit; evaluate alternatives." .
+
+
+###  https://example.org/arch#FC_DevOps_Con_DecLev
+arch:FC_DevOps_Con_DecLev rdf:type owl:NamedIndividual ,
+                                   arch:FrameworkCoverageMapping ;
+                          arch:coversAddedValue arch:AV_DecisionLeverage ;
+                          arch:coversFramework arch:FW_DevOps ;
+                          arch:coversPremise arch:Premise_Constraint ;
+                          arch:weight 1 .
+
+
+###  https://example.org/arch#FC_DevOps_Con_Opt
+arch:FC_DevOps_Con_Opt rdf:type owl:NamedIndividual ,
+                                arch:FrameworkCoverageMapping ;
+                       arch:coversAddedValue arch:AV_OptimizationConstraints ;
+                       arch:coversFramework arch:FW_DevOps ;
+                       arch:coversPremise arch:Premise_Constraint ;
+                       arch:weight 2 .
+
+
+###  https://example.org/arch#FC_ISO_Risk_ConsQ
+arch:FC_ISO_Risk_ConsQ rdf:type owl:NamedIndividual ,
+                                arch:FrameworkCoverageMapping ;
+                       arch:coversAddedValue arch:AV_ConsistentQuality ;
+                       arch:coversFramework arch:FW_ISO42010 ;
+                       arch:coversPremise arch:Premise_Risk ;
+                       arch:weight 1 .
+
+
+###  https://example.org/arch#FC_ISO_Risk_RiskRed
+arch:FC_ISO_Risk_RiskRed rdf:type owl:NamedIndividual ,
+                                  arch:FrameworkCoverageMapping ;
+                         arch:coversAddedValue arch:AV_RiskReduction ;
+                         arch:coversFramework arch:FW_ISO42010 ;
+                         arch:coversPremise arch:Premise_Risk ;
+                         arch:weight 2 .
+
+
+###  https://example.org/arch#FC_MBSE_Long_Adapt
+arch:FC_MBSE_Long_Adapt rdf:type owl:NamedIndividual ,
+                                 arch:FrameworkCoverageMapping ;
+                        arch:coversAddedValue arch:AV_AdaptabilityLongevity ;
+                        arch:coversFramework arch:FW_MBSE ;
+                        arch:coversPremise arch:Premise_Longevity ;
+                        arch:weight 2 .
+
+
+###  https://example.org/arch#FC_MBSE_Long_ConsQ
+arch:FC_MBSE_Long_ConsQ rdf:type owl:NamedIndividual ,
+                                 arch:FrameworkCoverageMapping ;
+                        arch:coversAddedValue arch:AV_ConsistentQuality ;
+                        arch:coversFramework arch:FW_MBSE ;
+                        arch:coversPremise arch:Premise_Longevity ;
+                        arch:weight 1 .
+
+
+###  https://example.org/arch#FC_MBSE_QC_ConsQ
+arch:FC_MBSE_QC_ConsQ rdf:type owl:NamedIndividual ,
+                               arch:FrameworkCoverageMapping ;
+                      arch:coversAddedValue arch:AV_ConsistentQuality ;
+                      arch:coversFramework arch:FW_MBSE ;
+                      arch:coversPremise arch:Premise_QualityCriticality ;
+                      arch:weight 2 .
+
+
+###  https://example.org/arch#FC_MBSE_QC_DecLev
+arch:FC_MBSE_QC_DecLev rdf:type owl:NamedIndividual ,
+                                arch:FrameworkCoverageMapping ;
+                       arch:coversAddedValue arch:AV_DecisionLeverage ;
+                       arch:coversFramework arch:FW_MBSE ;
+                       arch:coversPremise arch:Premise_QualityCriticality ;
+                       arch:weight 1 .
+
+
+###  https://example.org/arch#FC_Ostrom_Div_CohInt
+arch:FC_Ostrom_Div_CohInt rdf:type owl:NamedIndividual ,
+                                   arch:FrameworkCoverageMapping ;
+                          arch:coversAddedValue arch:AV_CoherenceIntegration ;
+                          arch:coversFramework arch:FW_Ostrom ;
+                          arch:coversPremise arch:Premise_Diversity ;
+                          arch:weight 2 .
+
+
+###  https://example.org/arch#FC_Ostrom_Div_SMM
+arch:FC_Ostrom_Div_SMM rdf:type owl:NamedIndividual ,
+                                arch:FrameworkCoverageMapping ;
+                       arch:coversAddedValue arch:AV_SharedMentalModel ;
+                       arch:coversFramework arch:FW_Ostrom ;
+                       arch:coversPremise arch:Premise_Diversity ;
+                       arch:weight 1 .
+
+
+###  https://example.org/arch#FC_SAFe_Coord_CohInt
+arch:FC_SAFe_Coord_CohInt rdf:type owl:NamedIndividual ,
+                                   arch:FrameworkCoverageMapping ;
+                          arch:coversAddedValue arch:AV_CoherenceIntegration ;
+                          arch:coversFramework arch:FW_SAFe ;
+                          arch:coversPremise arch:Premise_Coordination ;
+                          arch:weight 2 .
+
+
+###  https://example.org/arch#FC_SAFe_Coord_SMM
+arch:FC_SAFe_Coord_SMM rdf:type owl:NamedIndividual ,
+                                arch:FrameworkCoverageMapping ;
+                       arch:coversAddedValue arch:AV_SharedMentalModel ;
+                       arch:coversFramework arch:FW_SAFe ;
+                       arch:coversPremise arch:Premise_Coordination ;
+                       arch:weight 2 .
+
+
+###  https://example.org/arch#FC_TOGAF_Comp_Adapt
+arch:FC_TOGAF_Comp_Adapt rdf:type owl:NamedIndividual ,
+                                  arch:FrameworkCoverageMapping ;
+                         arch:coversAddedValue arch:AV_AdaptabilityLongevity ;
+                         arch:coversFramework arch:FW_TOGAF ;
+                         arch:coversPremise arch:Premise_Complexity ;
+                         arch:weight 1 .
+
+
+###  https://example.org/arch#FC_TOGAF_Comp_CohInt
+arch:FC_TOGAF_Comp_CohInt rdf:type owl:NamedIndividual ,
+                                   arch:FrameworkCoverageMapping ;
+                          arch:coversAddedValue arch:AV_CoherenceIntegration ;
+                          arch:coversFramework arch:FW_TOGAF ;
+                          arch:coversPremise arch:Premise_Complexity ;
+                          arch:weight 2 .
+
+
+###  https://example.org/arch#FC_TOGAF_Scale_Clarity
+arch:FC_TOGAF_Scale_Clarity rdf:type owl:NamedIndividual ,
+                                     arch:FrameworkCoverageMapping ;
+                            arch:coversAddedValue arch:AV_ClarityPurpose ;
+                            arch:coversFramework arch:FW_TOGAF ;
+                            arch:coversPremise arch:Premise_Scale ;
+                            arch:weight 2 .
+
+
+###  https://example.org/arch#FC_TOGAF_Scale_SMM
+arch:FC_TOGAF_Scale_SMM rdf:type owl:NamedIndividual ,
+                                 arch:FrameworkCoverageMapping ;
+                        arch:coversAddedValue arch:AV_SharedMentalModel ;
+                        arch:coversFramework arch:FW_TOGAF ;
+                        arch:coversPremise arch:Premise_Scale ;
+                        arch:weight 1 .
+
+
+###  https://example.org/arch#FW_Alexander
+arch:FW_Alexander rdf:type owl:NamedIndividual ,
+                           arch:Framework ;
+                  arch:containsPiece arch:Piece_FeedbackFromUse ,
+                                     arch:Piece_PatternClusters ,
+                                     arch:Piece_Patterns ;
+                  rdfs:label "Alexander's Pattern Language" .
+
+
+###  https://example.org/arch#FW_DevOps
+arch:FW_DevOps rdf:type owl:NamedIndividual ,
+                        arch:Framework ;
+               arch:containsPiece arch:Piece_CICD ,
+                                  arch:Piece_ErrorBudget ,
+                                  arch:Piece_SLOs ;
+               rdfs:label "DevOps / SRE" .
+
+
+###  https://example.org/arch#FW_ISO42010
+arch:FW_ISO42010 rdf:type owl:NamedIndividual ,
+                          arch:Framework ;
+                 arch:containsPiece arch:Piece_CorrespondenceRules ,
+                                    arch:Piece_StakeholderConcerns ,
+                                    arch:Piece_Viewpoints ;
+                 arch:codeName "FW_ISO42010" ;
+                 rdfs:label "ISO 42010 (Architecture Description)" .
+
+
+###  https://example.org/arch#FW_MBSE
+arch:FW_MBSE rdf:type owl:NamedIndividual ,
+                      arch:Framework ;
+             arch:containsPiece arch:Piece_ArchitectureModel ,
+                                arch:Piece_SysMLReqts ,
+                                arch:Piece_TradeStudies ;
+             rdfs:label "MBSE (Model-Based Systems Engineering)" .
+
+
+###  https://example.org/arch#FW_Ostrom
+arch:FW_Ostrom rdf:type owl:NamedIndividual ,
+                        arch:Framework ;
+               arch:containsPiece arch:Piece_ConflictResolution ,
+                                  arch:Piece_LocalRules ,
+                                  arch:Piece_NestedEnterprises ;
+               rdfs:label "Ostrom's Commons Principles" .
+
+
+###  https://example.org/arch#FW_SAFe
+arch:FW_SAFe rdf:type owl:NamedIndividual ,
+                      arch:Framework ;
+             arch:containsPiece arch:Piece_ART ,
+                                arch:Piece_InspectAdapt ,
+                                arch:Piece_PIPlanning ,
+                                arch:Piece_SystemDemo ;
+             arch:codeName "FW_SAFe" ;
+             rdfs:label "SAFe (Scaled Agile Framework)" .
+
+
+###  https://example.org/arch#FW_TOGAF
+arch:FW_TOGAF rdf:type owl:NamedIndividual ,
+                       arch:Framework ;
+              arch:containsPiece arch:Piece_ADMIteration ,
+                                 arch:Piece_ArchPrinciples ,
+                                 arch:Piece_ArchRepository ,
+                                 arch:Piece_CapabilityMap ;
+              arch:codeName "FW_TOGAF" ;
+              rdfs:label "TOGAF" .
+
+
+###  https://example.org/arch#IA_DevOps_Constraint
+arch:IA_DevOps_Constraint rdf:type owl:NamedIndividual ,
+                                   arch:IAIntervention ;
+                          arch:addressesPremise arch:Premise_Constraint ;
+                          arch:providedByFramework arch:FW_DevOps ;
+                          arch:usesPiece arch:Piece_CICD ,
+                                         arch:Piece_ErrorBudget ,
+                                         arch:Piece_SLOs ;
+                          arch:actions "Set SLOs; manage error budgets; automate delivery to focus scarce effort where it counts." ;
+                          arch:intrusiveness "low" .
+
+
+###  https://example.org/arch#IA_ISO_Risk
+arch:IA_ISO_Risk rdf:type owl:NamedIndividual ,
+                          arch:IAIntervention ;
+                 arch:addressesPremise arch:Premise_Risk ;
+                 arch:providedByFramework arch:FW_ISO42010 ;
+                 arch:usesPiece arch:Piece_CorrespondenceRules ,
+                                arch:Piece_StakeholderConcerns ,
+                                arch:Piece_Viewpoints ;
+                 arch:actions "Elicit critical concerns; add safety/ops viewpoints; enforce cross-view consistency checks and escalation paths." ;
+                 arch:intrusiveness "low" .
+
+
+###  https://example.org/arch#IA_MBSE_Longevity
+arch:IA_MBSE_Longevity rdf:type owl:NamedIndividual ,
+                                arch:IAIntervention ;
+                       arch:addressesPremise arch:Premise_Longevity ;
+                       arch:providedByFramework arch:FW_MBSE ;
+                       arch:usesPiece arch:Piece_ArchitectureModel ,
+                                      arch:Piece_SysMLReqts ,
+                                      arch:Piece_TradeStudies ;
+                       arch:actions "Trace rationale/requirements; model stable seams; run periodic trade studies to evolve without rewrites." ;
+                       arch:intrusiveness "low" .
+
+
+###  https://example.org/arch#IA_MBSE_QC
+arch:IA_MBSE_QC rdf:type owl:NamedIndividual ,
+                         arch:IAIntervention ;
+                arch:addressesPremise arch:Premise_QualityCriticality ;
+                arch:providedByFramework arch:FW_MBSE ;
+                arch:usesPiece arch:Piece_SysMLReqts ,
+                               arch:Piece_TradeStudies ;
+                arch:actions "Make quality attributes explicit; evaluate trade-offs; establish acceptance criteria and verification methods." ;
+                arch:intrusiveness "low" .
+
+
+###  https://example.org/arch#IA_Ostrom_Diversity
+arch:IA_Ostrom_Diversity rdf:type owl:NamedIndividual ,
+                                  arch:IAIntervention ;
+                         arch:addressesPremise arch:Premise_Diversity ;
+                         arch:providedByFramework arch:FW_Ostrom ;
+                         arch:usesPiece arch:Piece_ConflictResolution ,
+                                        arch:Piece_LocalRules ,
+                                        arch:Piece_NestedEnterprises ;
+                         arch:actions "Enable local rule-making; define shared interface rules; provide simple conflict resolution to keep heterogeneity coherent." ;
+                         arch:intrusiveness "low" .
+
+
+###  https://example.org/arch#IA_SAFe_Coord
+arch:IA_SAFe_Coord rdf:type owl:NamedIndividual ,
+                            arch:IAIntervention ;
+                   arch:addressesPremise arch:Premise_Coordination ;
+                   arch:providedByFramework arch:FW_SAFe ;
+                   arch:usesPiece arch:Piece_InspectAdapt ,
+                                  arch:Piece_PIPlanning ,
+                                  arch:Piece_SystemDemo ;
+                   arch:actions "Introduce shared PI cadence; run regular integrated demos; Inspect & Adapt to resolve cross-team issues & tune guardrails." ;
+                   arch:intrusiveness "low" .
+
+
+###  https://example.org/arch#IA_TOGAF_Complexity
+arch:IA_TOGAF_Complexity rdf:type owl:NamedIndividual ,
+                                  arch:IAIntervention ;
+                         arch:addressesPremise arch:Premise_Complexity ;
+                         arch:providedByFramework arch:FW_TOGAF ;
+                         arch:usesPiece arch:Piece_ADMIteration ,
+                                        arch:Piece_CapabilityMap ;
+                         arch:actions "Define capability seams; publish integration principles; institute ADM iteration checkpoints." ;
+                         arch:codeName "IA_TOGAF_Complexity" ;
+                         arch:intrusiveness "low" .
+
+
+###  https://example.org/arch#IA_TOGAF_Scale
+arch:IA_TOGAF_Scale rdf:type owl:NamedIndividual ,
+                             arch:IAIntervention ;
+                    arch:addressesPremise arch:Premise_Scale ;
+                    arch:providedByFramework arch:FW_TOGAF ;
+                    arch:usesPiece arch:Piece_ArchPrinciples ,
+                                   arch:Piece_ArchRepository ;
+                    arch:actions "Publish enterprise principles; template reusable assets in repository; align scope through capability hierarchy." ;
+                    arch:intrusiveness "low" .
+
+
+###  https://example.org/arch#Justif_Complexity_CAS
+arch:Justif_Complexity_CAS rdf:type owl:NamedIndividual ,
+                                    arch:PremisePrincipleJustif ;
+                           arch:justifiesPremise arch:Premise_Complexity ;
+                           arch:justifiesPrinciple arch:Principle_CAS ;
+                           arch:rationale "CAS manages interdependencies with modularity & feedback." .
+
+
+###  https://example.org/arch#Justif_Constraint_Optimization
+arch:Justif_Constraint_Optimization rdf:type owl:NamedIndividual ,
+                                             arch:PremisePrincipleJustif ;
+                                    arch:justifiesPremise arch:Premise_Constraint ;
+                                    arch:justifiesPrinciple arch:Principle_Optimization ;
+                                    arch:rationale "Exploit constraints; minimize waste; prioritize essentials." .
+
+
+###  https://example.org/arch#Justif_Coord_BAutonomy
+arch:Justif_Coord_BAutonomy rdf:type owl:NamedIndividual ,
+                                     arch:PremisePrincipleJustif ;
+                            arch:justifiesPremise arch:Premise_Coordination ;
+                            arch:justifiesPrinciple arch:Principle_BoundedAutonomy ;
+                            arch:rationale "Scale coordination via local autonomy inside guardrails." .
+
+
+###  https://example.org/arch#Justif_Coord_Sync
+arch:Justif_Coord_Sync rdf:type owl:NamedIndividual ,
+                                arch:PremisePrincipleJustif ;
+                       arch:justifiesPremise arch:Premise_Coordination ;
+                       arch:justifiesPrinciple arch:Principle_Synchronization ;
+                       arch:rationale "Parallel work needs aligned tempos and integration beats." .
+
+
+###  https://example.org/arch#Justif_Diversity_Boundary
+arch:Justif_Diversity_Boundary rdf:type owl:NamedIndividual ,
+                                        arch:PremisePrincipleJustif ;
+                               arch:justifiesPremise arch:Premise_Diversity ;
+                               arch:justifiesPrinciple arch:Principle_BoundaryObjects ;
+                               arch:rationale "Boundary objects standardize interfaces across diverse actors." .
+
+
+###  https://example.org/arch#Justif_Longevity_Lifecycle
+arch:Justif_Longevity_Lifecycle rdf:type owl:NamedIndividual ,
+                                         arch:PremisePrincipleJustif ;
+                                arch:justifiesPremise arch:Premise_Longevity ;
+                                arch:justifiesPrinciple arch:Principle_Lifecycle ;
+                                arch:rationale "Lifecycle thinking/antifragility supports graceful evolution." .
+
+
+###  https://example.org/arch#Justif_Quality_Tradeoff
+arch:Justif_Quality_Tradeoff rdf:type owl:NamedIndividual ,
+                                      arch:PremisePrincipleJustif ;
+                             arch:justifiesPremise arch:Premise_QualityCriticality ;
+                             arch:justifiesPrinciple arch:Principle_TradeoffDesignX ;
+                             arch:rationale "Make qualities first-class; analyze and enforce trade-offs." .
+
+
+###  https://example.org/arch#Justif_Risk_Cybernetics
+arch:Justif_Risk_Cybernetics rdf:type owl:NamedIndividual ,
+                                      arch:PremisePrincipleJustif ;
+                             arch:justifiesPremise arch:Premise_Risk ;
+                             arch:justifiesPrinciple arch:Principle_Cybernetics ;
+                             arch:rationale "Feedback loops reduce probability/impact of failure." .
+
+
+###  https://example.org/arch#Justif_Risk_Reliability
+arch:Justif_Risk_Reliability rdf:type owl:NamedIndividual ,
+                                      arch:PremisePrincipleJustif ;
+                             arch:justifiesPremise arch:Premise_Risk ;
+                             arch:justifiesPrinciple arch:Principle_Reliability ;
+                             arch:rationale "High impact of failure requires reliability/safety mechanisms." .
+
+
+###  https://example.org/arch#Justif_Scale_Fractals
+arch:Justif_Scale_Fractals rdf:type owl:NamedIndividual ,
+                                    arch:PremisePrincipleJustif ;
+                           arch:justifiesPremise arch:Premise_Scale ;
+                           arch:justifiesPrinciple arch:Principle_FractalsScale ;
+                           arch:rationale "Self-similar structures scale while preserving coherence." .
+
+
+###  https://example.org/arch#PI_Comp_ChangeCoupling
+arch:PI_Comp_ChangeCoupling rdf:type owl:NamedIndividual ,
+                                     arch:PremiseIndicator ;
+                            arch:narrative "How often components change together." ;
+                            rdfs:label "Change coupling" .
+
+
+###  https://example.org/arch#PI_Comp_Depth
+arch:PI_Comp_Depth rdf:type owl:NamedIndividual ,
+                            arch:PremiseIndicator ;
+                   arch:narrative "Max levels in dependency chains." ;
+                   rdfs:label "Dependency depth" .
+
+
+###  https://example.org/arch#PI_Comp_InterfaceCnt
+arch:PI_Comp_InterfaceCnt rdf:type owl:NamedIndividual ,
+                                   arch:PremiseIndicator ;
+                          arch:narrative "Number of high-impact interfaces." ;
+                          rdfs:label "Critical interface count" .
+
+
+###  https://example.org/arch#PI_Con_BudgetTightness
+arch:PI_Con_BudgetTightness rdf:type owl:NamedIndividual ,
+                                     arch:PremiseIndicator ;
+                            arch:narrative "Variance from ideal resources vs plan." ;
+                            rdfs:label "Budget/time tightness" .
+
+
+###  https://example.org/arch#PI_Con_ReuseRate
+arch:PI_Con_ReuseRate rdf:type owl:NamedIndividual ,
+                               arch:PremiseIndicator ;
+                      arch:narrative "Share of solution built from reusable elements." ;
+                      rdfs:label "Reuse rate" .
+
+
+###  https://example.org/arch#PI_Con_ReworkRisk
+arch:PI_Con_ReworkRisk rdf:type owl:NamedIndividual ,
+                                arch:PremiseIndicator ;
+                       arch:narrative "Likelihood of rework given current plan." ;
+                       rdfs:label "Rework risk" .
+
+
+###  https://example.org/arch#PI_Coord_DecisionLatency
+arch:PI_Coord_DecisionLatency rdf:type owl:NamedIndividual ,
+                                       arch:PremiseIndicator ;
+                              arch:narrative "Time to resolve cross-team decisions." ;
+                              rdfs:label "Decision latency" .
+
+
+###  https://example.org/arch#PI_Coord_IntegrationLag
+arch:PI_Coord_IntegrationLag rdf:type owl:NamedIndividual ,
+                                      arch:PremiseIndicator ;
+                             arch:narrative "Time between team outputs integrating." ;
+                             rdfs:label "Integration lag" .
+
+
+###  https://example.org/arch#PI_Coord_ParallelTeams
+arch:PI_Coord_ParallelTeams rdf:type owl:NamedIndividual ,
+                                     arch:PremiseIndicator ;
+                            arch:narrative "Teams contributing concurrently." ;
+                            rdfs:label "Parallel team count" .
+
+
+###  https://example.org/arch#PI_Div_ConflictRate
+arch:PI_Div_ConflictRate rdf:type owl:NamedIndividual ,
+                                  arch:PremiseIndicator ;
+                         arch:narrative "Frequency of cross-discipline conflicts." ;
+                         rdfs:label "Perspective conflict rate" .
+
+
+###  https://example.org/arch#PI_Div_HeteCount
+arch:PI_Div_HeteCount rdf:type owl:NamedIndividual ,
+                               arch:PremiseIndicator ;
+                      arch:narrative "Number of distinct techs/disciplines/perspectives." ;
+                      rdfs:label "Heterogeneity count" .
+
+
+###  https://example.org/arch#PI_Div_InterfaceVar
+arch:PI_Div_InterfaceVar rdf:type owl:NamedIndividual ,
+                                  arch:PremiseIndicator ;
+                         arch:narrative "Variance in interfaces/formats/protocols." ;
+                         rdfs:label "Interface variability" .
+
+
+###  https://example.org/arch#PI_Long_ChangeFreq
+arch:PI_Long_ChangeFreq rdf:type owl:NamedIndividual ,
+                                 arch:PremiseIndicator ;
+                        arch:narrative "Expected change cadence over years." ;
+                        rdfs:label "Change frequency over horizon" .
+
+
+###  https://example.org/arch#PI_Long_DebtTrend
+arch:PI_Long_DebtTrend rdf:type owl:NamedIndividual ,
+                                arch:PremiseIndicator ;
+                       arch:narrative "Rate at which structural/technical debt accumulates." ;
+                       rdfs:label "Debt trend" .
+
+
+###  https://example.org/arch#PI_Long_KnowledgeContinuity
+arch:PI_Long_KnowledgeContinuity rdf:type owl:NamedIndividual ,
+                                          arch:PremiseIndicator ;
+                                 arch:narrative "Retention of rationale/decisions over time." ;
+                                 rdfs:label "Knowledge continuity" .
+
+
+###  https://example.org/arch#PI_QC_AssuranceDepth
+arch:PI_QC_AssuranceDepth rdf:type owl:NamedIndividual ,
+                                   arch:PremiseIndicator ;
+                          arch:narrative "Strength of verification/validation planned." ;
+                          rdfs:label "Assurance depth" .
+
+
+###  https://example.org/arch#PI_QC_CriticalAttrs
+arch:PI_QC_CriticalAttrs rdf:type owl:NamedIndividual ,
+                                  arch:PremiseIndicator ;
+                         arch:narrative "Declared set of essential qualities (safety, security, performance...)." ;
+                         rdfs:label "Critical attribute set" .
+
+
+###  https://example.org/arch#PI_QC_TradeoffLoad
+arch:PI_QC_TradeoffLoad rdf:type owl:NamedIndividual ,
+                                 arch:PremiseIndicator ;
+                        arch:narrative "Number/impact of competing quality trade-offs." ;
+                        rdfs:label "Trade-off load" .
+
+
+###  https://example.org/arch#PI_Risk_Impact
+arch:PI_Risk_Impact rdf:type owl:NamedIndividual ,
+                             arch:PremiseIndicator ;
+                    arch:narrative "Estimated severity across safety, cost, trust." ;
+                    rdfs:label "Impact of failure" .
+
+
+###  https://example.org/arch#PI_Risk_Likelihood
+arch:PI_Risk_Likelihood rdf:type owl:NamedIndividual ,
+                                 arch:PremiseIndicator ;
+                        arch:narrative "Probability of incident given current design." ;
+                        rdfs:label "Failure likelihood" .
+
+
+###  https://example.org/arch#PI_Risk_SinglePoints
+arch:PI_Risk_SinglePoints rdf:type owl:NamedIndividual ,
+                                   arch:PremiseIndicator ;
+                          arch:narrative "Count of non-redundant critical elements." ;
+                          rdfs:label "Single points of failure" .
+
+
+###  https://example.org/arch#PI_Scale_ReusePotential
+arch:PI_Scale_ReusePotential rdf:type owl:NamedIndividual ,
+                                      arch:PremiseIndicator ;
+                             arch:narrative "Expected reuse across units/domains." ;
+                             rdfs:label "Reuse potential" .
+
+
+###  https://example.org/arch#PI_Scale_ScopeBreadth
+arch:PI_Scale_ScopeBreadth rdf:type owl:NamedIndividual ,
+                                    arch:PremiseIndicator ;
+                           arch:narrative "Count of distinct areas/units included." ;
+                           rdfs:label "Scope breadth" .
+
+
+###  https://example.org/arch#PI_Scale_TeamCount
+arch:PI_Scale_TeamCount rdf:type owl:NamedIndividual ,
+                                 arch:PremiseIndicator ;
+                        arch:narrative "Number of teams contributing to the effort." ;
+                        rdfs:label "Concurrent team count" .
+
+
+###  https://example.org/arch#Piece_ADMIteration
+arch:Piece_ADMIteration rdf:type owl:NamedIndividual ,
+                                 arch:FrameworkPiece ;
+                        arch:codeName "Piece_ADMIteration" ;
+                        rdfs:label "ADM Iteration Cycle" ;
+                        arch:pieceOf arch:FW_TOGAF .
+
+
+###  https://example.org/arch#Piece_ART
+arch:Piece_ART rdf:type owl:NamedIndividual ,
+                        arch:FrameworkPiece ;
+               rdfs:label "Agile Release Train (ART)" ;
+               arch:pieceOf arch:FW_SAFe .
+
+
+###  https://example.org/arch#Piece_ArchPrinciples
+arch:Piece_ArchPrinciples rdf:type owl:NamedIndividual ,
+                                   arch:FrameworkPiece ;
+                          rdfs:label "Architecture Principles Set" ;
+                          arch:pieceOf arch:FW_TOGAF .
+
+
+###  https://example.org/arch#Piece_ArchRepository
+arch:Piece_ArchRepository rdf:type owl:NamedIndividual ,
+                                   arch:FrameworkPiece ;
+                          rdfs:label "Architecture Repository" ;
+                          arch:pieceOf arch:FW_TOGAF .
+
+
+###  https://example.org/arch#Piece_ArchitectureModel
+arch:Piece_ArchitectureModel rdf:type owl:NamedIndividual ,
+                                      arch:FrameworkPiece ;
+                             rdfs:label "Architecture Model (Block/Activity/Parametric)" ;
+                             arch:pieceOf arch:FW_MBSE .
+
+
+###  https://example.org/arch#Piece_CICD
+arch:Piece_CICD rdf:type owl:NamedIndividual ,
+                         arch:FrameworkPiece ;
+                rdfs:label "Continuous Delivery Pipeline" ;
+                arch:pieceOf arch:FW_DevOps .
+
+
+###  https://example.org/arch#Piece_CapabilityMap
+arch:Piece_CapabilityMap rdf:type owl:NamedIndividual ,
+                                  arch:FrameworkPiece ;
+                         arch:codeName "Piece_CapabilityMap" ;
+                         rdfs:label "Capability Map" ;
+                         arch:pieceOf arch:FW_TOGAF .
+
+
+###  https://example.org/arch#Piece_ConflictResolution
+arch:Piece_ConflictResolution rdf:type owl:NamedIndividual ,
+                                       arch:FrameworkPiece ;
+                              rdfs:label "Conflict Resolution Mechanisms" ;
+                              arch:pieceOf arch:FW_Ostrom .
+
+
+###  https://example.org/arch#Piece_CorrespondenceRules
+arch:Piece_CorrespondenceRules rdf:type owl:NamedIndividual ,
+                                        arch:FrameworkPiece ;
+                               arch:codeName "Piece_CorrespondenceRules" ;
+                               rdfs:label "Correspondence & Consistency Rules" ;
+                               arch:pieceOf arch:FW_ISO42010 .
+
+
+###  https://example.org/arch#Piece_ErrorBudget
+arch:Piece_ErrorBudget rdf:type owl:NamedIndividual ,
+                                arch:FrameworkPiece ;
+                       rdfs:label "Error Budget Policy" ;
+                       arch:pieceOf arch:FW_DevOps .
+
+
+###  https://example.org/arch#Piece_FeedbackFromUse
+arch:Piece_FeedbackFromUse rdf:type owl:NamedIndividual ,
+                                    arch:FrameworkPiece ;
+                           rdfs:label "Feedback from Use" ;
+                           arch:pieceOf arch:FW_Alexander .
+
+
+###  https://example.org/arch#Piece_InspectAdapt
+arch:Piece_InspectAdapt rdf:type owl:NamedIndividual ,
+                                 arch:FrameworkPiece ;
+                        rdfs:label "Inspect & Adapt" ;
+                        arch:pieceOf arch:FW_SAFe .
+
+
+###  https://example.org/arch#Piece_LocalRules
+arch:Piece_LocalRules rdf:type owl:NamedIndividual ,
+                               arch:FrameworkPiece ;
+                      rdfs:label "Local Rule-Making" ;
+                      arch:pieceOf arch:FW_Ostrom .
+
+
+###  https://example.org/arch#Piece_NestedEnterprises
+arch:Piece_NestedEnterprises rdf:type owl:NamedIndividual ,
+                                      arch:FrameworkPiece ;
+                             rdfs:label "Nested Enterprises" ;
+                             arch:pieceOf arch:FW_Ostrom .
+
+
+###  https://example.org/arch#Piece_PIPlanning
+arch:Piece_PIPlanning rdf:type owl:NamedIndividual ,
+                               arch:FrameworkPiece ;
+                      arch:codeName "Piece_PIPlanning" ;
+                      rdfs:label "PI Planning" ;
+                      arch:pieceOf arch:FW_SAFe .
+
+
+###  https://example.org/arch#Piece_PatternClusters
+arch:Piece_PatternClusters rdf:type owl:NamedIndividual ,
+                                    arch:FrameworkPiece ;
+                           rdfs:label "Pattern Clusters" ;
+                           arch:pieceOf arch:FW_Alexander .
+
+
+###  https://example.org/arch#Piece_Patterns
+arch:Piece_Patterns rdf:type owl:NamedIndividual ,
+                             arch:FrameworkPiece ;
+                    rdfs:label "Patterns" ;
+                    arch:pieceOf arch:FW_Alexander .
+
+
+###  https://example.org/arch#Piece_SLOs
+arch:Piece_SLOs rdf:type owl:NamedIndividual ,
+                         arch:FrameworkPiece ;
+                rdfs:label "Service Level Objectives" ;
+                arch:pieceOf arch:FW_DevOps .
+
+
+###  https://example.org/arch#Piece_StakeholderConcerns
+arch:Piece_StakeholderConcerns rdf:type owl:NamedIndividual ,
+                                        arch:FrameworkPiece ;
+                               rdfs:label "Stakeholder Concerns" ;
+                               arch:pieceOf arch:FW_ISO42010 .
+
+
+###  https://example.org/arch#Piece_SysMLReqts
+arch:Piece_SysMLReqts rdf:type owl:NamedIndividual ,
+                               arch:FrameworkPiece ;
+                      rdfs:label "SysML Requirements & Traceability" ;
+                      arch:pieceOf arch:FW_MBSE .
+
+
+###  https://example.org/arch#Piece_SystemDemo
+arch:Piece_SystemDemo rdf:type owl:NamedIndividual ,
+                               arch:FrameworkPiece ;
+                      arch:codeName "Piece_SystemDemo" ;
+                      rdfs:label "System Demo" ;
+                      arch:pieceOf arch:FW_SAFe .
+
+
+###  https://example.org/arch#Piece_TradeStudies
+arch:Piece_TradeStudies rdf:type owl:NamedIndividual ,
+                                 arch:FrameworkPiece ;
+                        rdfs:label "Trade Studies / Pareto Fronts" ;
+                        arch:pieceOf arch:FW_MBSE .
+
+
+###  https://example.org/arch#Piece_Viewpoints
+arch:Piece_Viewpoints rdf:type owl:NamedIndividual ,
+                               arch:FrameworkPiece ;
+                      rdfs:label "Viewpoints & Views" ;
+                      arch:pieceOf arch:FW_ISO42010 .
+
+
+###  https://example.org/arch#Premise_Complexity
+arch:Premise_Complexity rdf:type owl:NamedIndividual ,
+                                 arch:Premise ;
+                        arch:mayLeadTo arch:C_Comp_Brittle ,
+                                       arch:C_Comp_Cascade ;
+                        arch:measuredBy arch:PI_Comp_ChangeCoupling ,
+                                        arch:PI_Comp_Depth ,
+                                        arch:PI_Comp_InterfaceCnt ;
+                        arch:codeName "Premise_Complexity" ;
+                        rdfs:label "Complexity" .
+
+
+###  https://example.org/arch#Premise_Constraint
+arch:Premise_Constraint rdf:type owl:NamedIndividual ,
+                                 arch:Premise ;
+                        arch:mayLeadTo arch:C_Con_Overruns ,
+                                       arch:C_Con_Shortcuts ;
+                        arch:measuredBy arch:PI_Con_BudgetTightness ,
+                                        arch:PI_Con_ReuseRate ,
+                                        arch:PI_Con_ReworkRisk ;
+                        arch:codeName "Premise_Constraint" ;
+                        rdfs:label "Constraint sensitivity" .
+
+
+###  https://example.org/arch#Premise_Coordination
+arch:Premise_Coordination rdf:type owl:NamedIndividual ,
+                                   arch:Premise ;
+                          arch:mayLeadTo arch:C_Coord_Drift ,
+                                         arch:C_Coord_MergeHell ;
+                          arch:measuredBy arch:PI_Coord_DecisionLatency ,
+                                          arch:PI_Coord_IntegrationLag ,
+                                          arch:PI_Coord_ParallelTeams ;
+                          arch:codeName "Premise_Coordination" ;
+                          rdfs:label "Coordination" .
+
+
+###  https://example.org/arch#Premise_Diversity
+arch:Premise_Diversity rdf:type owl:NamedIndividual ,
+                                arch:Premise ;
+                       arch:mayLeadTo arch:C_Div_Silos ,
+                                      arch:C_Div_Waste ;
+                       arch:measuredBy arch:PI_Div_ConflictRate ,
+                                       arch:PI_Div_HeteCount ,
+                                       arch:PI_Div_InterfaceVar ;
+                       arch:codeName "Premise_Diversity" ;
+                       rdfs:label "Diversity" .
+
+
+###  https://example.org/arch#Premise_Longevity
+arch:Premise_Longevity rdf:type owl:NamedIndividual ,
+                                arch:Premise ;
+                       arch:mayLeadTo arch:C_Long_Entropy ,
+                                      arch:C_Long_Rewrites ;
+                       arch:measuredBy arch:PI_Long_ChangeFreq ,
+                                       arch:PI_Long_DebtTrend ,
+                                       arch:PI_Long_KnowledgeContinuity ;
+                       arch:codeName "Premise_Longevity" ;
+                       rdfs:label "Longevity" .
+
+
+###  https://example.org/arch#Premise_QualityCriticality
+arch:Premise_QualityCriticality rdf:type owl:NamedIndividual ,
+                                         arch:Premise ;
+                                arch:mayLeadTo arch:C_QC_Erosion ,
+                                               arch:C_QC_Incidents ;
+                                arch:measuredBy arch:PI_QC_AssuranceDepth ,
+                                                arch:PI_QC_CriticalAttrs ,
+                                                arch:PI_QC_TradeoffLoad ;
+                                arch:codeName "Premise_QualityCriticality" ;
+                                rdfs:label "Criticality of quality attributes" .
+
+
+###  https://example.org/arch#Premise_Risk
+arch:Premise_Risk rdf:type owl:NamedIndividual ,
+                           arch:Premise ;
+                  arch:mayLeadTo arch:C_Risk_Incident ,
+                                 arch:C_Risk_Loss ;
+                  arch:measuredBy arch:PI_Risk_Impact ,
+                                  arch:PI_Risk_Likelihood ,
+                                  arch:PI_Risk_SinglePoints ;
+                  arch:codeName "Premise_Risk" ;
+                  rdfs:label "Risk" .
+
+
+###  https://example.org/arch#Premise_Scale
+arch:Premise_Scale rdf:type owl:NamedIndividual ,
+                            arch:Premise ;
+                   arch:mayLeadTo arch:C_Scale_Collapse ,
+                                  arch:C_Scale_ScopeDrift ;
+                   arch:measuredBy arch:PI_Scale_ReusePotential ,
+                                   arch:PI_Scale_ScopeBreadth ,
+                                   arch:PI_Scale_TeamCount ;
+                   arch:codeName "Premise_Scale" ;
+                   rdfs:label "Scale" .
+
+
+###  https://example.org/arch#Principle_BoundaryObjects
+arch:Principle_BoundaryObjects rdf:type owl:NamedIndividual ,
+                                        arch:Principle ;
+                               rdfs:comment "Shared artifacts enable collaboration across diverse perspectives." ;
+                               rdfs:label "Standardization & Boundary Objects" .
+
+
+###  https://example.org/arch#Principle_BoundedAutonomy
+arch:Principle_BoundedAutonomy rdf:type owl:NamedIndividual ,
+                                        arch:Principle ;
+                               arch:codeName "Principle_BoundedAutonomy" ;
+                               rdfs:comment "Local decision-making inside explicit guardrails." ;
+                               rdfs:label "Bounded Autonomy" .
+
+
+###  https://example.org/arch#Principle_CAS
+arch:Principle_CAS rdf:type owl:NamedIndividual ,
+                            arch:Principle ;
+                   arch:codeName "Principle_CAS" ;
+                   rdfs:comment "Manage interdependencies via modularity, feedback loops, bounded autonomy." ;
+                   rdfs:label "Complex Adaptive Systems" .
+
+
+###  https://example.org/arch#Principle_Cybernetics
+arch:Principle_Cybernetics rdf:type owl:NamedIndividual ,
+                                    arch:Principle ;
+                           arch:codeName "Principle_Cybernetics" ;
+                           rdfs:comment "Sense → compare → act loops keep systems within safe bounds." ;
+                           rdfs:label "Cybernetics / Feedback Control" .
+
+
+###  https://example.org/arch#Principle_FractalsScale
+arch:Principle_FractalsScale rdf:type owl:NamedIndividual ,
+                                      arch:Principle ;
+                             rdfs:comment "Self-similar structures across levels; subsidiarity." ;
+                             rdfs:label "Fractals / Scale-Invariance" .
+
+
+###  https://example.org/arch#Principle_Lifecycle
+arch:Principle_Lifecycle rdf:type owl:NamedIndividual ,
+                                  arch:Principle ;
+                         rdfs:comment "Design for graceful evolution and learning across time." ;
+                         rdfs:label "Lifecycle / Antifragility" .
+
+
+###  https://example.org/arch#Principle_Optimization
+arch:Principle_Optimization rdf:type owl:NamedIndividual ,
+                                     arch:Principle ;
+                            rdfs:comment "Prioritize value; minimize waste; reuse; exploit constraints." ;
+                            rdfs:label "Optimization & Lean" .
+
+
+###  https://example.org/arch#Principle_PatternLanguage
+arch:Principle_PatternLanguage rdf:type owl:NamedIndividual ,
+                                        arch:Principle ;
+                               rdfs:comment "Reusable patterns across scales; fit to context through composition." ;
+                               rdfs:label "Pattern Language" .
+
+
+###  https://example.org/arch#Principle_Reliability
+arch:Principle_Reliability rdf:type owl:NamedIndividual ,
+                                    arch:Principle ;
+                           arch:codeName "Principle_Reliability" ;
+                           rdfs:comment "Design for reliability: redundancy, containment, hazard analysis." ;
+                           rdfs:label "Reliability & Safety Engineering" .
+
+
+###  https://example.org/arch#Principle_Synchronization
+arch:Principle_Synchronization rdf:type owl:NamedIndividual ,
+                                        arch:Principle ;
+                               arch:codeName "Principle_Synchronization" ;
+                               rdfs:comment "Align tempos; regular integration and review beats." ;
+                               rdfs:label "Synchronization & Cadence" .
+
+
+###  https://example.org/arch#Principle_TradeoffDesignX
+arch:Principle_TradeoffDesignX rdf:type owl:NamedIndividual ,
+                                        arch:Principle ;
+                               rdfs:comment "Make qualities explicit; analyze trade-offs; enforce consistently." ;
+                               rdfs:label "Design-for-X / Trade-off Analysis" .
+
+
+###  https://example.org/arch#Rel_Comp_Adapt
+arch:Rel_Comp_Adapt rdf:type owl:NamedIndividual ,
+                             arch:RelevanceMapping ;
+                    arch:mapsAddedValue arch:AV_AdaptabilityLongevity ;
+                    arch:mapsPremise arch:Premise_Complexity ;
+                    arch:weight 2 .
+
+
+###  https://example.org/arch#Rel_Comp_Clar
+arch:Rel_Comp_Clar rdf:type owl:NamedIndividual ,
+                            arch:RelevanceMapping ;
+                   arch:mapsAddedValue arch:AV_ClarityPurpose ;
+                   arch:mapsPremise arch:Premise_Complexity ;
+                   arch:weight 1 .
+
+
+###  https://example.org/arch#Rel_Comp_CohInt
+arch:Rel_Comp_CohInt rdf:type owl:NamedIndividual ,
+                              arch:RelevanceMapping ;
+                     arch:mapsAddedValue arch:AV_CoherenceIntegration ;
+                     arch:mapsPremise arch:Premise_Complexity ;
+                     arch:weight 2 .
+
+
+###  https://example.org/arch#Rel_Comp_Dec
+arch:Rel_Comp_Dec rdf:type owl:NamedIndividual ,
+                           arch:RelevanceMapping ;
+                  arch:mapsAddedValue arch:AV_DecisionLeverage ;
+                  arch:mapsPremise arch:Premise_Complexity ;
+                  arch:weight 1 .
+
+
+###  https://example.org/arch#Rel_Comp_Opt
+arch:Rel_Comp_Opt rdf:type owl:NamedIndividual ,
+                           arch:RelevanceMapping ;
+                  arch:mapsAddedValue arch:AV_OptimizationConstraints ;
+                  arch:mapsPremise arch:Premise_Complexity ;
+                  arch:weight 1 .
+
+
+###  https://example.org/arch#Rel_Comp_Qual
+arch:Rel_Comp_Qual rdf:type owl:NamedIndividual ,
+                            arch:RelevanceMapping ;
+                   arch:mapsAddedValue arch:AV_ConsistentQuality ;
+                   arch:mapsPremise arch:Premise_Complexity ;
+                   arch:weight 1 .
+
+
+###  https://example.org/arch#Rel_Comp_Risk
+arch:Rel_Comp_Risk rdf:type owl:NamedIndividual ,
+                            arch:RelevanceMapping ;
+                   arch:mapsAddedValue arch:AV_RiskReduction ;
+                   arch:mapsPremise arch:Premise_Complexity ;
+                   arch:weight 2 .
+
+
+###  https://example.org/arch#Rel_Comp_SMM
+arch:Rel_Comp_SMM rdf:type owl:NamedIndividual ,
+                           arch:RelevanceMapping ;
+                  arch:mapsAddedValue arch:AV_SharedMentalModel ;
+                  arch:mapsPremise arch:Premise_Complexity ;
+                  arch:weight 2 .
+
+
+###  https://example.org/arch#Rel_Con_Adapt
+arch:Rel_Con_Adapt rdf:type owl:NamedIndividual ,
+                            arch:RelevanceMapping ;
+                   arch:mapsAddedValue arch:AV_AdaptabilityLongevity ;
+                   arch:mapsPremise arch:Premise_Constraint ;
+                   arch:weight 1 .
+
+
+###  https://example.org/arch#Rel_Con_Clarity
+arch:Rel_Con_Clarity rdf:type owl:NamedIndividual ,
+                              arch:RelevanceMapping ;
+                     arch:mapsAddedValue arch:AV_ClarityPurpose ;
+                     arch:mapsPremise arch:Premise_Constraint ;
+                     arch:weight 2 .
+
+
+###  https://example.org/arch#Rel_Con_CohInt
+arch:Rel_Con_CohInt rdf:type owl:NamedIndividual ,
+                             arch:RelevanceMapping ;
+                    arch:mapsAddedValue arch:AV_CoherenceIntegration ;
+                    arch:mapsPremise arch:Premise_Constraint ;
+                    arch:weight 1 .
+
+
+###  https://example.org/arch#Rel_Con_ConsQ
+arch:Rel_Con_ConsQ rdf:type owl:NamedIndividual ,
+                            arch:RelevanceMapping ;
+                   arch:mapsAddedValue arch:AV_ConsistentQuality ;
+                   arch:mapsPremise arch:Premise_Constraint ;
+                   arch:weight 2 .
+
+
+###  https://example.org/arch#Rel_Con_DecLev
+arch:Rel_Con_DecLev rdf:type owl:NamedIndividual ,
+                             arch:RelevanceMapping ;
+                    arch:mapsAddedValue arch:AV_DecisionLeverage ;
+                    arch:mapsPremise arch:Premise_Constraint ;
+                    arch:weight 2 .
+
+
+###  https://example.org/arch#Rel_Con_Opt
+arch:Rel_Con_Opt rdf:type owl:NamedIndividual ,
+                          arch:RelevanceMapping ;
+                 arch:mapsAddedValue arch:AV_OptimizationConstraints ;
+                 arch:mapsPremise arch:Premise_Constraint ;
+                 arch:weight 2 .
+
+
+###  https://example.org/arch#Rel_Con_Risk
+arch:Rel_Con_Risk rdf:type owl:NamedIndividual ,
+                           arch:RelevanceMapping ;
+                  arch:mapsAddedValue arch:AV_RiskReduction ;
+                  arch:mapsPremise arch:Premise_Constraint ;
+                  arch:weight 1 .
+
+
+###  https://example.org/arch#Rel_Con_SMM
+arch:Rel_Con_SMM rdf:type owl:NamedIndividual ,
+                          arch:RelevanceMapping ;
+                 arch:mapsAddedValue arch:AV_SharedMentalModel ;
+                 arch:mapsPremise arch:Premise_Constraint ;
+                 arch:weight 1 .
+
+
+###  https://example.org/arch#Rel_Coord_Adapt
+arch:Rel_Coord_Adapt rdf:type owl:NamedIndividual ,
+                              arch:RelevanceMapping ;
+                     arch:mapsAddedValue arch:AV_AdaptabilityLongevity ;
+                     arch:mapsPremise arch:Premise_Coordination ;
+                     arch:weight 1 .
+
+
+###  https://example.org/arch#Rel_Coord_Clarity
+arch:Rel_Coord_Clarity rdf:type owl:NamedIndividual ,
+                                arch:RelevanceMapping ;
+                       arch:mapsAddedValue arch:AV_ClarityPurpose ;
+                       arch:mapsPremise arch:Premise_Coordination ;
+                       arch:weight 2 .
+
+
+###  https://example.org/arch#Rel_Coord_CohInt
+arch:Rel_Coord_CohInt rdf:type owl:NamedIndividual ,
+                               arch:RelevanceMapping ;
+                      arch:mapsAddedValue arch:AV_CoherenceIntegration ;
+                      arch:mapsPremise arch:Premise_Coordination ;
+                      arch:weight 2 .
+
+
+###  https://example.org/arch#Rel_Coord_ConsQ
+arch:Rel_Coord_ConsQ rdf:type owl:NamedIndividual ,
+                              arch:RelevanceMapping ;
+                     arch:mapsAddedValue arch:AV_ConsistentQuality ;
+                     arch:mapsPremise arch:Premise_Coordination ;
+                     arch:weight 2 .
+
+
+###  https://example.org/arch#Rel_Coord_DecLev
+arch:Rel_Coord_DecLev rdf:type owl:NamedIndividual ,
+                               arch:RelevanceMapping ;
+                      arch:mapsAddedValue arch:AV_DecisionLeverage ;
+                      arch:mapsPremise arch:Premise_Coordination ;
+                      arch:weight 1 .
+
+
+###  https://example.org/arch#Rel_Coord_Opt
+arch:Rel_Coord_Opt rdf:type owl:NamedIndividual ,
+                            arch:RelevanceMapping ;
+                   arch:mapsAddedValue arch:AV_OptimizationConstraints ;
+                   arch:mapsPremise arch:Premise_Coordination ;
+                   arch:weight 1 .
+
+
+###  https://example.org/arch#Rel_Coord_Risk
+arch:Rel_Coord_Risk rdf:type owl:NamedIndividual ,
+                             arch:RelevanceMapping ;
+                    arch:mapsAddedValue arch:AV_RiskReduction ;
+                    arch:mapsPremise arch:Premise_Coordination ;
+                    arch:weight 1 .
+
+
+###  https://example.org/arch#Rel_Coord_SMM
+arch:Rel_Coord_SMM rdf:type owl:NamedIndividual ,
+                            arch:RelevanceMapping ;
+                   arch:mapsAddedValue arch:AV_SharedMentalModel ;
+                   arch:mapsPremise arch:Premise_Coordination ;
+                   arch:weight 2 .
+
+
+###  https://example.org/arch#Rel_Div_Adapt
+arch:Rel_Div_Adapt rdf:type owl:NamedIndividual ,
+                            arch:RelevanceMapping ;
+                   arch:mapsAddedValue arch:AV_AdaptabilityLongevity ;
+                   arch:mapsPremise arch:Premise_Diversity ;
+                   arch:weight 1 .
+
+
+###  https://example.org/arch#Rel_Div_Clarity
+arch:Rel_Div_Clarity rdf:type owl:NamedIndividual ,
+                              arch:RelevanceMapping ;
+                     arch:mapsAddedValue arch:AV_ClarityPurpose ;
+                     arch:mapsPremise arch:Premise_Diversity ;
+                     arch:weight 2 .
+
+
+###  https://example.org/arch#Rel_Div_CohInt
+arch:Rel_Div_CohInt rdf:type owl:NamedIndividual ,
+                             arch:RelevanceMapping ;
+                    arch:mapsAddedValue arch:AV_CoherenceIntegration ;
+                    arch:mapsPremise arch:Premise_Diversity ;
+                    arch:weight 2 .
+
+
+###  https://example.org/arch#Rel_Div_ConsQ
+arch:Rel_Div_ConsQ rdf:type owl:NamedIndividual ,
+                            arch:RelevanceMapping ;
+                   arch:mapsAddedValue arch:AV_ConsistentQuality ;
+                   arch:mapsPremise arch:Premise_Diversity ;
+                   arch:weight 1 .
+
+
+###  https://example.org/arch#Rel_Div_DecLev
+arch:Rel_Div_DecLev rdf:type owl:NamedIndividual ,
+                             arch:RelevanceMapping ;
+                    arch:mapsAddedValue arch:AV_DecisionLeverage ;
+                    arch:mapsPremise arch:Premise_Diversity ;
+                    arch:weight 1 .
+
+
+###  https://example.org/arch#Rel_Div_Opt
+arch:Rel_Div_Opt rdf:type owl:NamedIndividual ,
+                          arch:RelevanceMapping ;
+                 arch:mapsAddedValue arch:AV_OptimizationConstraints ;
+                 arch:mapsPremise arch:Premise_Diversity ;
+                 arch:weight 2 .
+
+
+###  https://example.org/arch#Rel_Div_Risk
+arch:Rel_Div_Risk rdf:type owl:NamedIndividual ,
+                           arch:RelevanceMapping ;
+                  arch:mapsAddedValue arch:AV_RiskReduction ;
+                  arch:mapsPremise arch:Premise_Diversity ;
+                  arch:weight 1 .
+
+
+###  https://example.org/arch#Rel_Div_SMM
+arch:Rel_Div_SMM rdf:type owl:NamedIndividual ,
+                          arch:RelevanceMapping ;
+                 arch:mapsAddedValue arch:AV_SharedMentalModel ;
+                 arch:mapsPremise arch:Premise_Diversity ;
+                 arch:weight 2 .
+
+
+###  https://example.org/arch#Rel_Long_Adapt
+arch:Rel_Long_Adapt rdf:type owl:NamedIndividual ,
+                             arch:RelevanceMapping ;
+                    arch:mapsAddedValue arch:AV_AdaptabilityLongevity ;
+                    arch:mapsPremise arch:Premise_Longevity ;
+                    arch:weight 2 .
+
+
+###  https://example.org/arch#Rel_Long_Clarity
+arch:Rel_Long_Clarity rdf:type owl:NamedIndividual ,
+                               arch:RelevanceMapping ;
+                      arch:mapsAddedValue arch:AV_ClarityPurpose ;
+                      arch:mapsPremise arch:Premise_Longevity ;
+                      arch:weight 1 .
+
+
+###  https://example.org/arch#Rel_Long_CohInt
+arch:Rel_Long_CohInt rdf:type owl:NamedIndividual ,
+                              arch:RelevanceMapping ;
+                     arch:mapsAddedValue arch:AV_CoherenceIntegration ;
+                     arch:mapsPremise arch:Premise_Longevity ;
+                     arch:weight 1 .
+
+
+###  https://example.org/arch#Rel_Long_ConsQ
+arch:Rel_Long_ConsQ rdf:type owl:NamedIndividual ,
+                             arch:RelevanceMapping ;
+                    arch:mapsAddedValue arch:AV_ConsistentQuality ;
+                    arch:mapsPremise arch:Premise_Longevity ;
+                    arch:weight 2 .
+
+
+###  https://example.org/arch#Rel_Long_Dec
+arch:Rel_Long_Dec rdf:type owl:NamedIndividual ,
+                           arch:RelevanceMapping ;
+                  arch:mapsAddedValue arch:AV_DecisionLeverage ;
+                  arch:mapsPremise arch:Premise_Longevity ;
+                  arch:weight 2 .
+
+
+###  https://example.org/arch#Rel_Long_Opt
+arch:Rel_Long_Opt rdf:type owl:NamedIndividual ,
+                           arch:RelevanceMapping ;
+                  arch:mapsAddedValue arch:AV_OptimizationConstraints ;
+                  arch:mapsPremise arch:Premise_Longevity ;
+                  arch:weight 1 .
+
+
+###  https://example.org/arch#Rel_Long_Risk
+arch:Rel_Long_Risk rdf:type owl:NamedIndividual ,
+                            arch:RelevanceMapping ;
+                   arch:mapsAddedValue arch:AV_RiskReduction ;
+                   arch:mapsPremise arch:Premise_Longevity ;
+                   arch:weight 2 .
+
+
+###  https://example.org/arch#Rel_Long_SMM
+arch:Rel_Long_SMM rdf:type owl:NamedIndividual ,
+                           arch:RelevanceMapping ;
+                  arch:mapsAddedValue arch:AV_SharedMentalModel ;
+                  arch:mapsPremise arch:Premise_Longevity ;
+                  arch:weight 1 .
+
+
+###  https://example.org/arch#Rel_QC_Adapt
+arch:Rel_QC_Adapt rdf:type owl:NamedIndividual ,
+                           arch:RelevanceMapping ;
+                  arch:mapsAddedValue arch:AV_AdaptabilityLongevity ;
+                  arch:mapsPremise arch:Premise_QualityCriticality ;
+                  arch:weight 1 .
+
+
+###  https://example.org/arch#Rel_QC_Clarity
+arch:Rel_QC_Clarity rdf:type owl:NamedIndividual ,
+                             arch:RelevanceMapping ;
+                    arch:mapsAddedValue arch:AV_ClarityPurpose ;
+                    arch:mapsPremise arch:Premise_QualityCriticality ;
+                    arch:weight 1 .
+
+
+###  https://example.org/arch#Rel_QC_CohInt
+arch:Rel_QC_CohInt rdf:type owl:NamedIndividual ,
+                            arch:RelevanceMapping ;
+                   arch:mapsAddedValue arch:AV_CoherenceIntegration ;
+                   arch:mapsPremise arch:Premise_QualityCriticality ;
+                   arch:weight 2 .
+
+
+###  https://example.org/arch#Rel_QC_ConsQ
+arch:Rel_QC_ConsQ rdf:type owl:NamedIndividual ,
+                           arch:RelevanceMapping ;
+                  arch:mapsAddedValue arch:AV_ConsistentQuality ;
+                  arch:mapsPremise arch:Premise_QualityCriticality ;
+                  arch:weight 2 .
+
+
+###  https://example.org/arch#Rel_QC_DecLev
+arch:Rel_QC_DecLev rdf:type owl:NamedIndividual ,
+                            arch:RelevanceMapping ;
+                   arch:mapsAddedValue arch:AV_DecisionLeverage ;
+                   arch:mapsPremise arch:Premise_QualityCriticality ;
+                   arch:weight 2 .
+
+
+###  https://example.org/arch#Rel_QC_Opt
+arch:Rel_QC_Opt rdf:type owl:NamedIndividual ,
+                         arch:RelevanceMapping ;
+                arch:mapsAddedValue arch:AV_OptimizationConstraints ;
+                arch:mapsPremise arch:Premise_QualityCriticality ;
+                arch:weight 1 .
+
+
+###  https://example.org/arch#Rel_QC_RiskRed
+arch:Rel_QC_RiskRed rdf:type owl:NamedIndividual ,
+                             arch:RelevanceMapping ;
+                    arch:mapsAddedValue arch:AV_RiskReduction ;
+                    arch:mapsPremise arch:Premise_QualityCriticality ;
+                    arch:weight 2 .
+
+
+###  https://example.org/arch#Rel_QC_SMM
+arch:Rel_QC_SMM rdf:type owl:NamedIndividual ,
+                         arch:RelevanceMapping ;
+                arch:mapsAddedValue arch:AV_SharedMentalModel ;
+                arch:mapsPremise arch:Premise_QualityCriticality ;
+                arch:weight 1 .
+
+
+###  https://example.org/arch#Rel_Risk_Adapt
+arch:Rel_Risk_Adapt rdf:type owl:NamedIndividual ,
+                             arch:RelevanceMapping ;
+                    arch:mapsAddedValue arch:AV_AdaptabilityLongevity ;
+                    arch:mapsPremise arch:Premise_Risk ;
+                    arch:weight 1 .
+
+
+###  https://example.org/arch#Rel_Risk_Clarity
+arch:Rel_Risk_Clarity rdf:type owl:NamedIndividual ,
+                               arch:RelevanceMapping ;
+                      arch:mapsAddedValue arch:AV_ClarityPurpose ;
+                      arch:mapsPremise arch:Premise_Risk ;
+                      arch:weight 1 .
+
+
+###  https://example.org/arch#Rel_Risk_CohInt
+arch:Rel_Risk_CohInt rdf:type owl:NamedIndividual ,
+                              arch:RelevanceMapping ;
+                     arch:mapsAddedValue arch:AV_CoherenceIntegration ;
+                     arch:mapsPremise arch:Premise_Risk ;
+                     arch:weight 2 .
+
+
+###  https://example.org/arch#Rel_Risk_ConsQ
+arch:Rel_Risk_ConsQ rdf:type owl:NamedIndividual ,
+                             arch:RelevanceMapping ;
+                    arch:mapsAddedValue arch:AV_ConsistentQuality ;
+                    arch:mapsPremise arch:Premise_Risk ;
+                    arch:weight 2 .
+
+
+###  https://example.org/arch#Rel_Risk_DecLev
+arch:Rel_Risk_DecLev rdf:type owl:NamedIndividual ,
+                              arch:RelevanceMapping ;
+                     arch:mapsAddedValue arch:AV_DecisionLeverage ;
+                     arch:mapsPremise arch:Premise_Risk ;
+                     arch:weight 2 .
+
+
+###  https://example.org/arch#Rel_Risk_Opt
+arch:Rel_Risk_Opt rdf:type owl:NamedIndividual ,
+                           arch:RelevanceMapping ;
+                  arch:mapsAddedValue arch:AV_OptimizationConstraints ;
+                  arch:mapsPremise arch:Premise_Risk ;
+                  arch:weight 1 .
+
+
+###  https://example.org/arch#Rel_Risk_RiskRed
+arch:Rel_Risk_RiskRed rdf:type owl:NamedIndividual ,
+                               arch:RelevanceMapping ;
+                      arch:mapsAddedValue arch:AV_RiskReduction ;
+                      arch:mapsPremise arch:Premise_Risk ;
+                      arch:weight 2 .
+
+
+###  https://example.org/arch#Rel_Risk_SMM
+arch:Rel_Risk_SMM rdf:type owl:NamedIndividual ,
+                           arch:RelevanceMapping ;
+                  arch:mapsAddedValue arch:AV_SharedMentalModel ;
+                  arch:mapsPremise arch:Premise_Risk ;
+                  arch:weight 1 .
+
+
+###  https://example.org/arch#Rel_Scale_Adapt
+arch:Rel_Scale_Adapt rdf:type owl:NamedIndividual ,
+                              arch:RelevanceMapping ;
+                     arch:mapsAddedValue arch:AV_AdaptabilityLongevity ;
+                     arch:mapsPremise arch:Premise_Scale ;
+                     arch:weight 1 .
+
+
+###  https://example.org/arch#Rel_Scale_Clarity
+arch:Rel_Scale_Clarity rdf:type owl:NamedIndividual ,
+                                arch:RelevanceMapping ;
+                       arch:mapsAddedValue arch:AV_ClarityPurpose ;
+                       arch:mapsPremise arch:Premise_Scale ;
+                       arch:weight 2 .
+
+
+###  https://example.org/arch#Rel_Scale_CohInt
+arch:Rel_Scale_CohInt rdf:type owl:NamedIndividual ,
+                               arch:RelevanceMapping ;
+                      arch:mapsAddedValue arch:AV_CoherenceIntegration ;
+                      arch:mapsPremise arch:Premise_Scale ;
+                      arch:weight 2 .
+
+
+###  https://example.org/arch#Rel_Scale_ConsQ
+arch:Rel_Scale_ConsQ rdf:type owl:NamedIndividual ,
+                              arch:RelevanceMapping ;
+                     arch:mapsAddedValue arch:AV_ConsistentQuality ;
+                     arch:mapsPremise arch:Premise_Scale ;
+                     arch:weight 1 .
+
+
+###  https://example.org/arch#Rel_Scale_DecLev
+arch:Rel_Scale_DecLev rdf:type owl:NamedIndividual ,
+                               arch:RelevanceMapping ;
+                      arch:mapsAddedValue arch:AV_DecisionLeverage ;
+                      arch:mapsPremise arch:Premise_Scale ;
+                      arch:weight 2 .
+
+
+###  https://example.org/arch#Rel_Scale_Opt
+arch:Rel_Scale_Opt rdf:type owl:NamedIndividual ,
+                            arch:RelevanceMapping ;
+                   arch:mapsAddedValue arch:AV_OptimizationConstraints ;
+                   arch:mapsPremise arch:Premise_Scale ;
+                   arch:weight 1 .
+
+
+###  https://example.org/arch#Rel_Scale_Risk
+arch:Rel_Scale_Risk rdf:type owl:NamedIndividual ,
+                             arch:RelevanceMapping ;
+                    arch:mapsAddedValue arch:AV_RiskReduction ;
+                    arch:mapsPremise arch:Premise_Scale ;
+                    arch:weight 1 .
+
+
+###  https://example.org/arch#Rel_Scale_SMM
+arch:Rel_Scale_SMM rdf:type owl:NamedIndividual ,
+                            arch:RelevanceMapping ;
+                   arch:mapsAddedValue arch:AV_SharedMentalModel ;
+                   arch:mapsPremise arch:Premise_Scale ;
+                   arch:weight 2 .
+
+
+###  Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi
