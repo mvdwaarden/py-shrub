@@ -13,7 +13,6 @@
     <script type="text/babel">
       const { useState, useMemo } = React;
 
-      // Alternate quadrant labels (optional)
       const ALT_NAMES = {
         Drift: ["Wild", "Autopoietic", "Sprawl"],
         Adaptive: ["Guided Emergence", "Steering", "Enabling"],
@@ -21,7 +20,6 @@
         Directive: ["Programmatic", "Engineered", "Designed"],
       };
 
-      // Presets (toggleable)
       const PRESETS = [
         { name: "Lean Startup (discovery)", x: 70, y: 60 },
         { name: "Scrum (mature team)", x: 80, y: 70 },
@@ -39,12 +37,10 @@
       ];
 
       function classifyQuadrant(x, y) {
-        // X: 0 Intentional → 100 Emergent
-        // Y: 0 Uncontrolled → 100 Controlled
-        if (x <= 50 && y >= 50) return "Directive"; // top-left
-        if (x > 50 && y >= 50) return "Adaptive";   // top-right
-        if (x <= 50 && y < 50) return "Illusory";   // bottom-left
-        return "Drift";                              // bottom-right
+        if (x <= 50 && y >= 50) return "Directive";
+        if (x > 50 && y >= 50) return "Adaptive";
+        if (x <= 50 && y < 50) return "Illusory";
+        return "Drift";
       }
 
       const PRESET_COLORS = [
@@ -53,7 +49,6 @@
         "#6366f1", "#84cc16", "#e11d48", "#0ea5e9"
       ];
 
-      // Overlays
       const overlayOptions = ["none", "architecture", "cynefin", "stacey", "control"];
 
       function QuadrantExplorer() {
@@ -152,7 +147,6 @@
               {/* Chart */}
               <div className="md:col-span-3">
                 <div className="relative aspect-square bg-white rounded-2xl shadow overflow-hidden">
-                  {/* Overlay regions (only when overlay != none) */}
                   {overlay !== "none" && <OverlayRegions overlay={overlay} colored={overlayColored} />}
 
                   {/* Axes labels */}
@@ -176,7 +170,7 @@
                     style={{ left: `calc(${x}% - 8px)`, bottom: `calc(${y}% - 8px)` }}
                     title={`You: (${x}, ${y})`} />
 
-                  {/* Active preset dots */}
+                  {/* Presets */}
                   {PRESETS.filter(p => activePresets.includes(p.name)).map((p) => {
                     const color = colorForPreset(p.name);
                     return (
@@ -199,21 +193,7 @@
                   <div className="absolute top-1/2 left-0 right-0 h-px bg-slate-200" />
                 </div>
 
-                {/* Legends */}
                 {overlay !== "none" && <OverlayLegend overlay={overlay} />}
-                {activePresets.length > 0 && (
-                  <div className="mt-4 text-xs text-slate-600">
-                    <div className="font-medium mb-1">Preset legend</div>
-                    <ul className="grid grid-cols-1 gap-1">
-                      {activePresets.map((name) => (
-                        <li key={name} className="flex items-center gap-2">
-                          <span className="inline-block w-3 h-3 rounded" style={{ backgroundColor: colorForPreset(name) }}></span>
-                          <span>{name}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -231,27 +211,22 @@
         );
       }
 
-      // Architecture posture (your model) – only renders when selected
       function ArchitectureOverlay({ colored }) {
         if (!colored) return null;
         return (
           <div className="absolute inset-0 grid grid-cols-2 grid-rows-2">
-            <div className="bg-amber-50"></div> <!-- Directive (top-left) -->
-            <div className="bg-green-50"></div>  <!-- Adaptive (top-right) -->
-            <div className="bg-rose-50"></div>   <!-- Illusory (bottom-left) -->
-            <div className="bg-blue-50"></div>   <!-- Drift (bottom-right) -->
+            <div className="bg-amber-50"></div>
+            <div className="bg-green-50"></div>
+            <div className="bg-rose-50"></div>
+            <div className="bg-blue-50"></div>
           </div>
         );
       }
 
-      // Cynefin mapped to axes:
-      // - Complicated/Obvious → Directive (top-left)
-      // - Complex → Adaptive (top-right)
-      // - Chaotic → Uncontrolled band (bottom)
       function CynefinOverlay({ colored }) {
         return (
           <>
-            {/* Chaotic: bottom band regardless of X */}
+            {/* Chaotic: bottom band */}
             <div className={`absolute left-0 right-0 bottom-0 h-[35%] ${colored ? "bg-red-200/30" : "bg-red-200/10"}`} />
             {/* Complex: top-right quadrant */}
             <div className={`absolute left-1/2 right-0 top-1/2 bottom-0 ${colored ? "bg-emerald-200/30" : "bg-emerald-200/10"}`} />
@@ -261,60 +236,43 @@
         );
       }
 
-      // Stacey mapped to axes:
-      // - High uncertainty → Uncontrolled band (bottom)
-      // - High disagreement → Right half (emergent side)
       function StaceyOverlay({ colored }) {
         return (
           <>
-            {/* High uncertainty (low certainty → low control) */}
+            {/* High uncertainty: bottom */}
             <div className={`absolute left-0 right-0 bottom-0 h-[35%] ${colored ? "bg-indigo-200/20" : "bg-indigo-200/5"}`} />
-            {/* High disagreement (misaligned intent → emergent/right side) */}
+            {/* High disagreement: right side */}
             <div className={`absolute left-1/2 right-0 top-0 bottom-0 ${colored ? "bg-fuchsia-200/20" : "bg-fuchsia-200/5"}`} />
           </>
         );
       }
 
-      // Control theory mapped to axes:
-      // - Open-loop/low gain → Uncontrolled band (bottom)
-      // - Good closed-loop controllability → Directive (top-left)
       function ControlOverlay({ colored }) {
         return (
           <>
-            {/* Open-loop / low loop gain */}
+            {/* Open-loop: bottom band */}
             <div className={`absolute left-0 right-0 bottom-0 h-[35%] ${colored ? "bg-sky-200/20" : "bg-sky-200/5"}`} />
-            {/* Good closed-loop controllability */}
+            {/* Closed-loop controllability: top-left */}
             <div className={`absolute left-0 right-1/2 top-1/2 bottom-0 ${colored ? "bg-lime-200/20" : "bg-lime-200/5"}`} />
           </>
         );
       }
 
       function OverlayLegend({ overlay }) {
-        if (overlay === "architecture") {
-          return (
-            <div className="mt-4 text-xs text-slate-600 space-y-1">
-              <div className="font-medium">Architecture posture quadrants</div>
-              <p><span className="inline-block w-3 h-3 bg-amber-50 mr-1"></span> Directive (Controlled + Intentional)</p>
-              <p><span className="inline-block w-3 h-3 bg-green-50 mr-1"></span> Adaptive (Controlled + Emergent)</p>
-              <p><span className="inline-block w-3 h-3 bg-rose-50 mr-1"></span> Illusory (Uncontrolled + Intentional)</p>
-              <p><span className="inline-block w-3 h-3 bg-blue-50 mr-1"></span> Drift (Uncontrolled + Emergent)</p>
-            </div>
-          );
-        }
         if (overlay === "cynefin") {
           return (
             <div className="mt-4 text-xs text-slate-600 space-y-1">
-              <div className="font-medium">Cynefin (illustrative)</div>
+              <div className="font-medium">Cynefin</div>
               <p><span className="inline-block w-3 h-3 bg-yellow-200 mr-1"></span> Complicated/Obvious → Directive (top-left)</p>
               <p><span className="inline-block w-3 h-3 bg-emerald-200 mr-1"></span> Complex → Adaptive (top-right)</p>
-              <p><span className="inline-block w-3 h-3 bg-red-200 mr-1"></span> Chaotic → Uncontrolled (bottom band)</p>
+              <p><span className="inline-block w-3 h-3 bg-red-200 mr-1"></span> Chaotic → Uncontrolled (bottom)</p>
             </div>
           );
         }
         if (overlay === "stacey") {
           return (
             <div className="mt-4 text-xs text-slate-600 space-y-1">
-              <div className="font-medium">Stacey Matrix (illustrative)</div>
+              <div className="font-medium">Stacey</div>
               <p><span className="inline-block w-3 h-3 bg-indigo-200 mr-1"></span> High uncertainty → Uncontrolled (bottom)</p>
               <p><span className="inline-block w-3 h-3 bg-fuchsia-200 mr-1"></span> High disagreement → Emergent (right side)</p>
             </div>
@@ -323,8 +281,8 @@
         if (overlay === "control") {
           return (
             <div className="mt-4 text-xs text-slate-600 space-y-1">
-              <div className="font-medium">Control theory (illustrative)</div>
-              <p><span className="inline-block w-3 h-3 bg-lime-200 mr-1"></span> Good closed-loop controllability → Directive (top-left)</p>
+              <div className="font-medium">Control theory</div>
+              <p><span className="inline-block w-3 h-3 bg-lime-200 mr-1"></span> Closed-loop controllability → Directive (top-left)</p>
               <p><span className="inline-block w-3 h-3 bg-sky-200 mr-1"></span> Open-loop / low loop gain → Uncontrolled (bottom)</p>
             </div>
           );
