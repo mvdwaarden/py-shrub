@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Quadrant Explorer</title>
+    <title>Architecture Postures: Quadrant Explorer</title>
     <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -11,15 +11,11 @@
   <body class="bg-white">
     <div id="root"></div>
     <script type="text/babel">
-      const { useState, useMemo } = React;
+      const { useState, useMemo, useEffect } = React;
 
-      const ALT_NAMES = {
-        Drift: ["Wild", "Autopoietic", "Sprawl"],
-        Adaptive: ["Guided Emergence", "Steering", "Enabling"],
-        Illusory: ["Theatre", "Cargo Cult", "Pretence"],
-        Directive: ["Programmatic", "Engineered", "Designed"],
-      };
-
+      // -----------------------------
+      // Presets
+      // -----------------------------
       const PRESETS = [
         { name: "Lean Startup (discovery)", x: 70, y: 60 },
         { name: "Scrum (mature team)", x: 80, y: 70 },
@@ -36,6 +32,15 @@
         { name: "SAFe", x: 35, y: 85 },
       ];
 
+      const PRESET_COLORS = [
+        "#ef4444","#3b82f6","#10b981","#f59e0b",
+        "#8b5cf6","#22c55e","#ec4899","#14b8a6","#a855f7",
+        "#6366f1","#84cc16","#e11d48","#0ea5e9"
+      ];
+
+      // -----------------------------
+      // Utilities
+      // -----------------------------
       function classifyQuadrant(x, y) {
         if (x <= 50 && y >= 50) return "Directive";
         if (x > 50 && y >= 50) return "Adaptive";
@@ -43,174 +48,86 @@
         return "Drift";
       }
 
-      const PRESET_COLORS = [
-        "#ef4444", "#3b82f6", "#10b981", "#f59e0b",
-        "#8b5cf6", "#22c55e", "#ec4899", "#14b8a6", "#a855f7",
-        "#6366f1", "#84cc16", "#e11d48", "#0ea5e9"
-      ];
+      // -----------------------------
+      // Calculation function (isolated)
+      // -----------------------------
+      function computeCoordinates(scores) {
+        const { scale, complexity, longevity, risk, diversity, coordination, criticality, constraints } = scores;
+        const intentionalityRaw = (longevity + risk + constraints + criticality) - (diversity + complexity);
+        const controlRaw = (scale + coordination) - complexity;
+        const INT_MIN = -6, INT_MAX = 18; // range width 24
+        const CTRL_MIN = -3, CTRL_MAX = 9; // range width 12
+        const normalize = (v, min, max) => Math.min(100, Math.max(0, ((v - min) / (max - min)) * 100));
+        return { x: normalize(intentionalityRaw, INT_MIN, INT_MAX), y: normalize(controlRaw, CTRL_MIN, CTRL_MAX), intentionalityRaw, controlRaw };
+      }
 
-      const overlayOptions = ["none", "architecture", "cynefin", "stacey", "control"];
-
-      function QuadrantExplorer() {
-        const [x, setX] = useState(50);
-        const [y, setY] = useState(50);
-        const [overlay, setOverlay] = useState("none");
-        const [overlayColored, setOverlayColored] = useState(true);
-        const [altLabels, setAltLabels] = useState(false);
-        const [activePresets, setActivePresets] = useState([]);
-        const [showPresetLabels, setShowPresetLabels] = useState(true);
-
-        const quadrant = useMemo(() => classifyQuadrant(x, y), [x, y]);
-        const labelFor = (key) => (altLabels ? ALT_NAMES[key][0] : key);
-
-        const togglePreset = (preset) => {
-          setActivePresets((prev) =>
-            prev.includes(preset.name)
-              ? prev.filter((n) => n !== preset.name)
-              : [...prev, preset.name]
-          );
-        };
-
-        const presetIndex = (name) => PRESETS.findIndex((p) => p.name === name);
-        const colorForPreset = (name) => PRESET_COLORS[presetIndex(name) % PRESET_COLORS.length];
-
+      // -----------------------------
+      // Collapsible wrapper
+      // -----------------------------
+      function Collapsible({ title, defaultOpen=true, children }) {
+        const [open, setOpen] = useState(defaultOpen);
         return (
-          <div className="w-full min-h-screen bg-white text-slate-900 p-6">
-            <div className="max-w-6xl mx-auto grid md:grid-cols-5 gap-6">
-              {/* Controls */}
-              <div className="md:col-span-2 space-y-6">
-                <h1 className="text-2xl font-semibold">Intentionality × Control</h1>
-                <div className="space-y-4 p-4 rounded-2xl shadow bg-slate-50">
-                  <div>
-                    <label className="block text-sm font-medium">
-                      Intentionality (Intentional → Emergent)
-                    </label>
-                    <input type="range" min={0} max={100} value={x}
-                      onChange={(e) => setX(parseInt(e.target.value))} className="w-full" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium">
-                      Control (Uncontrolled → Controlled)
-                    </label>
-                    <input type="range" min={0} max={100} value={y}
-                      onChange={(e) => setY(parseInt(e.target.value))} className="w-full" />
-                  </div>
-                  <div className="flex gap-2 flex-wrap">
-                    {overlayOptions.map((opt) => (
-                      <button key={opt}
-                        onClick={() => setOverlay(overlay === opt ? "none" : opt)}
-                        className={`px-3 py-1 rounded-xl text-sm border ${overlay === opt ? "bg-slate-900 text-white" : "bg-white"}`}
-                      >
-                        {opt === "none" ? "No overlay" : `Overlay: ${opt[0].toUpperCase() + opt.slice(1)}`}
-                      </button>
-                    ))}
-                    <button onClick={() => setAltLabels(!altLabels)}
-                      className="px-3 py-1 rounded-xl text-sm border">
-                      Alt quadrant labels
-                    </button>
-                    <label className="text-sm flex items-center gap-2">
-                      <input type="checkbox" checked={overlayColored}
-                        onChange={(e) => setOverlayColored(e.target.checked)} />
-                      Colored overlays
-                    </label>
-                    <label className="text-sm flex items-center gap-2 ml-auto">
-                      <input type="checkbox" checked={showPresetLabels}
-                        onChange={(e) => setShowPresetLabels(e.target.checked)} />
-                      Show preset labels
-                    </label>
-                  </div>
-                </div>
-
-                {/* Presets */}
-                <h2 className="font-medium">Presets (toggle to show/hide)</h2>
-                <div className="grid grid-cols-1 gap-2">
-                  {PRESETS.map((p) => {
-                    const active = activePresets.includes(p.name);
-                    return (
-                      <button key={p.name} onClick={() => togglePreset(p)}
-                        className={`flex items-center justify-between w-full px-3 py-2 rounded-xl border text-left ${active ? "bg-slate-900 text-white" : "bg-white"}`}>
-                        <span className="text-sm">{p.name}</span>
-                        <span className="flex items-center gap-2">
-                          <span className="inline-block w-3 h-3 rounded" style={{ backgroundColor: colorForPreset(p.name) }}></span>
-                          <span className="text-xs opacity-70">({p.x}, {p.y})</span>
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <div className="p-4 rounded-2xl bg-slate-50 shadow">
-                  <h2 className="font-medium mb-2">Current Quadrant: {labelFor(quadrant)}</h2>
-                </div>
-              </div>
-
-              {/* Chart */}
-              <div className="md:col-span-3">
-                <div className="relative aspect-square bg-white rounded-2xl shadow overflow-hidden">
-                  {overlay !== "none" && <OverlayRegions overlay={overlay} colored={overlayColored} />}
-
-                  {/* Axes labels */}
-                  <div className="absolute left-2 top-1/2 -translate-y-1/2 -rotate-90 text-xs text-slate-600">
-                    Uncontrolled ⟶ Controlled
-                  </div>
-                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-xs text-slate-600">
-                    Intentional ⟶ Emergent
-                  </div>
-
-                  {/* Quadrant labels */}
-                  <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 pointer-events-none">
-                    <div className="flex items-start justify-start p-3 text-slate-500 text-xs">{labelFor("Directive")}</div>
-                    <div className="flex items-start justify-end p-3 text-slate-500 text-xs">{labelFor("Adaptive")}</div>
-                    <div className="flex items-end justify-start p-3 text-slate-500 text-xs">{labelFor("Illusory")}</div>
-                    <div className="flex items-end justify-end p-3 text-slate-500 text-xs">{labelFor("Drift")}</div>
-                  </div>
-
-                  {/* User dot */}
-                  <div className="absolute w-4 h-4 rounded-full bg-slate-900 shadow-lg"
-                    style={{ left: `calc(${x}% - 8px)`, bottom: `calc(${y}% - 8px)` }}
-                    title={`You: (${x}, ${y})`} />
-
-                  {/* Presets */}
-                  {PRESETS.filter(p => activePresets.includes(p.name)).map((p) => {
-                    const color = colorForPreset(p.name);
-                    return (
-                      <div key={p.name}>
-                        <div className="absolute w-3 h-3 rounded-full shadow-lg ring-2 ring-white"
-                          style={{ left: `calc(${p.x}% - 6px)`, bottom: `calc(${p.y}% - 6px)`, backgroundColor: color }}
-                          title={p.name}></div>
-                        {showPresetLabels && (
-                          <div className="absolute text-[10px] bg-white/80 rounded px-1 py-0.5"
-                            style={{ left: `calc(${p.x}% + 6px)`, bottom: `calc(${p.y}% + 6px)` }}>
-                            {p.name}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-
-                  {/* Midlines */}
-                  <div className="absolute left-1/2 top-0 bottom-0 w-px bg-slate-200" />
-                  <div className="absolute top-1/2 left-0 right-0 h-px bg-slate-200" />
-                </div>
-
-                {overlay !== "none" && <OverlayLegend overlay={overlay} />}
-              </div>
-            </div>
+          <div className="border rounded-xl bg-white shadow">
+            <button onClick={()=>setOpen(!open)} className="w-full px-4 py-3 text-left font-medium">
+              {title} <span className="float-right text-slate-500">{open ? '−' : '+'}</span>
+            </button>
+            {open && <div className="p-4 border-t">{children}</div>}
           </div>
         );
       }
 
-      function OverlayRegions({ overlay, colored }) {
+      // -----------------------------
+      // Scoring Panel with legend & ranges
+      // -----------------------------
+      function ScoringPanel({ onUpdate }) {
+        const [scores, setScores] = useState({
+          scale: 3, complexity: 3, longevity: 3, risk: 3,
+          diversity: 3, coordination: 3, criticality: 3, constraints: 3,
+        });
+
+        // keep last emitted coords in a ref
+        const lastRef = React.useRef({ x: null, y: null });
+
+        useEffect(() => {
+          const r = computeCoordinates(scores);
+
+          // only trigger parent update if coords actually changed
+          if (r.x !== lastRef.current.x || r.y !== lastRef.current.y) {
+            lastRef.current = { x: r.x, y: r.y };
+            onUpdate(r.x, r.y, r);
+          }
+        }, [scores, onUpdate]);
+
+        const change = (k, v) => setScores(s => ({ ...s, [k]: parseInt(v) }));
+
+        const Row = ({ label, k, desc, range }) => (
+          <div className="space-y-1">
+            <div className="text-sm font-medium">{label}: {scores[k]}</div>
+            <input type="range" min={1} max={5} value={scores[k]}
+                   onChange={e => change(k, e.target.value)} className="w-full" />
+            <div className="text-xs text-slate-600">{desc}</div>
+            <div className="text-[11px] text-slate-400">Range: {range}</div>
+          </div>
+        );
+
         return (
-          <div className="absolute inset-0 pointer-events-none">
-            {overlay === "architecture" && <ArchitectureOverlay colored={colored} />}
-            {overlay === "cynefin" && <CynefinOverlay colored={colored} />}
-            {overlay === "stacey" && <StaceyOverlay colored={colored} />}
-            {overlay === "control" && <ControlOverlay colored={colored} />}
+          <div className="space-y-4">
+            <Row label="Scale" k="scale" desc="More people/parts/stakeholders → pushes Control ↑" range="1: single team → 5: multi-enterprise/ecosystem" />
+            <Row label="Complexity" k="complexity" desc="Interdependencies & nonlinearity → Emergence ↑, Control ↓" range="1: simple → 5: chaotic tendencies" />
+            <Row label="Longevity" k="longevity" desc="Long-lived systems → Intentional ↑" range="1: <1y → 5: >10y" />
+            <Row label="Risk" k="risk" desc="Higher consequence of failure → Intentional ↑" range="1: low → 5: catastrophic" />
+            <Row label="Diversity" k="diversity" desc="Plural stakeholders/perspectives → Emergence ↑" range="1: homogeneous → 5: fragmented interests" />
+            <Row label="Coordination" k="coordination" desc="Synchronization load → Control ↑" range="1: minimal → 5: global synchronization" />
+            <Row label="Criticality" k="criticality" desc="Importance of NFRs → Intentional ↑" range="1: best-effort → 5: zero-tolerance" />
+            <Row label="Constraint Sensitivity" k="constraints" desc="Regulatory/budget/legacy constraints → Intentional ↑" range="1: flexible → 5: rigidly constrained" />
           </div>
         );
       }
 
+
+      // -----------------------------
+      // Overlays & legend
+      // -----------------------------
       function ArchitectureOverlay({ colored }) {
         if (!colored) return null;
         return (
@@ -222,101 +139,227 @@
           </div>
         );
       }
-
       function CynefinOverlay({ colored }) {
         return (
           <>
-            {/* Chaotic = uncontrolled (bottom band) */}
-            <div
-              className={`absolute left-0 right-0 bottom-0 h-[35%] ${
-                colored ? "bg-red-200/30" : "bg-red-200/10"
-              }`}
-            />
-            {/* Complex = controlled + emergent (top-right) */}
-            <div
-              className={`absolute left-1/2 right-0 top-0 bottom-1/2 ${
-                colored ? "bg-emerald-200/30" : "bg-emerald-200/10"
-              }`}
-            />
-            {/* Complicated/Obvious = controlled + intentional (top-left) */}
-            <div
-              className={`absolute left-0 right-1/2 top-0 bottom-1/2 ${
-                colored ? "bg-yellow-200/30" : "bg-yellow-200/10"
-              }`}
-            />
+            {/* Chaotic: uncontrolled (bottom band) */}
+            <div className={`absolute left-0 right-0 bottom-0 h-[35%] ${colored ? "bg-red-200/30" : "bg-red-200/10"}`} />
+
+            {/* Complex: controlled + emergent (top-right) */}
+            <div className={`absolute left-1/2 right-0 top-0 bottom-1/2 ${colored ? "bg-emerald-200/30" : "bg-emerald-200/10"}`} />
+
+            {/* Complicated: controlled + intentional (top-left EXCEPT the “clear” corner) */}
+            <div className={`absolute left-0 right-1/2 top-0 bottom-1/2 ${colored ? "bg-yellow-200/25" : "bg-yellow-200/10"}`} />
+
+            {/* Clear (Obvious): a small top-left corner inside Directive */}
+            <div className={`absolute left-0 top-0 w-[22%] h-[22%] ${colored ? "bg-yellow-300/40" : "bg-yellow-300/15"}`} />
           </>
         );
       }
-
       function StaceyOverlay({ colored }) {
         return (
           <>
-            {/* High uncertainty = uncontrolled (bottom band) */}
-            <div
-              className={`absolute left-0 right-0 bottom-0 h-[35%] ${
-                colored ? "bg-indigo-200/20" : "bg-indigo-200/5"
-              }`}
-            />
-            {/* High disagreement = emergent side (right half) */}
-            <div
-              className={`absolute left-1/2 right-0 top-0 bottom-0 ${
-                colored ? "bg-fuchsia-200/20" : "bg-fuchsia-200/5"
-              }`}
-            />
+            <div className={`absolute left-0 right-0 bottom-0 h-[35%] ${colored?"bg-indigo-200/20":"bg-indigo-200/5"}`} />
+            <div className={`absolute left-1/2 right-0 top-0 bottom-0 ${colored?"bg-fuchsia-200/20":"bg-fuchsia-200/5"}`} />
           </>
         );
       }
-
       function ControlOverlay({ colored }) {
         return (
           <>
-            {/* Open-loop / low loop gain = uncontrolled (bottom band) */}
-            <div
-              className={`absolute left-0 right-0 bottom-0 h-[35%] ${
-                colored ? "bg-sky-200/20" : "bg-sky-200/5"
-              }`}
-            />
-            {/* Good closed-loop controllability = controlled + intentional (top-left) */}
-            <div
-              className={`absolute left-0 right-1/2 top-0 bottom-1/2 ${
-                colored ? "bg-lime-200/20" : "bg-lime-200/5"
-              }`}
-            />
+            <div className={`absolute left-0 right-0 bottom-0 h-[35%] ${colored?"bg-sky-200/20":"bg-sky-200/5"}`} />
+            <div className={`absolute left-0 right-1/2 top-0 bottom-1/2 ${colored?"bg-lime-200/20":"bg-lime-200/5"}`} />
           </>
         );
       }
-
-
+      function OverlayRegions({ overlay, colored }) {
+        return (
+          <div className="absolute inset-0 pointer-events-none">
+            {overlay==="architecture" && <ArchitectureOverlay colored={colored} />}
+            {overlay==="cynefin" && <CynefinOverlay colored={colored} />}
+            {overlay==="stacey" && <StaceyOverlay colored={colored} />}
+            {overlay==="control" && <ControlOverlay colored={colored} />}
+          </div>
+        );
+      }
       function OverlayLegend({ overlay }) {
+        if (overlay === "architecture") {
+          return (
+            <div className="mt-3 text-xs text-slate-700 space-y-1">
+              <div className="font-medium">Overlay legend — Architecture Posture</div>
+              <div><span className="inline-block w-3 h-3 bg-amber-50 border mr-1"></span> Directive (Controlled + Intentional)</div>
+              <div><span className="inline-block w-3 h-3 bg-green-50 border mr-1"></span> Adaptive (Controlled + Emergent)</div>
+              <div><span className="inline-block w-3 h-3 bg-rose-50 border mr-1"></span> Illusory (Uncontrolled + Intentional)</div>
+              <div><span className="inline-block w-3 h-3 bg-blue-50 border mr-1"></span> Drift (Uncontrolled + Emergent)</div>
+            </div>
+          );
+        }
         if (overlay === "cynefin") {
           return (
             <div className="mt-4 text-xs text-slate-600 space-y-1">
               <div className="font-medium">Cynefin</div>
-              <p><span className="inline-block w-3 h-3 bg-yellow-200 mr-1"></span> Complicated/Obvious → Directive (top-left)</p>
-              <p><span className="inline-block w-3 h-3 bg-emerald-200 mr-1"></span> Complex → Adaptive (top-right)</p>
-              <p><span className="inline-block w-3 h-3 bg-red-200 mr-1"></span> Chaotic → Uncontrolled (bottom)</p>
+              <p><span className="inline-block w-3 h-3 bg-yellow-300 mr-1"></span> Clear (Obvious) — small corner in Directive</p>
+              <p><span className="inline-block w-3 h-3 bg-yellow-200 mr-1"></span> Complicated — remainder of Directive</p>
+              <p><span className="inline-block w-3 h-3 bg-emerald-200 mr-1"></span> Complex — Adaptive (top-right)</p>
+              <p><span className="inline-block w-3 h-3 bg-red-200 mr-1"></span> Chaotic — Uncontrolled (bottom band)</p>
             </div>
           );
         }
         if (overlay === "stacey") {
           return (
-            <div className="mt-4 text-xs text-slate-600 space-y-1">
-              <div className="font-medium">Stacey</div>
-              <p><span className="inline-block w-3 h-3 bg-indigo-200 mr-1"></span> High uncertainty → Uncontrolled (bottom)</p>
-              <p><span className="inline-block w-3 h-3 bg-fuchsia-200 mr-1"></span> High disagreement → Emergent (right side)</p>
+            <div className="mt-3 text-xs text-slate-700 space-y-1">
+              <div className="font-medium">Overlay legend — Stacey</div>
+              <div><span className="inline-block w-3 h-3 bg-indigo-200 mr-1"></span> High uncertainty (Uncontrolled/bottom)</div>
+              <div><span className="inline-block w-3 h-3 bg-fuchsia-200 mr-1"></span> High disagreement (Emergent/right)</div>
             </div>
           );
         }
         if (overlay === "control") {
           return (
-            <div className="mt-4 text-xs text-slate-600 space-y-1">
-              <div className="font-medium">Control theory</div>
-              <p><span className="inline-block w-3 h-3 bg-lime-200 mr-1"></span> Closed-loop controllability → Directive (top-left)</p>
-              <p><span className="inline-block w-3 h-3 bg-sky-200 mr-1"></span> Open-loop / low loop gain → Uncontrolled (bottom)</p>
+            <div className="mt-3 text-xs text-slate-700 space-y-1">
+              <div className="font-medium">Overlay legend — Control theory</div>
+              <div><span className="inline-block w-3 h-3 bg-lime-200 mr-1"></span> Good closed-loop controllability (Directive/top-left)</div>
+              <div><span className="inline-block w-3 h-3 bg-sky-200 mr-1"></span> Open-loop / low loop gain (Uncontrolled/bottom)</div>
             </div>
           );
         }
         return null;
+      }
+
+      // -----------------------------
+      // Main Explorer
+      // -----------------------------
+      function QuadrantExplorer() {
+        const [x, setX] = useState(50);
+        const [y, setY] = useState(50);
+        const [calcX, setCalcX] = useState(null);
+        const [calcY, setCalcY] = useState(null);
+        const [raw, setRaw] = useState({ intentionalityRaw: 0, controlRaw: 0 });
+        const [overlay, setOverlay] = useState("none");
+        const [overlayColored, setOverlayColored] = useState(true);
+        const [activePresets, setActivePresets] = useState([]);
+
+        const quadrant = useMemo(()=> classifyQuadrant(x, y), [x,y]);
+        const calcQuadrant = useMemo(()=> (calcX===null||calcY===null? null : classifyQuadrant(calcX, calcY)), [calcX, calcY]);
+
+        return (
+          <div className="w-full min-h-screen bg-white text-slate-900 p-6">
+            <div className="max-w-7xl mx-auto grid md:grid-cols-5 gap-6">
+
+              {/* Left column */}
+              <div className="md:col-span-2 space-y-4">
+                <h1 className="text-3xl font-semibold">Architecture Postures</h1>
+
+                <Collapsible title="Manual sliders" defaultOpen={true}>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-medium">Intentionality (Intentional → Emergent): {x}</label>
+                      <input type="range" min={0} max={100} value={x} onChange={e=>setX(parseInt(e.target.value))} className="w-full" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium">Control (Uncontrolled → Controlled): {y}</label>
+                      <input type="range" min={0} max={100} value={y} onChange={e=>setY(parseInt(e.target.value))} className="w-full" />
+                    </div>
+                    <div className="text-xs text-slate-600">Quadrant (manual): <span className="font-medium">{quadrant}</span></div>
+                  </div>
+                </Collapsible>
+
+                <Collapsible title="Canonical dimensions (calculated)" defaultOpen={true}>
+                  <ScoringPanel onUpdate={(cx,cy,r)=>{ setCalcX(cx); setCalcY(cy); setRaw(r); }} />
+                  <div className="mt-3 p-3 rounded-xl bg-slate-50 border text-sm text-slate-700">
+                    <div className="font-medium mb-1">Calculated position (purple dot)</div>
+                    <div>Raw Intentionality: <span className="font-mono">{raw.intentionalityRaw}</span> → X ≈ {calcX!==null? Math.round(calcX): "-"}</div>
+                    <div>Raw Control: <span className="font-mono">{raw.controlRaw}</span> → Y ≈ {calcY!==null? Math.round(calcY): "-"}</div>
+                    <div>Quadrant: <span className="font-medium">{calcQuadrant || "-"}</span></div>
+                  </div>
+                </Collapsible>
+
+                <Collapsible title="Overlays" defaultOpen={true}>
+                  <div className="flex gap-2 flex-wrap items-center">
+                    {["none","architecture","cynefin","stacey","control"].map(opt=> (
+                      <button key={opt} onClick={()=>setOverlay(opt)} className={`px-3 py-1 rounded-xl text-sm border ${overlay===opt?"bg-slate-900 text-white":"bg-white"}`}>
+                        {opt==="none"?"No overlay":`Overlay: ${opt[0].toUpperCase()+opt.slice(1)}`}
+                      </button>
+                    ))}
+                    <label className="text-sm flex items-center gap-2 ml-2">
+                      <input type="checkbox" checked={overlayColored} onChange={e=>setOverlayColored(e.target.checked)} /> Colored overlays
+                    </label>
+                  </div>
+                </Collapsible>
+
+                <Collapsible title="Presets (toggle)" defaultOpen={false}>
+                  <div className="grid grid-cols-1 gap-2">
+                    {PRESETS.map((p,i)=>{
+                      const active = activePresets.includes(p.name);
+                      return (
+                        <button key={p.name} onClick={()=> setActivePresets(prev => prev.includes(p.name)? prev.filter(n=>n!==p.name) : [...prev, p.name])}
+                          className={`flex items-center justify-between w-full px-3 py-2 rounded-xl border text-left ${active?"bg-slate-900 text-white":"bg-white"}`}>
+                          <span className="text-sm">{p.name}</span>
+                          <span className="flex items-center gap-2">
+                            <span className="inline-block w-3 h-3 rounded" style={{backgroundColor: PRESET_COLORS[i % PRESET_COLORS.length]}}></span>
+                            <span className="text-xs opacity-70">({p.x}, {p.y})</span>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </Collapsible>
+
+              </div>
+
+              {/* Right column: chart */}
+              <div className="md:col-span-3">
+                <div className="relative aspect-square bg-white rounded-2xl shadow overflow-hidden">
+                  {/* Overlays */}
+                  {overlay!=="none" && <OverlayRegions overlay={overlay} colored={overlayColored} />}
+
+                  {/* Axes labels */}
+                  <div className="absolute left-2 top-1/2 -translate-y-1/2 -rotate-90 text-xs text-slate-600">Uncontrolled ⟶ Controlled</div>
+                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-xs text-slate-600">Intentional ⟶ Emergent</div>
+
+                  {/* Quadrant labels */}
+                  <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 pointer-events-none">
+                    <div className="flex items-start justify-start p-3 text-slate-500 text-xs">Directive</div>
+                    <div className="flex items-start justify-end p-3 text-slate-500 text-xs">Adaptive</div>
+                    <div className="flex items-end justify-start p-3 text-slate-500 text-xs">Illusory</div>
+                    <div className="flex items-end justify-end p-3 text-slate-500 text-xs">Drift</div>
+                  </div>
+
+                  {/* Manual dot */}
+                  <div className="absolute w-4 h-4 rounded-full bg-slate-900 shadow-lg" style={{ left:`calc(${x}% - 8px)`, bottom:`calc(${y}% - 8px)` }} title={`Manual: (${x}, ${y})`} />
+
+                  {/* Calculated dot */}
+                  {calcX!==null && calcY!==null && (
+                    <div className="absolute w-4 h-4 rounded-full bg-purple-600 shadow-lg" style={{ left:`calc(${calcX}% - 8px)`, bottom:`calc(${calcY}% - 8px)` }} title={`Calculated: (${Math.round(calcX)}, ${Math.round(calcY)})`} />
+                  )}
+
+                  {/* Preset dots */}
+                  {PRESETS.filter(p=>activePresets.includes(p.name)).map((p,i)=>{
+                    const color = PRESET_COLORS[i % PRESET_COLORS.length];
+                    return (
+                      <div key={p.name}>
+                        <div className="absolute w-3 h-3 rounded-full shadow ring-2 ring-white" style={{ left:`calc(${p.x}% - 6px)`, bottom:`calc(${p.y}% - 6px)`, backgroundColor: color }} title={p.name}></div>
+                        <div className="absolute text-[10px] bg-white/80 rounded px-1 py-0.5" style={{ left:`calc(${p.x}% + 6px)`, bottom:`calc(${p.y}% + 6px)` }}>{p.name}</div>
+                      </div>
+                    );
+                  })}
+
+                  {/* Midlines */}
+                  <div className="absolute left-1/2 top-0 bottom-0 w-px bg-slate-200" />
+                  <div className="absolute top-1/2 left-0 right-0 h-px bg-slate-200" />
+                </div>
+
+                {/* Legends */}
+                {overlay!=="none" && <OverlayLegend overlay={overlay} />}
+                <div className="mt-2 text-xs text-slate-600">
+                  <span className="inline-flex items-center mr-4"><span className="inline-block w-3 h-3 rounded-full bg-slate-900 mr-1"></span> Manual</span>
+                  <span className="inline-flex items-center"><span className="inline-block w-3 h-3 rounded-full bg-purple-600 mr-1"></span> Calculated</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        );
       }
 
       ReactDOM.createRoot(document.getElementById("root")).render(<QuadrantExplorer />);
