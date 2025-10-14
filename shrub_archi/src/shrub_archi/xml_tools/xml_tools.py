@@ -2,15 +2,24 @@ from defusedxml import ElementTree
 from xml.dom.pulldom import parse, parseString
 from shrub_util.core.arguments import Arguments
 from networkx import Graph
-import networkx as nx
-import os
 from xml.sax.handler import ContentHandler
 from xml.sax import parseString as saxParseString
 from xml.dom.minidom import Element as minidomElement
 from xml.etree.ElementTree import register_namespace
-import json
+from lxml import etree
 import re
 
+
+
+def transform_xml(xml: str, xslt: str) -> str:
+    xml_tree = etree.fromstring(xml.encode('utf-8'))
+    xslt_tree = etree.fromstring(xslt)
+    transformer = etree.XSLT(xslt_tree)
+    result_tree = transformer(xml_tree)
+    result =  etree.tostring(result_tree)
+    if isinstance(result, bytes):
+        result = result.decode(encoding='utf-8')
+    return result
 
 def clone_xml(xml: str) -> str:
     for event, el in parse(xml):
@@ -135,6 +144,25 @@ DEF_XML = """<?xml version="1.0"?>
 </bck:catalog>
 """
 
+DEF_XSLT = """
+<!-- transform.xslt -->
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+  <xsl:output method="html" indent="yes"/>
+  <xsl:template match="/">
+    <html>
+      <body>
+        <h2>Book Catalog</h2>
+        <ul>
+          <xsl:for-each select="catalog/book">
+            <li><xsl:value-of select="title"/> — <xsl:value-of select="author"/></li>
+          </xsl:for-each>
+        </ul>
+      </body>
+    </html>
+  </xsl:template>
+</xsl:stylesheet>
+
+"""
 
 def test_replace_xml(xml: str):
     namespaces = {"bck": "book_namespace"}
@@ -147,41 +175,15 @@ def test_replace_xml(xml: str):
     print(ElementTree.tostring(et).decode("utf8"))
 
 
-def transform_xml(xml_file: str, xslt_file: str):
-    et = ElementTree.parse(xml_file)
-    xsl = ElementTree.parse(xslt_file)
+
+def test_transform():
+    result = transform_xml(DEF_XML,DEF_XSLT)
+    print(result)
 
 
 def main():
     args = Arguments()
-    file = args.get_arg("file")
-    xml = None
-    if file:
-        if os.path.exists(file):
-            with open(file) as ofp:
-                xml = ofp.read()
-    else:
-        file = "/tmp/default_file.dat"
-    if not xml:
-        xml = DEF_XML
-    # g = xml_to_graph_sax(xml)
-    # g = xml_to_graph(xml)
-    # g = xml_to_graph_eltree(xml)
-    xml_dict = xmltodict.parse(xml)
-    with open(f"/tmp/{os.path.split(file)[-1]}2.json", "w") as ofp:
-        ofp.write(json.dumps(xml_dict))
-    if False:
-        g = relabel_nodes(g, lambda n: f"{n.tagName}-{hash(n)}")
-        nx.write_network_text(g)
-        ag = nx.nx_agraph.to_agraph(g)
-        # ag.draw(f"/tmp/{os.path.split(file)[-1]}.png", prog="neato")
-        labels = nx.get_node_attributes(g, "name")
-
-        # nx.draw(g, with_labels=True, labels=labels)
-        nx.write_gml(g, f"/tmp/{os.path.split(file)[-1]}2.gml")
-        # show()
-    elif True:
-        test_replace_xml(DEF_XML)
+    test_transform()
 
 
 if __name__ == "__main__":

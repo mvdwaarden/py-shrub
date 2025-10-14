@@ -90,6 +90,15 @@ usage = f"""
     
     TODO:
     - feature: Option to overwrite target repository identities
+    
+    Mode - [xml] operations
+    Function
+    - xml
+    Parameters:
+    - workdir: working directory (for source and target)
+    - source: xml input file
+    - xslt: xslt transformation file
+    - target: xml output file
 """
 
 class FunctionEnum(Enum):
@@ -134,6 +143,12 @@ class ToolsFunction(FunctionEnum):
     def is_operation(operation: str):
         return operation and operation in [e.value for e in ToolsFunction]
 
+class XmlFunction(FunctionEnum):
+    OPP_XSLT = "xslt"
+    @staticmethod
+    def is_operation(operation: str):
+        return operation and operation in [e.value for e in XmlFunction]
+
 class OiaFunction(FunctionEnum):
     OPP_UPDATE_USER_AUTHORIZATIONS = "update-authorizations"
     OPP_DELETE_USERS = "delete-users"
@@ -151,7 +166,6 @@ class OwlFunction(FunctionEnum):
 
     @staticmethod
     def is_operation(operation: str):
-        result = FunctionEnum.test_is_operation(OwlFunction, operation)
         return operation and operation in [e.value for e in OwlFunction]
 
 def create_repository(location: str) -> Repository:
@@ -279,6 +293,18 @@ def do_export_ontology(file_name: str, folder: str):
     ontology = owl_read_ontology(file_name)
     owl_export_to_archi_csv(ontology, folder)
 
+def do_xslt_transform(work_dir: str, source_file_name: str, xslt_file_name :str, target_file_name: str):
+    from shrub_archi.xml_tools.xml_tools import transform_xml
+    xml = xslt = ""
+
+    with open("/".join([work_dir, source_file_name]), "r") as ifp:
+        xml = ifp.read()
+    with open(xslt_file_name, "r") as ifp:
+        xslt = ifp.read()
+    result = transform_xml(xml, xslt)
+    with open("/".join([work_dir, target_file_name]), "w") as ofp:
+        ofp.write(str(result))
+
 logging.configure_console()
 if __name__ == "__main__":
 
@@ -295,6 +321,7 @@ if __name__ == "__main__":
     target_dir = args.get_arg("target-dir")
     work_dir = args.get_arg("workdir")
     function_tools = args.get_arg("tools")
+    function_xml = args.get_arg("xml")
     function_archi = args.get_arg("archi")
     function_oia = args.get_arg("oia")
     function_oci = args.get_arg("oci")
@@ -326,8 +353,12 @@ if __name__ == "__main__":
     dry_run = args.has_arg("dry-run")
     if help:
         do_print_usage()
+    elif XmlFunction.is_operation(function_xml):
+        if function_xml == XmlFunction.OPP_XSLT.value:
+            xslt = args.get_arg("xslt")
+            do_xslt_transform(work_dir, source, xslt, target)
     elif OwlFunction.is_operation(function_owl):
-        if function_owl == OwlFunction.OPP_VERBALIZE:
+        if function_owl == OwlFunction.OPP_VERBALIZE.value:
             do_visualize_ontology(file)
         else:
             do_export_ontology(source, target_dir)
