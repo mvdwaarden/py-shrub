@@ -1,0 +1,57 @@
+# basis form of a tripple [subject] -(predicate)-> [object]
+<http://linked-data/subject> <http://linked-data/predicate> <http://linked-data/object> .
+<http://linked-data/subject> a <http://xmlnls.com/foaf/0.1/Person> .
+
+# brackets
+<#me> <ld:means> <turtle-cheat-sheet.ttl#me> .
+<#you> <ld:means> <turtle-cheat-sheet.ttl#you> .
+<turtle-cheat-sheet.ttl#you> <ld:is-something-else-than> <some-other-people-file.ttl#you> .
+
+#define prefixes
+@prefix ld: <http://linked-data/> .
+@prefix foaf: <http://xmlnls.com/foaf/0.1/> .
+
+# using prefixes
+ld:subject a foaf:Person .
+
+# multiple facts about a subject : use ;
+# a subject is a person with an age of 88
+ld:subject a <foaf:Person> ;
+    <ld:age> 88 .
+
+# define the empty prefix
+@prefix : <#> .
+@prefix this: <turtle-cheat-sheet.ttl> .
+
+:me ld:means :me .
+:me ld:means this:me .
+:you ld:means :you .
+:you ld:is-something-else-than <some-other-people-file.ttl#you> .
+
+# multiple object share the same subject and predicate : use ,
+:me foaf:knows :you,
+               :me,
+               :yo-momma .
+
+# structure
+:me :home _:a .
+    _:a :address _:b .
+        _:b :street "Jubilee";
+            :no 1;
+            :city "Any Town" .
+    _:a :phone "+123456789" .
+
+# is the same as
+:me :home [
+        :address [
+            :street "Jubilee";
+            :no 1;
+            :city "Any Town"
+        ] ;
+        :phone "+123456789"
+    ] .
+
+#lists
+:me :home [
+        :phone ("+123456789"  "555 55555")
+    ] .

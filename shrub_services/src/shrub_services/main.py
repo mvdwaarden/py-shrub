@@ -20,10 +20,22 @@ usage = """
     - The config.ini contains the connections definitions. Connection sections
       have the name [ExternalApi-<connection name>]
 
-    Mode - <mode>
-    <description>
+    Mode - music service [synch]ronization
+    Function:
+    playlist
     Parameters:
-    - <param1>: <description>
+    - profile: filename of local profile, if empty the profile will be read from the music provider
+    - from: from music provider [apple|spotify] 
+    - to:  music provider [apple|spotify] 
+    - dev-token: location of Apple Music developer token
+    - user-token: location of Apple Music user token
+    - client-id: client ID for Spotify
+    - client-secret: client secret for Spotify
+    - redirect-ur: Spotify redirect URI (default: http://localhost:8888/callback/
+    - dry-run: if specified the 'to' music provider will NOT be updated, use [verify] to check if items exist on
+                in the 'to'-provider
+    
+    
 """
 
 class KeyFunction(Enum):

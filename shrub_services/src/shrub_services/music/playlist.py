@@ -580,7 +580,6 @@ class Synchronizer:
                     logging.getLogger().info(future.result())
         else:
             for playlist in selected_playlists:
-                self.source.get_playlist_songs(playlist)
                 self.synchronize_playlist(playlist)
         # synchronize liked albums
         self.synchronize_albums(selected_albums)
@@ -609,6 +608,7 @@ class Synchronizer:
 
     def synchronize_playlist(self, playlist: PlayList):
         if not self.dry_run or self.dry_run == "verify":
+            self.source.get_playlist_songs(playlist)
             not_found_songs = 0
             target_playlist = PlayList()
             target_playlist.name = playlist.name
