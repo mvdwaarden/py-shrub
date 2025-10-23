@@ -1,0 +1,56 @@
+# default prefixes
+Prefix(:=<https://domain-name/this-file>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)
+Prefix(xml:=<http://www.w3.org/XML/1998/namespace>)
+Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+#define the header
+Ontology(<https://domain-name/this-file>
+    Import(<file:/Users/mib/Documents/projects/py-shrub/shrub_archi/data/shrub_archi/owl/turtle-cheat-sheet.ttl>)
+    Annotation(rdfs:comment "Some addition comment for the ontology")
+    Annotation(rdfs:label "Your ontology label")
+    # basic types
+    Declaration(Class(:Person))
+    Declaration(Class(:Role))
+    Declaration(ObjectProperty(:hasRole))
+    Declaration(DataProperty(:roleName))
+
+    # define domains and ranges
+    ObjectPropertyDomain(:hasRole :Person)
+    ObjectPropertyRange(:hasRole :Role)
+    ObjectPropertyDomain(:isChildOf :Person)
+
+
+    # subclasses and properties
+    SubObjectPropertyOf(:isModeler :hasRole)
+    SubClassOf(:Person :Mamal)
+    SubClassOf(:Male :Person)
+    SubClassOf(:Female :Person)
+
+    #individuals
+    ClassAssertion(:Male :Bob)
+    ClassAssertion(:Female :Mary)
+    ClassAssertion(:Person :Mary)
+    ClassAssertion(:Person :Pete)
+
+    # class constructions
+    # union (or)
+    EquivalentClasses(:Person ObjectUnionOf(:Female :Male))
+    # complement (not), use owl:equivalentClass
+    EquivalentClasses(:Animal ObjectComplementOf(:Person))
+    # one of, use owl:equivalentClass
+    EquivalentClasses(:Modeler ObjectOneOf(:Mary :Pete))
+    # intersection (and)
+    EquivalentClasses(:FemaleModeler ObjectIntersectionOf(:Female :Modeler))
+
+    # properties (symmetric, inverse)
+    InverseObjectProperties(:isChildOf :isParentOf)
+    SymmetricObjectProperty(:worksWith)
+
+
+    ObjectPropertyAssertion(:worksWith :Pete :Mary)
+    ObjectPropertyAssertion(:isParentOf :Mary :Bob)
+
+  )
