@@ -5,12 +5,12 @@ Prefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)
 Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
 Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
 
-
 #define the header
 Ontology(<https://domain-name/this-file>
-    Import(<file:/Users/mib/Documents/projects/py-shrub/shrub_archi/data/shrub_archi/owl/turtle-cheat-sheet.ttl>)
     Annotation(rdfs:comment "Some addition comment for the ontology")
     Annotation(rdfs:label "Your ontology label")
+
+
     # basic types
     Declaration(Class(:Person))
     Declaration(Class(:Role))
