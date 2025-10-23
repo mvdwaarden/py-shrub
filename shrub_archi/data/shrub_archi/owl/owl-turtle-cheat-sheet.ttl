@@ -27,5 +27,31 @@
 	      rdfs:range :Role .
 
 # subclasses and properties
-:owlModeler rdfs:subPropertyOf :hasRole .
+:isModeler rdfs:subPropertyOf :hasRole .
 :Person rdfs:subClassOf :Mamal .
+:Male rdfs:subClassOf :Person .
+:Female rdfs:subClassOf :Person .
+
+#individuals
+:Pete a :Person .
+:Mary a :Person ;
+        a :Female .
+:Bob a :Male .
+
+# class constructions
+# union (or)
+:Person owl:unionOf ( :Male :Female ) .
+# complement (not), use owl:equivalentClass
+:Animal owl:equivalentClass [owl:complementOf :Person ] .
+# one of, use owl:equivalentClass
+:Modeler owl:equivalentClass [owl:oneOf ( :Pete :Mary )] .
+# intersection (and)
+:FemaleModeler owl:intersectionOf( :Female :Modeler ) .
+
+# properties (symmetric, inverse, object)
+:worksWith a owl:SymmetricProperty .
+:isParentOf owl:inverseOf :isChildOf .
+:isChildOf rdfs:domain :Person .
+
+:Pete :worksWith :Mary .
+:Mary :isParentOf :Bob .

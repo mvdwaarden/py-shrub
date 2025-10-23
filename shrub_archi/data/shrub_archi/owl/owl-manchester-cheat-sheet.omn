@@ -1,0 +1,135 @@
+Prefix: : <https://domain-name/this-file>
+Prefix: owl: <http://www.w3.org/2002/07/owl#>
+Prefix: rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+Prefix: rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+Prefix: xml: <http://www.w3.org/XML/1998/namespace>
+Prefix: xsd: <http://www.w3.org/2001/XMLSchema#>
+
+
+
+Ontology: <https://domain-name/this-file>
+
+
+Annotations: 
+    rdfs:comment "Some addition comment for the ontology",
+    rdfs:label "Your ontology label"
+
+AnnotationProperty: rdfs:comment
+
+    
+AnnotationProperty: rdfs:label
+
+    
+Datatype: xsd:string
+
+    
+ObjectProperty: hasRole
+
+    Domain: 
+        Person
+    
+    Range: 
+        Role
+    
+    
+ObjectProperty: isChildOf
+
+    Domain: 
+        Person
+    
+    InverseOf: 
+        isParentOf
+    
+    
+ObjectProperty: isModeler
+
+    SubPropertyOf: 
+        hasRole
+    
+    
+ObjectProperty: isParentOf
+
+    InverseOf: 
+        isChildOf
+    
+    
+ObjectProperty: worksWith
+
+    Characteristics: 
+        Symmetric
+    
+    
+DataProperty: roleName
+
+    
+Class: Animal
+
+    EquivalentTo: 
+        not (Person)
+    
+    
+Class: Female
+
+    SubClassOf: 
+        Person
+    
+    
+Class: FemaleModeler
+
+    EquivalentTo: 
+        Female
+         and Modeler
+    
+    
+Class: Male
+
+    SubClassOf: 
+        Person
+    
+    
+Class: Mamal
+
+    
+Class: Modeler
+
+    EquivalentTo: 
+        {Mary , Pete}
+    
+    
+Class: Person
+
+    EquivalentTo: 
+        Female or Male
+    
+    SubClassOf: 
+        Mamal
+    
+    
+Class: Role
+
+    
+Individual: Bob
+
+    Types: 
+        Male
+    
+    
+Individual: Mary
+
+    Types: 
+        Female,
+        Person
+    
+    Facts:  
+     isParentOf  Bob
+    
+    
+Individual: Pete
+
+    Types: 
+        Person
+    
+    Facts:  
+     worksWith  Mary
+    
+    
