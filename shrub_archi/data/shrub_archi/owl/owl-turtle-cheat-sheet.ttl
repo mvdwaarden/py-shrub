@@ -1,0 +1,31 @@
+# default prefixes
+@prefix : <https://domain-name/this-file> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+#define the header
+<https://domain-name/this-file>
+	a owl:Ontology;
+	rdfs:label "Your ontology label";
+	rdfs:comment "Some addition comment for the ontology" .
+
+# basic types
+:Person rdf:type owl:Class .
+:hasRole rdf:type owl:ObjectProperty .
+:roleName rdf:type owl:DatatypeProperty .
+
+# which is based on turtle 'a' syntactic sugar, the same as
+:Person a owl:Class .
+:Role a owl:Class .
+:hasRole a owl:ObjectProperty .
+:roleName a owl:DatatypeProperty .
+
+# define domains and ranges
+:hasRole rdfs:domain :Person ;
+	      rdfs:range :Role .
+
+# subclasses and properties
+:owlModeler rdfs:subPropertyOf :hasRole .
+:Person rdfs:subClassOf :Mamal .

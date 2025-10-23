@@ -1,0 +1,24 @@
+@prefix : <#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+# peter donates something to charity
+:peter :donates-to :charity .
+
+
+# telling something about the donation, give tripple an ID
+
+_:REF0 rdf:type rdf:statement ;
+        rdf:subject :peter ;
+        rdf:predicate :donates-to ;
+        rdf:object :charity .
+
+_:REF0 :amount "50" ;
+    :date "2008-10-12" .
+
+
+# doing the same with RDF*, not a standard yet : https://w3c.github.io/rdf-star/cg-spec/editors_draft.html
+# not supported by a lot of frameworks yet
+_:REF0STAR rdf:reiffies << :peter :donates-to :charity >> .
+
+_:REF0START :amount "50" ;
+    :date "2008-10-12" .

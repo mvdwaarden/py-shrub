@@ -2,10 +2,15 @@
 <http://linked-data/subject> <http://linked-data/predicate> <http://linked-data/object> .
 <http://linked-data/subject> a <http://xmlnls.com/foaf/0.1/Person> .
 
+# define a base IRI, IRI reference : https://www.w3.org/TR/rdf12-turtle/#sec-iri
+@base <turtle-cheat-sheet.ttl> .
 # brackets
 <#me> <ld:means> <turtle-cheat-sheet.ttl#me> .
 <#you> <ld:means> <turtle-cheat-sheet.ttl#you> .
 <turtle-cheat-sheet.ttl#you> <ld:is-something-else-than> <some-other-people-file.ttl#you> .
+
+# short hand notations (syntactic sugar)
+# predicate a means : http://www.w3.org/1999/02/22-rdf-syntax-ns#type .
 
 #define prefixes
 @prefix ld: <http://linked-data/> .
