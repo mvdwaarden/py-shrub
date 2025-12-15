@@ -30,6 +30,8 @@ class CloneDirectoryTemplateRenderer:
                 return value[:idx]
         return value
 
+    def prefix(self, value, prefix_value):
+        return "".join([prefix_value, value])
 
     def render(self, template, **kwargs):
         """Render the template
@@ -46,6 +48,7 @@ class CloneDirectoryTemplateRenderer:
             self.environment.filters["snake_to_camel"] = self.snake_to_camel
             self.environment.filters["upper"] = self.to_upper
             self.environment.filters["snake_get_first"] = self.snake_get_first
+            self.environment.filters["prefix"] = self.prefix
         return self.environment.get_template(template).render(**kwargs)
 
 

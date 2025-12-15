@@ -1,0 +1,315 @@
+@prefix : <http://example.org/tlp#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+#################################################################
+# Ontology header
+#################################################################
+
+<http://example.org/tlp>
+  a owl:Ontology ;
+  rdfs:label "Taal/Literatuur/Taalfilosofie Ontologie"@nl ;
+  rdfs:comment "Een lichte OWL-ontologie voor kernbegrippen in de taalwetenschap, taalfilosofie en literatuurwetenschap, inclusief kruiskoppelingen."@nl .
+
+#################################################################
+# Core object properties (relaties)
+#################################################################
+
+:partOf a owl:ObjectProperty ;
+  rdfs:label "part-of"@nl ;
+  rdfs:comment "Deel-geheel relatie."@nl ;
+  rdfs:domain owl:Thing ;
+  rdfs:range  owl:Thing .
+
+:relatesTo a owl:ObjectProperty ;
+  rdfs:label "relates-to"@nl ;
+  rdfs:comment "Algemene semantische of conceptuele relatie."@nl ;
+  rdfs:domain owl:Thing ;
+  rdfs:range owl:Thing .
+
+:theorizedBy a owl:ObjectProperty ;
+  rdfs:label "theorized-by"@nl ;
+  rdfs:comment "Wordt theoretisch uitgewerkt door (stroming of auteur)."@nl ;
+  rdfs:domain :Concept ;
+  rdfs:range  :Theory .
+
+:analyzedBy a owl:ObjectProperty ;
+  rdfs:label "analyzed-by"@nl ;
+  rdfs:comment "Wordt geanalyseerd door (discipline/benadering)."@nl ;
+  rdfs:domain :TextualPhenomenon ;
+  rdfs:range  :Approach .
+
+:interpretedBy a owl:ObjectProperty ;
+  rdfs:label "interpreted-by"@nl ;
+  rdfs:comment "Wordt geïnterpreteerd door (hermeneutische school/benadering)."@nl ;
+  rdfs:domain :TextualPhenomenon ;
+  rdfs:range  :Approach .
+
+:realizedAs a owl:ObjectProperty ;
+  rdfs:label "realized-as"@nl ;
+  rdfs:comment "Wordt gerealiseerd als (concreet verschijnsel/stijlfiguur/constructie)."@nl ;
+  rdfs:domain :Concept ;
+  rdfs:range  :TextualPhenomenon .
+
+:emergesVia a owl:ObjectProperty ;
+  rdfs:label "emerges-via"@nl ;
+  rdfs:comment "Ontstaat via (proces of mechanisme)."@nl ;
+  rdfs:domain :Concept ;
+  rdfs:range  :Process .
+
+:stabilizedBy a owl:ObjectProperty ;
+  rdfs:label "stabilized-by"@nl ;
+  rdfs:comment "Wordt pragmatisch/gebruiksmatig gestabiliseerd door."@nl ;
+  rdfs:domain :Concept ;
+  rdfs:range  :Approach .
+
+:mapsToPerspective a owl:ObjectProperty ;
+  rdfs:label "maps-to-perspective"@nl ;
+  rdfs:comment "Brengt informatie in kaart volgens een perspectief (narratologie)."@nl ;
+  rdfs:domain :NarratologyConcept ;
+  rdfs:range  :Perspective .
+
+:anchorsMeaningTo a owl:ObjectProperty ;
+  rdfs:label "anchors-meaning-to"@nl ;
+  rdfs:comment "Verankert betekenis aan context (tijd/plaats/persoon)."@nl ;
+  rdfs:domain :PragmaticsConcept ;
+  rdfs:range  :ContextAnchor .
+
+:varietyBy a owl:ObjectProperty ;
+  rdfs:label "variety-by"@nl ;
+  rdfs:comment "Variatie naar situatie/rol/medium (register)."@nl ;
+  rdfs:domain :VariationConcept ;
+  rdfs:range  :SituationalFactor .
+
+#################################################################
+# Annotation/data properties (optioneel)
+#################################################################
+
+:definition a owl:AnnotationProperty ;
+  rdfs:label "definitie"@nl .
+
+#################################################################
+# High-level classes
+#################################################################
+
+:Domain a owl:Class ; rdfs:label "Domein"@nl .
+:Concept a owl:Class ; rdfs:label "Concept"@nl .
+:Theory a owl:Class ; rdfs:label "Theorie/Stroming"@nl .
+:Approach a owl:Class ; rdfs:label "Benadering"@nl .
+:Process a owl:Class ; rdfs:label "Proces"@nl .
+:TextualPhenomenon a owl:Class ; rdfs:label "Tekstueel verschijnsel"@nl .
+:Perspective a owl:Class ; rdfs:label "Perspectief"@nl .
+:ContextAnchor a owl:Class ; rdfs:label "Contextanker"@nl .
+:VariationConcept a owl:Class ; rdfs:label "Variatieconcept"@nl .
+
+#################################################################
+# Domains
+#################################################################
+
+:Linguistics a owl:Class ;
+  rdfs:subClassOf :Domain ;
+  rdfs:label "Taalwetenschap (Linguïstiek)"@nl .
+
+:PhilosophyOfLanguage a owl:Class ;
+  rdfs:subClassOf :Domain ;
+  rdfs:label "Taalfilosofie"@nl .
+
+:LiteraryStudies a owl:Class ;
+  rdfs:subClassOf :Domain ;
+  rdfs:label "Letterkunde (Literatuurwetenschap)"@nl .
+
+#################################################################
+# Linguistics substructure
+#################################################################
+
+:LinguisticSubfield a owl:Class ;
+  rdfs:subClassOf :Concept .
+
+:Phonology a owl:Class ;
+  rdfs:subClassOf :LinguisticSubfield ;
+  rdfs:label "Fonologie"@nl .
+
+:Morphology a owl:Class ;
+  rdfs:subClassOf :LinguisticSubfield ;
+  rdfs:label "Morfologie"@nl .
+
+:Syntax a owl:Class ;
+  rdfs:subClassOf :LinguisticSubfield ;
+  rdfs:label "Syntaxis"@nl .
+
+:Semantics a owl:Class ;
+  rdfs:subClassOf :LinguisticSubfield ;
+  rdfs:label "Semantiek"@nl .
+
+:Pragmatics a owl:Class ;
+  rdfs:subClassOf :LinguisticSubfield ;
+  rdfs:label "Pragmatiek"@nl .
+
+:Lexicon a owl:Class ;
+  rdfs:subClassOf :LinguisticSubfield ;
+  rdfs:label "Lexicon"@nl .
+
+:Sociolinguistics a owl:Class ;
+  rdfs:subClassOf :LinguisticSubfield ;
+  rdfs:label "Sociolinguïstiek"@nl .
+
+:Psycholinguistics a owl:Class ;
+  rdfs:subClassOf :LinguisticSubfield ;
+  rdfs:label "Psycholinguïstiek"@nl .
+
+:Neurolinguistics a owl:Class ;
+  rdfs:subClassOf :LinguisticSubfield ;
+  rdfs:label "Neurolinguïstiek"@nl .
+
+:DiscourseAnalysis a owl:Class ;
+  rdfs:subClassOf :LinguisticSubfield ;
+  rdfs:label "Discourseanalyse"@nl .
+
+:CorpusLinguistics a owl:Class ;
+  rdfs:subClassOf :LinguisticSubfield ;
+  rdfs:label "Corpuslinguïstiek"@nl .
+
+:ComputationalLinguistics a owl:Class ;
+  rdfs:subClassOf :LinguisticSubfield ;
+  rdfs:label "Computationele linguïstiek / NLP"@nl .
+
+#################################################################
+# Philosophy of Language
+#################################################################
+
+:MeaningTheory a owl:Class ; rdfs:subClassOf :Theory ; rdfs:label "Betekenistheorie"@nl .
+:TruthConditional a owl:Class ; rdfs:subClassOf :MeaningTheory ; rdfs:label "Waarheids-conditioneel"@nl .
+:ReferenceTheory a owl:Class ; rdfs:subClassOf :MeaningTheory ; rdfs:label "Referentietheorie"@nl .
+:UseTheory a owl:Class ; rdfs:subClassOf :MeaningTheory ; rdfs:label "Gebruikstheorie"@nl .
+:Inferentialism a owl:Class ; rdfs:subClassOf :MeaningTheory ; rdfs:label "Inferentialisme"@nl .
+:ConceptualMetaphorTheory a owl:Class ; rdfs:subClassOf :Theory ; rdfs:label "Conceptuele metafoor-theorie"@nl .
+
+:SpeechActTheory a owl:Class ; rdfs:subClassOf :Theory ; rdfs:label "Taalhandelingentheorie"@nl .
+:GriceanMaxims a owl:Class ; rdfs:subClassOf :Theory ; rdfs:label "Conversatiemaximes (Grice)"@nl .
+
+:Hermeneutics a owl:Class ; rdfs:subClassOf :Theory ; rdfs:label "Hermeneutiek"@nl .
+
+:Semiotics a owl:Class ; rdfs:subClassOf :Theory ; rdfs:label "Semiotiek"@nl .
+:Structuralism a owl:Class ; rdfs:subClassOf :Theory ; rdfs:label "Structuralisme"@nl .
+:Deconstruction a owl:Class ; rdfs:subClassOf :Theory ; rdfs:label "Deconstructie"@nl .
+
+#################################################################
+# Literary Studies
+#################################################################
+
+:Poetics a owl:Class ; rdfs:subClassOf :Approach ; rdfs:label "Poëtica"@nl .
+:Rhetoric a owl:Class ; rdfs:subClassOf :Approach ; rdfs:label "Retorica"@nl .
+:Narratology a owl:Class ; rdfs:subClassOf :Approach ; rdfs:label "Narratologie"@nl .
+:Genre a owl:Class ; rdfs:subClassOf :Concept ; rdfs:label "Genre"@nl .
+:InterpretationSchool a owl:Class ; rdfs:subClassOf :Approach ; rdfs:label "Interpretatieschool"@nl .
+:NewCriticism a owl:Class ; rdfs:subClassOf :InterpretationSchool ; rdfs:label "New Criticism"@nl .
+:ReaderResponse a owl:Class ; rdfs:subClassOf :InterpretationSchool ; rdfs:label "Lezerrespons"@nl .
+:Intertextuality a owl:Class ; rdfs:subClassOf :Concept ; rdfs:label "Intertekstualiteit"@nl .
+
+#################################################################
+# Cross-cutting linguistic/literary concepts
+#################################################################
+
+:Metaphor a owl:Class ; rdfs:subClassOf :TextualPhenomenon ; rdfs:label "Metafoor"@nl .
+:Metonymy a owl:Class ; rdfs:subClassOf :TextualPhenomenon ; rdfs:label "Metonymie"@nl .
+:Polysemy a owl:Class ; rdfs:subClassOf :Concept ; rdfs:label "Polysemie"@nl .
+:Homonymy a owl:Class ; rdfs:subClassOf :Concept ; rdfs:label "Homonymie"@nl .
+:Implicature a owl:Class ; rdfs:subClassOf :PragmaticsConcept ; rdfs:label "Implicatuur"@nl .
+:Deixis a owl:Class ; rdfs:subClassOf :PragmaticsConcept ; rdfs:label "Deixis"@nl .
+:Register a owl:Class ; rdfs:subClassOf :VariationConcept ; rdfs:label "Register"@nl .
+
+:Neologism a owl:Class ; rdfs:subClassOf :Concept ; rdfs:label "Neologisme"@nl .
+:LexicalNeologism a owl:Class ;
+  rdfs:subClassOf :Neologism ;
+  rdfs:label "Lexicaal neologisme"@nl ;
+  :definition "Nieuw woord: nieuwe vorm (klank/orthografie) + betekenis."@nl .
+
+:SemanticNeologism a owl:Class ;
+  rdfs:subClassOf :Neologism ;
+  rdfs:label "Semantisch neologisme"@nl ;
+  :definition "Nieuwe betekenislaag bij een bestaande woordvorm."@nl .
+
+#################################################################
+# Pragmatics / Narratology detail
+#################################################################
+
+:PragmaticsConcept a owl:Class ; rdfs:subClassOf :Concept ; rdfs:label "Pragmatisch concept"@nl .
+:NarratologyConcept a owl:Class ; rdfs:subClassOf :Concept ; rdfs:label "Narratologisch concept"@nl .
+:Perspective a owl:Class ; rdfs:label "Perspectief"@nl .
+:ContextAnchor a owl:Class ; rdfs:label "Contextanker (tijd/plaats/persoon)"@nl .
+:VariationConcept a owl:Class ; rdfs:label "Variatieconcept"@nl .
+:SituationalFactor a owl:Class ; rdfs:label "Situationele factor"@nl .
+
+:Focalization a owl:Class ;
+  rdfs:subClassOf :NarratologyConcept ;
+  rdfs:label "Focalisatie"@nl .
+
+:Narrator a owl:Class ;
+  rdfs:subClassOf :NarratologyConcept ;
+  rdfs:label "Vertelinstantie"@nl .
+
+:NarrativeTime a owl:Class ;
+  rdfs:subClassOf :NarratologyConcept ;
+  rdfs:label "Narratieve tijd"@nl .
+
+#################################################################
+# Structural links (TBox axioms via properties)
+#################################################################
+
+# Metaforiek: linguïstisch (semantiek/pragmatiek), filosofisch (conceptuele metafoor), literair (stijlfiguur)
+:Metaphor :analyzedBy :Semantics , :Pragmatics , :Poetics ;
+          :theorizedBy :ConceptualMetaphorTheory ;
+          rdfs:comment "Metafoor als tekstueel verschijnsel; conceptuele metafoor als theorie."@nl .
+
+# Polysemie/Homonymie in het lexicon
+:Polysemy :partOf :Lexicon ;
+          :analyzedBy :Semantics ;
+          rdfs:comment "Eén vorm, meerdere verwante betekenissen."@nl .
+
+:Homonymy :partOf :Lexicon ;
+          :analyzedBy :Semantics ;
+          rdfs:comment "Eén vorm, ongerelateerde betekenissen."@nl .
+
+# Neologismen
+:LexicalNeologism :emergesVia :WordFormation , :Borrowing , :Blending , :Compounding .
+:SemanticNeologism :emergesVia :MetaphoricShift , :MetonymicShift , :Broadening , :Narrowing .
+
+# Deixis/Implicatuur/Register
+:Deixis :anchorsMeaningTo :ContextAnchor .
+:Register :varietyBy :SituationalFactor .
+:Implicature :theorizedBy :GriceanMaxims ; :analyzedBy :Pragmatics .
+
+# Narratologie
+:Focalization :mapsToPerspective :Perspective ;
+              :analyzedBy :Narratology .
+
+#################################################################
+# Processes (woordvorming e.d.)
+#################################################################
+
+:WordFormation a owl:Class ; rdfs:subClassOf :Process ; rdfs:label "Woordvorming"@nl .
+:Borrowing a owl:Class ; rdfs:subClassOf :Process ; rdfs:label "Ontlening"@nl .
+:Blending a owl:Class ; rdfs:subClassOf :Process ; rdfs:label "Blending (woordversmelting)"@nl .
+:Compounding a owl:Class ; rdfs:subClassOf :Process ; rdfs:label "Samenstelling"@nl .
+:MetaphoricShift a owl:Class ; rdfs:subClassOf :Process ; rdfs:label "Metaforische verschuiving"@nl .
+:MetonymicShift a owl:Class ; rdfs:subClassOf :Process ; rdfs:label "Metonymische verschuiving"@nl .
+:Broadening a owl:Class ; rdfs:subClassOf :Process ; rdfs:label "Betekenisuitbreiding"@nl .
+:Narrowing a owl:Class ; rdfs:subClassOf :Process ; rdfs:label "Betekenisverenging"@nl .
+
+#################################################################
+# Example individuals (optioneel, ter illustratie)
+#################################################################
+
+# Voorbeeld: 'doomscrollen' als lexicaal neologisme via ontlening + blending
+:doomscrollen a :LexicalNeologism ;
+  rdfs:label "doomscrollen"@nl ;
+  :emergesVia :Borrowing , :Blending ;
+  :definition "Nieuw Nederlands woord (Eng. doom + scrolling) voor het eindeloos langs negatief nieuws scrollen."@nl .
+
+# Voorbeeld: 'cloud' (IT) als semantisch neologisme via metaforische verschuiving
+:cloud_IT a :SemanticNeologism ;
+  rdfs:label "cloud (IT)"@nl ;
+  :emergesVia :MetaphoricShift ;
+  :definition "Nieuwe betekenislaag van 'cloud': virtuele opslag/diensten in plaats van meteorologische wolk."@nl .

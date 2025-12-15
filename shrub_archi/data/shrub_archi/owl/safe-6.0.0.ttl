@@ -1,0 +1,3330 @@
+@prefix : <https://scaledagileframework.com/safe/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <https://scaledagileframework.com/safe/> .
+
+<https://scaledagileframework.com/safe> rdf:type owl:Ontology ;
+                                         owl:versionIRI <https://scaledagileframework.com/safe/6.0.0> .
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  https://scaledagileframework.com/safe#partOfDevelopmentValueStreamCanvas
+:partOfDevelopmentValueStreamCanvas rdf:type owl:ObjectProperty ;
+                                    rdfs:subPropertyOf :partOfValueStreamCanvas .
+
+
+###  https://scaledagileframework.com/safe/collaborateIn
+:collaborateIn rdf:type owl:ObjectProperty ;
+               rdfs:subPropertyOf owl:topObjectProperty .
+
+
+###  https://scaledagileframework.com/safe/collaborateInPortfolioStrategyFormulation
+:collaborateInPortfolioStrategyFormulation rdf:type owl:ObjectProperty ;
+                                           rdfs:subPropertyOf :collaborateIn ;
+                                           rdfs:domain :EnterpriseArchitect ,
+                                                       :EnterpriseExecutives ,
+                                                       :PortfolioLeadership ,
+                                                       :PortolioStakeholders ;
+                                           rdfs:range :PortfolioStrategyFormulation .
+
+
+###  https://scaledagileframework.com/safe/constraints
+:constraints rdf:type owl:ObjectProperty ;
+             rdfs:subPropertyOf owl:topObjectProperty .
+
+
+###  https://scaledagileframework.com/safe/constraintsBacklog
+:constraintsBacklog rdf:type owl:ObjectProperty ;
+                    rdfs:subPropertyOf :constraints ;
+                    rdfs:domain :NonFunctionalRequirement ;
+                    rdfs:range :Backlog .
+
+
+###  https://scaledagileframework.com/safe/consume
+:consume rdf:type owl:ObjectProperty ;
+         rdfs:subPropertyOf owl:topObjectProperty .
+
+
+###  https://scaledagileframework.com/safe/consumeSolution
+:consumeSolution rdf:type owl:ObjectProperty ;
+                 rdfs:subPropertyOf :consume ;
+                 rdfs:domain :OperationalValueStream ;
+                 rdfs:range :Solution .
+
+
+###  https://scaledagileframework.com/safe/describeByStrategicThemeObjectiveKeyResult
+:describeByStrategicThemeObjectiveKeyResult rdf:type owl:ObjectProperty ;
+                                            rdfs:subPropertyOf :describedByObjectiveKeyResult ;
+                                            rdfs:domain :StrategicTheme ;
+                                            rdfs:range :StrategicThemeOKR .
+
+
+###  https://scaledagileframework.com/safe/describedBy
+:describedBy rdf:type owl:ObjectProperty ;
+             rdfs:subPropertyOf owl:topObjectProperty .
+
+
+###  https://scaledagileframework.com/safe/describedByObjectiveKeyResult
+:describedByObjectiveKeyResult rdf:type owl:ObjectProperty ;
+                               rdfs:subPropertyOf :describedBy .
+
+
+###  https://scaledagileframework.com/safe/has
+:has rdf:type owl:ObjectProperty ;
+     rdfs:subPropertyOf owl:topObjectProperty ;
+     rdfs:range :NonFunctionalRequirement .
+
+
+###  https://scaledagileframework.com/safe/hasARTEpic
+:hasARTEpic rdf:type owl:ObjectProperty ;
+            rdfs:subPropertyOf :hasEpic ;
+            rdfs:domain :ARTBacklog ;
+            rdfs:range :ARTEpic .
+
+
+###  https://scaledagileframework.com/safe/hasARTFlow
+:hasARTFlow rdf:type owl:ObjectProperty ;
+            rdfs:subPropertyOf :hasFlow ;
+            rdfs:domain :AgileReleaseTrain ;
+            rdfs:range :ARTFlow .
+
+
+###  https://scaledagileframework.com/safe/hasARTOKR
+:hasARTOKR rdf:type owl:ObjectProperty ;
+           rdfs:subPropertyOf :hasOKR ;
+           rdfs:domain :ValueStreamOKR ;
+           rdfs:range :ARTOKR .
+
+
+###  https://scaledagileframework.com/safe/hasAddresssBottlenecksAccelerator
+:hasAddresssBottlenecksAccelerator rdf:type owl:ObjectProperty ;
+                                   rdfs:subPropertyOf :hasFlowAccelerator ;
+                                   rdfs:range :AddressBottlenecksAccelerator .
+
+
+###  https://scaledagileframework.com/safe/hasAgileTestingMatrixAspect
+:hasAgileTestingMatrixAspect rdf:type owl:ObjectProperty ;
+                             rdfs:subPropertyOf :has .
+
+
+###  https://scaledagileframework.com/safe/hasBacklogItem
+:hasBacklogItem rdf:type owl:ObjectProperty ;
+                rdfs:subPropertyOf :has .
+
+
+###  https://scaledagileframework.com/safe/hasBusinessFactingAspect
+:hasBusinessFactingAspect rdf:type owl:ObjectProperty ;
+                          rdfs:subPropertyOf :hasAgileTestingMatrixAspect ;
+                          rdfs:domain :Q2 ,
+                                      :Q3 ;
+                          rdfs:range :BusinessFacing .
+
+
+###  https://scaledagileframework.com/safe/hasBusinessValue
+:hasBusinessValue rdf:type owl:ObjectProperty ;
+                  rdfs:subPropertyOf :has ;
+                  rdfs:domain :Epic ;
+                  rdfs:range :BusinessValue .
+
+
+###  https://scaledagileframework.com/safe/hasCapability
+:hasCapability rdf:type owl:ObjectProperty ;
+               rdfs:subPropertyOf :hasBacklogItem ;
+               rdfs:domain :SolutionTrainBacklog ;
+               rdfs:range :Capability .
+
+
+###  https://scaledagileframework.com/safe/hasCriteria
+:hasCriteria rdf:type owl:ObjectProperty ;
+             rdfs:subPropertyOf :has .
+
+
+###  https://scaledagileframework.com/safe/hasCritiqueProductAspect
+:hasCritiqueProductAspect rdf:type owl:ObjectProperty ;
+                          rdfs:subPropertyOf :hasAgileTestingMatrixAspect ;
+                          rdfs:domain :Q3 ,
+                                      :Q4 ;
+                          rdfs:range :CritiqueTheProduct .
+
+
+###  https://scaledagileframework.com/safe/hasEnterpriseArchitectResponsibility
+:hasEnterpriseArchitectResponsibility rdf:type owl:ObjectProperty ;
+                                      rdfs:subPropertyOf :hasResponsiblity ;
+                                      rdfs:domain :EnterpriseArchitect ;
+                                      rdfs:range :EnterpriseArchitectResponsibility .
+
+
+###  https://scaledagileframework.com/safe/hasEpic
+:hasEpic rdf:type owl:ObjectProperty ;
+         rdfs:subPropertyOf :hasBacklogItem ;
+         rdfs:domain :PortfolioBacklog ;
+         rdfs:range :Epic .
+
+
+###  https://scaledagileframework.com/safe/hasEpicHypothesisStatement
+:hasEpicHypothesisStatement rdf:type owl:ObjectProperty ;
+                            rdfs:subPropertyOf :has ;
+                            rdfs:domain :Epic ;
+                            rdfs:range :EpicHypothesisStatement .
+
+
+###  https://scaledagileframework.com/safe/hasEpicOwner
+:hasEpicOwner rdf:type owl:ObjectProperty ;
+              rdfs:subPropertyOf :hasOwner ;
+              rdfs:domain :Epic ;
+              rdfs:range :EpicOwner .
+
+
+###  https://scaledagileframework.com/safe/hasFeature
+:hasFeature rdf:type owl:ObjectProperty ;
+            rdfs:subPropertyOf :hasBacklogItem ;
+            rdfs:domain :ARTBacklog ;
+            rdfs:range :Feature .
+
+
+###  https://scaledagileframework.com/safe/hasFlow
+:hasFlow rdf:type owl:ObjectProperty ;
+         rdfs:subPropertyOf :has .
+
+
+###  https://scaledagileframework.com/safe/hasFlowAccelerator
+:hasFlowAccelerator rdf:type owl:ObjectProperty ;
+                    rdfs:subPropertyOf :has ;
+                    rdfs:domain :Flow .
+
+
+###  https://scaledagileframework.com/safe/hasGetFasterFeedbackAccelerator
+:hasGetFasterFeedbackAccelerator rdf:type owl:ObjectProperty ;
+                                 rdfs:subPropertyOf :hasFlowAccelerator ;
+                                 rdfs:range :GetFasterFeedbackAccelerator .
+
+
+###  https://scaledagileframework.com/safe/hasGuideDevelopmentAspect
+:hasGuideDevelopmentAspect rdf:type owl:ObjectProperty ;
+                           rdfs:subPropertyOf :hasAgileTestingMatrixAspect ;
+                           rdfs:domain :Q1 ,
+                                       :Q2 ;
+                           rdfs:range :GuidedDevelopment .
+
+
+###  https://scaledagileframework.com/safe/hasLeanBusinessCase
+:hasLeanBusinessCase rdf:type owl:ObjectProperty ;
+                     rdfs:subPropertyOf :has ;
+                     rdfs:domain :Epic ;
+                     rdfs:range :LeanBusinessCase .
+
+
+###  https://scaledagileframework.com/safe/hasMVP
+:hasMVP rdf:type owl:ObjectProperty ;
+        rdfs:subPropertyOf :has ;
+        rdfs:domain :Epic ;
+        rdfs:range :MinimumViableProduct .
+
+
+###  https://scaledagileframework.com/safe/hasMinimizeHandoffsAndDependenciesAccelerator
+:hasMinimizeHandoffsAndDependenciesAccelerator rdf:type owl:ObjectProperty ;
+                                               rdfs:subPropertyOf :hasFlowAccelerator ;
+                                               rdfs:range :MinimizeHandoffsAndDependenciesAccelerator .
+
+
+###  https://scaledagileframework.com/safe/hasNonFunctionalRequirement
+:hasNonFunctionalRequirement rdf:type owl:ObjectProperty ;
+                             rdfs:subPropertyOf :has ;
+                             rdfs:domain :Epic ;
+                             rdfs:range :NonFunctionalRequirement .
+
+
+###  https://scaledagileframework.com/safe/hasNonFunctionalRequirmentCriteria
+:hasNonFunctionalRequirmentCriteria rdf:type owl:ObjectProperty ;
+                                    rdfs:subPropertyOf :hasCriteria ;
+                                    rdfs:domain :NonFunctionalRequirement ;
+                                    rdfs:range :NonFunctionalRequirementCriteria .
+
+
+###  https://scaledagileframework.com/safe/hasOKR
+:hasOKR rdf:type owl:ObjectProperty ;
+        rdfs:subPropertyOf :has .
+
+
+###  https://scaledagileframework.com/safe/hasOptimizeTimeInTheZoneAccelerator
+:hasOptimizeTimeInTheZoneAccelerator rdf:type owl:ObjectProperty ;
+                                     rdfs:subPropertyOf :hasFlowAccelerator ;
+                                     rdfs:range :OptimizeTimeInTheZoneAccelerator .
+
+
+###  https://scaledagileframework.com/safe/hasOwner
+:hasOwner rdf:type owl:ObjectProperty ;
+          rdfs:subPropertyOf :has .
+
+
+###  https://scaledagileframework.com/safe/hasPortfolioFlow
+:hasPortfolioFlow rdf:type owl:ObjectProperty ;
+                  rdfs:subPropertyOf :hasFlow ;
+                  rdfs:domain :LeanPortfolioManagement ;
+                  rdfs:range :PortfolioFlow .
+
+
+###  https://scaledagileframework.com/safe/hasProductManagementResponsibility
+:hasProductManagementResponsibility rdf:type owl:ObjectProperty ;
+                                    rdfs:subPropertyOf :hasResponsiblity ;
+                                    rdfs:domain :ProductManagement ;
+                                    rdfs:range :ProductManagementResponsiblity .
+
+
+###  https://scaledagileframework.com/safe/hasReduceQueueLengthAccelerator
+:hasReduceQueueLengthAccelerator rdf:type owl:ObjectProperty ;
+                                 rdfs:subPropertyOf :hasFlowAccelerator ;
+                                 rdfs:range :ReduceQueueLengthAccelerator .
+
+
+###  https://scaledagileframework.com/safe/hasRemediateLegacyPolicyAndPracticesAccelerator
+:hasRemediateLegacyPolicyAndPracticesAccelerator rdf:type owl:ObjectProperty ;
+                                                 rdfs:subPropertyOf :hasFlowAccelerator ;
+                                                 rdfs:range :RemediateLegacyPolicyAndPracticesAccelerator .
+
+
+###  https://scaledagileframework.com/safe/hasResponsiblity
+:hasResponsiblity rdf:type owl:ObjectProperty ;
+                  rdfs:subPropertyOf :has ;
+                  rdfs:domain :Role ;
+                  rdfs:range :Responsibility .
+
+
+###  https://scaledagileframework.com/safe/hasSolutionArchitectResponsibility
+:hasSolutionArchitectResponsibility rdf:type owl:ObjectProperty ;
+                                    rdfs:subPropertyOf :hasResponsiblity ;
+                                    rdfs:domain :SolutionArchitect ;
+                                    rdfs:range :SolutionArchitectResponsibility .
+
+
+###  https://scaledagileframework.com/safe/hasSolutionManagementResponsibility
+:hasSolutionManagementResponsibility rdf:type owl:ObjectProperty ;
+                                     rdfs:subPropertyOf :hasResponsiblity ;
+                                     rdfs:domain :SolutionManagement ;
+                                     rdfs:range :SolutionManagementResponsibility .
+
+
+###  https://scaledagileframework.com/safe/hasSolutionTrainEpic
+:hasSolutionTrainEpic rdf:type owl:ObjectProperty ;
+                      rdfs:subPropertyOf :hasEpic ;
+                      rdfs:domain :SolutionTrainBacklog ;
+                      rdfs:range :SolutionEpic .
+
+
+###  https://scaledagileframework.com/safe/hasSolutionTrainFlow
+:hasSolutionTrainFlow rdf:type owl:ObjectProperty ;
+                      rdfs:subPropertyOf :hasFlow ;
+                      rdfs:domain :SolutionTrain ;
+                      rdfs:range :SolutionTrainFlow .
+
+
+###  https://scaledagileframework.com/safe/hasStory
+:hasStory rdf:type owl:ObjectProperty ;
+          rdfs:subPropertyOf :hasBacklogItem ;
+          rdfs:domain :TeamBacklog ;
+          rdfs:range :Story .
+
+
+###  https://scaledagileframework.com/safe/hasSystemArchitectResponsiblity
+:hasSystemArchitectResponsiblity rdf:type owl:ObjectProperty ;
+                                 rdfs:subPropertyOf :hasResponsiblity ;
+                                 rdfs:domain :SystemArchitect ;
+                                 rdfs:range :SystemArchitectResponsibility .
+
+
+###  https://scaledagileframework.com/safe/hasTeamFlow
+:hasTeamFlow rdf:type owl:ObjectProperty ;
+             rdfs:subPropertyOf :hasFlow ;
+             rdfs:domain :AgileTeam ;
+             rdfs:range :TeamFlow .
+
+
+###  https://scaledagileframework.com/safe/hasTechnologyFactingAspect
+:hasTechnologyFactingAspect rdf:type owl:ObjectProperty ;
+                            rdfs:subPropertyOf :hasAgileTestingMatrixAspect ;
+                            rdfs:domain :Q1 ,
+                                        :Q4 ;
+                            rdfs:range :TechnologyFacing .
+
+
+###  https://scaledagileframework.com/safe/hasValueStreamOKR
+:hasValueStreamOKR rdf:type owl:ObjectProperty ;
+                   rdfs:subPropertyOf :hasOKR ;
+                   rdfs:domain :StrategicThemeOKR ;
+                   rdfs:range :ValueStreamOKR .
+
+
+###  https://scaledagileframework.com/safe/hasVisualizeAndLimitWipAccelerator
+:hasVisualizeAndLimitWipAccelerator rdf:type owl:ObjectProperty ;
+                                    rdfs:subPropertyOf :hasFlowAccelerator ;
+                                    rdfs:range :VisualizeAndLimitWipAccelerator .
+
+
+###  https://scaledagileframework.com/safe/hasWorkinSmallerBatchesAccelerator
+:hasWorkinSmallerBatchesAccelerator rdf:type owl:ObjectProperty ;
+                                    rdfs:subPropertyOf :hasFlowAccelerator ;
+                                    rdfs:range :WorkinSmallerBatchesAccelerator .
+
+
+###  https://scaledagileframework.com/safe/influence
+:influence rdf:type owl:ObjectProperty ;
+           rdfs:subPropertyOf owl:topObjectProperty .
+
+
+###  https://scaledagileframework.com/safe/influenceART
+:influenceART rdf:type owl:ObjectProperty ;
+              rdfs:subPropertyOf :influence ;
+              rdfs:domain :ARTOKR ;
+              rdfs:range :AgileReleaseTrain .
+
+
+###  https://scaledagileframework.com/safe/influenceBacklog
+:influenceBacklog rdf:type owl:ObjectProperty ;
+                  rdfs:subPropertyOf :influence ;
+                  rdfs:domain :StrategicTheme ;
+                  rdfs:range :Backlog .
+
+
+###  https://scaledagileframework.com/safe/influenceSolutionVision
+:influenceSolutionVision rdf:type owl:ObjectProperty ;
+                         rdfs:subPropertyOf :influence ;
+                         rdfs:domain :StrategicTheme ;
+                         rdfs:range :SolutionVision .
+
+
+###  https://scaledagileframework.com/safe/influenceValueStream
+:influenceValueStream rdf:type owl:ObjectProperty ;
+                      rdfs:subPropertyOf :influence ;
+                      rdfs:domain :ValueStreamOKR ;
+                      rdfs:range :ValueStream .
+
+
+###  https://scaledagileframework.com/safe/influenceValueStreamBuget
+:influenceValueStreamBuget rdf:type owl:ObjectProperty ;
+                           rdfs:subPropertyOf :influence ;
+                           rdfs:domain :StrategicTheme ;
+                           rdfs:range :SolutionVision .
+
+
+###  https://scaledagileframework.com/safe/influenceValueStreamGuardrail
+:influenceValueStreamGuardrail rdf:type owl:ObjectProperty ;
+                               rdfs:subPropertyOf :influence ;
+                               rdfs:domain :StrategicTheme ;
+                               rdfs:range :ValueStreamGuardrail .
+
+
+###  https://scaledagileframework.com/safe/isInputFor
+:isInputFor rdf:type owl:ObjectProperty ;
+            rdfs:subPropertyOf owl:topObjectProperty .
+
+
+###  https://scaledagileframework.com/safe/isInputForPortfolioStrategy
+:isInputForPortfolioStrategy rdf:type owl:ObjectProperty ;
+                             rdfs:subPropertyOf :isInputFor ;
+                             rdfs:domain :PortfolioStrategyFormulation ;
+                             rdfs:range :PortfolioStrategy .
+
+
+###  https://scaledagileframework.com/safe/isInputForPortfolioStrategyFormulation
+:isInputForPortfolioStrategyFormulation rdf:type owl:ObjectProperty ;
+                                        rdfs:subPropertyOf :isInputFor ;
+                                        rdfs:domain :EnterpriseStrategy ,
+                                                    :EnterpriseVision ,
+                                                    :PortfolioContext ;
+                                        rdfs:range :PortfolioStrategyFormulation .
+
+
+###  https://scaledagileframework.com/safe/isInputForPortfolioVision
+:isInputForPortfolioVision rdf:type owl:ObjectProperty ;
+                           rdfs:subPropertyOf :isInputFor ;
+                           rdfs:domain :StrategicTheme ;
+                           rdfs:range :PortfolioVision .
+
+
+###  https://scaledagileframework.com/safe/isInputForStrategicThemes
+:isInputForStrategicThemes rdf:type owl:ObjectProperty ;
+                           rdfs:subPropertyOf :isInputFor ;
+                           rdfs:domain :PortfolioStrategyFormulation ;
+                           rdfs:range :StrategicTheme .
+
+
+###  https://scaledagileframework.com/safe/isInputForValueStreamBudget
+:isInputForValueStreamBudget rdf:type owl:ObjectProperty ;
+                             rdfs:subPropertyOf :isInputFor ;
+                             rdfs:domain :PortfolioStrategyFormulation ;
+                             rdfs:range :ValueStreamBudget .
+
+
+###  https://scaledagileframework.com/safe/partOf
+:partOf rdf:type owl:ObjectProperty ;
+        rdfs:subPropertyOf owl:topObjectProperty .
+
+
+###  https://scaledagileframework.com/safe/partOfPortfolioCanvas
+:partOfPortfolioCanvas rdf:type owl:ObjectProperty ;
+                       rdfs:subPropertyOf :partOf ;
+                       rdfs:domain :Budget ,
+                                   :Channel ,
+                                   :Customer ,
+                                   :CustomerRelation ,
+                                   :KPI ,
+                                   :Solution ,
+                                   :ValueStream ;
+                       rdfs:range :PortfolioCanvas .
+
+
+###  https://scaledagileframework.com/safe/partOfSolutionIntent
+:partOfSolutionIntent rdf:type owl:ObjectProperty ;
+                      rdfs:subPropertyOf :partOf ;
+                      rdfs:domain :FunctionalRequirement ,
+                                  :NonFunctionalRequirement ;
+                      rdfs:range :SolutionIntent .
+
+
+###  https://scaledagileframework.com/safe/partOfValueStreamCanvas
+:partOfValueStreamCanvas rdf:type owl:ObjectProperty ;
+                         rdfs:subPropertyOf :partOf ;
+                         rdfs:domain :AgileReleaseTrain ;
+                         rdfs:range :DevelopmentValueStream .
+
+
+###  https://scaledagileframework.com/safe/produce
+:produce rdf:type owl:ObjectProperty ;
+         rdfs:subPropertyOf owl:topObjectProperty .
+
+
+###  https://scaledagileframework.com/safe/produceSolution
+:produceSolution rdf:type owl:ObjectProperty ;
+                 rdfs:subPropertyOf :produce ;
+                 rdfs:domain :DevelopmentValueStream ;
+                 rdfs:range :Solution ;
+                 rdfs:comment """Zie https://scaledagileframework.com/organize-around-value-2/
+
+Development value streams are SAFe’s primary concerns. After all, delivering new solutions in the shortest sustainable lead time is the focus of SAFe, and development value streams help organizations understand how to get there. However, the enterprise’s operational value streams must be identified first to determine the development value streams that support them.""" .
+
+
+###  https://scaledagileframework.com/safe/provide
+:provide rdf:type owl:ObjectProperty ;
+         rdfs:subPropertyOf owl:topObjectProperty .
+
+
+###  https://scaledagileframework.com/safe/provideSolution
+:provideSolution rdf:type owl:ObjectProperty ;
+                 rdfs:subPropertyOf :provide ;
+                 rdfs:domain :OperationalValueStream ;
+                 rdfs:range :Solution .
+
+
+###  https://scaledagileframework.com/safe/realize
+:realize rdf:type owl:ObjectProperty ;
+         rdfs:subPropertyOf owl:topObjectProperty .
+
+
+###  https://scaledagileframework.com/safe/realizeDevelopmentValueStream
+:realizeDevelopmentValueStream rdf:type owl:ObjectProperty ;
+                               rdfs:subPropertyOf :realize ;
+                               rdfs:domain :AgileReleaseTrain ;
+                               rdfs:range :DevelopmentValueStream .
+
+
+###  https://scaledagileframework.com/safe/support
+:support rdf:type owl:ObjectProperty ;
+         rdfs:domain :ObjectiveKeyResult ;
+         rdfs:range :CoreValues .
+
+
+###  https://scaledagileframework.com/safe/supportAndCoordinate
+:supportAndCoordinate rdf:type owl:ObjectProperty ;
+                      rdfs:subPropertyOf :support ;
+                      rdfs:domain :LeaderShipRole ;
+                      rdfs:range :AgileTeam .
+
+
+###  https://scaledagileframework.com/safe/supportCoreValue
+:supportCoreValue rdf:type owl:ObjectProperty ;
+                  rdfs:subPropertyOf :support .
+
+
+###  https://scaledagileframework.com/safe/supportSystemQualityTest
+:supportSystemQualityTest rdf:type owl:ObjectProperty ;
+                          rdfs:subPropertyOf :support ;
+                          rdfs:domain :SystemTeam ;
+                          rdfs:range :Q4 .
+
+
+###  https://scaledagileframework.com/safe/testedBy
+:testedBy rdf:type owl:ObjectProperty ;
+          rdfs:subPropertyOf owl:topObjectProperty ;
+          rdfs:domain :SystemQuality ;
+          rdfs:range :Q4 .
+
+
+###  https://scaledagileframework.com/safe/testedByCapabilityAcceptanceTest
+:testedByCapabilityAcceptanceTest rdf:type owl:ObjectProperty ;
+                                  rdfs:subPropertyOf :testedBy ;
+                                  rdfs:domain :Capability ;
+                                  rdfs:range :CapabilityAcceptanceTest .
+
+
+###  https://scaledagileframework.com/safe/testedByFeatureAcceptanceTest
+:testedByFeatureAcceptanceTest rdf:type owl:ObjectProperty ;
+                               rdfs:subPropertyOf :testedBy ;
+                               rdfs:domain :Feature ;
+                               rdfs:range :FeatureAcceptanceTest .
+
+
+###  https://scaledagileframework.com/safe/testedByOutcomeHypothesis
+:testedByOutcomeHypothesis rdf:type owl:ObjectProperty ;
+                           rdfs:subPropertyOf :testedBy ;
+                           rdfs:domain :Epic ;
+                           rdfs:range :OutcomeHypothesis .
+
+
+###  https://scaledagileframework.com/safe/testedByStoryAcceptanceTest
+:testedByStoryAcceptanceTest rdf:type owl:ObjectProperty ;
+                             rdfs:subPropertyOf :testedBy ;
+                             rdfs:domain :Story ;
+                             rdfs:range :StoryAcceptanceTest .
+
+
+###  https://scaledagileframework.com/safe/testedBySystemQualityTest
+:testedBySystemQualityTest rdf:type owl:ObjectProperty ;
+                           rdfs:subPropertyOf :testedBy ;
+                           rdfs:domain :SystemQuality ;
+                           rdfs:range :Q4 .
+
+
+###  https://scaledagileframework.com/safe/testedByUnitTest
+:testedByUnitTest rdf:type owl:ObjectProperty ;
+                  rdfs:subPropertyOf :testedBy ;
+                  rdfs:domain :Story ;
+                  rdfs:range :UnitTest .
+
+
+#################################################################
+#    Data properties
+#################################################################
+
+###  https://scaledagileframework.com/safe/Accessibility
+:Accessibility rdf:type owl:DatatypeProperty ;
+               rdfs:subPropertyOf :SystemQualityAttribute .
+
+
+###  https://scaledagileframework.com/safe/Availability
+:Availability rdf:type owl:DatatypeProperty ;
+              rdfs:subPropertyOf :SystemQualityAttribute .
+
+
+###  https://scaledagileframework.com/safe/Certification
+:Certification rdf:type owl:DatatypeProperty ;
+               rdfs:subPropertyOf :SystemQualityAttribute .
+
+
+###  https://scaledagileframework.com/safe/Compatibility
+:Compatibility rdf:type owl:DatatypeProperty ;
+               rdfs:subPropertyOf :SystemQualityAttribute .
+
+
+###  https://scaledagileframework.com/safe/Compliance
+:Compliance rdf:type owl:DatatypeProperty ;
+            rdfs:subPropertyOf :SystemQualityAttribute .
+
+
+###  https://scaledagileframework.com/safe/Configurability
+:Configurability rdf:type owl:DatatypeProperty ;
+                 rdfs:subPropertyOf :SystemQualityAttribute .
+
+
+###  https://scaledagileframework.com/safe/Dependability
+:Dependability rdf:type owl:DatatypeProperty ;
+               rdfs:subPropertyOf :SystemQualityAttribute .
+
+
+###  https://scaledagileframework.com/safe/Deployability
+:Deployability rdf:type owl:DatatypeProperty ;
+               rdfs:subPropertyOf :SystemQualityAttribute .
+
+
+###  https://scaledagileframework.com/safe/DisasterRecovery
+:DisasterRecovery rdf:type owl:DatatypeProperty ;
+                  rdfs:subPropertyOf :SystemQualityAttribute .
+
+
+###  https://scaledagileframework.com/safe/Documentation
+:Documentation rdf:type owl:DatatypeProperty ;
+               rdfs:subPropertyOf :SystemQualityAttribute .
+
+
+###  https://scaledagileframework.com/safe/Efficiency
+:Efficiency rdf:type owl:DatatypeProperty ;
+            rdfs:subPropertyOf :SystemQualityAttribute .
+
+
+###  https://scaledagileframework.com/safe/Extensibility
+:Extensibility rdf:type owl:DatatypeProperty ;
+               rdfs:subPropertyOf :SystemQualityAttribute .
+
+
+###  https://scaledagileframework.com/safe/FailureTransparency
+:FailureTransparency rdf:type owl:DatatypeProperty ;
+                     rdfs:subPropertyOf :SystemQualityAttribute .
+
+
+###  https://scaledagileframework.com/safe/FaultTolerance
+:FaultTolerance rdf:type owl:DatatypeProperty ;
+                rdfs:subPropertyOf :SystemQualityAttribute .
+
+
+###  https://scaledagileframework.com/safe/Flexibility
+:Flexibility rdf:type owl:DatatypeProperty ;
+             rdfs:subPropertyOf :SystemQualityAttribute .
+
+
+###  https://scaledagileframework.com/safe/Interoperability
+:Interoperability rdf:type owl:DatatypeProperty ;
+                  rdfs:subPropertyOf :SystemQualityAttribute .
+
+
+###  https://scaledagileframework.com/safe/Maintainability
+:Maintainability rdf:type owl:DatatypeProperty ;
+                 rdfs:subPropertyOf :SystemQualityAttribute .
+
+
+###  https://scaledagileframework.com/safe/Operability
+:Operability rdf:type owl:DatatypeProperty ;
+             rdfs:subPropertyOf :SystemQualityAttribute .
+
+
+###  https://scaledagileframework.com/safe/Performance
+:Performance rdf:type owl:DatatypeProperty ;
+             rdfs:subPropertyOf :SystemQualityAttribute .
+
+
+###  https://scaledagileframework.com/safe/Recoverability
+:Recoverability rdf:type owl:DatatypeProperty ;
+                rdfs:subPropertyOf :SystemQualityAttribute .
+
+
+###  https://scaledagileframework.com/safe/Reliability
+:Reliability rdf:type owl:DatatypeProperty ;
+             rdfs:subPropertyOf :SystemQualityAttribute .
+
+
+###  https://scaledagileframework.com/safe/Responsiveness
+:Responsiveness rdf:type owl:DatatypeProperty ;
+                rdfs:subPropertyOf :SystemQualityAttribute .
+
+
+###  https://scaledagileframework.com/safe/Robustness
+:Robustness rdf:type owl:DatatypeProperty ;
+            rdfs:subPropertyOf :SystemQualityAttribute .
+
+
+###  https://scaledagileframework.com/safe/Safety
+:Safety rdf:type owl:DatatypeProperty ;
+        rdfs:subPropertyOf :SystemQualityAttribute .
+
+
+###  https://scaledagileframework.com/safe/Scalability
+:Scalability rdf:type owl:DatatypeProperty ;
+             rdfs:subPropertyOf :SystemQualityAttribute .
+
+
+###  https://scaledagileframework.com/safe/Securability
+:Securability rdf:type owl:DatatypeProperty ;
+              rdfs:subPropertyOf :SystemQualityAttribute .
+
+
+###  https://scaledagileframework.com/safe/Supportability
+:Supportability rdf:type owl:DatatypeProperty ;
+                rdfs:subPropertyOf :SystemQualityAttribute .
+
+
+###  https://scaledagileframework.com/safe/SystemQualityAttribute
+:SystemQualityAttribute rdf:type owl:DatatypeProperty ;
+                        rdfs:subPropertyOf owl:topDataProperty ;
+                        rdfs:domain :SystemQuality .
+
+
+###  https://scaledagileframework.com/safe/Testability
+:Testability rdf:type owl:DatatypeProperty ;
+             rdfs:subPropertyOf :SystemQualityAttribute .
+
+
+###  https://scaledagileframework.com/safe/Traceability
+:Traceability rdf:type owl:DatatypeProperty ;
+              rdfs:subPropertyOf :SystemQualityAttribute .
+
+
+###  https://scaledagileframework.com/safe/Usability
+:Usability rdf:type owl:DatatypeProperty ;
+           rdfs:subPropertyOf :SystemQualityAttribute .
+
+
+#################################################################
+#    Classes
+#################################################################
+
+###  https://scaledagileframework.com/safe#DevelopmentValueStreamCanvas
+:DevelopmentValueStreamCanvas rdf:type owl:Class ;
+                              rdfs:subClassOf :ValueStreamCanvas .
+
+
+###  https://scaledagileframework.com/safe#FullfillmentValueStream
+:FullfillmentValueStream rdf:type owl:Class ;
+                         rdfs:subClassOf :OperationalValueStream ;
+                         rdfs:comment "Represents the process of processing a customer order for a digitally-enabled product or service by delivering it and receiving payment. Examples include providing a consumer with an insurance product or fulfilling an eCommerce sales order." .
+
+
+###  https://scaledagileframework.com/safe#ManufacturingValueStream
+:ManufacturingValueStream rdf:type owl:Class ;
+                          rdfs:subClassOf :OperationalValueStream ;
+                          rdfs:comment "Converts raw materials into the products customers purchase. Examples include consumer products, medical devices, and complex cyber-physical systems." .
+
+
+###  https://scaledagileframework.com/safe#SoftwareProductValueStream
+:SoftwareProductValueStream rdf:type owl:Class ;
+                            rdfs:subClassOf :OperationalValueStream ;
+                            rdfs:comment "Offer and support software applications and solutions for sale to the end user or enterprise. Examples include ERP systems, SaaS, and desktop and mobile applications." .
+
+
+###  https://scaledagileframework.com/safe#SupportingValueStream
+:SupportingValueStream rdf:type owl:Class ;
+                       rdfs:subClassOf :OperationalValueStream ;
+                       rdfs:comment "Value streams are end-to-end workflows for various repetitive and internal support activities. Examples include employee hiring, establishing and executing supplier contracts, performing the annual audit, and completing an enterprise sales cycle." .
+
+
+###  https://scaledagileframework.com/safe#01_TakeEconomicView
+<https://scaledagileframework.com/safe#01_TakeEconomicView> rdf:type owl:Class ;
+                                                            rdfs:subClassOf :SafeLeanAgilePrinciple .
+
+
+###  https://scaledagileframework.com/safe#02_ApplySystemsThinking
+<https://scaledagileframework.com/safe#02_ApplySystemsThinking> rdf:type owl:Class ;
+                                                                rdfs:subClassOf :SafeLeanAgilePrinciple .
+
+
+###  https://scaledagileframework.com/safe#03_AssumeVariability
+<https://scaledagileframework.com/safe#03_AssumeVariability> rdf:type owl:Class ;
+                                                             rdfs:subClassOf :SafeLeanAgilePrinciple .
+
+
+###  https://scaledagileframework.com/safe#04_BuildIncremently
+<https://scaledagileframework.com/safe#04_BuildIncremently> rdf:type owl:Class ;
+                                                            rdfs:subClassOf :SafeLeanAgilePrinciple .
+
+
+###  https://scaledagileframework.com/safe#05_WorkingSystemEvaluationBasedMilestones
+<https://scaledagileframework.com/safe#05_WorkingSystemEvaluationBasedMilestones> rdf:type owl:Class ;
+                                                                                  rdfs:subClassOf :SafeLeanAgilePrinciple .
+
+
+###  https://scaledagileframework.com/safe#06_ContinuousValueFlow
+<https://scaledagileframework.com/safe#06_ContinuousValueFlow> rdf:type owl:Class ;
+                                                               rdfs:subClassOf :SafeLeanAgilePrinciple .
+
+
+###  https://scaledagileframework.com/safe#07_ApplyCadenceAcrossDomains
+<https://scaledagileframework.com/safe#07_ApplyCadenceAcrossDomains> rdf:type owl:Class ;
+                                                                     rdfs:subClassOf :SafeLeanAgilePrinciple .
+
+
+###  https://scaledagileframework.com/safe#08_UnlockIntrinsicMotivation
+<https://scaledagileframework.com/safe#08_UnlockIntrinsicMotivation> rdf:type owl:Class ;
+                                                                     rdfs:subClassOf :SafeLeanAgilePrinciple .
+
+
+###  https://scaledagileframework.com/safe#09_DecentraliceDecisionMaking
+<https://scaledagileframework.com/safe#09_DecentraliceDecisionMaking> rdf:type owl:Class ;
+                                                                      rdfs:subClassOf :SafeLeanAgilePrinciple .
+
+
+###  https://scaledagileframework.com/safe#10_OrganizeAroundValue
+<https://scaledagileframework.com/safe#10_OrganizeAroundValue> rdf:type owl:Class ;
+                                                               rdfs:subClassOf :SafeLeanAgilePrinciple .
+
+
+###  https://scaledagileframework.com/safe/ABTest
+:ABTest rdf:type owl:Class ;
+        rdfs:subClassOf :Q2 .
+
+
+###  https://scaledagileframework.com/safe/ARTBacklog
+:ARTBacklog rdf:type owl:Class ;
+            rdfs:subClassOf :Backlog .
+
+
+###  https://scaledagileframework.com/safe/ARTEpic
+:ARTEpic rdf:type owl:Class ;
+         rdfs:subClassOf :Epic .
+
+
+###  https://scaledagileframework.com/safe/ARTFlow
+:ARTFlow rdf:type owl:Class ;
+         rdfs:subClassOf :Flow .
+
+
+###  https://scaledagileframework.com/safe/ARTOKR
+:ARTOKR rdf:type owl:Class ;
+        rdfs:subClassOf :ObjectiveKeyResult ;
+        owl:disjointWith :ValueStreamOKR .
+
+
+###  https://scaledagileframework.com/safe/ActivelySupportDesignAndSteeringOfCICDPipeline
+:ActivelySupportDesignAndSteeringOfCICDPipeline rdf:type owl:Class ;
+                                                rdfs:subClassOf :SystemArchitectResponsibility .
+
+
+###  https://scaledagileframework.com/safe/ActivelySupportDesignAndSteeringOfContinuousDeliveryPipeline
+:ActivelySupportDesignAndSteeringOfContinuousDeliveryPipeline rdf:type owl:Class ;
+                                                              rdfs:subClassOf :SolutionArchitectResponsibility .
+
+
+###  https://scaledagileframework.com/safe/AddressBottlenecksAccelerator
+:AddressBottlenecksAccelerator rdf:type owl:Class ;
+                               rdfs:subClassOf :FlowAccelerator ;
+                               rdfs:comment """Bottlenecks occur wherever people or resources (systems, materials, and so on) in the flow of value experience demand greater than the available capacity. Examples include a shortage of a specialized skill (such as a data scientist), insufficient processing power for the build servers in the CI/CD pipeline, or a silicon supply shortage for building the integrated circuits of a cyber-physical system. Work piles up at a bottleneck and limits the effective throughput of value, as Figure 3 illustrates.
+
+Upstream processes are blocked from moving value. Downstream processes are starved and waiting. Bottlenecks cause the value stream to operate slowly and uneconomically, far below its potential capacity. This is emphasized in the Theory of Constraints (Goldratt [2], [3]), which posits that the throughput of any flow system is limited by the capacity of a dominant constraint, or bottleneck. By this theory, investment in optimizing the system at any other point than the dominant constraint is waste, as it will not improve the throughput of the system.
+
+No matter the theory, bottlenecks must be addressed, by adding additional skills, people, or other resources at the bottleneck step. While that is not always easy to do, (there are reasons why the bottleneck is a bottleneck), eliminating dominant bottlenecks must be a primary focus as throughput will not increase until the bottleneck is addressed.
+
+In the meantime, however, the complex workflows in solution development provide other options. It’s often the case that not all the work is single-threaded (must pass through the bottleneck step). There is often other work (different features, etc.) that does not have to pass through the bottleneck. In this case, teams can selectively pick and deliver other valuable work, thus increasing value throughput, while the dominant bottleneck is being addressed. In addition, relentless improvement drives us to improve wherever we can do so, and knowledge workers take pride in improving the processes that are under their control. In the end, the efficiency of every step matters.
+
+But the fact is that bottlenecks limit throughput and negatively affect economic outcomes.""" .
+
+
+###  https://scaledagileframework.com/safe/AgileMindset
+:AgileMindset rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/AgileReleaseTrain
+:AgileReleaseTrain rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/AgileTeam
+:AgileTeam rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/AgileTestingMatrix
+:AgileTestingMatrix rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/AgileTestingMatrixAspect
+:AgileTestingMatrixAspect rdf:type owl:Class ;
+                          rdfs:subClassOf :AgileTestingMatrix .
+
+
+###  https://scaledagileframework.com/safe/AgileTestingMatrixQuadrant
+:AgileTestingMatrixQuadrant rdf:type owl:Class ;
+                            rdfs:subClassOf :AgileTestingMatrix .
+
+
+###  https://scaledagileframework.com/safe/AlignArchitectureWithBusinessStrategy
+:AlignArchitectureWithBusinessStrategy rdf:type owl:Class ;
+                                       rdfs:subClassOf :EnterpriseArchitectResponsibility .
+
+
+###  https://scaledagileframework.com/safe/AlignOnOutcomes
+:AlignOnOutcomes rdf:type owl:Class ;
+                 rdfs:subClassOf :SolutionManagementResponsibility .
+
+
+###  https://scaledagileframework.com/safe/Alignment
+:Alignment rdf:type owl:Class ;
+           rdfs:subClassOf :CoreValues ;
+           rdfs:comment """Like cars out of alignment, misaligned companies can develop serious problems. They are hard to steer and don’t respond well to changes in direction [2]. Even if it’s clear where everyone thinks they’re headed, the vehicle is unlikely to get them there.
+
+The same is true for organizations adopting SAFe as their new way of working. In Lean-Agile, many decisions are decentralized to deliver value in the shortest sustainable lead time (see SAFe Principle #9). However, if decisions pull the organization in different directions, significant delays and quality concerns will result. The solution is to provide clear, consistent alignment from the top of the enterprise through every level of SAFe, all the way to each individual contributor. Value delivery with speed and quality can consistently be achieved when everyone is aligned.
+
+Here are specific ways to create and maintain alignment in SAFe.
+
+Communicate the vision, mission, and strategy. Alignment starts with keeping the enterprise’s vision, mission, and strategy constantly present. For example, including these elements in the Business Owner briefings during PI planning is one way to ensure the work of the ART is consistent with the higher aims of the enterprise.
+
+Connect strategy to execution. The next step is to make sure everyone in the SAFe Portfolio aligns their work to the most important things to the enterprise. Strategic themes explicitly translate business strategies into tangible guidance that aligns the portfolio vision, lean budgets, and epics to enterprise priorities and subsequently inform the work of teams and trains in the portfolio.
+
+Speak with a common language. It’s difficult to achieve alignment if there’s inconsistency in how the organization describes important roles, processes, events, and artifacts. SAFe provides a common language and promotes practices (backlogs, ART boards, solution intent, portfolio vision, and so on) that maintain a common view of the work and the resulting solutions.
+
+Constantly check for understanding. Creating alignment requires regular reinforcement. SAFe events (iteration planning, backlog refinement, PI planning, ART syncs, portfolio syncs) and SAFe artifacts (backlogs, team boards, ART boards, portfolio canvas) are just some of the tools that help the SAFe organization stay aligned. Face-to-face conversations are also essential for checking for understanding.
+
+Understand your customer. SAFe promotes continuous exploration with customer centricity and design thinking to gather inputs and perspectives from diverse stakeholders and information sources to ensure that the items in the backlogs are aligned with the most important voice of all… the customer.""" .
+
+
+###  https://scaledagileframework.com/safe/ArchitecturalRunway
+:ArchitecturalRunway rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/ArchitectureResponsibility
+:ArchitectureResponsibility rdf:type owl:Class ;
+                            rdfs:subClassOf :Responsibility .
+
+
+###  https://scaledagileframework.com/safe/ArchitectureRole
+:ArchitectureRole rdf:type owl:Class ;
+                  rdfs:subClassOf :LeaderShipRole .
+
+
+###  https://scaledagileframework.com/safe/ArchitectureVision
+:ArchitectureVision rdf:type owl:Class ;
+                    rdfs:subClassOf :Vision .
+
+
+###  https://scaledagileframework.com/safe/Automation
+:Automation rdf:type owl:Class ;
+            rdfs:subClassOf :CALMR ;
+            rdfs:comment "Automate the Continuous Delivery Pipeline." ,
+                         """Building and operating a CDP tool chain typically involves the following categories of tools:
+
+Value Stream Management (VSM) – VSM tools’ wrap’ the CDP from end to end, providing real-time visibility into the health and efficiency of the value stream itself.
+
+Version Control – These tools store and manage changes to source code and configuration files that define the behavior of solutions, systems, and infrastructure.
+
+Infrastructure as code (IaC) – As a discipline, infrastructure-as-code treats all systems as highly configurable, expendable commodities. Tools in this category enable all computing infrastructure to be built, deployed, changed, and destroyed on demand.
+
+Test Automation – Test automation can be a significant source of delivery acceleration. It applies to almost all testing types, including unit, component, integration, regression, performance, acceptance, usability, and exploratory testing. However, automating exploratory testing requires manual input from those testing the solution.
+
+Vulnerability Detection – These tools span much of the CDP and are specifically designed to detect security vulnerabilities in code, networks, and infrastructure.
+
+CI/CD – Continuous Integration (CI) and Continuous Deployment (CD) tools are typically invoked automatically upon code commit and orchestrate build, integration, testing, compliance, and deployment activities.
+
+Monitoring and Analytics – These tools collect usage and performance data from all levels of the solution stack and provide critical insights into pipeline flow, solution quality, and delivered value.
+
+Additional tools – The tools above tend to be used universally; however, many others support DevOps but are implementation specific. These include IDE plugins, microservices, artifact repositories, cloud management, and chaos engineering.""" .
+
+
+###  https://scaledagileframework.com/safe/Backlog
+:Backlog rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/BacklogItem
+:BacklogItem rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/BehaviourDrivenDesign
+:BehaviourDrivenDesign rdf:type owl:Class ;
+                       rdfs:subClassOf :TestRequirementModel .
+
+
+###  https://scaledagileframework.com/safe/Bounded
+:Bounded rdf:type owl:Class ;
+         rdfs:subClassOf :NonFunctionalRequirementCriteria ;
+         rdfs:comment "NFRs must have a specific bounded context. For example, an airplane’s flight control reliability should be much higher than the infotainment system." .
+
+
+###  https://scaledagileframework.com/safe/BrickAndMortarStore
+:BrickAndMortarStore rdf:type owl:Class ;
+                     rdfs:subClassOf :MarketingAndSalesChannels .
+
+
+###  https://scaledagileframework.com/safe/Budget
+:Budget rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/BuildModelQualityIn
+:BuildModelQualityIn rdf:type owl:Class ;
+                     rdfs:subClassOf :ModelBasedSystemEngineering ;
+                     rdfs:comment """Due to the diversity and number of people contributing information, models can suffer a challenge: continuous changes made by many people can cause a drop in quality without proper oversight. The System Architect works with teams to define quality practices—model standards and model testing—and to ensure that they are followed.
+
+The quality practices discussed below facilitate early learning cycles. As SAFe notes, “You can’t scale crappy code,” and the same is true for system models. Quality practices and strong version management allow engineers to confidently and frequently make model changes and contribute to the system’s intent.""" .
+
+
+###  https://scaledagileframework.com/safe/BusinessCapability
+:BusinessCapability rdf:type owl:Class ;
+                    rdfs:subClassOf :Capability .
+
+
+###  https://scaledagileframework.com/safe/BusinessEpic
+:BusinessEpic rdf:type owl:Class ;
+              rdfs:subClassOf :Epic .
+
+
+###  https://scaledagileframework.com/safe/BusinessFacing
+:BusinessFacing rdf:type owl:Class ;
+                rdfs:subClassOf :AgileTestingMatrixAspect .
+
+
+###  https://scaledagileframework.com/safe/BusinessFeature
+:BusinessFeature rdf:type owl:Class ;
+                 rdfs:subClassOf :Feature .
+
+
+###  https://scaledagileframework.com/safe/BusinessOwner
+:BusinessOwner rdf:type owl:Class ;
+               rdfs:subClassOf :LeaderShipRole .
+
+
+###  https://scaledagileframework.com/safe/BusinessStrategy
+:BusinessStrategy rdf:type owl:Class ;
+                  rdfs:subClassOf :Strategy .
+
+
+###  https://scaledagileframework.com/safe/BusinessValue
+:BusinessValue rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/CALMR
+:CALMR rdf:type owl:Class ;
+       rdfs:subClassOf :DevOpsMindset ;
+       rdfs:comment """CALMR is a DevOps mindset that guides the ART toward achieving continuous value delivery by enhancing culture, automation, lean flow, measurement, and recovery.
+
+Successful DevOps hinges on an approach that unites everyone in the value stream toward achieving extraordinary business outcomes. In SAFe, CALMR provides such an approach. When everyone in the value stream thinks and acts with continuous delivery in mind, the result is:
+
+Increased frequency, quality, and security of product innovation
+Decreased deployment risk with accelerated learning cycles
+Accelerated time-to-market
+Improved solution quality and shortened lead time for fixes
+Reduced severity and frequency of defects and failures
+Improved Mean Time to Recover (MTTR) from production incidents
+A critical component of the CALMR mindset is the realization that DevOps often forces significant change within established enterprises. Enterprises are complex systems with diverse people, values, processes, policies, and technology. Careful attention must be given to effectively cultivating and maturing DevOps in these environments.
+
+After more than a decade of experimentation and learning, the DevOps community has discovered that effective DevOps entails a deep appreciation for culture, automation, lean flow, measurement, and sharing (CALMS). DevOps requires directing energy toward each area—not necessarily equally, but in balance—to achieve desired outcomes.
+
+SAFe echoes this belief with one modification, sharing is a natural component of culture, which makes room for ‘recovery’ as a new element. Hence, SAFe’s ‘CALMR’ approach to DevOps""" .
+
+
+###  https://scaledagileframework.com/safe/Canvas
+:Canvas rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/Capability
+:Capability rdf:type owl:Class ;
+            rdfs:subClassOf :BacklogItem .
+
+
+###  https://scaledagileframework.com/safe/CapabilityAcceptanceTest
+:CapabilityAcceptanceTest rdf:type owl:Class ;
+                          rdfs:subClassOf :Test .
+
+
+###  https://scaledagileframework.com/safe/Channel
+:Channel rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/CollaborateWithLeanPortfolioManagement
+:CollaborateWithLeanPortfolioManagement rdf:type owl:Class ;
+                                        rdfs:subClassOf :EnterpriseArchitectResponsibility .
+
+
+###  https://scaledagileframework.com/safe/CollaborationPracticeAndProperUseOfVersionControlSystem
+:CollaborationPracticeAndProperUseOfVersionControlSystem rdf:type owl:Class ;
+                                                         rdfs:subClassOf :ModelStandards .
+
+
+###  https://scaledagileframework.com/safe/CollapseDesignOptionsWithFrequentIntegrationPoints
+:CollapseDesignOptionsWithFrequentIntegrationPoints rdf:type owl:Class ;
+                                                    rdfs:subClassOf :SetBasedDesign ;
+                                                    rdfs:comment """When teams explore new designs during development, uncertainty abounds, and validated learning is scarce. The best way to resolve this variability is to test design alternatives through early and frequent system integration. In part, integration points are driven by regular System Demos, which occur each iteration, and Solution Demos, which happen on the PI cadence. (See ‘Frequently Integrate the System’ in Enterprise Solution Delivery.)
+
+These frequent integration points support experiential learning, providing new insights and reducing options as the system evolves (Figure 5).""" .
+
+
+###  https://scaledagileframework.com/safe/CommonTypesAndDimensionsUsedAcrossTheSystem
+:CommonTypesAndDimensionsUsedAcrossTheSystem rdf:type owl:Class ;
+                                             rdfs:subClassOf :ModelStandards .
+
+
+###  https://scaledagileframework.com/safe/CommunicateForUnderstandingAndBuyIn
+:CommunicateForUnderstandingAndBuyIn rdf:type owl:Class ;
+                                     rdfs:subClassOf :KotterEightAccelerators .
+
+
+###  https://scaledagileframework.com/safe/ComplicatedSubsystemART
+:ComplicatedSubsystemART rdf:type owl:Class ;
+                         rdfs:subClassOf :AgileReleaseTrain .
+
+
+###  https://scaledagileframework.com/safe/ComplicatedSubsystemTeam
+:ComplicatedSubsystemTeam rdf:type owl:Class ;
+                          rdfs:subClassOf :AgileTeam .
+
+
+###  https://scaledagileframework.com/safe/ComponentTest
+:ComponentTest rdf:type owl:Class ;
+               rdfs:subClassOf :Q1 .
+
+
+###  https://scaledagileframework.com/safe/ConnectWithTheCustomer
+:ConnectWithTheCustomer rdf:type owl:Class ;
+                        rdfs:subClassOf :ProductManagementResponsiblity .
+
+
+###  https://scaledagileframework.com/safe/ConnectivityTest
+:ConnectivityTest rdf:type owl:Class ;
+                  rdfs:subClassOf :Q1 .
+
+
+###  https://scaledagileframework.com/safe/Context
+:Context rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/ContinuousDeliveryPipeline
+:ContinuousDeliveryPipeline rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/ContinuousDeployment
+:ContinuousDeployment rdf:type owl:Class ;
+                      rdfs:subClassOf :ContinuousDeliveryPipeline .
+
+
+###  https://scaledagileframework.com/safe/ContinuousExploration
+:ContinuousExploration rdf:type owl:Class ;
+                       rdfs:subClassOf :ContinuousDeliveryPipeline .
+
+
+###  https://scaledagileframework.com/safe/ContinuousIntegration
+:ContinuousIntegration rdf:type owl:Class ;
+                       rdfs:subClassOf :ContinuousDeliveryPipeline .
+
+
+###  https://scaledagileframework.com/safe/CoreValues
+:CoreValues rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/CreateASenseOfUrgency
+:CreateASenseOfUrgency rdf:type owl:Class ;
+                       rdfs:subClassOf :KotterEightAccelerators .
+
+
+###  https://scaledagileframework.com/safe/CreateTestableAndExecutableModels
+:CreateTestableAndExecutableModels rdf:type owl:Class ;
+                                   rdfs:subClassOf :QualityPractices ;
+                                   owl:disjointWith :ModelStandards ;
+                                   rdfs:comment "Test-First practices help teams build quality into their products early, facilitating the continuous small changes we find in Agile software development. Test-first creates a rich suite of cases that allow developers to make changes more reliably without causing errors elsewhere in the system. Rich, automated tests are critical to building a Continuous Delivery Pipeline." .
+
+
+###  https://scaledagileframework.com/safe/Criteria
+:Criteria rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/CritiqueTheProduct
+:CritiqueTheProduct rdf:type owl:Class ;
+                    rdfs:subClassOf :AgileTestingMatrixAspect .
+
+
+###  https://scaledagileframework.com/safe/Culture
+:Culture rdf:type owl:Class ;
+         rdfs:subClassOf :CALMR ;
+         rdfs:comment """Customer-centricity – Value is determined by an enterprise’s ability to sense and respond to customer needs; therefore, everyone in the value stream must be guided by a shared understanding of their customers.    
+
+Collaboration – DevOps relies on the ability of development, operations, security, and other teams to partner effectively on an ongoing basis, ensuring that solutions are developed, delivered, and maintained in lockstep with ever-changing business needs.
+
+Risk tolerance – DevOps requires widespread acknowledgment that every release is an experiment until validated by Customers and that many experiments fail. DevOps cultures reward risk-taking, continuous learning, and relentless improvement.
+
+Knowledge sharing – Sharing ideas, discoveries, practices, tools, and learning across teams, ARTs, and the broader organization unifies the enterprise and enables skills to shift left.""" ,
+                      "Establish a culture of shared responsibility for development, deployment, and operations." .
+
+
+###  https://scaledagileframework.com/safe/CustomITApplications
+:CustomITApplications rdf:type owl:Class ;
+                      rdfs:subClassOf :InternalChannels ;
+                      owl:disjointWith :InternalWebSites .
+
+
+###  https://scaledagileframework.com/safe/Customer
+:Customer rdf:type owl:Class ;
+          rdfs:subClassOf :Role .
+
+
+###  https://scaledagileframework.com/safe/CustomerCollaborationOverContractNegotiation
+:CustomerCollaborationOverContractNegotiation rdf:type owl:Class ;
+                                              rdfs:subClassOf :AgileMindset ;
+                                              rdfs:comment "Customers are the ultimate deciders of value, so their close collaboration is essential in pursuing business agility. Contracts are often necessary to convey each party’s rights, responsibilities, and economic concerns—but recognize that contracts can over-regulate what to do and how to do it. They don’t replace regular communication, collaboration, and trust, no matter how well they’re written. Instead, contracts should be win-win propositions. Win-lose contracts usually result in poor economic outcomes and distrust, creating contentious short-term relationships instead of long-term business partnerships. Instead, favor customer collaboration over contract negotiation." .
+
+
+###  https://scaledagileframework.com/safe/CustomerRelation
+:CustomerRelation rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/DefineModelNotationsToUse
+:DefineModelNotationsToUse rdf:type owl:Class ;
+                           rdfs:subClassOf :ModelStandards .
+
+
+###  https://scaledagileframework.com/safe/DefineProductStrategyProductVisionAndProductRoadmap
+:DefineProductStrategyProductVisionAndProductRoadmap rdf:type owl:Class ;
+                                                     rdfs:subClassOf :ProductManagementResponsiblity .
+
+
+###  https://scaledagileframework.com/safe/DeliverValue
+:DeliverValue rdf:type owl:Class ;
+              rdfs:subClassOf :ProductManagementResponsiblity .
+
+
+###  https://scaledagileframework.com/safe/Deliverable
+:Deliverable rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/DescribeWhatInformationShouldBeCaptured
+:DescribeWhatInformationShouldBeCaptured rdf:type owl:Class ;
+                                         rdfs:subClassOf :ModelStandards .
+
+
+###  https://scaledagileframework.com/safe/DesignConstraint
+:DesignConstraint rdf:type owl:Class ;
+                  rdfs:subClassOf :NonFunctionalRequirement ;
+                  owl:disjointWith :SystemQuality .
+
+
+###  https://scaledagileframework.com/safe/DevOpsMindset
+:DevOpsMindset rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/DevelopTheChangeVisionAndStrategy
+:DevelopTheChangeVisionAndStrategy rdf:type owl:Class ;
+                                   rdfs:subClassOf :KotterEightAccelerators .
+
+
+###  https://scaledagileframework.com/safe/DevelopmentValueStream
+:DevelopmentValueStream rdf:type owl:Class ;
+                        rdfs:subClassOf :ValueStream ;
+                        owl:disjointWith :OperationalValueStream ;
+                        rdfs:comment "Development value streams are SAFe’s primary concerns. After all, delivering new solutions in the shortest sustainable lead time is the focus of SAFe, and development value streams help organizations understand how to get there. However, the enterprise’s operational value streams must be identified first to determine the development value streams that support them." .
+
+
+###  https://scaledagileframework.com/safe/DirectSales
+:DirectSales rdf:type owl:Class ;
+             rdfs:subClassOf :MarketingAndSalesChannels .
+
+
+###  https://scaledagileframework.com/safe/DistributionNetwork
+:DistributionNetwork rdf:type owl:Class ;
+                     rdfs:subClassOf :MarketingAndSalesChannels .
+
+
+###  https://scaledagileframework.com/safe/DoNotLetUp
+:DoNotLetUp rdf:type owl:Class ;
+            rdfs:subClassOf :KotterEightAccelerators .
+
+
+###  https://scaledagileframework.com/safe/DocumentGeneration
+:DocumentGeneration rdf:type owl:Class ;
+                    rdfs:subClassOf :CreateTestableAndExecutableModels ;
+                    rdfs:comment "While possibly redundant with the traceability scripts above, document generation may have scripts to ensure that the model is appropriately structured and that all data exists to support all document templates. With extensive models, debugging a script is often easier than debugging or updating the document template." .
+
+
+###  https://scaledagileframework.com/safe/DomainModelTestAssessmentCriteria
+:DomainModelTestAssessmentCriteria rdf:type owl:Class ;
+                                   rdfs:subClassOf :CreateTestableAndExecutableModels .
+
+
+###  https://scaledagileframework.com/safe/ElectricalModelsTestForLogic
+:ElectricalModelsTestForLogic rdf:type owl:Class ;
+                              rdfs:subClassOf :DomainModelTestAssessmentCriteria .
+
+
+###  https://scaledagileframework.com/safe/EmpowerOthersToAct
+:EmpowerOthersToAct rdf:type owl:Class ;
+                    rdfs:subClassOf :KotterEightAccelerators .
+
+
+###  https://scaledagileframework.com/safe/EnablerCapability
+:EnablerCapability rdf:type owl:Class ;
+                   rdfs:subClassOf :Capability .
+
+
+###  https://scaledagileframework.com/safe/EnablerEpic
+:EnablerEpic rdf:type owl:Class ;
+             rdfs:subClassOf :Epic .
+
+
+###  https://scaledagileframework.com/safe/EnablerFeature
+:EnablerFeature rdf:type owl:Class ;
+                rdfs:subClassOf :Feature .
+
+
+###  https://scaledagileframework.com/safe/EnablerStory
+:EnablerStory rdf:type owl:Class ;
+              rdfs:subClassOf :Story .
+
+
+###  https://scaledagileframework.com/safe/EnablingART
+:EnablingART rdf:type owl:Class ;
+             rdfs:subClassOf :AgileReleaseTrain .
+
+
+###  https://scaledagileframework.com/safe/EnablingTeam
+:EnablingTeam rdf:type owl:Class ;
+              rdfs:subClassOf :AgileTeam .
+
+
+###  https://scaledagileframework.com/safe/EnterpriseArchitect
+:EnterpriseArchitect rdf:type owl:Class ;
+                     rdfs:subClassOf :ArchitectureRole .
+
+
+###  https://scaledagileframework.com/safe/EnterpriseArchitectResponsibility
+:EnterpriseArchitectResponsibility rdf:type owl:Class ;
+                                   rdfs:subClassOf :ArchitectureResponsibility ;
+                                   owl:disjointWith :EstablischAndSupportDefinitionOfNFRs .
+
+
+###  https://scaledagileframework.com/safe/EnterpriseExecutives
+:EnterpriseExecutives rdf:type owl:Class ;
+                      rdfs:subClassOf :Role .
+
+
+###  https://scaledagileframework.com/safe/EnterpriseStrategy
+:EnterpriseStrategy rdf:type owl:Class ;
+                    rdfs:subClassOf :Strategy .
+
+
+###  https://scaledagileframework.com/safe/EnterpriseVision
+:EnterpriseVision rdf:type owl:Class ;
+                  rdfs:subClassOf :Vision .
+
+
+###  https://scaledagileframework.com/safe/Epic
+:Epic rdf:type owl:Class ;
+      rdfs:subClassOf :BacklogItem .
+
+
+###  https://scaledagileframework.com/safe/EpicHypothesisStatement
+:EpicHypothesisStatement rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/EpicOwner
+:EpicOwner rdf:type owl:Class ;
+           rdfs:subClassOf :Role .
+
+
+###  https://scaledagileframework.com/safe/EstablischAndSupportDefinitionOfNFRs
+:EstablischAndSupportDefinitionOfNFRs rdf:type owl:Class ;
+                                      rdfs:subClassOf :ArchitectureResponsibility .
+
+
+###  https://scaledagileframework.com/safe/EvolveTheSolution
+:EvolveTheSolution rdf:type owl:Class ;
+                   rdfs:subClassOf :SolutionManagementResponsibility .
+
+
+###  https://scaledagileframework.com/safe/ExecutableSystemModelsTestForSystemBehaviour
+:ExecutableSystemModelsTestForSystemBehaviour rdf:type owl:Class ;
+                                              rdfs:subClassOf :DomainModelTestAssessmentCriteria .
+
+
+###  https://scaledagileframework.com/safe/ExloratoryTesting
+:ExloratoryTesting rdf:type owl:Class ;
+                   rdfs:subClassOf :Q3 .
+
+
+###  https://scaledagileframework.com/safe/ExploreMarketsAndUsers
+:ExploreMarketsAndUsers rdf:type owl:Class ;
+                        rdfs:subClassOf :ProductManagementResponsiblity .
+
+
+###  https://scaledagileframework.com/safe/ExplorerAlternativesAndLearnFaster
+:ExplorerAlternativesAndLearnFaster rdf:type owl:Class ;
+                                    rdfs:subClassOf :ModelBasedSystemEngineering .
+
+
+###  https://scaledagileframework.com/safe/ExternalCustomer
+:ExternalCustomer rdf:type owl:Class ;
+                  rdfs:subClassOf :Customer ;
+                  owl:disjointWith :InternalCustomer .
+
+
+###  https://scaledagileframework.com/safe/ExternalSupplierReleaseTrain
+:ExternalSupplierReleaseTrain rdf:type owl:Class ;
+                              rdfs:subClassOf :SupplierReleaseTrain ;
+                              owl:disjointWith :InternalSupplierReleaseTrain .
+
+
+###  https://scaledagileframework.com/safe/Feature
+:Feature rdf:type owl:Class ;
+         rdfs:subClassOf :BacklogItem .
+
+
+###  https://scaledagileframework.com/safe/FeatureAcceptanceTest
+:FeatureAcceptanceTest rdf:type owl:Class ;
+                       rdfs:subClassOf :Test .
+
+
+###  https://scaledagileframework.com/safe/Flow
+:Flow rdf:type owl:Class ;
+      rdfs:comment "SAFe is a flow-based system. As such, any interruptions to flow must be identified and addressed systematically to enable continuous value delivery. While flow-based guidance is embedded throughout SAFe, a special collection of eight articles directly addresses impediments to flow. These are Value Stream Management, Principle #6- Make value flow without interruptions, Team Flow, ART Flow, Solution Train Flow, Portfolio Flow, Accelerating Flow with SAFe, and the Extended Guidance article Coaching Flow." .
+
+
+###  https://scaledagileframework.com/safe/FlowAccelerator
+:FlowAccelerator rdf:type owl:Class ;
+                 rdfs:comment "Each flow property is subject to optimizations, and often many steps encounter unnecessary delays, bottlenecks, and other impediments to flow. Making value flow without interruptions can best be achieved by adopting the eight ‘flow accelerators’ described in this article. These powerful accelerators of value are relevant to all Framework levels, but the challenges differ for each. An individual SAFe article discusses how these accelerators apply to each flow domain: Team Flow, ART Flow, Solution Train Flow, and Portfolio Flow." .
+
+
+###  https://scaledagileframework.com/safe/ForsterBuildInQualityForTheARTSystems
+:ForsterBuildInQualityForTheARTSystems rdf:type owl:Class ;
+                                       rdfs:subClassOf :SystemArchitectResponsibility .
+
+
+###  https://scaledagileframework.com/safe/FosterBuiltInQualityForTheEntireSolution
+:FosterBuiltInQualityForTheEntireSolution rdf:type owl:Class ;
+                                          rdfs:subClassOf :SolutionArchitectResponsibility .
+
+
+###  https://scaledagileframework.com/safe/FunctionalRequirement
+:FunctionalRequirement rdf:type owl:Class ;
+                       rdfs:subClassOf :Requirement .
+
+
+###  https://scaledagileframework.com/safe/GenerateDocumentation
+:GenerateDocumentation rdf:type owl:Class ;
+                       rdfs:subClassOf :ModelBasedSystemEngineering ;
+                       rdfs:comment """Many product domains require documents for regulatory compliance (for example, FAA, FDA) or contractual obligations (e.g., CDRLs in government contracting). With an MBSE approach to system development, models will contain most, if not all, of the information required for compliance and can be used to generate the objective evidence necessary. Models act as a single source of truth and ensure consistency across the many documents. Also, models can create documents targeting different stakeholders, who may have individual system perspectives, or who should only have access to view subsets of the information (e.g., Suppliers).
+
+While all products and programs will likely require formal documents, System Engineers are encouraged to work directly with Customers and/or regulatory agencies on the minimum set sufficient to meet their obligations. The source of most, if not all, of the information resides in engineering models that can and should be used, where possible, for inspections and formal reviews.
+
+If documents are generated from the models, the document templates should be defined early, as they will influence many of these decisions. System designers need to know where to store the model elements and any metadata or links that may be used for queries, document generation, or compliance. As a best practice, create a high-level, full-system skeleton model early to validate these usage scenarios. Teams then populate the model as the system evolves.""" .
+
+
+###  https://scaledagileframework.com/safe/GetFasterFeedbackAccelerator
+:GetFasterFeedbackAccelerator rdf:type owl:Class ;
+                              rdfs:subClassOf :FlowAccelerator ;
+                              rdfs:comment """Learning is the foundation of improvement and the engine that powers product development [4]. Doing this as fast as possible speeds up and improves the overall development process. The goal is to get positive and negative feedback into the development process as early as possible.
+
+However, we often discover that getting early feedback can be difficult for a variety of reasons, for example:
+
+Lack of direct access to customers
+Delays in the development value stream
+Late or infrequent integration results in discovering hidden work and defects
+Developing more functionality than what’s needed
+Building the wrong things or more functionality than what’s needed
+Fast feedback is generally achieved by applying the basic Plan-Do-Check-Adjust (PDCA) learning cycle. However, to accelerate flow further, we’ve found that more needs to be done, for example:
+
+Applying customer centricity and design thinking as part of product development and engaging with customers frequently
+Making improvements to the continuous delivery pipeline, including build and test automation, test-first practices, and continuous integration
+Keeping work items small results in faster working increments of value.
+Using built-in quality practices, mob work, pairing, and swarming to increase team cohesion and focus on finishing one backlog item at a time
+Upholding a solid Definition of Done (DoD) to help teams work together to finish Increments of value and share knowledge
+Use “stop-the-line” to fix problems when they occur so they don’t pile up.
+Generally, solution builders need two types of feedback from each PDCA cycle (Figure 5):
+
+Feedback about building the right thing. This feedback can only come from those users, customers, and economic stakeholders who can measure a solution’s actual value. Each PDCA cycle is an opportunity for this learning, from early mockups and storyboards to system demos during development to feedback on pre-releases and deployed systems in production.
+Feedback about building it right. Innovative systems constantly push the bounds of technology and the developers’ skills. Each PDCA cycle also evaluates if the right technology is applied to optimally solve the customer’s problem and meet the critical nonfunctional requirements (system ‘ilities”) that characterize robust and effective solutions.
+Creating the mechanisms and processes to collect a wide range of data is the critical first step to promoting flow with faster feedback, but it doesn’t stop there. The information should be quickly analyzed and evaluated to make effective adjustments and initiate the next PDCA cycle based on these learnings.""" .
+
+
+###  https://scaledagileframework.com/safe/Guardrail
+:Guardrail rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/GuideAndSupportArchitecturalRunwayStrategy
+:GuideAndSupportArchitecturalRunwayStrategy rdf:type owl:Class ;
+                                            rdfs:subClassOf :EnterpriseArchitectResponsibility .
+
+
+###  https://scaledagileframework.com/safe/GuidedDevelopment
+:GuidedDevelopment rdf:type owl:Class ;
+                   rdfs:subClassOf :AgileTestingMatrixAspect .
+
+
+###  https://scaledagileframework.com/safe/IncreaseFlexibilityInInterfacesAndDesign
+:IncreaseFlexibilityInInterfacesAndDesign rdf:type owl:Class ;
+                                          rdfs:subClassOf :SetBasedDesign ;
+                                          rdfs:comment """Teams build and integrate complex systems from subsystems and components to produce the desired system behavior. To support SBD, subsystem interfaces must be flexible at the intersection points. System engineers may specify ranges for requirements and designs for these intersection points, which they can discuss with Product Management as more validated learning occurs. For example, how would the overall system value improve if a system engineer allocated more space, weight, and power to one component instead of another?
+
+This more experimental approach allows system designers to manage the system-level allocations, creating a collaborative environment for system-level learning, negotiation, and making sound economic choices.""" .
+
+
+###  https://scaledagileframework.com/safe/Independent
+:Independent rdf:type owl:Class ;
+             rdfs:subClassOf :NonFunctionalRequirementCriteria ;
+             rdfs:comment "NFRs should be independent of each other so that they can be evaluated and tested without consideration of other system qualities." .
+
+
+###  https://scaledagileframework.com/safe/IndividualsAndInteractionsOverProcessesAndTools
+:IndividualsAndInteractionsOverProcessesAndTools rdf:type owl:Class ;
+                                                 rdfs:subClassOf :AgileMindset ;
+                                                 rdfs:comment "Deming notes, “If you can’t describe what you are doing as a process, then you don’t know what you are doing.” [12] So, Agile processes in frameworks like Scrum, Kanban, and SAFe matter. However, a process is only a means to an end. When we’re captive to a process that isn’t working, it creates waste and delays. So, favor individuals and interactions, then modify processes accordingly. Tools are valuable but should supplement, rather than replace, face-to-face communication." .
+
+
+###  https://scaledagileframework.com/safe/InstituteChange
+:InstituteChange rdf:type owl:Class ;
+                 rdfs:subClassOf :KotterEightAccelerators .
+
+
+###  https://scaledagileframework.com/safe/InternalChannels
+:InternalChannels rdf:type owl:Class ;
+                  rdfs:subClassOf :Channel ;
+                  owl:disjointWith :MarketingAndSalesChannels .
+
+
+###  https://scaledagileframework.com/safe/InternalCustomer
+:InternalCustomer rdf:type owl:Class ;
+                  rdfs:subClassOf :Customer .
+
+
+###  https://scaledagileframework.com/safe/InternalSupplierReleaseTrain
+:InternalSupplierReleaseTrain rdf:type owl:Class ;
+                              rdfs:subClassOf :SupplierReleaseTrain .
+
+
+###  https://scaledagileframework.com/safe/InternalWebSites
+:InternalWebSites rdf:type owl:Class ;
+                  rdfs:subClassOf :InternalChannels .
+
+
+###  https://scaledagileframework.com/safe/Internet
+:Internet rdf:type owl:Class ;
+          rdfs:subClassOf :MarketingAndSalesChannels .
+
+
+###  https://scaledagileframework.com/safe/InvestmentHorizon
+:InvestmentHorizon rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/KPI
+:KPI rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/KotterEightAccelerators
+:KotterEightAccelerators rdf:type owl:Class ;
+                         rdfs:subClassOf :LeadingChange .
+
+
+###  https://scaledagileframework.com/safe/LeaderShipRole
+:LeaderShipRole rdf:type owl:Class ;
+                rdfs:subClassOf :Role .
+
+
+###  https://scaledagileframework.com/safe/LeadingChange
+:LeadingChange rdf:type owl:Class ;
+               rdfs:comment """Being a Lean-Agile leader provides the thought processes and practical tools needed to guide the enterprise to achieve business agility. The benefits of delivering value in the shortest sustainable lead time, creating flow, and producing customer delight—all with happy, engaged employees—are clear. It’s also clear that the new way of working for many organizations represents a quantum shift in culture and practice from the traditional paradigms of the past. In other words, the transformation required to adopt SAFe inevitably leads to significant organizational change.
+
+Here again, the role of the Lean-Agile leader is critical. Successful organizational change requires leaders who will lead the transformation (rather than simply ‘support’ it) by creating the environment, preparing the people, and providing the necessary resources to realize desired outcomes. Research shows clear correlations between the leader behaviors described in the “Leading by Example” section of this article and the success of organizational change driven by Agile and DevOps initiatives. Other researchers found that these leader behaviors influence employees’ commitment to supporting the change more than simply following a prescriptive change model [10, 11].""" .
+
+
+###  https://scaledagileframework.com/safe/LeanBudget
+:LeanBudget rdf:type owl:Class ;
+            rdfs:subClassOf :Budget .
+
+
+###  https://scaledagileframework.com/safe/LeanBusinessCase
+:LeanBusinessCase rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/LeanFlow
+:LeanFlow rdf:type owl:Class ;
+          rdfs:subClassOf :CALMR ;
+          rdfs:comment "Keep batch sizes small, limit work in process (WIP), and provide extreme visibility." ,
+                       """Visualize and limit Work in Process (WIP) – Figure 3 illustrates an example of an ART Kanban board, which makes WIP visible to all stakeholders. Kanban boards help teams quickly identify bottlenecks and balance the amount of WIP against the available development and operations capacity.
+
+Work in smaller batches – Small batches go through the system faster and with less variability than large batches. This accelerator supports more frequent deployments and speeds up the learning process. Reducing batch sizes typically involves focusing more attention on and increasing investment in infrastructure and automation that reduces the transaction cost of each batch.
+
+Reduce queue lengths – The size of the queue of work to be done is a predictor of the amount of time it will take to complete the job, no matter how efficiently it is processed. Fast flow is achieved by closely managing and generally reducing queue lengths—the shorter the queue, the quicker the delivery.""" .
+
+
+###  https://scaledagileframework.com/safe/LeanPortfolioManagement
+:LeanPortfolioManagement rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/LeanSystemEngineering
+:LeanSystemEngineering rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/LeverageModelingSimulationAndPrototyping
+:LeverageModelingSimulationAndPrototyping rdf:type owl:Class ;
+                                          rdfs:subClassOf :SetBasedDesign ;
+                                          rdfs:comment "Modeling, simulation, and prototyping provide the initial learning points that help eliminate some design alternatives and confirm others. As described in the MBSE article, modeling uses a broad set of specific techniques, including digital twins, CAD, design thinking, and user-experience design options. Teams should use various SBD approaches to the parts of the system where the risk is highest, optimizing the overall cost of maintaining design alternatives." .
+
+
+###  https://scaledagileframework.com/safe/LinksWithinModelOrOtherCrossDomainDiscipline
+:LinksWithinModelOrOtherCrossDomainDiscipline rdf:type owl:Class ;
+                                              rdfs:subClassOf :ModelStandards .
+
+
+###  https://scaledagileframework.com/safe/LoadTest
+:LoadTest rdf:type owl:Class ;
+          rdfs:subClassOf :Q4 .
+
+
+###  https://scaledagileframework.com/safe/ManageAndPrioritizeTheARTBacklog
+:ManageAndPrioritizeTheARTBacklog rdf:type owl:Class ;
+                                  rdfs:subClassOf :ProductManagementResponsiblity .
+
+
+###  https://scaledagileframework.com/safe/ManagementResponsibility
+:ManagementResponsibility rdf:type owl:Class ;
+                          rdfs:subClassOf :Responsibility .
+
+
+###  https://scaledagileframework.com/safe/ManagementRole
+:ManagementRole rdf:type owl:Class ;
+                rdfs:subClassOf :LeaderShipRole .
+
+
+###  https://scaledagileframework.com/safe/MarketingAndSalesChannels
+:MarketingAndSalesChannels rdf:type owl:Class ;
+                           rdfs:subClassOf :Channel .
+
+
+###  https://scaledagileframework.com/safe/Measurement
+:Measurement rdf:type owl:Class ;
+             rdfs:subClassOf :CALMR ;
+             rdfs:comment """Measure pipeline flow – The health of the delivery pipeline itself can make or break a solution. The Development Value Stream needs to evolve into a CDP to achieve business agility.
+
+Flow measurements, described in Measure & Grow, focus on throughput and lead time from concept (Customer request) to cash (delivery to the Customer) and are derived from the people and tools that perform design, development, testing, deployment, and release activities. For example:
+
+The Flow Framework defines four flow metrics–flow velocity, flow efficiency, flow time, and flow load–and tracks the “Flow Distribution” of features, defects, risks, and debts in the pipeline.[2]
+
+Google considers end-to-end lead time and deployment frequency metrics the most crucial pipeline performance indicators. [3]
+
+Measure solution quality – DevOps cultures stress the importance of shifting technical practices left (earlier). This practice ensures that quality is built into solutions during development rather than ‘inspected in’ as defects are discovered later.
+
+Quality metrics gauge adherence to functional, nonfunctional, security, and compliance requirements, which are best obtained via automated testing tools before release. The Flow Framework categorizes these as quality metrics [2], while Google focuses specifically on change failure rates. [3]
+
+Measure solution value – A streamlined pipeline is worthless if it simply accelerates the delivery of products nobody wants. Therefore, measuring the business value of the work exiting the pipeline is essential. These metrics gauge economic outcomes and Customer (or end-user) satisfaction, which are evaluated against forecasted results defined as part of the original business hypothesis.
+
+Value metrics are sourced from full-stack telemetry, analytics engines, financial systems, and feedback from users and stakeholders. The Flow Framework presents these as ‘business results’ with specific metrics to track the value, cost, and happiness.[2] Google adds time to restore—equivalent to the well-known Mean Time to Restore (MTTR)—since production failures can rapidly diminish the value of deployed solutions. [3]""" ,
+                          "Measure the flow through the pipeline. Implement full-stack telemetry." .
+
+
+###  https://scaledagileframework.com/safe/MechanicalModelsTestForPhysicalAndEnvironmentalIssue
+:MechanicalModelsTestForPhysicalAndEnvironmentalIssue rdf:type owl:Class ;
+                                                      rdfs:subClassOf :DomainModelTestAssessmentCriteria .
+
+
+###  https://scaledagileframework.com/safe/MetaInformationForModelElements
+:MetaInformationForModelElements rdf:type owl:Class ;
+                                 rdfs:subClassOf :ModelStandards .
+
+
+###  https://scaledagileframework.com/safe/MinimizeHandoffsAndDependenciesAccelerator
+:MinimizeHandoffsAndDependenciesAccelerator rdf:type owl:Class ;
+                                            rdfs:subClassOf :FlowAccelerator ;
+                                            rdfs:comment """Handoffs occur whenever there is a separation between knowledge, responsibility, action, and feedback [4]. For example, dependencies happen between teams when the work of one team cannot continue until related work by another team is completed (see Figure 4). Both result in development waste in the form of wait states in the flow of value. They can also lead to rework as the knowledge transfer is likely imperfect, causing further delays.
+
+The best solution to overcome handoffs and dependencies is to create teams and ARTs with all the knowledge, resources, skills, and decision-making authority to create an end-to-end flow of value. However, unhealthy dependencies and handoffs can still occur even when teams and trains have all the skills to deliver end-to-end value. This can happen when there is a series of handoffs between Agile Team members or when there are delays while waiting on decisions to be made outside the ART. Activities like value stream mapping, retros, and the I&A problem-solving workshop can help identify the root causes and potential solutions.""" .
+
+
+###  https://scaledagileframework.com/safe/MinimumMarketableFeature
+:MinimumMarketableFeature rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/MinimumViableArchitecture
+:MinimumViableArchitecture rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/MinimumViableProduct
+:MinimumViableProduct rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/ModelBasedSystemEngineering
+:ModelBasedSystemEngineering rdf:type owl:Class ;
+                             rdfs:subClassOf :Practice ;
+                             rdfs:comment """Model-Based Systems Engineering (MBSE) is the practice of developing a set of related models that help define, design, simulate, and document a system under development.
+
+MBSE is the application of modeling systems as a cost-effective way to explore and document system characteristics. By testing and validating system characteristics early, models facilitate timely learning of properties and behaviors, enabling fast feedback on requirements and design decisions. Models provide an efficient way to explore, update, and communicate system aspects to stakeholders while significantly reducing or eliminating dependence on traditional documents.
+
+MBSE historically focused on expressing and recording requirements, design, analysis, and verification information [2]. As modeling technology matures, it provides even more value by accelerating learning (e.g., simulation) and providing better insights into the physical world (e.g., digital twins) [3]. Both are important to evolve live systems and enable Enterprise Solution Delivery.
+
+Although models are not a perfect representation of a system, they provide knowledge and feedback sooner and more cost-effectively than implementation alone. And they allow the simulation of complex system and system-of-systems interactions with appropriate fidelity to accelerate learning. In practice, engineers use models to gain knowledge and to serve as a guide for system implementation. In some cases, they use them to directly build the actual implementation (e.g. electrical CAD, mechanical CAD).""" .
+
+
+###  https://scaledagileframework.com/safe/ModelBridgePhysicalAndVirtualWorlds
+:ModelBridgePhysicalAndVirtualWorlds rdf:type owl:Class ;
+                                     rdfs:subClassOf :ExplorerAlternativesAndLearnFaster .
+
+
+###  https://scaledagileframework.com/safe/ModelStandards
+:ModelStandards rdf:type owl:Class ;
+                rdfs:subClassOf :QualityPractices .
+
+
+###  https://scaledagileframework.com/safe/ModelingToolPropertiesAndConfiguration
+:ModelingToolPropertiesAndConfiguration rdf:type owl:Class ;
+                                        rdfs:subClassOf :ModelStandards .
+
+
+###  https://scaledagileframework.com/safe/Negotiable
+:Negotiable rdf:type owl:Class ;
+            rdfs:subClassOf :NonFunctionalRequirementCriteria ;
+            rdfs:comment "Negotiability of NFRs is a crucial aspect of economic performance." .
+
+
+###  https://scaledagileframework.com/safe/NonFunctionalRequirement
+:NonFunctionalRequirement rdf:type owl:Class ;
+                          rdfs:subClassOf :Requirement ;
+                          rdfs:comment """Bounded:
+NFRs must have a specific bounded context. For example, an airplane’s flight control reliability should be much higher than the infotainment system.
+
+Independent:
+NFRs should be independent of each other so that they can be evaluated and tested without consideration of other system qualities.
+
+Negotiable:
+Negotiability of NFRs is a crucial aspect of economic performance.
+
+Testable:
+NFRs must be testable with objective measures.""" .
+
+
+###  https://scaledagileframework.com/safe/NonFunctionalRequirementCriteria
+:NonFunctionalRequirementCriteria rdf:type owl:Class ;
+                                  rdfs:subClassOf :Criteria .
+
+
+###  https://scaledagileframework.com/safe/ObjectiveKeyResult
+:ObjectiveKeyResult rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/OperationalValueStream
+:OperationalValueStream rdf:type owl:Class ;
+                        rdfs:subClassOf :ValueStream .
+
+
+###  https://scaledagileframework.com/safe/OptimizeTimeInTheZoneAccelerator
+:OptimizeTimeInTheZoneAccelerator rdf:type owl:Class ;
+                                  rdfs:subClassOf :FlowAccelerator ;
+                                  rdfs:comment """Being ‘in the zone’ (also described as being in a ‘flow state’) is an engaged mental state of extreme focus on an activity where the work feels effortless and time passes quickly. People and teams in the zone demonstrate higher creativity, productivity, happiness, and fulfillment. Getting into this mental state requires uninterrupted focus time, autonomy, competence, and connectedness to others to engender self-actualization and intrinsic motivation. [5]
+
+Contrast this to the conditions in a typical work environment where work occurs in functional siloes in a batch-queue-handoff system. These frequent interruptions (emergency requests, ad hoc status reports, constant communication alerts, and so on) are the norm, and excessive WIP drives frequent task switching. (Figure 8).
+
+There is an essential connection between creating a continuous flow of value and creating a working environment where individuals and teams can maximize their time in the zone. Knowledge workers also need the time and space free from interruption essential for complex tasks involving application, analysis, evaluation, and creativity, and ultimately the personal satisfaction that completion engenders.""" .
+
+
+###  https://scaledagileframework.com/safe/OutcomeHypothesis
+:OutcomeHypothesis rdf:type owl:Class ;
+                   rdfs:subClassOf :Test .
+
+
+###  https://scaledagileframework.com/safe/PartnerWithSolutionAndEnterpriseArchitectToElaborateEpicsCapabilitiesAndBusinessCapabilities
+:PartnerWithSolutionAndEnterpriseArchitectToElaborateEpicsCapabilitiesAndBusinessCapabilities rdf:type owl:Class ;
+                                                                                              rdfs:subClassOf :SystemArchitectResponsibility .
+
+
+###  https://scaledagileframework.com/safe/PartnerWithSystemArchitectToElaborateCapabilitiesAndFeatures
+:PartnerWithSystemArchitectToElaborateCapabilitiesAndFeatures rdf:type owl:Class ;
+                                                              rdfs:subClassOf :SolutionArchitectResponsibility .
+
+
+###  https://scaledagileframework.com/safe/PerformanceTest
+:PerformanceTest rdf:type owl:Class ;
+                 rdfs:subClassOf :Q4 .
+
+
+###  https://scaledagileframework.com/safe/PlanArchitecturalRunwayForAFullSolution
+:PlanArchitecturalRunwayForAFullSolution rdf:type owl:Class ;
+                                         rdfs:subClassOf :SolutionArchitectResponsibility .
+
+
+###  https://scaledagileframework.com/safe/PlanTheArchitecturalRunway
+:PlanTheArchitecturalRunway rdf:type owl:Class ;
+                            rdfs:subClassOf :SystemArchitectResponsibility .
+
+
+###  https://scaledagileframework.com/safe/PlatformART
+:PlatformART rdf:type owl:Class ;
+             rdfs:subClassOf :AgileReleaseTrain .
+
+
+###  https://scaledagileframework.com/safe/PlatformTeam
+:PlatformTeam rdf:type owl:Class ;
+              rdfs:subClassOf :AgileTeam .
+
+
+###  https://scaledagileframework.com/safe/Portfolio
+:Portfolio rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/PortfolioBacklog
+:PortfolioBacklog rdf:type owl:Class ;
+                  rdfs:subClassOf :Backlog .
+
+
+###  https://scaledagileframework.com/safe/PortfolioBudget
+:PortfolioBudget rdf:type owl:Class ;
+                 rdfs:subClassOf :LeanBudget .
+
+
+###  https://scaledagileframework.com/safe/PortfolioCanvas
+:PortfolioCanvas rdf:type owl:Class ;
+                 rdfs:subClassOf :Canvas .
+
+
+###  https://scaledagileframework.com/safe/PortfolioContext
+:PortfolioContext rdf:type owl:Class ;
+                  rdfs:subClassOf :Context .
+
+
+###  https://scaledagileframework.com/safe/PortfolioEpic
+:PortfolioEpic rdf:type owl:Class ;
+               rdfs:subClassOf :Epic .
+
+
+###  https://scaledagileframework.com/safe/PortfolioFlow
+:PortfolioFlow rdf:type owl:Class ;
+               rdfs:subClassOf :Flow .
+
+
+###  https://scaledagileframework.com/safe/PortfolioLeadership
+:PortfolioLeadership rdf:type owl:Class ;
+                     rdfs:subClassOf :LeaderShipRole .
+
+
+###  https://scaledagileframework.com/safe/PortfolioRoadmap
+:PortfolioRoadmap rdf:type owl:Class ;
+                  rdfs:subClassOf :Roadmap .
+
+
+###  https://scaledagileframework.com/safe/PortfolioStrategy
+:PortfolioStrategy rdf:type owl:Class ;
+                   rdfs:subClassOf :Strategy .
+
+
+###  https://scaledagileframework.com/safe/PortfolioStrategyFormulation
+:PortfolioStrategyFormulation rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/PortfolioVision
+:PortfolioVision rdf:type owl:Class ;
+                 rdfs:subClassOf :Vision .
+
+
+###  https://scaledagileframework.com/safe/PortolioStakeholders
+:PortolioStakeholders rdf:type owl:Class ;
+                      rdfs:subClassOf :Role .
+
+
+###  https://scaledagileframework.com/safe/Practice
+:Practice rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/Principle
+:Principle rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/ProduceShortTermWins
+:ProduceShortTermWins rdf:type owl:Class ;
+                      rdfs:subClassOf :KotterEightAccelerators .
+
+
+###  https://scaledagileframework.com/safe/Product
+:Product rdf:type owl:Class ;
+         rdfs:subClassOf :Solution .
+
+
+###  https://scaledagileframework.com/safe/ProductManagement
+:ProductManagement rdf:type owl:Class ;
+                   rdfs:subClassOf :ManagementRole ;
+                   owl:disjointWith :SolutionManagement .
+
+
+###  https://scaledagileframework.com/safe/ProductManagementResponsiblity
+:ProductManagementResponsiblity rdf:type owl:Class ;
+                                rdfs:subClassOf :ManagementResponsibility ;
+                                owl:disjointWith :SolutionManagementResponsibility .
+
+
+###  https://scaledagileframework.com/safe/ProductOwner
+:ProductOwner rdf:type owl:Class ;
+              rdfs:subClassOf :ProductRoles .
+
+
+###  https://scaledagileframework.com/safe/ProductRoles
+:ProductRoles rdf:type owl:Class ;
+              rdfs:subClassOf :Role .
+
+
+###  https://scaledagileframework.com/safe/ProductVision
+:ProductVision rdf:type owl:Class ;
+               rdfs:subClassOf :Vision .
+
+
+###  https://scaledagileframework.com/safe/ProgramIncrementRoadmap
+:ProgramIncrementRoadmap rdf:type owl:Class ;
+                         rdfs:subClassOf :Roadmap .
+
+
+###  https://scaledagileframework.com/safe/PromoteModernTechnicalAndDevOpsPractices
+:PromoteModernTechnicalAndDevOpsPractices rdf:type owl:Class ;
+                                          rdfs:subClassOf :EnterpriseArchitectResponsibility .
+
+
+###  https://scaledagileframework.com/safe/Prototype
+:Prototype rdf:type owl:Class ;
+           rdfs:subClassOf :Q2 .
+
+
+###  https://scaledagileframework.com/safe/ProvideStrategicTechnicalDirectionAcrossARTsAndTeams
+:ProvideStrategicTechnicalDirectionAcrossARTsAndTeams rdf:type owl:Class ;
+                                                      rdfs:subClassOf :EnterpriseArchitectResponsibility .
+
+
+###  https://scaledagileframework.com/safe/PullTogetherTheGuidingTeam
+:PullTogetherTheGuidingTeam rdf:type owl:Class ;
+                            rdfs:subClassOf :KotterEightAccelerators .
+
+
+###  https://scaledagileframework.com/safe/Q1
+:Q1 rdf:type owl:Class ;
+    rdfs:subClassOf :AgileTestingMatrixQuadrant .
+
+
+###  https://scaledagileframework.com/safe/Q2
+:Q2 rdf:type owl:Class ;
+    rdfs:subClassOf :AgileTestingMatrixQuadrant .
+
+
+###  https://scaledagileframework.com/safe/Q3
+:Q3 rdf:type owl:Class ;
+    rdfs:subClassOf :AgileTestingMatrixQuadrant .
+
+
+###  https://scaledagileframework.com/safe/Q4
+:Q4 rdf:type owl:Class ;
+    rdfs:subClassOf :AgileTestingMatrixQuadrant .
+
+
+###  https://scaledagileframework.com/safe/QualityAttribute
+:QualityAttribute rdf:type owl:Class ;
+                  rdfs:subClassOf :Q4 .
+
+
+###  https://scaledagileframework.com/safe/QualityPractices
+:QualityPractices rdf:type owl:Class ;
+                  rdfs:subClassOf :BuildModelQualityIn .
+
+
+###  https://scaledagileframework.com/safe/Recovery
+:Recovery rdf:type owl:Class ;
+          rdfs:subClassOf :CALMR ;
+          rdfs:comment "Architect and enable low-risk releases. Establish fast recovery, fast reversion, and fast fix-forward." ,
+                       """Stop-the-line mentality – With a ‘stop-the-line’ mentality, any issue compromising solution value causes team members to stop what they are doing and swarm on the problem resolution. Learnings are then turned into permanent fixes to prevent the issue from recurring.
+
+Plan for and rehearse failures – When it comes to DevOps, failed deployments can still occur. To minimize and maximize the resiliency of solutions, teams should develop recovery plans and practice them often in production or production-like environments. (See ‘Chaos Monkey’ [4].)
+
+Fast fix forward and roll back – Since production failures are inevitable, teams need to develop the capability to quickly ‘fix forward’ and, where necessary, move back to a known stable state. Fixes must flow through the same process as any feature or enhancement; therefore, the CDP should accommodate any type of change at any level of severity.""" .
+
+
+###  https://scaledagileframework.com/safe/ReduceQueueLengthAccelerator
+:ReduceQueueLengthAccelerator rdf:type owl:Class ;
+                              rdfs:subClassOf :FlowAccelerator ;
+                              rdfs:comment "Reducing the length of the queue that is feeding the system is another critical way to accelerate flow. As we have all experienced, long queues are fundamentally bad. They introduce waste, delays, and information decay. In addition, Little’s Law (Figure 7) informs us that the average wait time equals the average queue length divided by the average processing rate. (While this might sound complicated, even the line at Starbucks illustrates that.) Therefore, assuming any average processing rate, the longer the queue, the longer the wait." .
+
+
+###  https://scaledagileframework.com/safe/ReleaseOnDemand
+:ReleaseOnDemand rdf:type owl:Class ;
+                 rdfs:subClassOf :ContinuousDeliveryPipeline .
+
+
+###  https://scaledagileframework.com/safe/ReleaseTrainEngineer
+:ReleaseTrainEngineer rdf:type owl:Class ;
+                      rdfs:subClassOf :Role .
+
+
+###  https://scaledagileframework.com/safe/RelentlessImprovement
+:RelentlessImprovement rdf:type owl:Class ;
+                       rdfs:subClassOf :CoreValues ;
+                       rdfs:comment """The relentless pursuit of perfection has always been one of the core tenets of Lean. While unattainable, striving for perfection leads to continuous improvements to products and services. In the process, companies have created more and better products for less money and with happier customers, leading to higher revenues and greater profitability.
+
+But improvement requires learning. Rarely are the causes and solutions for problems that organizations face clear and easily identified. Relentless improvement is built on a series of small iterative and incremental improvements and experiments that enable the organization to learn its way to the most promising answer to a problem.
+
+The following moves can help build a culture of relentless improvement in a SAFe enterprise:
+
+Create a constant sense of urgency. Improvement activities are essential to the survival of an organization and should be given priority, visibility, and resources. They require an intense focus on delivering value to customers by providing products and services that solve their problems in a preferred way over the organization’s competitors. Organizations that become complacent and fail to relentlessly improve with urgency risk losing customers and may ultimately go out of business.
+
+Build a problem-solving culture. Problem-solving is the driver for relentless improvement. It recognizes that a gap exists between the current and desired states, requiring an iterative process to achieve the target state. Iterative Plan-Do-Check-Adjust (PDCA) cycles provide the process for iterative problem-solving on small adjustments as well as breakthrough innovations. The goal is to have a culture of ‘everyone improving all the time.’
+
+Reflect and adapt frequently. It’s vital in SAFe to periodically pause from the never-ending backlog of new work to openly identify and address shortcomings of the process at all levels. Improvements should be managed and prioritized just like any other story or feature because improvement requires real work and consumes real capacity of teams and trains, as well as for those who guide the portfolio processes.
+
+Let facts guide improvements. Improvements based on opinion or conjecture will likely focus on symptoms instead of true root causes. Improvement results are objectively measured, focusing on empirical evidence. This helps an organization concentrate more on the work needed to solve problems and less on assigning blame or on pursuing improvements that are not solving the original problem.
+
+Provide time and space for innovation. Improvements should be designed to increase the effectiveness of the entire system that produces the sustainable flow of value instead of optimizing individual teams, silos, or subsystems. Everyone at all levels should embrace improvement thinking, but improvements in one area, team, or domain should not be made to the detriment of the overall system. SAFe Principle #2 Apply systems thinking expands on this idea further.""" .
+
+
+###  https://scaledagileframework.com/safe/RemediateLegacyPolicyAndPracticesAccelerator
+:RemediateLegacyPolicyAndPracticesAccelerator rdf:type owl:Class ;
+                                              rdfs:subClassOf :FlowAccelerator ;
+                                              rdfs:comment """During or after a Lean-Agile transformation, enterprises must constantly look out for legacy policies and practices that inhibit flow (Figure 9). Many of these practices became part of the culture and are described as “we’ve always done it this way,” even when they are no longer fit for purpose. Examples are many, some legendary:
+
+Continued reliance on phase-gate milestones and the iron triangle of fixed scope, resources, and time. In reality, all three components become fixed instead of tradeoffs among constraints.
+Obsolete or unnecessary change control boards, including extraneous oversight and reporting
+Waterfall-based quality management systems for regulations and compliance
+Obsolete tech standards—design specifications, audit practices, and the like—in environments where they are not mandated or required for quality
+Continuation of timesheet reporting in addition to Agile Lifecycle Management (ALM) tooling, requiring double recording of time
+Traditional HR performance reviews and compensation policies that cause unhealthy competition
+Agile is adopted only by teams; the mindset of management and portfolio governance remain unchanged""" .
+
+
+###  https://scaledagileframework.com/safe/Requirement
+:Requirement rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/RespectForPeople
+:RespectForPeople rdf:type owl:Class ;
+                  rdfs:subClassOf :CoreValues ;
+                  rdfs:comment """A Lean-Agile approach doesn’t implement itself or perform any real work. In reality, people do all the work, and people receive all the value from the work. Since people are the focal point of how enterprises create value with SAFe, respect for people must be considered in every aspect of the new way of working.
+
+Respect is a basic human need. When treated with respect, people are unleashed to evolve their practices and contribute their creativity. Conversely, people cannot commit to another person, their teams, or their organizations if they feel a lack of respect. When disrespect is widespread and tolerated, it creates a toxic work environment, poor performance, and a high attrition rate [4].
+
+The following suggestions provide just a few ways to cultivate a culture of respect for people in an organization.
+
+Hold precious what it is to be human. This is the literal meaning of ‘respect for people’ described in Lean. Elaborated further, it means fostering a corporate culture that enhances individual creativity and values teamwork while honoring mutual trust and respect [5].
+
+Value diversity of people and opinions. Another way to show respect is to build organizations that include people with various personal and professional backgrounds. However, just hiring a diverse workforce is insufficient. Respect for people requires listening to and valuing perspectives and viewpoints different from our own.
+
+Grow people through coaching and mentoring. Respect for people goes beyond a fundamental moral obligation. The practical business implication is that ‘it is necessary to develop good people in order to make good products.’ One way to help people grow is to facilitate connections with others inside and outside the organization who can contribute to each person’s development journey.
+
+Embrace ‘your customer is whoever consumes your work.’ Lean and Agile methods are customer-centric, as both recognize that customers are the ultimate beneficiaries of value. In addition, Lean explicitly addresses the fact that all who consume your work, including people inside the organization, are customers too. Treating customers with respect and empathy produces products and services that address their real problems.
+
+Build long-term partnerships based on mutual benefit. Many suppliers are required when building the world’s most complex systems. When applied to suppliers, respect means holding them in the same high regard as customers, challenging them, and helping them improve. This is done not by bullying or pressuring tactics but by creating long-term relationships defined by ‘win-win’ contracts based on mutual benefit and accountability.""" .
+
+
+###  https://scaledagileframework.com/safe/RespondingToChangeOverFollowingAPlan
+:RespondingToChangeOverFollowingAPlan rdf:type owl:Class ;
+                                      rdfs:subClassOf :AgileMindset ;
+                                      rdfs:comment """Change is a reality in the digital age and essential to achieving agility. The strength of Lean-Agile is in how it embraces change. As the system evolves, so does the understanding of the problem and the solution domain. Business stakeholder knowledge also improves over time, and customer needs evolve as well. Indeed, those changes add value to our system.
+
+Of course, planning is an essential part of Agile. In fact, Agile teams and teams-of-teams plan more often and more continuously than their waterfall counterparts. However, plans must adapt as new learning occurs, new information becomes visible, and the situation changes. Worse, evaluating success by measuring conformance to a plan drives the wrong behaviors (for example, following a plan in the face of evidence that the plan is not working).""" .
+
+
+###  https://scaledagileframework.com/safe/Responsibility
+:Responsibility rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/Roadmap
+:Roadmap rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/Role
+:Role rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/SAFeLeanStartupCycle
+:SAFeLeanStartupCycle rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/SAFePortfolio
+:SAFePortfolio rdf:type owl:Class ;
+               rdfs:subClassOf :Portfolio .
+
+
+###  https://scaledagileframework.com/safe/SafeLeanAgilePrinciple
+:SafeLeanAgilePrinciple rdf:type owl:Class ;
+                        rdfs:subClassOf :Principle .
+
+
+###  https://scaledagileframework.com/safe/ScrumMaster
+:ScrumMaster rdf:type owl:Class ;
+             rdfs:subClassOf :Role .
+
+
+###  https://scaledagileframework.com/safe/SecurityTest
+:SecurityTest rdf:type owl:Class ;
+              rdfs:subClassOf :Q4 .
+
+
+###  https://scaledagileframework.com/safe/Service
+:Service rdf:type owl:Class ;
+         rdfs:subClassOf :Solution .
+
+
+###  https://scaledagileframework.com/safe/SetBasedDesign
+:SetBasedDesign rdf:type owl:Class ;
+                rdfs:subClassOf :Practice .
+
+
+###  https://scaledagileframework.com/safe/SharedServices
+:SharedServices rdf:type owl:Class ;
+                rdfs:subClassOf :AgileTeam .
+
+
+###  https://scaledagileframework.com/safe/Simulation
+:Simulation rdf:type owl:Class ;
+            rdfs:subClassOf :Q2 .
+
+
+###  https://scaledagileframework.com/safe/SoftwareModelsTestForBoundaryConditionsAndAnomaly
+:SoftwareModelsTestForBoundaryConditionsAndAnomaly rdf:type owl:Class ;
+                                                   rdfs:subClassOf :DomainModelTestAssessmentCriteria .
+
+
+###  https://scaledagileframework.com/safe/Solution
+:Solution rdf:type owl:Class ;
+          rdfs:subClassOf :Deliverable .
+
+
+###  https://scaledagileframework.com/safe/SolutionArchitect
+:SolutionArchitect rdf:type owl:Class ;
+                   rdfs:subClassOf :ArchitectureRole .
+
+
+###  https://scaledagileframework.com/safe/SolutionArchitectResponsibility
+:SolutionArchitectResponsibility rdf:type owl:Class ;
+                                 rdfs:subClassOf :ArchitectureResponsibility .
+
+
+###  https://scaledagileframework.com/safe/SolutionArchitecture
+:SolutionArchitecture rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/SolutionContext
+:SolutionContext rdf:type owl:Class ;
+                 rdfs:subClassOf :Context .
+
+
+###  https://scaledagileframework.com/safe/SolutionEpic
+:SolutionEpic rdf:type owl:Class ;
+              rdfs:subClassOf :Epic .
+
+
+###  https://scaledagileframework.com/safe/SolutionIntent
+:SolutionIntent rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/SolutionManagement
+:SolutionManagement rdf:type owl:Class ;
+                    rdfs:subClassOf :ManagementRole .
+
+
+###  https://scaledagileframework.com/safe/SolutionManagementResponsibility
+:SolutionManagementResponsibility rdf:type owl:Class ;
+                                  rdfs:subClassOf :ManagementResponsibility .
+
+
+###  https://scaledagileframework.com/safe/SolutionPortfolio
+:SolutionPortfolio rdf:type owl:Class ;
+                   rdfs:subClassOf :Portfolio .
+
+
+###  https://scaledagileframework.com/safe/SolutionRoadmap
+:SolutionRoadmap rdf:type owl:Class ;
+                 rdfs:subClassOf :Roadmap .
+
+
+###  https://scaledagileframework.com/safe/SolutionTrain
+:SolutionTrain rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/SolutionTrainBacklog
+:SolutionTrainBacklog rdf:type owl:Class ;
+                      rdfs:subClassOf :Backlog .
+
+
+###  https://scaledagileframework.com/safe/SolutionTrainEngineer
+:SolutionTrainEngineer rdf:type owl:Class ;
+                       rdfs:subClassOf :Role .
+
+
+###  https://scaledagileframework.com/safe/SolutionTrainFlow
+:SolutionTrainFlow rdf:type owl:Class ;
+                   rdfs:subClassOf :Flow .
+
+
+###  https://scaledagileframework.com/safe/SolutionVision
+:SolutionVision rdf:type owl:Class ;
+                rdfs:subClassOf :Vision .
+
+
+###  https://scaledagileframework.com/safe/SteerTheSolutionTrain
+:SteerTheSolutionTrain rdf:type owl:Class ;
+                       rdfs:subClassOf :SolutionManagementResponsibility .
+
+
+###  https://scaledagileframework.com/safe/Story
+:Story rdf:type owl:Class ;
+       rdfs:subClassOf :BacklogItem .
+
+
+###  https://scaledagileframework.com/safe/StoryAcceptanceTest
+:StoryAcceptanceTest rdf:type owl:Class ;
+                     rdfs:subClassOf :Test .
+
+
+###  https://scaledagileframework.com/safe/StoryTest
+:StoryTest rdf:type owl:Class ;
+           rdfs:subClassOf :Q2 .
+
+
+###  https://scaledagileframework.com/safe/StrategicTheme
+:StrategicTheme rdf:type owl:Class ;
+                rdfs:comment "Strategic themes connect the enterprise strategy to a portfolio, as shown in Figure 1. They distill strategic factors such as the enterprise vision, competitive environment, and existing portfolio context into concise, actionable, measurable goals. Strategic themes are best stated in Objective and Key Result (OKR) format. Written in plain business language, these OKRs say what the portfolio will pursue, thus providing decision-makers and contributors at all levels the clarity needed for decentralized decision-making." .
+
+
+###  https://scaledagileframework.com/safe/StrategicThemeOKR
+:StrategicThemeOKR rdf:type owl:Class ;
+                   rdfs:subClassOf :ObjectiveKeyResult .
+
+
+###  https://scaledagileframework.com/safe/Strategy
+:Strategy rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/StreamAlignedART
+:StreamAlignedART rdf:type owl:Class ;
+                  rdfs:subClassOf :AgileReleaseTrain .
+
+
+###  https://scaledagileframework.com/safe/StreamAlignedTeam
+:StreamAlignedTeam rdf:type owl:Class ;
+                   rdfs:subClassOf :AgileTeam .
+
+
+###  https://scaledagileframework.com/safe/SupplierReleaseTrain
+:SupplierReleaseTrain rdf:type owl:Class ;
+                      rdfs:subClassOf :AgileReleaseTrain .
+
+
+###  https://scaledagileframework.com/safe/SupportComplianceAndImpactAnalysis
+:SupportComplianceAndImpactAnalysis rdf:type owl:Class ;
+                                    rdfs:subClassOf :ModelBasedSystemEngineering .
+
+
+###  https://scaledagileframework.com/safe/SynchronizeArchitectureAcrossARTsAndTeams
+:SynchronizeArchitectureAcrossARTsAndTeams rdf:type owl:Class ;
+                                           rdfs:subClassOf :EnterpriseArchitectResponsibility .
+
+
+###  https://scaledagileframework.com/safe/System
+:System rdf:type owl:Class ;
+        rdfs:subClassOf :Solution .
+
+
+###  https://scaledagileframework.com/safe/SystemArchitect
+:SystemArchitect rdf:type owl:Class ;
+                 rdfs:subClassOf :ArchitectureRole .
+
+
+###  https://scaledagileframework.com/safe/SystemArchitectResponsibility
+:SystemArchitectResponsibility rdf:type owl:Class ;
+                               rdfs:subClassOf :ArchitectureResponsibility .
+
+
+###  https://scaledagileframework.com/safe/SystemIntegration
+:SystemIntegration rdf:type owl:Class ;
+                   rdfs:subClassOf :Q3 .
+
+
+###  https://scaledagileframework.com/safe/SystemQualitiesTest
+:SystemQualitiesTest rdf:type owl:Class ;
+                     rdfs:subClassOf :Test .
+
+
+###  https://scaledagileframework.com/safe/SystemQuality
+:SystemQuality rdf:type owl:Class ;
+               rdfs:subClassOf :NonFunctionalRequirement .
+
+
+###  https://scaledagileframework.com/safe/SystemTeam
+:SystemTeam rdf:type owl:Class ;
+            rdfs:subClassOf :AgileTeam .
+
+
+###  https://scaledagileframework.com/safe/TeamBacklog
+:TeamBacklog rdf:type owl:Class ;
+             rdfs:subClassOf :Backlog .
+
+
+###  https://scaledagileframework.com/safe/TeamFlow
+:TeamFlow rdf:type owl:Class ;
+          rdfs:subClassOf :Flow .
+
+
+###  https://scaledagileframework.com/safe/TechnicalStrategy
+:TechnicalStrategy rdf:type owl:Class ;
+                   rdfs:subClassOf :Strategy .
+
+
+###  https://scaledagileframework.com/safe/TechnologyFacing
+:TechnologyFacing rdf:type owl:Class ;
+                  rdfs:subClassOf :AgileTestingMatrixAspect .
+
+
+###  https://scaledagileframework.com/safe/TechnologyPortfolio
+:TechnologyPortfolio rdf:type owl:Class ;
+                     rdfs:subClassOf :Portfolio .
+
+
+###  https://scaledagileframework.com/safe/Test
+:Test rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/TestAnalysisAndDesignModel
+:TestAnalysisAndDesignModel rdf:type owl:Class ;
+                            rdfs:subClassOf :CreateTestableAndExecutableModels ;
+                            rdfs:comment "Designs represented in models can be tested using tools that have static analyzers or ‘checkers’ that identify something that deviates from what is standard, regular, or expected. Teams may add their own rules—model organization, modeling conventions and standards, required meta-information, etc. If analyzers don’t exist, scripts can iterate over the models to look for problems in the static model." .
+
+
+###  https://scaledagileframework.com/safe/TestRequirementModel
+:TestRequirementModel rdf:type owl:Class ;
+                      rdfs:subClassOf :CreateTestableAndExecutableModels ;
+                      rdfs:comment "Textual requirements are used in almost every system and are typically reviewed manually under the current practice. The Agile method of Behavior-Driven Development (BDD) defines automated acceptance tests for Features and Stories. These tests persist and continually validate the solution as it emerges. While helpful in testing Agile backlog items, BDD’s use has been limited at a large scale. However, the recommendation is to automate where possible and make requirements and tests the same." .
+
+
+###  https://scaledagileframework.com/safe/TestTraceability
+:TestTraceability rdf:type owl:Class ;
+                  rdfs:subClassOf :CreateTestableAndExecutableModels ;
+                  rdfs:comment "To ensure proper queries, document generation, and compliance, models must comply with the linking structure." .
+
+
+###  https://scaledagileframework.com/safe/Testable
+:Testable rdf:type owl:Class ;
+          rdfs:subClassOf :NonFunctionalRequirementCriteria ;
+          rdfs:comment "NFRs must be testable with objective measures." .
+
+
+###  https://scaledagileframework.com/safe/Transparency
+:Transparency rdf:type owl:Class ;
+              rdfs:subClassOf :CoreValues ;
+              rdfs:comment """Solution development is complex. Often, things go wrong or do not work out as planned. Without openness, facts are obscure, and decision-making is based on speculative assumptions and a lack of data. No one can fix a secret.
+
+To ensure transparency—trust is needed. Trust exists when everyone can confidently rely on one another to act with integrity, particularly in times of difficulty. Without trust, it is impossible to build high-performing teams and trains or build (or rebuild) the confidence needed to make and meet reasonable commitments. Trust-based environments are also fun and motivating. Simply put, the new way of working promoted by SAFe will struggle to succeed without a culture of transparency and trust.
+
+The following actions can help build a culture of transparency and trust in the SAFe enterprise.
+
+Create a trust-based environment. Trust requires action, not just a feeling. People at every level of the organization must be willing to trust others and be trustworthy themselves. It means making and keeping commitments. It also means relinquishing control and trusting others to make and keep their commitments.
+
+Communicate directly, openly, and honestly. A frequently used mantra in SAFe is ‘the facts are friendly.’ Problems cannot be solved if they are hidden. In a trust-based environment, information is shared without embellishment or blame to resolve issues as quickly and effectively as possible.
+
+Turn mistakes into learning moments. People often learn more from their mistakes than from their successes, but this is effective only when those mistakes can be acknowledged without fear of retribution or punishment. Address mistakes as ‘learning moments’ [3] to create the psychological safety needed to quickly surface and resolve errors.
+
+Visualize work. Making all work visible is essential to transparency. In SAFe, this begins with all work at every level being captured in a continuously refined backlog. Other tools such as Kanban boards, ART boards, PI objectives, solution intent, collaboration tools, and shared knowledge repositories support the aim of keeping work visible and accessible to all.
+
+Provide ready access to needed information. Information that is difficult to find has the same impact as if that knowledge were intentionally hidden. True transparency requires that information is easily accessible to all who need it and that the location and means of access are well known. It requires a willingness to help each other find required information when the location is unclear and relentlessly improve systems to make accessing information as frictionless as possible.""" .
+
+
+###  https://scaledagileframework.com/safe/UnitTest
+:UnitTest rdf:type owl:Class ;
+          rdfs:subClassOf :Test .
+
+
+###  https://scaledagileframework.com/safe/UnitTtest
+:UnitTtest rdf:type owl:Class ;
+           rdfs:subClassOf :Q1 .
+
+
+###  https://scaledagileframework.com/safe/UsabilityTesting
+:UsabilityTesting rdf:type owl:Class ;
+                  rdfs:subClassOf :Q3 .
+
+
+###  https://scaledagileframework.com/safe/UserAcceptanceTesting
+:UserAcceptanceTesting rdf:type owl:Class ;
+                       rdfs:subClassOf :Q3 .
+
+
+###  https://scaledagileframework.com/safe/UserExperience
+:UserExperience rdf:type owl:Class ;
+                rdfs:subClassOf :Q2 .
+
+
+###  https://scaledagileframework.com/safe/UserStory
+:UserStory rdf:type owl:Class ;
+           rdfs:subClassOf :Story .
+
+
+###  https://scaledagileframework.com/safe/ValueStream
+:ValueStream rdf:type owl:Class .
+
+
+###  https://scaledagileframework.com/safe/ValueStreamBudget
+:ValueStreamBudget rdf:type owl:Class ;
+                   rdfs:subClassOf :Budget .
+
+
+###  https://scaledagileframework.com/safe/ValueStreamCanvas
+:ValueStreamCanvas rdf:type owl:Class ;
+                   rdfs:subClassOf :Canvas .
+
+
+###  https://scaledagileframework.com/safe/ValueStreamGuardrail
+:ValueStreamGuardrail rdf:type owl:Class ;
+                      rdfs:subClassOf :Guardrail .
+
+
+###  https://scaledagileframework.com/safe/ValueStreamOKR
+:ValueStreamOKR rdf:type owl:Class ;
+                rdfs:subClassOf :ObjectiveKeyResult .
+
+
+###  https://scaledagileframework.com/safe/Vision
+:Vision rdf:type owl:Class ;
+        rdfs:subClassOf :Deliverable .
+
+
+###  https://scaledagileframework.com/safe/VisualizeAndLimitWipAccelerator
+:VisualizeAndLimitWipAccelerator rdf:type owl:Class ;
+                                 rdfs:subClassOf :FlowAccelerator ;
+                                 rdfs:comment """Overloading teams and ARTs with more work than can be reasonably accomplished is a common and pernicious problem. Too much work in process (WIP) confuses priorities, causes frequent context switching, and increases overhead. It overloads people, scatters focus on immediate tasks, reduces productivity and throughput, and increases wait times for new functionality. Like a highway at rush hour, there is simply no upside to having more work in a system than the system can handle.
+
+The first corrective action is to make the current WIP visible to all stakeholders. Figure 2 shows a simple Kanban board that illustrates the total amount of WIP and the process state of each work item. This Kanban serves as an initial process diagnostic, showing the current bottlenecks. Often, simply visualizing the current volume of work is the wake-up call that causes the organization to address the systemic problems of too much work and too little flow.
+
+The following action is balancing the amount of WIP against the available development capacity. This is done by establishing—and continually adjusting—WIP limits for the relevant states. No new work is started when any workflow state reaches its WIP limit. This matches demand to capacity and increases flow through the system.
+
+Limiting WIP, however, requires knowledge, discipline, and commitment. It may even seem counterintuitive to those who believe that the more work you put into the system, the more you get out. That can be true up to a point, but when the system becomes overloaded, throughput decreases dramatically. Indeed, there is no substitute for effectively managing WIP.""" .
+
+
+###  https://scaledagileframework.com/safe/WhereAreSolutionAndSubsystemModelsPlaced
+:WhereAreSolutionAndSubsystemModelsPlaced rdf:type owl:Class ;
+                                          rdfs:subClassOf :ModelStandards .
+
+
+###  https://scaledagileframework.com/safe/Workflow
+:Workflow rdf:type owl:Class ;
+          rdfs:subClassOf :Q3 .
+
+
+###  https://scaledagileframework.com/safe/WorkinSmallerBatchesAccelerator
+:WorkinSmallerBatchesAccelerator rdf:type owl:Class ;
+                                 rdfs:subClassOf :FlowAccelerator ;
+                                 rdfs:comment """Faster feedback is one of the primary reasons for working in smaller batches. The smaller the size, the faster teams can collect and evaluate the feedback to adjust. In addition, smaller batches reduce WIP by limiting the number of requirements, designs, code, tests, and other work items moving through the system at any point. Smaller batches go through the system faster and with less variability, fostering faster learning. Moreover, since each item in the batch has some variability, larger batches accumulate more variability.
+
+The economically optimal batch size depends on the holding cost (the cost for delayed feedback, inventory decay, delayed value delivery, and so on) and the transaction cost (the cost of preparing and implementing the batch). Figure 6 illustrates the tradeoff u-curve optimization for batch size [5].""" .
+
+
+###  https://scaledagileframework.com/safe/WorkingSoftwareOverComprehensiveDocumentation
+:WorkingSoftwareOverComprehensiveDocumentation rdf:type owl:Class ;
+                                               rdfs:subClassOf :AgileMindset ;
+                                               rdfs:comment "Documentation is important and has value. But creating documents to comply with potentially outdated corporate governance models has limited value. As part of a change program, governance, often captured by documentation standards, needs to be updated to reflect the Lean-Agile way of working. Rather than create detailed documentation too early—especially the wrong kind—it’s more valuable to show customers working software, systems, and so on to get their feedback. Therefore, favor measuring progress by evaluating tangible work products. And document only what’s truly needed." .
+
+
+###  https://scaledagileframework.com/safe/a.Horizon3Evaluating
+:a.Horizon3Evaluating rdf:type owl:Class ;
+                      rdfs:subClassOf :InvestmentHorizon .
+
+
+###  https://scaledagileframework.com/safe/b.Horizon2Emerging
+:b.Horizon2Emerging rdf:type owl:Class ;
+                    rdfs:subClassOf :InvestmentHorizon .
+
+
+###  https://scaledagileframework.com/safe/c.Horizon1Investing
+:c.Horizon1Investing rdf:type owl:Class ;
+                     rdfs:subClassOf :InvestmentHorizon .
+
+
+###  https://scaledagileframework.com/safe/d.Horizon1Extracting
+:d.Horizon1Extracting rdf:type owl:Class ;
+                      rdfs:subClassOf :InvestmentHorizon .
+
+
+###  https://scaledagileframework.com/safe/e.Hozizon0Retiring
+:e.Hozizon0Retiring rdf:type owl:Class ;
+                    rdfs:subClassOf :InvestmentHorizon .
+
+
+#################################################################
+#    General axioms
+#################################################################
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :FullfillmentValueStream
+                :ManufacturingValueStream
+                :SoftwareProductValueStream
+                :SupportingValueStream
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( <https://scaledagileframework.com/safe#01_TakeEconomicView>
+                <https://scaledagileframework.com/safe#02_ApplySystemsThinking>
+                <https://scaledagileframework.com/safe#03_AssumeVariability>
+                <https://scaledagileframework.com/safe#04_BuildIncremently>
+                <https://scaledagileframework.com/safe#05_WorkingSystemEvaluationBasedMilestones>
+                <https://scaledagileframework.com/safe#06_ContinuousValueFlow>
+                <https://scaledagileframework.com/safe#07_ApplyCadenceAcrossDomains>
+                <https://scaledagileframework.com/safe#08_UnlockIntrinsicMotivation>
+                <https://scaledagileframework.com/safe#09_DecentraliceDecisionMaking>
+                <https://scaledagileframework.com/safe#10_OrganizeAroundValue>
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :ABTest
+                :Prototype
+                :Simulation
+                :StoryTest
+                :UserExperience
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :ARTBacklog
+                :PortfolioBacklog
+                :SolutionTrainBacklog
+                :TeamBacklog
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :ARTEpic
+                :BusinessCapability
+                :BusinessEpic
+                :BusinessFeature
+                :EnablerCapability
+                :EnablerFeature
+                :EnablerStory
+                :PortfolioEpic
+                :SolutionEpic
+                :UserStory
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :ARTEpic
+                :BusinessEpic
+                :BusinessValue
+                :EnablerEpic
+                :PortfolioEpic
+                :SolutionEpic
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :ARTFlow
+                :SolutionTrainFlow
+                :TeamFlow
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :ActivelySupportDesignAndSteeringOfCICDPipeline
+                :ForsterBuildInQualityForTheARTSystems
+                :PartnerWithSolutionAndEnterpriseArchitectToElaborateEpicsCapabilitiesAndBusinessCapabilities
+                :PlanTheArchitecturalRunway
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :ActivelySupportDesignAndSteeringOfContinuousDeliveryPipeline
+                :FosterBuiltInQualityForTheEntireSolution
+                :PartnerWithSystemArchitectToElaborateCapabilitiesAndFeatures
+                :PlanArchitecturalRunwayForAFullSolution
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :AddressBottlenecksAccelerator
+                :GetFasterFeedbackAccelerator
+                :MinimizeHandoffsAndDependenciesAccelerator
+                :OptimizeTimeInTheZoneAccelerator
+                :ReduceQueueLengthAccelerator
+                :RemediateLegacyPolicyAndPracticesAccelerator
+                :VisualizeAndLimitWipAccelerator
+                :WorkinSmallerBatchesAccelerator
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :AgileMindset
+                :AgileReleaseTrain
+                :AgileTeam
+                :AgileTestingMatrix
+                :ArchitecturalRunway
+                :Backlog
+                :BacklogItem
+                :Budget
+                :BusinessValue
+                :Canvas
+                :Channel
+                :Context
+                :ContinuousDeliveryPipeline
+                :CoreValues
+                :Criteria
+                :CustomerRelation
+                :Deliverable
+                :DevOpsMindset
+                :Flow
+                :FlowAccelerator
+                :Guardrail
+                :InvestmentHorizon
+                :KPI
+                :LeadingChange
+                :LeanBusinessCase
+                :LeanPortfolioManagement
+                :LeanSystemEngineering
+                :MinimumMarketableFeature
+                :MinimumViableArchitecture
+                :MinimumViableProduct
+                :Portfolio
+                :PortfolioBudget
+                :Practice
+                :Principle
+                :Requirement
+                :Responsibility
+                :Roadmap
+                :Role
+                :SAFeLeanStartupCycle
+                :SolutionArchitecture
+                :SolutionIntent
+                :SolutionTrain
+                :StrategicTheme
+                :Strategy
+                :Test
+                :ValueStream
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :AgileMindset
+                :AgileReleaseTrain
+                :AgileTeam
+                :AgileTestingMatrix
+                :ArchitecturalRunway
+                :Backlog
+                :BacklogItem
+                :Budget
+                :BusinessValue
+                :Canvas
+                :Channel
+                :Context
+                :ContinuousDeliveryPipeline
+                :CoreValues
+                :CustomerRelation
+                :Deliverable
+                :DevOpsMindset
+                :Flow
+                :FlowAccelerator
+                :Guardrail
+                :InvestmentHorizon
+                :KPI
+                :LeadingChange
+                :LeanBusinessCase
+                :LeanPortfolioManagement
+                :LeanSystemEngineering
+                :MinimumMarketableFeature
+                :MinimumViableArchitecture
+                :MinimumViableProduct
+                :Portfolio
+                :PortfolioBudget
+                :Practice
+                :Principle
+                :Requirement
+                :Responsibility
+                :Roadmap
+                :Role
+                :SAFeLeanStartupCycle
+                :SolutionArchitecture
+                :SolutionIntent
+                :SolutionTrain
+                :StrategicTheme
+                :Strategy
+                :Test
+                :ValueStream
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :AgileMindset
+                :AgileReleaseTrain
+                :AgileTeam
+                :ArchitecturalRunway
+                :Backlog
+                :BacklogItem
+                :Budget
+                :Canvas
+                :Channel
+                :Context
+                :ContinuousDeliveryPipeline
+                :CoreValues
+                :Customer
+                :CustomerRelation
+                :Deliverable
+                :Flow
+                :Guardrail
+                :KPI
+                :LeanSystemEngineering
+                :MinimumMarketableFeature
+                :MinimumViableArchitecture
+                :MinimumViableProduct
+                :NonFunctionalRequirement
+                :Portfolio
+                :PortfolioBudget
+                :Responsibility
+                :Roadmap
+                :Role
+                :SafeLeanAgilePrinciple
+                :SolutionArchitecture
+                :SolutionIntent
+                :SolutionTrain
+                :StrategicTheme
+                :Strategy
+                :Test
+                :ValueStream
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :AgileMindset
+                :AgileReleaseTrain
+                :AgileTeam
+                :ArchitecturalRunway
+                :Backlog
+                :BacklogItem
+                :Budget
+                :Canvas
+                :Channel
+                :Context
+                :ContinuousDeliveryPipeline
+                :CoreValues
+                :CustomerRelation
+                :Deliverable
+                :Flow
+                :Guardrail
+                :InvestmentHorizon
+                :KPI
+                :LeadingChange
+                :LeanBusinessCase
+                :LeanSystemEngineering
+                :MinimumMarketableFeature
+                :MinimumViableArchitecture
+                :MinimumViableProduct
+                :NonFunctionalRequirement
+                :Portfolio
+                :PortfolioBudget
+                :Principle
+                :QualityPractices
+                :Responsibility
+                :Roadmap
+                :Role
+                :SAFeLeanStartupCycle
+                :SolutionArchitecture
+                :SolutionIntent
+                :SolutionTrain
+                :StrategicTheme
+                :Strategy
+                :Test
+                :ValueStream
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :AgileMindset
+                :AgileReleaseTrain
+                :AgileTeam
+                :ArchitecturalRunway
+                :Backlog
+                :BacklogItem
+                :Budget
+                :Canvas
+                :Channel
+                :Context
+                :ContinuousDeliveryPipeline
+                :CoreValues
+                :CustomerRelation
+                :Deliverable
+                :Flow
+                :Guardrail
+                :KPI
+                :LeadingChange
+                :LeanSystemEngineering
+                :MinimumMarketableFeature
+                :MinimumViableArchitecture
+                :MinimumViableProduct
+                :NonFunctionalRequirement
+                :Portfolio
+                :PortfolioBudget
+                :Principle
+                :QualityPractices
+                :Responsibility
+                :Roadmap
+                :Role
+                :SolutionArchitecture
+                :SolutionIntent
+                :SolutionTrain
+                :StrategicTheme
+                :Strategy
+                :Test
+                :ValueStream
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :AgileMindset
+                :AgileReleaseTrain
+                :AgileTeam
+                :ArchitecturalRunway
+                :Backlog
+                :BacklogItem
+                :Budget
+                :Canvas
+                :Channel
+                :Context
+                :ContinuousDeliveryPipeline
+                :CoreValues
+                :CustomerRelation
+                :Deliverable
+                :Flow
+                :Guardrail
+                :KPI
+                :LeadingChange
+                :LeanSystemEngineering
+                :MinimumMarketableFeature
+                :MinimumViableArchitecture
+                :MinimumViableProduct
+                :NonFunctionalRequirement
+                :Portfolio
+                :PortfolioBudget
+                :Principle
+                :Responsibility
+                :Roadmap
+                :Role
+                :SafeLeanAgilePrinciple
+                :SolutionArchitecture
+                :SolutionIntent
+                :SolutionTrain
+                :StrategicTheme
+                :Strategy
+                :Test
+                :ValueStream
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :AgileReleaseTrain
+                :AgileTeam
+                :ArchitecturalRunway
+                :Backlog
+                :BacklogItem
+                :Budget
+                :Canvas
+                :Channel
+                :Context
+                :ContinuousDeliveryPipeline
+                :Customer
+                :Deliverable
+                :Flow
+                :Guardrail
+                :KPI
+                :LeanSystemEngineering
+                :MinimumMarketableFeature
+                :MinimumViableArchitecture
+                :MinimumViableProduct
+                :NonFunctionalRequirement
+                :Portfolio
+                :PortfolioBudget
+                :Responsibility
+                :Roadmap
+                :Role
+                :SafeLeanAgilePrinciple
+                :SolutionArchitecture
+                :SolutionIntent
+                :SolutionTrain
+                :StrategicTheme
+                :Strategy
+                :Test
+                :ValueStream
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :AgileReleaseTrain
+                :AgileTeam
+                :ArchitecturalRunway
+                :Backlog
+                :BacklogItem
+                :Canvas
+                :Context
+                :ContinuousDeliveryPipeline
+                :Deliverable
+                :Flow
+                :Guardrail
+                :LeanSystemEngineering
+                :MinimumMarketableFeature
+                :MinimumViableArchitecture
+                :MinimumViableProduct
+                :NonFunctionalRequirement
+                :Portfolio
+                :PortfolioBudget
+                :PortfolioCanvas
+                :Responsibility
+                :Roadmap
+                :Role
+                :SafeLeanAgilePrinciple
+                :SolutionArchitecture
+                :SolutionIntent
+                :SolutionTrain
+                :StrategicTheme
+                :Strategy
+                :Test
+                :ValueStream
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :AgileReleaseTrain
+                :AgileTeam
+                :ArchitecturalRunway
+                :Backlog
+                :BacklogItem
+                :Context
+                :ContinuousDeliveryPipeline
+                :Deliverable
+                :Flow
+                :Guardrail
+                :LeanSystemEngineering
+                :MinimumMarketableFeature
+                :MinimumViableArchitecture
+                :MinimumViableProduct
+                :NonFunctionalRequirement
+                :Portfolio
+                :PortfolioBudget
+                :PortfolioCanvas
+                :Responsibility
+                :Roadmap
+                :Role
+                :SafeLeanAgilePrinciple
+                :SolutionArchitecture
+                :SolutionIntent
+                :SolutionTrain
+                :StrategicTheme
+                :Strategy
+                :Test
+                :ValueStream
+                :Vision
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :AgileReleaseTrain
+                :ArchitecturalRunway
+                :Backlog
+                :Capability
+                :ContinuousDeliveryPipeline
+                :Epic
+                :Feature
+                :LeanSystemEngineering
+                :NonFunctionalRequirement
+                :Roadmap
+                :Role
+                :SafeLeanAgilePrinciple
+                :SolutionArchitecture
+                :SolutionContext
+                :SolutionIntent
+                :StrategicTheme
+                :Strategy
+                :TechnologyPortfolio
+                :ValueStream
+                :Vision
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :AlignArchitectureWithBusinessStrategy
+                :CollaborateWithLeanPortfolioManagement
+                :GuideAndSupportArchitecturalRunwayStrategy
+                :PromoteModernTechnicalAndDevOpsPractices
+                :ProvideStrategicTechnicalDirectionAcrossARTsAndTeams
+                :SynchronizeArchitectureAcrossARTsAndTeams
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :AlignOnOutcomes
+                :EvolveTheSolution
+                :SteerTheSolutionTrain
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :ArchitectureRole
+                :ManagementRole
+                :ProductRoles
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :ArchitectureRole
+                :ManagementRole
+                :ProductRoles
+                :ReleaseTrainEngineer
+                :ScrumMaster
+                :SolutionTrainEngineer
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :ArchitectureVision
+                :EnterpriseVision
+                :PortfolioVision
+                :ProductVision
+                :SolutionVision
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :ArchitectureVision
+                :PortfolioVision
+                :ProductVision
+                :SolutionVision
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :Automation
+                :Culture
+                :LeanFlow
+                :Measurement
+                :Recovery
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :Bounded
+                :Independent
+                :Negotiable
+                :Testable
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :BrickAndMortarStore
+                :DirectSales
+                :DistributionNetwork
+                :Internet
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :BuildModelQualityIn
+                :ExplorerAlternativesAndLearnFaster
+                :GenerateDocumentation
+                :SupportComplianceAndImpactAnalysis
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :BusinessFacing
+                :CritiqueTheProduct
+                :GuidedDevelopment
+                :Q1
+                :Q2
+                :Q3
+                :Q4
+                :TechnologyFacing
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :BusinessStrategy
+                :EnterpriseStrategy
+                :TechnicalStrategy
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :CapabilityAcceptanceTest
+                :FeatureAcceptanceTest
+                :OutcomeHypothesis
+                :StoryAcceptanceTest
+                :UnitTest
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :CollaborationPracticeAndProperUseOfVersionControlSystem
+                :CommonTypesAndDimensionsUsedAcrossTheSystem
+                :DefineModelNotationsToUse
+                :DescribeWhatInformationShouldBeCaptured
+                :LinksWithinModelOrOtherCrossDomainDiscipline
+                :MetaInformationForModelElements
+                :ModelingToolPropertiesAndConfiguration
+                :WhereAreSolutionAndSubsystemModelsPlaced
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :CollapseDesignOptionsWithFrequentIntegrationPoints
+                :IncreaseFlexibilityInInterfacesAndDesign
+                :LeverageModelingSimulationAndPrototyping
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :ComplicatedSubsystemART
+                :EnablingART
+                :PlatformART
+                :StreamAlignedART
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :ComplicatedSubsystemTeam
+                :EnablingTeam
+                :PlatformTeam
+                :SharedServices
+                :StreamAlignedTeam
+                :SystemTeam
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :ComponentTest
+                :ConnectivityTest
+                :UnitTtest
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :ConnectWithTheCustomer
+                :DefineProductStrategyProductVisionAndProductRoadmap
+                :DeliverValue
+                :ExploreMarketsAndUsers
+                :ManageAndPrioritizeTheARTBacklog
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :ContinuousDeployment
+                :ContinuousExploration
+                :ContinuousIntegration
+                :ReleaseOnDemand
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :Customer
+                :EnterpriseExecutives
+                :EpicOwner
+                :LeaderShipRole
+                :PortfolioLeadership
+                :PortolioStakeholders
+                :ProductRoles
+                :ReleaseTrainEngineer
+                :ScrumMaster
+                :SolutionTrainEngineer
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :CustomerCollaborationOverContractNegotiation
+                :IndividualsAndInteractionsOverProcessesAndTools
+                :RespondingToChangeOverFollowingAPlan
+                :WorkingSoftwareOverComprehensiveDocumentation
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :DocumentGeneration
+                :DomainModelTestAssessmentCriteria
+                :TestAnalysisAndDesignModel
+                :TestRequirementModel
+                :TestTraceability
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :ElectricalModelsTestForLogic
+                :ExecutableSystemModelsTestForSystemBehaviour
+                :MechanicalModelsTestForPhysicalAndEnvironmentalIssue
+                :SoftwareModelsTestForBoundaryConditionsAndAnomaly
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :EnterpriseArchitect
+                :SolutionArchitect
+                :SystemArchitectResponsibility
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :ExloratoryTesting
+                :SystemIntegration
+                :UsabilityTesting
+                :UserAcceptanceTesting
+                :Workflow
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :LoadTest
+                :PerformanceTest
+                :QualityAttribute
+                :SecurityTest
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :PortfolioRoadmap
+                :ProgramIncrementRoadmap
+                :SolutionRoadmap
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :Product
+                :Service
+                :System
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :a.Horizon3Evaluating
+                :b.Horizon2Emerging
+                :c.Horizon1Investing
+                :d.Horizon1Extracting
+                :e.Hozizon0Retiring
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointProperties ;
+  owl:members ( :collaborateIn
+                :constraints
+                :consume
+                :has
+                :isInputFor
+                :isInputForStrategicThemes
+                :partOf
+                :produceSolution
+                :provide
+                :realize
+                :support
+                :testedBy
+              )
+] .
+
+
+###  Generated by the OWL API (version 4.5.26.2023-07-17T20:34:13Z) https://github.com/owlcs/owlapi
