@@ -3,1065 +3,1030 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Standalone React App</title>
+    <title>Modeler Canvas</title>
 
+    <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Load React and ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
-    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
-    
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Load Babel for JSX transformation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
-        /* Basic reset */
-        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+        body { margin: 0; padding: 0; overflow: hidden; }
+        /* Prevent text selection while dragging */
+        .select-none { user-select: none; -webkit-user-select: none; }
     </style>
 </head>
 <body>
-
     <div id="root"></div>
 
     <script type="text/babel">
-        
-        // --- PREAMBLE ---
-        // Destructure hooks so you don't need 'React.' prefix
-        const { useState, useEffect, useRef, useMemo, useCallback } = React;
-
-        // --- PASTE YOUR GENERATED APP COMPONENT BELOW THIS LINE ---
-        
-        import React, { useState, useRef, useMemo, useCallback } from 'react';
-import {
-  MousePointer2,
-  Square,
-  Group,
-  ArrowRight,
-  Trash2,
-  Plus,
-  Minus,
-  Settings
-} from 'lucide-react';
-
-// --- Types & Constants ---
-
-type NodeType = 'standard' | 'group';
-type RelationType = 'directional' | 'containment' | 'relation_link';
-type PathType = 'straight' | 'curved' | 'manhattan';
-
-interface Point {
-  x: number;
-  y: number;
-}
-
-interface Rect {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
-
-interface NodeData {
-  id: string;
-  type: NodeType;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  name: string;
-  desc: string;
-  collapsed?: boolean;
-  lastExpandedSize?: { w: number, h: number };
-  lastCollapsedSize?: { w: number, h: number };
-}
-
-interface RelationData {
-  id: string;
-  type: RelationType;
-  sourceId: string;
-  targetId: string;
-  sourceType: 'node' | 'relation';
-  targetType: 'node';
-  name: string;
-  desc: string;
-  pathType: PathType;
-}
-
-interface ViewState {
-  x: number;
-  y: number;
-  scale: number;
-}
-
-type Tool = 'select' | 'standard' | 'group' | 'relation';
-
-const DEFAULT_NODE_SIZE = { w: 120, h: 60 };
-const DEFAULT_GROUP_SIZE = { w: 300, h: 200 };
-const COLLAPSED_SIZE = { w: 120, h: 60 };
-const HANDLE_SIZE = 8;
-
-// --- Helper Functions ---
-
-const generateId = () => Math.random().toString(36).substr(2, 9);
-
-const screenToWorld = (point: Point, view: ViewState): Point => ({
-  x: (point.x - view.x) / view.scale,
-  y: (point.y - view.y) / view.scale,
-});
-
-const getRectCenter = (node: { x: number, y: number, w: number, h: number }): Point => ({
-  x: node.x + node.w / 2,
-  y: node.y + node.h / 2,
-});
-
-// --- Geometry & Pathing ---
-
-// Calculate intersection between line (node center -> target) and node borders
-const getIntersectingPoint = (node: NodeData, target: Point): Point => {
-  const { x, y, w, h } = node;
-  const cx = x + w / 2;
-  const cy = y + h / 2;
-  const dx = target.x - cx;
-  const dy = target.y - cy;
-
-  // Handle zero length or target is center
-  if (dx === 0 && dy === 0) return { x: cx, y: cy };
-
-  let t = Infinity;
-
-  // Right edge
-  if (dx > 0) t = Math.min(t, (x + w - cx) / dx);
-  // Left edge
-  else if (dx < 0) t = Math.min(t, (x - cx) / dx);
-
-  // Bottom edge
-  if (dy > 0) t = Math.min(t, (y + h - cy) / dy);
-  // Top edge
-  else if (dy < 0) t = Math.min(t, (y - cy) / dy);
-
-  return {
-    x: cx + t * dx,
-    y: cy + t * dy
-  };
-};
-
-const getManhattanPath = (start: Point, end: Point): string => {
-  const midX = (start.x + end.x) / 2;
-  return `M ${start.x} ${start.y} L ${midX} ${start.y} L ${midX} ${end.y} L ${end.x} ${end.y}`;
-};
-
-const getCurvedPath = (start: Point, end: Point): string => {
-  const dx = Math.abs(end.x - start.x) * 0.5;
-  return `M ${start.x} ${start.y} C ${start.x + dx} ${start.y}, ${end.x - dx} ${end.y}, ${end.x} ${end.y}`;
-};
-
-const getStraightPath = (start: Point, end: Point): string => {
-  return `M ${start.x} ${start.y} L ${end.x} ${end.y}`;
-};
-
-// --- Components ---
-
-export default function App() {
-  // --- State ---
-  const [nodes, setNodes] = useState<NodeData[]>([]);
-  const [relations, setRelations] = useState<RelationData[]>([]);
-  const [view, setView] = useState<ViewState>({ x: 0, y: 0, scale: 1 });
-  const [tool, setTool] = useState<Tool>('select');
-  const [selection, setSelection] = useState<string[]>([]);
-
-  // Interaction State
-  const [dragState, setDragState] = useState<{
-    isDragging: boolean;
-    mode: 'pan' | 'move' | 'resize' | 'marquee' | 'connect' | 'panel_move';
-    start: Point; // Screen coords
-    current: Point; // Screen coords
-    worldStart: Point;
-    selectionStart?: string[];
-    // Snapshot of ALL nodes to ensure consistent movement
-    nodeSnapshots?: Record<string, NodeData>;
-    resizeHandle?: number;
-    connectionSource?: { id: string, type: 'node' | 'relation' };
-    panelStartPos?: { x: number, y: number };
-    selectionBoundsSnapshot?: Rect;
-  } | null>(null);
-
-  const [propPanelPos, setPropPanelPos] = useState({ x: -1, y: 100 });
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // --- Logic: Containment & Visibility ---
-
-  const containmentMap = useMemo(() => {
-    const map = new Map<string, string>();
-    relations.forEach(r => {
-      if (r.type === 'containment' && r.targetType === 'node' && r.sourceType === 'node') {
-        map.set(r.sourceId, r.targetId);
-      }
-    });
-    return map;
-  }, [relations]);
-
-  const getVisualState = useCallback((nodeId: string): { visible: boolean, visualRepresentativeId: string } => {
-    let currentId = nodeId;
-    const visited = new Set<string>();
-
-    while (containmentMap.has(currentId)) {
-      if (visited.has(currentId)) break;
-      visited.add(currentId);
-
-      const parentId = containmentMap.get(currentId)!;
-      const parent = nodes.find(n => n.id === parentId);
-
-      if (parent && parent.collapsed) {
-        const parentState = getVisualState(parentId);
-        if (!parentState.visible) {
-            return { visible: false, visualRepresentativeId: parentState.visualRepresentativeId };
-        }
-        return { visible: false, visualRepresentativeId: parentId };
-      }
-      currentId = parentId;
-    }
-
-    return { visible: true, visualRepresentativeId: nodeId };
-  }, [containmentMap, nodes]);
-
-  const visibleNodes = useMemo(() => {
-    return nodes.filter(n => getVisualState(n.id).visible);
-  }, [nodes, getVisualState]);
-
-  // --- Sorting for Z-Order (Hierarchy Aware) ---
-  const sortedNodes = useMemo(() => {
-    // 1. Calculate Depth of each Group
-    const depthMap = new Map<string, number>();
-
-    const getDepth = (id: string, visited = new Set<string>()): number => {
-        if (depthMap.has(id)) return depthMap.get(id)!;
-        if (visited.has(id)) return 0; // Break cycle
-        visited.add(id);
-
-        const parentId = containmentMap.get(id);
-        if (!parentId) {
-            depthMap.set(id, 0);
-            return 0;
-        }
-
-        const depth = getDepth(parentId, visited) + 1;
-        depthMap.set(id, depth);
-        return depth;
-    };
-
-    visibleNodes.forEach(n => {
-        if (n.type === 'group') getDepth(n.id);
-    });
-
-    // 2. Sort
-    return [...visibleNodes].sort((a, b) => {
-      // Standard objects always on top (effectively infinite Z)
-      if (a.type !== 'group' && b.type === 'group') return 1;
-      if (a.type === 'group' && b.type !== 'group') return -1;
-
-      // Both are groups: Sort by depth ASCENDING (Leafs on top of Parents)
-      if (a.type === 'group' && b.type === 'group') {
-          const dA = depthMap.get(a.id) || 0;
-          const dB = depthMap.get(b.id) || 0;
-          return dA - dB;
-      }
-
-      return 0; // Stable
-    });
-  }, [visibleNodes, containmentMap]);
-
-  // --- Selection Bounds Calculation ---
-  const selectionBounds = useMemo(() => {
-      if (selection.length === 0) return null;
-      const selectedNodes = visibleNodes.filter(n => selection.includes(n.id));
-      if (selectedNodes.length === 0) return null;
-
-      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-      selectedNodes.forEach(n => {
-          if (n.x < minX) minX = n.x;
-          if (n.y < minY) minY = n.y;
-          if (n.x + n.w > maxX) maxX = n.x + n.w;
-          if (n.y + n.h > maxY) maxY = n.y + n.h;
-      });
-      return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
-  }, [selection, visibleNodes]);
-
-  // --- Handlers: Input ---
-
-  const handleWheel = (e: React.WheelEvent) => {
-    const scaleAmount = -e.deltaY * 0.001;
-    const newScale = Math.min(Math.max(view.scale * (1 + scaleAmount), 0.1), 5);
-
-    const rect = containerRef.current!.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-
-    const mouseWorldX = (mouseX - view.x) / view.scale;
-    const mouseWorldY = (mouseY - view.y) / view.scale;
-
-    const newX = mouseX - mouseWorldX * newScale;
-    const newY = mouseY - mouseWorldY * newScale;
-
-    setView({ x: newX, y: newY, scale: newScale });
-  };
-
-  const handlePointerDown = (e: React.PointerEvent) => {
-    e.preventDefault();
-    const rect = containerRef.current!.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const worldPos = screenToWorld({ x, y }, view);
-
-    // 1. Check Resize Handles (Selection Overlay)
-    if (selectionBounds && tool === 'select') {
-        const handles = getResizeHandles(selectionBounds);
-        for (let i = 0; i < handles.length; i++) {
-            const h = handles[i];
-            if (Math.abs(worldPos.x - h.x) < HANDLE_SIZE / view.scale && Math.abs(worldPos.y - h.y) < HANDLE_SIZE / view.scale) {
-                // Snapshot ALL nodes for scaling
-                const snapshot: Record<string, NodeData> = {};
-                nodes.forEach(n => snapshot[n.id] = { ...n });
-
-                setDragState({
-                    isDragging: true,
-                    mode: 'resize',
-                    start: { x, y },
-                    current: { x, y },
-                    worldStart: worldPos,
-                    resizeHandle: i,
-                    nodeSnapshots: snapshot,
-                    selectionBoundsSnapshot: { ...selectionBounds }
-                });
-                return;
-            }
-        }
-    }
-
-    // 2. Check Objects Hit
-    const clickedNode = [...sortedNodes].reverse().find(n =>
-      worldPos.x >= n.x && worldPos.x <= n.x + n.w &&
-      worldPos.y >= n.y && worldPos.y <= n.y + n.h
-    );
-
-    if (tool === 'standard' || tool === 'group') {
-      const size = tool === 'standard' ? DEFAULT_NODE_SIZE : DEFAULT_GROUP_SIZE;
-      const newNode: NodeData = {
-        id: generateId(),
-        type: tool,
-        x: worldPos.x - size.w / 2,
-        y: worldPos.y - size.h / 2,
-        w: size.w,
-        h: size.h,
-        name: tool === 'standard' ? 'Object' : 'Group',
-        desc: 'Description...',
-        collapsed: false
-      };
-      setNodes([...nodes, newNode]);
-      // setSelection([newNode.id]); // Removed auto-selection on creation
-      return;
-    }
-
-    if (tool === 'relation') {
-      if (clickedNode) {
-        setDragState({
-          isDragging: true,
-          mode: 'connect',
-          start: { x, y },
-          current: { x, y },
-          worldStart: worldPos,
-          connectionSource: { id: clickedNode.id, type: 'node' }
-        });
-      }
-      return;
-    }
-
-    if (tool === 'select') {
-      if (clickedNode) {
-        const isSelected = selection.includes(clickedNode.id);
-        let newSelection = selection;
-
-        if (e.shiftKey) {
-          if (isSelected) newSelection = selection.filter(id => id !== clickedNode.id);
-          else newSelection = [...selection, clickedNode.id];
-        } else {
-          if (!isSelected) newSelection = [clickedNode.id];
-        }
-
-        setSelection(newSelection);
-
-        // Snapshot ALL nodes for stable movement
-        const snapshot: Record<string, NodeData> = {};
-        nodes.forEach(n => snapshot[n.id] = { ...n });
-
-        setDragState({
-          isDragging: true,
-          mode: 'move',
-          start: { x, y },
-          current: { x, y },
-          worldStart: worldPos,
-          nodeSnapshots: snapshot
-        });
-      } else {
-        if (e.button === 2 || e.button === 1) {
-            setDragState({
-                isDragging: true,
-                mode: 'pan',
-                start: { x, y },
-                current: { x, y },
-                worldStart: worldPos
-            });
-        } else {
-            if (!e.shiftKey) setSelection([]);
-            setDragState({
-                isDragging: true,
-                mode: 'marquee',
-                start: { x, y },
-                current: { x, y },
-                worldStart: worldPos,
-                selectionStart: e.shiftKey ? selection : []
-            });
-        }
-      }
-    }
-  };
-
-  const handleRelationPointerDown = (e: React.PointerEvent, relId: string) => {
-    e.stopPropagation();
-    if (tool === 'select') {
-        if (e.shiftKey) {
-            setSelection(prev => prev.includes(relId) ? prev.filter(id => id !== relId) : [...prev, relId]);
-        } else {
-            setSelection([relId]);
-        }
-    } else if (tool === 'relation') {
-        const rect = containerRef.current!.getBoundingClientRect();
-        setDragState({
-            isDragging: true,
-            mode: 'connect',
-            start: { x: e.clientX - rect.left, y: e.clientY - rect.top },
-            current: { x: e.clientX - rect.left, y: e.clientY - rect.top },
-            worldStart: screenToWorld({ x: e.clientX - rect.left, y: e.clientY - rect.top }, view),
-            connectionSource: { id: relId, type: 'relation' }
-        });
-    }
-  };
-
-  const handlePanelPointerDown = (e: React.PointerEvent) => {
-      e.stopPropagation();
-      e.preventDefault();
-      const rect = containerRef.current!.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-
-      const currentX = propPanelPos.x === -1 ? rect.width - 272 : propPanelPos.x;
-      const currentY = propPanelPos.y;
-
-      setDragState({
-          isDragging: true,
-          mode: 'panel_move',
-          start: { x, y },
-          current: { x, y },
-          worldStart: { x: 0, y: 0 },
-          panelStartPos: { x: currentX, y: currentY }
-      });
-  };
-
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (!dragState || !dragState.isDragging) return;
-
-    const rect = containerRef.current!.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const worldPos = screenToWorld({ x, y }, view);
-
-    setDragState(prev => prev ? ({ ...prev, current: { x, y } }) : null);
-
-    if (dragState.mode === 'pan') {
-      const dx = x - dragState.start.x;
-      const dy = y - dragState.start.y;
-      setView(prev => ({ ...prev, x: prev.x + dx, y: prev.y + dy }));
-      setDragState(prev => prev ? ({ ...prev, start: { x, y } }) : null);
-    }
-    else if (dragState.mode === 'panel_move' && dragState.panelStartPos) {
-        const dx = x - dragState.start.x;
-        const dy = y - dragState.start.y;
-        setPropPanelPos({
-            x: dragState.panelStartPos.x + dx,
-            y: dragState.panelStartPos.y + dy
-        });
-    }
-    else if (dragState.mode === 'move') {
-       const dx = worldPos.x - dragState.worldStart.x;
-       const dy = worldPos.y - dragState.worldStart.y;
-
-       // Calculate moving set using SNAPSHOTS
-       const movingIds = new Set(selection);
-       let changed = true;
-       while(changed) {
-           changed = false;
-           // Iterate over all nodes in snapshot
-           Object.values(dragState.nodeSnapshots!).forEach(n => {
-               if (movingIds.has(n.id)) return;
-
-               const parentId = containmentMap.get(n.id);
-               if (parentId && movingIds.has(parentId)) {
-                   const parentSnap = dragState.nodeSnapshots![parentId];
-                   const childSnap = n;
-
-                   // Check if parent was expanded in snapshot
-                   if (parentSnap && !parentSnap.collapsed) {
-                       // Strict Geometric Check on SNAPSHOTS
-                       const isInside =
-                           childSnap.x >= parentSnap.x &&
-                           childSnap.y >= parentSnap.y &&
-                           childSnap.x + childSnap.w <= parentSnap.x + parentSnap.w &&
-                           childSnap.y + childSnap.h <= parentSnap.y + parentSnap.h;
-
-                       if (isInside) {
-                           movingIds.add(n.id);
-                           changed = true;
-                       }
-                   }
-               }
-           });
-       }
-
-       // Update Nodes
-       const newNodes = nodes.map(n => {
-           if (movingIds.has(n.id)) {
-               const snap = dragState.nodeSnapshots![n.id];
-               return { ...n, x: snap.x + dx, y: snap.y + dy };
-           }
-           return n;
-       });
-
-       setNodes(newNodes);
-    }
-    else if (dragState.mode === 'resize') {
-        const dx = worldPos.x - dragState.worldStart.x;
-        const dy = worldPos.y - dragState.worldStart.y;
-
-        const originalBounds = dragState.selectionBoundsSnapshot!;
-        let { x, y, w, h } = originalBounds;
-        const handle = dragState.resizeHandle!;
-
-        // Calculate new Bounds
-        if ([0, 6, 7].includes(handle)) { x += dx; w -= dx; }
-        if ([0, 1, 2].includes(handle)) { y += dy; h -= dy; }
-        if ([2, 3, 4].includes(handle)) { w += dx; }
-        if ([4, 5, 6].includes(handle)) { h += dy; }
-
-        if (w < 20) w = 20;
-        if (h < 20) h = 20;
-
-        // Calculate Scale Factors
-        const scaleX = w / originalBounds.w;
-        const scaleY = h / originalBounds.h;
-
-        const newNodes = nodes.map(n => {
-            if (selection.includes(n.id)) {
-                const snap = dragState.nodeSnapshots![n.id];
-                // Relative position in bounds
-                const relX = snap.x - originalBounds.x;
-                const relY = snap.y - originalBounds.y;
-
-                return {
-                    ...n,
-                    x: x + relX * scaleX,
-                    y: y + relY * scaleY,
-                    w: snap.w * scaleX,
-                    h: snap.h * scaleY
-                };
-            }
-            return n;
-        });
-
-        setNodes(newNodes);
-    }
-  };
-
-  const handlePointerUp = (e: React.PointerEvent) => {
-    if (!dragState) return;
-
-    const rect = containerRef.current!.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const worldPos = screenToWorld({ x, y }, view);
-
-    if (dragState.mode === 'marquee') {
-        const x1 = Math.min(dragState.worldStart.x, worldPos.x);
-        const y1 = Math.min(dragState.worldStart.y, worldPos.y);
-        const x2 = Math.max(dragState.worldStart.x, worldPos.x);
-        const y2 = Math.max(dragState.worldStart.y, worldPos.y);
-
-        const newSel = visibleNodes.filter(n =>
-            n.x >= x1 && n.x + n.w <= x2 &&
-            n.y >= y1 && n.y + n.h <= y2
-        ).map(n => n.id);
-
-        setSelection(newSel);
-    }
-    else if (dragState.mode === 'connect') {
-        const targetNode = [...sortedNodes].reverse().find(n =>
-            worldPos.x >= n.x && worldPos.x <= n.x + n.w &&
-            worldPos.y >= n.y && worldPos.y <= n.y + n.h
+        const { useState, useRef, useMemo, useCallback } = React;
+
+        // --- Icons (Inline SVGs) ---
+        const IconBase = ({ size = 24, className = "", children }) => (
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width={size}
+                height={size}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className={className}
+            >
+                {children}
+            </svg>
         );
 
-        if (targetNode && dragState.connectionSource) {
-            const source = dragState.connectionSource;
-            const target = targetNode;
+        const MousePointer2 = (props) => (
+            <IconBase {...props}>
+                <path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="m13 13 6 6"/>
+            </IconBase>
+        );
+        const Square = (props) => (
+            <IconBase {...props}>
+                <rect width="18" height="18" x="3" y="3" rx="2"/>
+            </IconBase>
+        );
+        const Group = (props) => (
+            <IconBase {...props}>
+                <path d="M3 7V5c0-1.1.9-2 2-2h2"/><path d="M17 3h2c1.1 0 2 .9 2 2v2"/><path d="M21 17v2c0 1.1-.9 2-2 2h-2"/><path d="M7 21H5c-1.1 0-2-.9-2-2v-2"/><rect width="10" height="10" x="7" y="7" rx="1"/>
+            </IconBase>
+        );
+        const ArrowRight = (props) => (
+            <IconBase {...props}>
+                <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+            </IconBase>
+        );
+        const Trash2 = (props) => (
+            <IconBase {...props}>
+                <path d="M3 6h18"/><path d="M19 6v14c0 1 1 2 2 2h10c1 0 2-1 2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>
+            </IconBase>
+        );
+        const Plus = (props) => (
+            <IconBase {...props}>
+                <path d="M5 12h14"/><path d="M12 5v14"/>
+            </IconBase>
+        );
+        const Minus = (props) => (
+            <IconBase {...props}>
+                <path d="M5 12h14"/>
+            </IconBase>
+        );
+        const Settings = (props) => (
+            <IconBase {...props}>
+                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>
+            </IconBase>
+        );
 
-            if (source.id !== target.id) {
-                let type: RelationType = 'directional';
-                let sourceId = source.id;
-                let targetId = target.id;
+        // --- Constants ---
 
-                const sourceNode = source.type === 'node' ? nodes.find(n => n.id === source.id) : null;
+        const DEFAULT_NODE_SIZE = { w: 120, h: 60 };
+        const DEFAULT_GROUP_SIZE = { w: 300, h: 200 };
+        const COLLAPSED_SIZE = { w: 120, h: 60 };
+        const HANDLE_SIZE = 8;
 
-                if (source.type === 'relation') {
-                    type = 'relation_link';
-                } else if (sourceNode) {
-                    if (sourceNode.type === 'standard' && target.type === 'standard') {
-                        type = 'directional';
-                    } else if (target.type === 'group' || sourceNode.type === 'group') {
-                        type = 'containment';
-                        if (sourceNode.type === 'group' && target.type === 'standard') {
-                            sourceId = target.id;
-                            targetId = source.id;
+        // --- Helper Functions ---
+
+        const generateId = () => Math.random().toString(36).substr(2, 9);
+
+        const screenToWorld = (point, view) => ({
+            x: (point.x - view.x) / view.scale,
+            y: (point.y - view.y) / view.scale,
+        });
+
+        const getRectCenter = (node) => ({
+            x: node.x + node.w / 2,
+            y: node.y + node.h / 2,
+        });
+
+        // --- Geometry & Pathing ---
+
+        const getIntersectingPoint = (node, target) => {
+            const { x, y, w, h } = node;
+            const cx = x + w / 2;
+            const cy = y + h / 2;
+            const dx = target.x - cx;
+            const dy = target.y - cy;
+
+            if (dx === 0 && dy === 0) return { x: cx, y: cy };
+
+            let t = Infinity;
+
+            // Right edge
+            if (dx > 0) t = Math.min(t, (x + w - cx) / dx);
+            // Left edge
+            else if (dx < 0) t = Math.min(t, (x - cx) / dx);
+
+            // Bottom edge
+            if (dy > 0) t = Math.min(t, (y + h - cy) / dy);
+            // Top edge
+            else if (dy < 0) t = Math.min(t, (y - cy) / dy);
+
+            return {
+                x: cx + t * dx,
+                y: cy + t * dy
+            };
+        };
+
+        const getManhattanPath = (start, end) => {
+            const midX = (start.x + end.x) / 2;
+            return `M ${start.x} ${start.y} L ${midX} ${start.y} L ${midX} ${end.y} L ${end.x} ${end.y}`;
+        };
+
+        const getCurvedPath = (start, end) => {
+            const dx = Math.abs(end.x - start.x) * 0.5;
+            return `M ${start.x} ${start.y} C ${start.x + dx} ${start.y}, ${end.x - dx} ${end.y}, ${end.x} ${end.y}`;
+        };
+
+        const getStraightPath = (start, end) => {
+            return `M ${start.x} ${start.y} L ${end.x} ${end.y}`;
+        };
+
+        // --- Main App Component ---
+
+        function App() {
+            // --- State ---
+            const [nodes, setNodes] = useState([]);
+            const [relations, setRelations] = useState([]);
+            const [view, setView] = useState({ x: 0, y: 0, scale: 1 });
+            const [tool, setTool] = useState('select');
+            const [selection, setSelection] = useState([]);
+
+            // Interaction State
+            const [dragState, setDragState] = useState(null);
+            const [propPanelPos, setPropPanelPos] = useState({ x: -1, y: 100 });
+            const containerRef = useRef(null);
+
+            // --- Logic: Containment & Visibility ---
+
+            const containmentMap = useMemo(() => {
+                const map = new Map();
+                relations.forEach(r => {
+                    if (r.type === 'containment' && r.targetType === 'node' && r.sourceType === 'node') {
+                        map.set(r.sourceId, r.targetId);
+                    }
+                });
+                return map;
+            }, [relations]);
+
+            const getVisualState = useCallback((nodeId) => {
+                let currentId = nodeId;
+                const visited = new Set();
+
+                while (containmentMap.has(currentId)) {
+                    if (visited.has(currentId)) break;
+                    visited.add(currentId);
+
+                    const parentId = containmentMap.get(currentId);
+                    const parent = nodes.find(n => n.id === parentId);
+
+                    if (parent && parent.collapsed) {
+                        const parentState = getVisualState(parentId);
+                        if (!parentState.visible) {
+                            return { visible: false, visualRepresentativeId: parentState.visualRepresentativeId };
+                        }
+                        return { visible: false, visualRepresentativeId: parentId };
+                    }
+                    currentId = parentId;
+                }
+
+                return { visible: true, visualRepresentativeId: nodeId };
+            }, [containmentMap, nodes]);
+
+            const visibleNodes = useMemo(() => {
+                return nodes.filter(n => getVisualState(n.id).visible);
+            }, [nodes, getVisualState]);
+
+            // --- Sorting for Z-Order (Hierarchy Aware) ---
+            const sortedNodes = useMemo(() => {
+                // 1. Calculate Depth of each Group
+                const depthMap = new Map();
+
+                const getDepth = (id, visited = new Set()) => {
+                    if (depthMap.has(id)) return depthMap.get(id);
+                    if (visited.has(id)) return 0; // Break cycle
+                    visited.add(id);
+
+                    const parentId = containmentMap.get(id);
+                    if (!parentId) {
+                        depthMap.set(id, 0);
+                        return 0;
+                    }
+
+                    const depth = getDepth(parentId, visited) + 1;
+                    depthMap.set(id, depth);
+                    return depth;
+                };
+
+                visibleNodes.forEach(n => {
+                    if (n.type === 'group') getDepth(n.id);
+                });
+
+                // 2. Sort
+                return [...visibleNodes].sort((a, b) => {
+                    // Standard objects always on top (effectively infinite Z)
+                    if (a.type !== 'group' && b.type === 'group') return 1;
+                    if (a.type === 'group' && b.type !== 'group') return -1;
+
+                    // Both are groups: Sort by depth ASCENDING (Leafs on top of Parents)
+                    if (a.type === 'group' && b.type === 'group') {
+                        const dA = depthMap.get(a.id) || 0;
+                        const dB = depthMap.get(b.id) || 0;
+                        return dA - dB;
+                    }
+
+                    return 0; // Stable
+                });
+            }, [visibleNodes, containmentMap]);
+
+            // --- Selection Bounds Calculation ---
+            const selectionBounds = useMemo(() => {
+                if (selection.length === 0) return null;
+                const selectedNodes = visibleNodes.filter(n => selection.includes(n.id));
+                if (selectedNodes.length === 0) return null;
+
+                let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+                selectedNodes.forEach(n => {
+                    if (n.x < minX) minX = n.x;
+                    if (n.y < minY) minY = n.y;
+                    if (n.x + n.w > maxX) maxX = n.x + n.w;
+                    if (n.y + n.h > maxY) maxY = n.y + n.h;
+                });
+                return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+            }, [selection, visibleNodes]);
+
+            // --- Handlers: Input ---
+
+            const handleWheel = (e) => {
+                const scaleAmount = -e.deltaY * 0.001;
+                const newScale = Math.min(Math.max(view.scale * (1 + scaleAmount), 0.1), 5);
+
+                const rect = containerRef.current.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+
+                const mouseWorldX = (mouseX - view.x) / view.scale;
+                const mouseWorldY = (mouseY - view.y) / view.scale;
+
+                const newX = mouseX - mouseWorldX * newScale;
+                const newY = mouseY - mouseWorldY * newScale;
+
+                setView({ x: newX, y: newY, scale: newScale });
+            };
+
+            const handlePointerDown = (e) => {
+                e.preventDefault();
+                const rect = containerRef.current.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const worldPos = screenToWorld({ x, y }, view);
+
+                // 1. Check Resize Handles (Selection Overlay)
+                if (selectionBounds && tool === 'select') {
+                    const handles = getResizeHandles(selectionBounds);
+                    for (let i = 0; i < handles.length; i++) {
+                        const h = handles[i];
+                        if (Math.abs(worldPos.x - h.x) < HANDLE_SIZE / view.scale && Math.abs(worldPos.y - h.y) < HANDLE_SIZE / view.scale) {
+                            // Snapshot ALL nodes for scaling
+                            const snapshot = {};
+                            nodes.forEach(n => snapshot[n.id] = { ...n });
+
+                            setDragState({
+                                isDragging: true,
+                                mode: 'resize',
+                                start: { x, y },
+                                current: { x, y },
+                                worldStart: worldPos,
+                                resizeHandle: i,
+                                nodeSnapshots: snapshot,
+                                selectionBoundsSnapshot: { ...selectionBounds }
+                            });
+                            return;
                         }
                     }
                 }
 
-                // --- VALIDATION: STRICT HIERARCHY ---
-                if (type === 'containment') {
-                   if (containmentMap.has(sourceId)) {
-                       setDragState(null);
-                       return;
-                   }
+                // 2. Check Objects Hit
+                const clickedNode = [...sortedNodes].reverse().find(n =>
+                    worldPos.x >= n.x && worldPos.x <= n.x + n.w &&
+                    worldPos.y >= n.y && worldPos.y <= n.y + n.h
+                );
 
-                   let ancestorId = targetId;
-                   let isCycle = false;
-                   const visited = new Set<string>();
-                   if (sourceId === targetId) isCycle = true;
-                   while (containmentMap.has(ancestorId) && !isCycle) {
-                       const parentId = containmentMap.get(ancestorId)!;
-                       if (parentId === sourceId) isCycle = true;
-                       if (visited.has(parentId)) break;
-                       visited.add(parentId);
-                       ancestorId = parentId;
-                   }
-                   if (isCycle) {
-                       setDragState(null);
-                       return;
-                   }
+                if (tool === 'standard' || tool === 'group') {
+                    const size = tool === 'standard' ? DEFAULT_NODE_SIZE : DEFAULT_GROUP_SIZE;
+                    const newNode = {
+                        id: generateId(),
+                        type: tool,
+                        x: worldPos.x - size.w / 2,
+                        y: worldPos.y - size.h / 2,
+                        w: size.w,
+                        h: size.h,
+                        name: tool === 'standard' ? 'Object' : 'Group',
+                        desc: 'Description...',
+                        collapsed: false
+                    };
+                    setNodes([...nodes, newNode]);
+                    // setSelection([newNode.id]);
+                    return;
                 }
 
-                setRelations(prev => [...prev, {
-                    id: generateId(),
-                    type,
-                    sourceId,
-                    targetId,
-                    sourceType: source.type === 'relation' ? 'relation' : 'node',
-                    targetType: 'node',
-                    name: type === 'containment' ? 'Contains' : 'Relation',
-                    desc: '',
-                    pathType: 'straight'
-                }]);
-            }
-        }
-    }
-
-    setDragState(null);
-  };
-
-  // --- Rendering Helpers ---
-
-  const getResizeHandles = (rect: Rect) => {
-     const { x, y, w, h } = rect;
-     return [
-       { x, y }, { x: x + w/2, y }, { x: x + w, y },
-       { x: x + w, y: y + h/2 }, { x: x + w, y: y + h },
-       { x: x + w/2, y: y + h }, { x, y: y + h }, { x, y: y + h/2 }
-     ];
-  };
-
-  const toggleGroupCollapse = (e: React.MouseEvent, node: NodeData) => {
-    e.stopPropagation();
-    setNodes(prev => prev.map(n => {
-        if (n.id !== node.id) return n;
-        const willCollapse = !n.collapsed;
-
-        let updates: Partial<NodeData> = { collapsed: willCollapse };
-        if (willCollapse) {
-            updates.lastExpandedSize = { w: n.w, h: n.h };
-            updates.w = n.lastCollapsedSize?.w || COLLAPSED_SIZE.w;
-            updates.h = n.lastCollapsedSize?.h || COLLAPSED_SIZE.h;
-        } else {
-            updates.lastCollapsedSize = { w: n.w, h: n.h };
-            updates.w = n.lastExpandedSize?.w || DEFAULT_GROUP_SIZE.w;
-            updates.h = n.lastExpandedSize?.h || DEFAULT_GROUP_SIZE.h;
-        }
-        return { ...n, ...updates };
-    }));
-  };
-
-  const deleteSelection = () => {
-    const idsToDelete = new Set(selection);
-
-    const findAllChildren = (parentId: string) => {
-        const children: string[] = [];
-        relations.forEach(r => {
-            if (r.type === 'containment' && r.targetId === parentId && r.sourceType === 'node') {
-                children.push(r.sourceId);
-                children.push(...findAllChildren(r.sourceId));
-            }
-        });
-        return children;
-    };
-
-    selection.forEach(id => {
-        const n = nodes.find(x => x.id === id);
-        if (n && n.type === 'group') {
-            findAllChildren(id).forEach(childId => idsToDelete.add(childId));
-        }
-    });
-
-    setNodes(prev => prev.filter(n => !idsToDelete.has(n.id)));
-    setRelations(prev => prev.filter(r =>
-        !idsToDelete.has(r.id) &&
-        !idsToDelete.has(r.sourceId) &&
-        !idsToDelete.has(r.targetId)
-    ));
-    setSelection([]);
-  };
-
-  // --- Properties ---
-  const updateSelectedProperty = (field: string, value: any) => {
-    if (selection.length !== 1) return;
-    const id = selection[0];
-
-    setNodes(nodes => nodes.map(n => n.id === id ? { ...n, [field]: value } : n));
-    setRelations(rels => rels.map(r => r.id === id ? { ...r, [field]: value } : r));
-  };
-
-  const getSelectionData = () => {
-    if (selection.length !== 1) return null;
-    const id = selection[0];
-    const n = nodes.find(x => x.id === id);
-    if (n) return { ...n, _kind: 'node' };
-    const r = relations.find(x => x.id === id);
-    if (r) return { ...r, _kind: 'relation' };
-    return null;
-  };
-  const selectedData = getSelectionData();
-
-  return (
-    <div className="w-full h-screen bg-gray-100 overflow-hidden flex flex-col font-sans select-none">
-
-      {/* Toolbar */}
-      <div className="absolute top-4 left-4 z-50 bg-white shadow-lg rounded-lg p-2 flex flex-col gap-2 border border-gray-200">
-        <button
-          className={`p-2 rounded ${tool === 'select' ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'}`}
-          onClick={() => setTool('select')} title="Select"
-        >
-          <MousePointer2 size={20} />
-        </button>
-        <button
-          className={`p-2 rounded ${tool === 'standard' ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'}`}
-          onClick={() => setTool('standard')} title="Standard Object"
-        >
-          <Square size={20} />
-        </button>
-        <button
-          className={`p-2 rounded ${tool === 'group' ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'}`}
-          onClick={() => setTool('group')} title="Group Object"
-        >
-          <Group size={20} />
-        </button>
-        <button
-          className={`p-2 rounded ${tool === 'relation' ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'}`}
-          onClick={() => setTool('relation')} title="Relation"
-        >
-          <ArrowRight size={20} />
-        </button>
-        <div className="h-px bg-gray-200 my-1" />
-        <button className="p-2 hover:bg-gray-100 rounded text-red-500" onClick={deleteSelection} title="Delete Selected">
-            <Trash2 size={20} />
-        </button>
-      </div>
-
-      {/* Property Panel */}
-      {selectedData && (
-        <div
-          className="absolute z-50 bg-white shadow-xl border border-gray-200 w-64 rounded-lg flex flex-col overflow-hidden"
-          style={{
-            top: propPanelPos.y,
-            left: propPanelPos.x === -1 ? 'auto' : propPanelPos.x,
-            right: propPanelPos.x === -1 ? 16 : 'auto',
-          }}
-        >
-          <div
-             className="flex justify-between items-center text-gray-700 font-semibold bg-gray-50 px-4 py-2 cursor-move border-b"
-             onPointerDown={handlePanelPointerDown}
-          >
-            <span>Properties</span>
-            <Settings size={16} />
-          </div>
-          <div className="p-4 flex flex-col gap-3 bg-white">
-              <div>
-                <label className="text-xs text-gray-500">Name</label>
-                <input
-                  className="w-full border rounded px-2 py-1 text-sm"
-                  value={selectedData.name}
-                  onChange={e => updateSelectedProperty('name', e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="text-xs text-gray-500">Description</label>
-                <textarea
-                  className="w-full border rounded px-2 py-1 text-sm h-16 resize-none"
-                  value={selectedData.desc}
-                  onChange={e => updateSelectedProperty('desc', e.target.value)}
-                />
-              </div>
-              {'pathType' in selectedData && (
-                 <div>
-                   <label className="text-xs text-gray-500">Path Type</label>
-                   <select
-                     className="w-full border rounded px-2 py-1 text-sm"
-                     value={selectedData.pathType}
-                     onChange={e => updateSelectedProperty('pathType', e.target.value)}
-                   >
-                     <option value="straight">Straight</option>
-                     <option value="curved">Curved</option>
-                     <option value="manhattan">Manhattan</option>
-                   </select>
-                 </div>
-              )}
-          </div>
-        </div>
-      )}
-
-      {/* Canvas Area */}
-      <div
-        ref={containerRef}
-        className="flex-1 relative cursor-crosshair overflow-hidden"
-        onWheel={handleWheel}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onContextMenu={e => e.preventDefault()}
-        style={{
-          background: 'radial-gradient(circle, #ddd 1px, transparent 1px)',
-          backgroundSize: `${20 * view.scale}px ${20 * view.scale}`,
-          backgroundPosition: `${view.x}px ${view.y}px`
-        }}
-      >
-        <div
-          style={{
-            transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})`,
-            transformOrigin: '0 0',
-            width: '100%', height: '100%',
-            position: 'absolute'
-          }}
-        >
-
-          {/* Relations Layer (SVG) */}
-          <svg className="absolute top-0 left-0 overflow-visible pointer-events-none z-[5]" style={{ width: 1, height: 1 }}>
-            <defs>
-              <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
-                <path d="M0,0 L0,6 L9,3 z" fill="#333" />
-              </marker>
-            </defs>
-            {relations.map(rel => {
-                let startNode: NodeData | undefined;
-                let startCenter: Point = { x: 0, y: 0 };
-
-                // 1. Resolve Source Center (Logical Center)
-                if (rel.sourceType === 'node') {
-                   const sVis = getVisualState(rel.sourceId);
-                   startNode = nodes.find(n => n.id === sVis.visualRepresentativeId);
-                   if (startNode) startCenter = getRectCenter(startNode);
-                } else {
-                   const parentRel = relations.find(r => r.id === rel.sourceId);
-                   if (parentRel) {
-                       const pSourceNode = nodes.find(n => n.id === getVisualState(parentRel.sourceId).visualRepresentativeId);
-                       const pTargetNode = nodes.find(n => n.id === getVisualState(parentRel.targetId).visualRepresentativeId);
-                       if (pSourceNode && pTargetNode) {
-                           const pStart = getRectCenter(pSourceNode);
-                           const pEnd = getRectCenter(pTargetNode);
-                           startCenter = { x: (pStart.x + pEnd.x)/2, y: (pStart.y + pEnd.y)/2 };
-                       }
-                   }
+                if (tool === 'relation') {
+                    if (clickedNode) {
+                        setDragState({
+                            isDragging: true,
+                            mode: 'connect',
+                            start: { x, y },
+                            current: { x, y },
+                            worldStart: worldPos,
+                            connectionSource: { id: clickedNode.id, type: 'node' }
+                        });
+                    }
+                    return;
                 }
 
-                const tVis = getVisualState(rel.targetId);
-                const targetNode = nodes.find(n => n.id === tVis.visualRepresentativeId);
+                if (tool === 'select') {
+                    if (clickedNode) {
+                        const isSelected = selection.includes(clickedNode.id);
+                        let newSelection = selection;
 
-                if ((!startNode && rel.sourceType === 'node') || !targetNode) return null;
+                        if (e.shiftKey) {
+                            if (isSelected) newSelection = selection.filter(id => id !== clickedNode.id);
+                            else newSelection = [...selection, clickedNode.id];
+                        } else {
+                            if (!isSelected) newSelection = [clickedNode.id];
+                        }
 
-                const targetCenter = getRectCenter(targetNode);
+                        setSelection(newSelection);
 
-                // 2. Calculate Visual Clipping (Bounds Intersection)
-                let drawStart = startCenter;
-                let drawEnd = targetCenter;
+                        // Snapshot ALL nodes for stable movement
+                        const snapshot = {};
+                        nodes.forEach(n => snapshot[n.id] = { ...n });
 
-                if (startNode) {
-                    drawStart = getIntersectingPoint(startNode, targetCenter);
+                        setDragState({
+                            isDragging: true,
+                            mode: 'move',
+                            start: { x, y },
+                            current: { x, y },
+                            worldStart: worldPos,
+                            nodeSnapshots: snapshot
+                        });
+                    } else {
+                        if (e.button === 2 || e.button === 1) {
+                            setDragState({
+                                isDragging: true,
+                                mode: 'pan',
+                                start: { x, y },
+                                current: { x, y },
+                                worldStart: worldPos
+                            });
+                        } else {
+                            if (!e.shiftKey) setSelection([]);
+                            setDragState({
+                                isDragging: true,
+                                mode: 'marquee',
+                                start: { x, y },
+                                current: { x, y },
+                                worldStart: worldPos,
+                                selectionStart: e.shiftKey ? selection : []
+                            });
+                        }
+                    }
                 }
-                if (targetNode) {
-                    drawEnd = getIntersectingPoint(targetNode, startCenter);
-                }
+            };
 
-                // Containment Visibility Check
-                if (rel.type === 'containment' && rel.sourceType === 'node') {
-                    const child = nodes.find(n => n.id === rel.sourceId);
-                    const group = nodes.find(n => n.id === rel.targetId);
-                    if (child && group && !group.collapsed) {
-                         const cx = child.x, cy = child.y, cw = child.w, ch = child.h;
-                         const gx = group.x, gy = group.y, gw = group.w, gh = group.h;
-                         if (cx >= gx && cx + cw <= gx + gw && cy >= gy && cy + ch <= gy + gh) {
-                             return null;
-                         }
+            const handleRelationPointerDown = (e, relId) => {
+                e.stopPropagation();
+                if (tool === 'select') {
+                    if (e.shiftKey) {
+                        setSelection(prev => prev.includes(relId) ? prev.filter(id => id !== relId) : [...prev, relId]);
+                    } else {
+                        setSelection([relId]);
+                    }
+                } else if (tool === 'relation') {
+                    const rect = containerRef.current.getBoundingClientRect();
+                    setDragState({
+                        isDragging: true,
+                        mode: 'connect',
+                        start: { x: e.clientX - rect.left, y: e.clientY - rect.top },
+                        current: { x: e.clientX - rect.left, y: e.clientY - rect.top },
+                        worldStart: screenToWorld({ x: e.clientX - rect.left, y: e.clientY - rect.top }, view),
+                        connectionSource: { id: relId, type: 'relation' }
+                    });
+                }
+            };
+
+            const handlePanelPointerDown = (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                const rect = containerRef.current.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                const currentX = propPanelPos.x === -1 ? rect.width - 272 : propPanelPos.x;
+                const currentY = propPanelPos.y;
+
+                setDragState({
+                    isDragging: true,
+                    mode: 'panel_move',
+                    start: { x, y },
+                    current: { x, y },
+                    worldStart: { x: 0, y: 0 },
+                    panelStartPos: { x: currentX, y: currentY }
+                });
+            };
+
+            const handlePointerMove = (e) => {
+                if (!dragState || !dragState.isDragging) return;
+
+                const rect = containerRef.current.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const worldPos = screenToWorld({ x, y }, view);
+
+                setDragState(prev => prev ? ({ ...prev, current: { x, y } }) : null);
+
+                if (dragState.mode === 'pan') {
+                    const dx = x - dragState.start.x;
+                    const dy = y - dragState.start.y;
+                    setView(prev => ({ ...prev, x: prev.x + dx, y: prev.y + dy }));
+                    setDragState(prev => prev ? ({ ...prev, start: { x, y } }) : null);
+                }
+                else if (dragState.mode === 'panel_move' && dragState.panelStartPos) {
+                    const dx = x - dragState.start.x;
+                    const dy = y - dragState.start.y;
+                    setPropPanelPos({
+                        x: dragState.panelStartPos.x + dx,
+                        y: dragState.panelStartPos.y + dy
+                    });
+                }
+                else if (dragState.mode === 'move') {
+                    const dx = worldPos.x - dragState.worldStart.x;
+                    const dy = worldPos.y - dragState.worldStart.y;
+
+                    // Calculate moving set using SNAPSHOTS
+                    const movingIds = new Set(selection);
+                    let changed = true;
+                    while(changed) {
+                        changed = false;
+                        // Iterate over all nodes in snapshot
+                        Object.values(dragState.nodeSnapshots).forEach(n => {
+                            if (movingIds.has(n.id)) return;
+
+                            const parentId = containmentMap.get(n.id);
+                            if (parentId && movingIds.has(parentId)) {
+                                const parentSnap = dragState.nodeSnapshots[parentId];
+                                const childSnap = n;
+
+                                // Check if parent was expanded in snapshot
+                                if (parentSnap && !parentSnap.collapsed) {
+                                    // Strict Geometric Check on SNAPSHOTS
+                                    const isInside =
+                                        childSnap.x >= parentSnap.x &&
+                                        childSnap.y >= parentSnap.y &&
+                                        childSnap.x + childSnap.w <= parentSnap.x + parentSnap.w &&
+                                        childSnap.y + childSnap.h <= parentSnap.y + parentSnap.h;
+
+                                    if (isInside) {
+                                        movingIds.add(n.id);
+                                        changed = true;
+                                    }
+                                }
+                            }
+                        });
+                    }
+
+                    // Update Nodes
+                    const newNodes = nodes.map(n => {
+                        if (movingIds.has(n.id)) {
+                            const snap = dragState.nodeSnapshots[n.id];
+                            return { ...n, x: snap.x + dx, y: snap.y + dy };
+                        }
+                        return n;
+                    });
+
+                    setNodes(newNodes);
+                }
+                else if (dragState.mode === 'resize') {
+                    const dx = worldPos.x - dragState.worldStart.x;
+                    const dy = worldPos.y - dragState.worldStart.y;
+
+                    const originalBounds = dragState.selectionBoundsSnapshot;
+                    let { x, y, w, h } = originalBounds;
+                    const handle = dragState.resizeHandle;
+
+                    // Calculate new Bounds
+                    if ([0, 6, 7].includes(handle)) { x += dx; w -= dx; }
+                    if ([0, 1, 2].includes(handle)) { y += dy; h -= dy; }
+                    if ([2, 3, 4].includes(handle)) { w += dx; }
+                    if ([4, 5, 6].includes(handle)) { h += dy; }
+
+                    if (w < 20) w = 20;
+                    if (h < 20) h = 20;
+
+                    // Calculate Scale Factors
+                    const scaleX = w / originalBounds.w;
+                    const scaleY = h / originalBounds.h;
+
+                    const newNodes = nodes.map(n => {
+                        if (selection.includes(n.id)) {
+                            const snap = dragState.nodeSnapshots[n.id];
+                            // Relative position in bounds
+                            const relX = snap.x - originalBounds.x;
+                            const relY = snap.y - originalBounds.y;
+
+                            return {
+                                ...n,
+                                x: x + relX * scaleX,
+                                y: y + relY * scaleY,
+                                w: snap.w * scaleX,
+                                h: snap.h * scaleY
+                            };
+                        }
+                        return n;
+                    });
+
+                    setNodes(newNodes);
+                }
+            };
+
+            const handlePointerUp = (e) => {
+                if (!dragState) return;
+
+                const rect = containerRef.current.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const worldPos = screenToWorld({ x, y }, view);
+
+                if (dragState.mode === 'marquee') {
+                    const x1 = Math.min(dragState.worldStart.x, worldPos.x);
+                    const y1 = Math.min(dragState.worldStart.y, worldPos.y);
+                    const x2 = Math.max(dragState.worldStart.x, worldPos.x);
+                    const y2 = Math.max(dragState.worldStart.y, worldPos.y);
+
+                    const newSel = visibleNodes.filter(n =>
+                        n.x >= x1 && n.x + n.w <= x2 &&
+                        n.y >= y1 && n.y + n.h <= y2
+                    ).map(n => n.id);
+
+                    setSelection(newSel);
+                }
+                else if (dragState.mode === 'connect') {
+                    const targetNode = [...sortedNodes].reverse().find(n =>
+                        worldPos.x >= n.x && worldPos.x <= n.x + n.w &&
+                        worldPos.y >= n.y && worldPos.y <= n.y + n.h
+                    );
+
+                    if (targetNode && dragState.connectionSource) {
+                        const source = dragState.connectionSource;
+                        const target = targetNode;
+
+                        if (source.id !== target.id) {
+                            let type = 'directional';
+                            let sourceId = source.id;
+                            let targetId = target.id;
+
+                            const sourceNode = source.type === 'node' ? nodes.find(n => n.id === source.id) : null;
+
+                            if (source.type === 'relation') {
+                                type = 'relation_link';
+                            } else if (sourceNode) {
+                                if (sourceNode.type === 'standard' && target.type === 'standard') {
+                                    type = 'directional';
+                                } else if (target.type === 'group' || sourceNode.type === 'group') {
+                                    type = 'containment';
+                                    if (sourceNode.type === 'group' && target.type === 'standard') {
+                                        sourceId = target.id;
+                                        targetId = source.id;
+                                    }
+                                }
+                            }
+
+                            // --- VALIDATION: STRICT HIERARCHY ---
+                            let valid = true;
+                            if (type === 'containment') {
+                                if (containmentMap.has(sourceId)) {
+                                    valid = false;
+                                } else {
+                                    let ancestorId = targetId;
+                                    let isCycle = false;
+                                    const visited = new Set();
+                                    if (sourceId === targetId) isCycle = true;
+                                    while (containmentMap.has(ancestorId) && !isCycle) {
+                                        const parentId = containmentMap.get(ancestorId);
+                                        if (parentId === sourceId) isCycle = true;
+                                        if (visited.has(parentId)) break;
+                                        visited.add(parentId);
+                                        ancestorId = parentId;
+                                    }
+                                    if (isCycle) valid = false;
+                                }
+                            }
+
+                            if (valid) {
+                                setRelations(prev => [...prev, {
+                                    id: generateId(),
+                                    type,
+                                    sourceId,
+                                    targetId,
+                                    sourceType: source.type === 'relation' ? 'relation' : 'node',
+                                    targetType: 'node',
+                                    name: type === 'containment' ? 'Contains' : 'Relation',
+                                    desc: '',
+                                    pathType: 'straight'
+                                }]);
+                            }
+                        }
                     }
                 }
 
-                let pathD = '';
-                if (rel.pathType === 'curved') pathD = getCurvedPath(drawStart, drawEnd);
-                else if (rel.pathType === 'manhattan') pathD = getManhattanPath(drawStart, drawEnd);
-                else pathD = getStraightPath(drawStart, drawEnd);
+                setDragState(null);
+            };
 
-                const isSelected = selection.includes(rel.id);
-                const strokeStyle = rel.type === 'directional' ? 'solid' : '5,5';
-                const markerEnd = rel.type === 'directional' ? 'url(#arrow)' : undefined;
+            const getResizeHandles = (rect) => {
+                const { x, y, w, h } = rect;
+                return [
+                { x, y }, { x: x + w/2, y }, { x: x + w, y },
+                { x: x + w, y: y + h/2 }, { x: x + w, y: y + h },
+                { x: x + w/2, y: y + h }, { x, y: y + h }, { x, y: y + h/2 }
+                ];
+            };
 
-                return (
-                    <g key={rel.id} className="pointer-events-auto" onPointerDown={(e) => handleRelationPointerDown(e, rel.id)}>
-                        <path d={pathD} stroke="transparent" strokeWidth="15" fill="none" />
-                        <path
-                            d={pathD}
-                            stroke={isSelected ? '#3b82f6' : '#555'}
-                            strokeWidth={isSelected ? 3 : 2}
-                            fill="none"
-                            strokeDasharray={strokeStyle === 'solid' ? undefined : strokeStyle}
-                            markerEnd={markerEnd}
-                        />
-                        <g transform={`translate(${(drawStart.x + drawEnd.x)/2}, ${(drawStart.y + drawEnd.y)/2})`}>
-                            <rect x="-40" y="-10" width="80" height="20" fill="white" fillOpacity="0.8" rx="4" />
-                            <text x="0" y="4" textAnchor="middle" fontSize="10" fill="#333" className="select-none">{rel.name}</text>
-                        </g>
-                    </g>
-                );
-            })}
+            const toggleGroupCollapse = (e, node) => {
+                e.stopPropagation();
+                setNodes(prev => prev.map(n => {
+                    if (n.id !== node.id) return n;
+                    const willCollapse = !n.collapsed;
 
-            {dragState && dragState.mode === 'connect' && (
-               <path
-                 d={`M ${dragState.worldStart.x} ${dragState.worldStart.y} L ${screenToWorld(dragState.current, view).x} ${screenToWorld(dragState.current, view).y}`}
-                 stroke="#3b82f6" strokeWidth="2" strokeDasharray="5,5" fill="none"
-               />
-            )}
-          </svg>
+                    let updates = { collapsed: willCollapse };
+                    if (willCollapse) {
+                        updates.lastExpandedSize = { w: n.w, h: n.h };
+                        updates.w = n.lastCollapsedSize?.w || COLLAPSED_SIZE.w;
+                        updates.h = n.lastCollapsedSize?.h || COLLAPSED_SIZE.h;
+                    } else {
+                        updates.lastCollapsedSize = { w: n.w, h: n.h };
+                        updates.w = n.lastExpandedSize?.w || DEFAULT_GROUP_SIZE.w;
+                        updates.h = n.lastExpandedSize?.h || DEFAULT_GROUP_SIZE.h;
+                    }
+                    return { ...n, ...updates };
+                }));
+            };
 
-          {/* Nodes Layer */}
-          {sortedNodes.map(node => {
-            const isSelected = selection.includes(node.id);
-            const isGroup = node.type === 'group';
+            const deleteSelection = () => {
+                const idsToDelete = new Set(selection);
+
+                const findAllChildren = (parentId) => {
+                    const children = [];
+                    relations.forEach(r => {
+                        if (r.type === 'containment' && r.targetId === parentId && r.sourceType === 'node') {
+                            children.push(r.sourceId);
+                            children.push(...findAllChildren(r.sourceId));
+                        }
+                    });
+                    return children;
+                };
+
+                selection.forEach(id => {
+                    const n = nodes.find(x => x.id === id);
+                    if (n && n.type === 'group') {
+                        findAllChildren(id).forEach(childId => idsToDelete.add(childId));
+                    }
+                });
+
+                setNodes(prev => prev.filter(n => !idsToDelete.has(n.id)));
+                setRelations(prev => prev.filter(r =>
+                    !idsToDelete.has(r.id) &&
+                    !idsToDelete.has(r.sourceId) &&
+                    !idsToDelete.has(r.targetId)
+                ));
+                setSelection([]);
+            };
+
+            const updateSelectedProperty = (field, value) => {
+                if (selection.length !== 1) return;
+                const id = selection[0];
+
+                setNodes(nodes => nodes.map(n => n.id === id ? { ...n, [field]: value } : n));
+                setRelations(rels => rels.map(r => r.id === id ? { ...r, [field]: value } : r));
+            };
+
+            const getSelectionData = () => {
+                if (selection.length !== 1) return null;
+                const id = selection[0];
+                const n = nodes.find(x => x.id === id);
+                if (n) return { ...n, _kind: 'node' };
+                const r = relations.find(x => x.id === id);
+                if (r) return { ...r, _kind: 'relation' };
+                return null;
+            };
+            const selectedData = getSelectionData();
 
             return (
-              <div
-                key={node.id}
-                className={`absolute flex flex-col items-center ${
-                    isGroup ? 'justify-start pt-7' : 'justify-center p-2'
-                } text-sm select-none transition-shadow rounded-lg ${
-                    isSelected ? 'ring-2 ring-blue-500' : ''
-                } ${isGroup ? 'bg-white border-2 border-gray-400 border-dashed' : 'bg-white border-2 border-gray-800 shadow-sm'}`}
-                style={{
-                  left: node.x, top: node.y, width: node.w, height: node.h,
-                  zIndex: isGroup ? 0 : 10
-                }}
-              >
-                {/* Group State Handle */}
-                {isGroup && (
-                    <div
-                        className="absolute top-1 left-1/2 -translate-x-1/2 bg-white border border-gray-400 w-5 h-5 flex items-center justify-center cursor-pointer hover:bg-gray-100 rounded-sm shadow-sm z-20"
-                        onPointerDown={(e) => toggleGroupCollapse(e, node)}
+                <div className="w-full h-screen bg-gray-100 overflow-hidden flex flex-col font-sans select-none">
+
+                {/* Toolbar */}
+                <div className="absolute top-4 left-4 z-50 bg-white shadow-lg rounded-lg p-2 flex flex-col gap-2 border border-gray-200">
+                    <button
+                    className={`p-2 rounded ${tool === 'select' ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'}`}
+                    onClick={() => setTool('select')} title="Select"
                     >
-                        {node.collapsed ? <Plus size={12}/> : <Minus size={12}/>}
+                    <MousePointer2 size={20} />
+                    </button>
+                    <button
+                    className={`p-2 rounded ${tool === 'standard' ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'}`}
+                    onClick={() => setTool('standard')} title="Standard Object"
+                    >
+                    <Square size={20} />
+                    </button>
+                    <button
+                    className={`p-2 rounded ${tool === 'group' ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'}`}
+                    onClick={() => setTool('group')} title="Group Object"
+                    >
+                    <Group size={20} />
+                    </button>
+                    <button
+                    className={`p-2 rounded ${tool === 'relation' ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'}`}
+                    onClick={() => setTool('relation')} title="Relation"
+                    >
+                    <ArrowRight size={20} />
+                    </button>
+                    <div className="h-px bg-gray-200 my-1" />
+                    <button className="p-2 hover:bg-gray-100 rounded text-red-500" onClick={deleteSelection} title="Delete Selected">
+                        <Trash2 size={20} />
+                    </button>
+                </div>
+
+                {/* Property Panel */}
+                {selectedData && (
+                    <div
+                    className="absolute z-50 bg-white shadow-xl border border-gray-200 w-64 rounded-lg flex flex-col overflow-hidden"
+                    style={{
+                        top: propPanelPos.y,
+                        left: propPanelPos.x === -1 ? 'auto' : propPanelPos.x,
+                        right: propPanelPos.x === -1 ? 16 : 'auto',
+                    }}
+                    >
+                    <div
+                        className="flex justify-between items-center text-gray-700 font-semibold bg-gray-50 px-4 py-2 cursor-move border-b"
+                        onPointerDown={handlePanelPointerDown}
+                    >
+                        <span>Properties</span>
+                        <Settings size={16} />
+                    </div>
+                    <div className="p-4 flex flex-col gap-3 bg-white">
+                        <div>
+                            <label className="text-xs text-gray-500">Name</label>
+                            <input
+                            className="w-full border rounded px-2 py-1 text-sm"
+                            value={selectedData.name}
+                            onChange={e => updateSelectedProperty('name', e.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <label className="text-xs text-gray-500">Description</label>
+                            <textarea
+                            className="w-full border rounded px-2 py-1 text-sm h-16 resize-none"
+                            value={selectedData.desc}
+                            onChange={e => updateSelectedProperty('desc', e.target.value)}
+                            />
+                        </div>
+                        {'pathType' in selectedData && (
+                            <div>
+                            <label className="text-xs text-gray-500">Path Type</label>
+                            <select
+                                className="w-full border rounded px-2 py-1 text-sm"
+                                value={selectedData.pathType}
+                                onChange={e => updateSelectedProperty('pathType', e.target.value)}
+                            >
+                                <option value="straight">Straight</option>
+                                <option value="curved">Curved</option>
+                                <option value="manhattan">Manhattan</option>
+                            </select>
+                            </div>
+                        )}
+                    </div>
                     </div>
                 )}
 
-                <span className={`font-bold pointer-events-none truncate w-full text-center`}>
-                    {node.name}
-                </span>
-                {!node.collapsed && <span className="text-[10px] text-gray-500 pointer-events-none truncate w-full text-center">{node.desc}</span>}
-              </div>
+                {/* Canvas Area */}
+                <div
+                    ref={containerRef}
+                    className="flex-1 relative cursor-crosshair overflow-hidden"
+                    onWheel={handleWheel}
+                    onPointerDown={handlePointerDown}
+                    onPointerMove={handlePointerMove}
+                    onPointerUp={handlePointerUp}
+                    onContextMenu={e => e.preventDefault()}
+                    style={{
+                    background: 'radial-gradient(circle, #ddd 1px, transparent 1px)',
+                    backgroundSize: `${20 * view.scale}px ${20 * view.scale}`,
+                    backgroundPosition: `${view.x}px ${view.y}px`
+                    }}
+                >
+                    <div
+                    style={{
+                        transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})`,
+                        transformOrigin: '0 0',
+                        width: '100%', height: '100%',
+                        position: 'absolute'
+                    }}
+                    >
+
+                    {/* Relations Layer (SVG) */}
+                    <svg className="absolute top-0 left-0 overflow-visible pointer-events-none z-[5]" style={{ width: 1, height: 1 }}>
+                        <defs>
+                        <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                            <path d="M0,0 L0,6 L9,3 z" fill="#333" />
+                        </marker>
+                        </defs>
+                        {relations.map(rel => {
+                            let startNode = null;
+                            let startCenter = { x: 0, y: 0 };
+
+                            // 1. Resolve Source Center (Logical Center)
+                            if (rel.sourceType === 'node') {
+                                const sVis = getVisualState(rel.sourceId);
+                                startNode = nodes.find(n => n.id === sVis.visualRepresentativeId);
+                                if (startNode) startCenter = getRectCenter(startNode);
+                            } else {
+                                const parentRel = relations.find(r => r.id === rel.sourceId);
+                                if (parentRel) {
+                                    const pSourceNode = nodes.find(n => n.id === getVisualState(parentRel.sourceId).visualRepresentativeId);
+                                    const pTargetNode = nodes.find(n => n.id === getVisualState(parentRel.targetId).visualRepresentativeId);
+                                    if (pSourceNode && pTargetNode) {
+                                        const pStart = getRectCenter(pSourceNode);
+                                        const pEnd = getRectCenter(pTargetNode);
+                                        startCenter = { x: (pStart.x + pEnd.x)/2, y: (pStart.y + pEnd.y)/2 };
+                                    }
+                                }
+                            }
+
+                            const tVis = getVisualState(rel.targetId);
+                            const targetNode = nodes.find(n => n.id === tVis.visualRepresentativeId);
+
+                            if ((!startNode && rel.sourceType === 'node') || !targetNode) return null;
+
+                            const targetCenter = getRectCenter(targetNode);
+
+                            // 2. Calculate Visual Clipping (Bounds Intersection)
+                            let drawStart = startCenter;
+                            let drawEnd = targetCenter;
+
+                            if (startNode) {
+                                drawStart = getIntersectingPoint(startNode, targetCenter);
+                            }
+                            if (targetNode) {
+                                drawEnd = getIntersectingPoint(targetNode, startCenter);
+                            }
+
+                            // Containment Visibility Check
+                            if (rel.type === 'containment' && rel.sourceType === 'node') {
+                                const child = nodes.find(n => n.id === rel.sourceId);
+                                const group = nodes.find(n => n.id === rel.targetId);
+                                if (child && group && !group.collapsed) {
+                                    const cx = child.x, cy = child.y, cw = child.w, ch = child.h;
+                                    const gx = group.x, gy = group.y, gw = group.w, gh = group.h;
+                                    if (cx >= gx && cx + cw <= gx + gw && cy >= gy && cy + ch <= gy + gh) {
+                                        return null;
+                                    }
+                                }
+                            }
+
+                            let pathD = '';
+                            if (rel.pathType === 'curved') pathD = getCurvedPath(drawStart, drawEnd);
+                            else if (rel.pathType === 'manhattan') pathD = getManhattanPath(drawStart, drawEnd);
+                            else pathD = getStraightPath(drawStart, drawEnd);
+
+                            const isSelected = selection.includes(rel.id);
+                            const strokeStyle = rel.type === 'directional' ? 'solid' : '5,5';
+                            const markerEnd = rel.type === 'directional' ? 'url(#arrow)' : undefined;
+
+                            return (
+                                <g key={rel.id} className="pointer-events-auto" onPointerDown={(e) => handleRelationPointerDown(e, rel.id)}>
+                                    <path d={pathD} stroke="transparent" strokeWidth="15" fill="none" />
+                                    <path
+                                        d={pathD}
+                                        stroke={isSelected ? '#3b82f6' : '#555'}
+                                        strokeWidth={isSelected ? 3 : 2}
+                                        fill="none"
+                                        strokeDasharray={strokeStyle === 'solid' ? undefined : strokeStyle}
+                                        markerEnd={markerEnd}
+                                    />
+                                    <g transform={`translate(${(drawStart.x + drawEnd.x)/2}, ${(drawStart.y + drawEnd.y)/2})`}>
+                                        <rect x="-40" y="-10" width="80" height="20" fill="white" fillOpacity="0.8" rx="4" />
+                                        <text x="0" y="4" textAnchor="middle" fontSize="10" fill="#333" className="select-none">{rel.name}</text>
+                                    </g>
+                                </g>
+                            );
+                        })}
+
+                        {dragState && dragState.mode === 'connect' && (
+                        <path
+                            d={`M ${dragState.worldStart.x} ${dragState.worldStart.y} L ${screenToWorld(dragState.current, view).x} ${screenToWorld(dragState.current, view).y}`}
+                            stroke="#3b82f6" strokeWidth="2" strokeDasharray="5,5" fill="none"
+                        />
+                        )}
+                    </svg>
+
+                    {/* Nodes Layer */}
+                    {sortedNodes.map(node => {
+                        const isSelected = selection.includes(node.id);
+                        const isGroup = node.type === 'group';
+
+                        return (
+                        <div
+                            key={node.id}
+                            className={`absolute flex flex-col items-center ${
+                                isGroup ? 'justify-start pt-7' : 'justify-center p-2'
+                            } text-sm select-none transition-shadow rounded-lg ${
+                                isSelected ? 'ring-2 ring-blue-500' : ''
+                            } ${isGroup ? 'bg-white border-2 border-gray-400 border-dashed' : 'bg-white border-2 border-gray-800 shadow-sm'}`}
+                            style={{
+                            left: node.x, top: node.y, width: node.w, height: node.h,
+                            zIndex: isGroup ? 0 : 10
+                            }}
+                        >
+                            {/* Group State Handle */}
+                            {isGroup && (
+                                <div
+                                    className="absolute top-1 left-1/2 -translate-x-1/2 bg-white border border-gray-400 w-5 h-5 flex items-center justify-center cursor-pointer hover:bg-gray-100 rounded-sm shadow-sm z-20"
+                                    onPointerDown={(e) => toggleGroupCollapse(e, node)}
+                                >
+                                    {node.collapsed ? <Plus size={12}/> : <Minus size={12}/>}
+                                </div>
+                            )}
+
+                            <span className={`font-bold pointer-events-none truncate w-full text-center ${isGroup ? 'mt-6' : ''}`}>
+                                {node.name}
+                            </span>
+                            {!node.collapsed && <span className="text-[10px] text-gray-500 pointer-events-none truncate w-full text-center">{node.desc}</span>}
+                        </div>
+                        );
+                    })}
+
+                    {/* Selection Overlay & Handles */}
+                    {selectionBounds && tool === 'select' && (
+                        <div
+                            className="absolute border border-blue-500 pointer-events-none"
+                            style={{
+                                left: selectionBounds.x,
+                                top: selectionBounds.y,
+                                width: selectionBounds.w,
+                                height: selectionBounds.h,
+                                zIndex: 20
+                            }}
+                        >
+                            {getResizeHandles(selectionBounds).map((h, i) => (
+                                <div
+                                    key={i}
+                                    className="absolute w-2.5 h-2.5 bg-white border border-black z-30 pointer-events-auto"
+                                    style={{
+                                        // Position relative to the bounding box div
+                                        left: (i === 1 || i === 5) ? '50%' : (i === 2 || i === 3 || i === 4) ? '100%' : '0%',
+                                        top: (i === 3 || i === 7) ? '50%' : (i === 4 || i === 5 || i === 6) ? '100%' : '0%',
+                                        // Offset to "Outside"
+                                        transform: `translate(
+                                            ${(i === 0 || i === 6 || i === 7) ? '-100%' : (i === 2 || i === 3 || i === 4) ? '0%' : '-50%'},
+                                            ${(i === 0 || i === 1 || i === 2) ? '-100%' : (i === 4 || i === 5 || i === 6) ? '0%' : '-50%'}
+                                        )`,
+                                        cursor: 'nwse-resize' // Simplified for demo
+                                    }}
+                                />
+                            ))}
+                        </div>
+                    )}
+
+                    {dragState && dragState.mode === 'marquee' && (
+                        <div
+                            className="absolute border border-blue-500 bg-blue-500/10 pointer-events-none"
+                            style={{
+                                left: Math.min(dragState.worldStart.x, screenToWorld(dragState.current, view).x),
+                                top: Math.min(dragState.worldStart.y, screenToWorld(dragState.current, view).y),
+                                width: Math.abs(dragState.worldStart.x - screenToWorld(dragState.current, view).x),
+                                height: Math.abs(dragState.worldStart.y - screenToWorld(dragState.current, view).y),
+                            }}
+                        />
+                    )}
+
+                    </div>
+                </div>
+
+                <div className="absolute bottom-2 right-2 text-xs text-gray-400 bg-white/80 p-1 rounded pointer-events-none">
+                    Pos: {Math.round(view.x)}, {Math.round(view.y)} | Scale: {view.scale.toFixed(2)}x
+                </div>
+                </div>
             );
-          })}
+        }
 
-          {/* Selection Overlay & Handles */}
-          {selectionBounds && tool === 'select' && (
-              <div
-                className="absolute border border-blue-500 pointer-events-none"
-                style={{
-                    left: selectionBounds.x,
-                    top: selectionBounds.y,
-                    width: selectionBounds.w,
-                    height: selectionBounds.h,
-                    zIndex: 20
-                }}
-              >
-                  {getResizeHandles(selectionBounds).map((h, i) => (
-                      <div
-                          key={i}
-                          className="absolute w-2.5 h-2.5 bg-white border border-black z-30 pointer-events-auto"
-                          style={{
-                              // Position relative to the bounding box div
-                              left: (i === 1 || i === 5) ? '50%' : (i === 2 || i === 3 || i === 4) ? '100%' : '0%',
-                              top: (i === 3 || i === 7) ? '50%' : (i === 4 || i === 5 || i === 6) ? '100%' : '0%',
-                              // Offset to "Outside"
-                              transform: `translate(
-                                ${(i === 0 || i === 6 || i === 7) ? '-100%' : (i === 2 || i === 3 || i === 4) ? '0%' : '-50%'},
-                                ${(i === 0 || i === 1 || i === 2) ? '-100%' : (i === 4 || i === 5 || i === 6) ? '0%' : '-50%'}
-                              )`,
-                              cursor: 'nwse-resize' // Simplified for demo
-                          }}
-                      />
-                  ))}
-              </div>
-          )}
-
-          {dragState && dragState.mode === 'marquee' && (
-             <div
-                className="absolute border border-blue-500 bg-blue-500/10 pointer-events-none"
-                style={{
-                    left: Math.min(dragState.worldStart.x, screenToWorld(dragState.current, view).x),
-                    top: Math.min(dragState.worldStart.y, screenToWorld(dragState.current, view).y),
-                    width: Math.abs(dragState.worldStart.x - screenToWorld(dragState.current, view).x),
-                    height: Math.abs(dragState.worldStart.y - screenToWorld(dragState.current, view).y),
-                }}
-             />
-          )}
-
-        </div>
-      </div>
-
-      <div className="absolute bottom-2 right-2 text-xs text-gray-400 bg-white/80 p-1 rounded pointer-events-none">
-         Pos: {Math.round(view.x)}, {Math.round(view.y)} | Scale: {view.scale.toFixed(2)}x
-      </div>
-    </div>
-  );
-}
-
-        // --- DO NOT DELETE BELOW THIS LINE ---
-
-        // Mount the application
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
-        
-        // Initialize Icons if using Lucide global script
-        if (window.lucide) {
-            window.lucide.createIcons();
-        }
     </script>
 </body>
 </html>
