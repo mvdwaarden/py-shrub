@@ -38,45 +38,22 @@
             text-align: center;
             user-select: none;
         }
-        .tool-btn:hover {
-            background: #e2e8f0;
-            border-color: #94a3b8;
-        }
-        .tool-btn.active {
-            background: #2563eb;
-            color: white;
-            border-color: #1d4ed8;
-        }
-        .tool-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+        .tool-btn:hover { background: #e2e8f0; border-color: #94a3b8; }
+        .tool-btn.active { background: #2563eb; color: white; border-color: #1d4ed8; }
+        .tool-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         #canvas-container {
             flex-grow: 1;
             position: relative;
             background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
             background-size: 20px 20px;
         }
-        canvas {
-            display: block;
-            touch-action: none;
-        }
+        canvas { display: block; touch-action: none; }
         #info {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            pointer-events: none;
-            font-size: 11px;
-            color: #94a3b8;
-            background: rgba(255,255,255,0.8);
-            padding: 5px 10px;
-            border-radius: 4px;
+            position: absolute; bottom: 20px; left: 20px; pointer-events: none;
+            font-size: 11px; color: #94a3b8; background: rgba(255,255,255,0.8);
+            padding: 5px 10px; border-radius: 4px;
         }
-        .zoom-controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
+        .zoom-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         h2 { margin: 0; font-size: 16px; color: #1e293b; }
         p { font-size: 11px; color: #64748b; margin: 0; line-height: 1.4; }
     </style>
@@ -85,108 +62,76 @@
     <div id="toolbox">
         <h2>Toolbox</h2>
         <div class="tool-btn" onclick="addBox()">Add Rectangle</div>
-
         <hr style="width: 100%; border: 0; border-top: 1px solid #e2e8f0;">
-
         <div id="selectToolBtn" class="tool-btn active" onclick="setMode('select')">Select Tool</div>
         <div id="connectToolBtn" class="tool-btn" onclick="setMode('connect')">Connect Tool</div>
-
         <hr style="width: 100%; border: 0; border-top: 1px solid #e2e8f0;">
-
         <div id="groupBtn" class="tool-btn" onclick="groupSelected()" disabled>Group Selected</div>
         <div id="ungroupBtn" class="tool-btn" onclick="ungroupSelected()" disabled>Ungroup</div>
-        <div id="regroupBtn" class="tool-btn" onclick="regroupLast()" disabled>Regroup Last</div>
-
         <hr style="width: 100%; border: 0; border-top: 1px solid #e2e8f0;">
-
         <div class="zoom-controls">
-            <div class="tool-btn" onclick="zoom(1.2)">Zoom In</div>
-            <div class="tool-btn" onclick="zoom(0.8)">Zoom Out</div>
+            <div class="tool-btn" onclick="zoom(1.2)">In</div>
+            <div class="tool-btn" onclick="zoom(0.8)">Out</div>
         </div>
         <div class="tool-btn" onclick="resetView()">Reset View</div>
-
         <p>
-            <b>Navigation:</b> Wheel to Zoom. Right-Click to Pan.<br><br>
-            <b>Interaction:</b> Drag handles to resize. Drag box to move. Double-click to rename.
+            <b>Connections:</b> Drag between boxes OR lines.<br><br>
+            <b>Resizing:</b> Drag handles around selected objects.
         </p>
     </div>
     <div id="canvas-container">
         <canvas id="canvas"></canvas>
-        <div id="info">Cycle time: 5s | Resize Logic Enabled</div>
+        <div id="info">Cycle time: 5s | Resize & Multi-target enabled</div>
     </div>
 
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
-
         let width, height;
         const CYCLE_TIME = 5000;
         const HANDLE_SIZE = 10;
+        const CONN_HANDLE_SIZE = 12;
         const MIN_SIZE = 20;
 
         // App State
         let boxes = [
-            { x: 150, y: 150, w: 120, h: 80, label: 'Node A' },
-            { x: 450, y: 100, w: 140, h: 90, label: 'Node B' },
-            { x: 350, y: 400, w: 130, h: 85, label: 'Node C' }
+            { x: 150, y: 150, w: 100, h: 60, label: 'Node A' },
+            { x: 450, y: 150, w: 100, h: 60, label: 'Node B' },
+            { x: 300, y: 350, w: 100, h: 60, label: 'Node C' }
         ];
+
         let connections = [
-            { from: 0, to: 1, type: 'straight' },
-            { from: 1, to: 2, type: 'curved' },
-            { from: 2, to: 0, type: 'manhattan' }
+            { from: {type: 'box', id: 0}, to: {type: 'box', id: 1}, type: 'straight' },
+            { from: {type: 'box', id: 1}, to: {type: 'box', id: 2}, type: 'curved' },
+            { from: {type: 'box', id: 2}, to: {type: 'box', id: 0}, type: 'manhattan' }
         ];
 
         // View State
-        let viewScale = 1;
-        let viewX = 0;
-        let viewY = 0;
+        let viewScale = 1, viewX = 0, viewY = 0;
+        let currentMode = 'select', selectedIndices = new Set(), groups = [];
+        let isDragging = false, isResizing = false, isMarquee = false, isPanning = false, isConnDragging = false;
+        let dragTargetIndex = -1, resizeHandle = null;
+        let dragOffset = { x: 0, y: 0 }, marqueeStart = { x: 0, y: 0 }, marqueeCurrent = { x: 0, y: 0 };
+        let connectStartDescriptor = null, floatingPoint = null, shiftPressed = false;
 
-        // Interaction State
-        let currentMode = 'select';
-        let selectedIndices = new Set();
-        let groups = [];
-        let lastUngrouped = null;
+        // Transform Snapshots
+        let initialBounds = null, initialBoxes = [];
 
-        let isDragging = false;
-        let isResizing = false;
-        let isMarquee = false;
-        let isPanning = false;
-
-        let dragTargetIndex = -1;
-        let resizeHandle = null; // 'nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'
-        let dragOffset = { x: 0, y: 0 };
-        let marqueeStart = { x: 0, y: 0 };
-        let marqueeCurrent = { x: 0, y: 0 };
-        let connectStartIndex = -1;
-        let shiftPressed = false;
-
-        // Snapshots for transformation
-        let initialBounds = null;
-        let initialBoxes = [];
-
-        function resize() {
+        function resizeCanvas() {
             const container = canvas.parentElement;
-            width = container.clientWidth;
-            height = container.clientHeight;
-            canvas.width = width * window.devicePixelRatio;
-            canvas.height = height * window.devicePixelRatio;
-            canvas.style.width = width + 'px';
-            canvas.style.height = height + 'px';
+            width = container.clientWidth; height = container.clientHeight;
+            canvas.width = width * window.devicePixelRatio; canvas.height = height * window.devicePixelRatio;
+            canvas.style.width = width + 'px'; canvas.style.height = height + 'px';
             ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
         }
-
-        window.addEventListener('resize', resize);
+        window.addEventListener('resize', resizeCanvas);
         window.addEventListener('keydown', (e) => { if (e.key === 'Shift') shiftPressed = true; });
         window.addEventListener('keyup', (e) => { if (e.key === 'Shift') shiftPressed = false; });
-        resize();
+        resizeCanvas();
 
-        // --- Coordinate Helpers ---
-        function screenToWorld(sx, sy) {
-            return {
-                x: (sx - viewX) / viewScale,
-                y: (sy - viewY) / viewScale
-            };
-        }
+        // --- Math & Geometry Helpers ---
+        function screenToWorld(sx, sy) { return { x: (sx - viewX) / viewScale, y: (sy - viewY) / viewScale }; }
+        function dist(p1, p2) { return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2); }
 
         function getSelectionBounds() {
             if (selectedIndices.size === 0) return null;
@@ -205,290 +150,25 @@
             if (!bounds) return {};
             const { x, y, w, h } = bounds;
             return {
-                nw: { x, y },
-                n:  { x: x + w / 2, y },
-                ne: { x: x + w, y },
-                e:  { x: x + w, y: y + h / 2 },
-                se: { x: x + w, y: y + h },
-                s:  { x: x + w / 2, y: y + h },
-                sw: { x, y: y + h },
-                w:  { x, y: y + h / 2 }
+                nw: { x, y }, n: { x: x + w / 2, y }, ne: { x: x + w, y },
+                e: { x: x + w, y: y + h / 2 }, se: { x: x + w, y: y + h },
+                s: { x: x + w / 2, y: y + h }, sw: { x, y: y + h }, w: { x, y: y + h / 2 }
             };
         }
 
-        // --- Core Logic ---
-        function zoom(factor, centerX = width / 2, centerY = height / 2) {
-            const worldCenter = screenToWorld(centerX, centerY);
-            viewScale *= factor;
-            viewScale = Math.max(0.1, Math.min(viewScale, 5));
-            viewX = centerX - worldCenter.x * viewScale;
-            viewY = centerY - worldCenter.y * viewScale;
-        }
-
-        function resetView() {
-            viewScale = 1; viewX = 0; viewY = 0;
-        }
-
-        function setMode(mode) {
-            currentMode = mode;
-            connectStartIndex = -1;
-            document.getElementById('selectToolBtn').classList.toggle('active', mode === 'select');
-            document.getElementById('connectToolBtn').classList.toggle('active', mode === 'connect');
-        }
-
-        function addBox() {
-            const worldCenter = screenToWorld(width/2, height/2);
-            boxes.push({
-                x: worldCenter.x, y: worldCenter.y,
-                w: 120, h: 80, label: 'New Node'
-            });
-            updateUI();
-        }
-
-        function groupSelected() {
-            if (selectedIndices.size < 2) return;
-            const newGroup = Array.from(selectedIndices);
-            groups = groups.filter(g => !g.some(idx => selectedIndices.has(idx)));
-            groups.push(newGroup);
-            updateUI();
-        }
-
-        function ungroupSelected() {
-            const groupsToUngroup = groups.filter(g => g.some(idx => selectedIndices.has(idx)));
-            if (groupsToUngroup.length > 0) {
-                lastUngrouped = groupsToUngroup[0];
-                groups = groups.filter(g => !groupsToUngroup.includes(g));
+        function getEndpointPos(desc) {
+            if (desc.type === 'box') {
+                const b = boxes[desc.id];
+                return b ? { x: b.x, y: b.y } : { x: 0, y: 0 };
+            } else if (desc.type === 'connection') {
+                const conn = connections[desc.id];
+                if (!conn) return { x: 0, y: 0 };
+                const p1 = getEndpointPos(conn.from);
+                const p2 = getEndpointPos(conn.to);
+                const pts = getPathPoints(p1, p2, conn.type);
+                return getPointOnPath(pts, desc.t, conn.type);
             }
-            updateUI();
-        }
-
-        function regroupLast() {
-            if (lastUngrouped) {
-                groups.push([...lastUngrouped]);
-                selectedIndices = new Set(lastUngrouped);
-                lastUngrouped = null;
-            }
-            updateUI();
-        }
-
-        function updateUI() {
-            document.getElementById('groupBtn').disabled = selectedIndices.size < 2;
-            const hasGrouped = Array.from(selectedIndices).some(idx => groups.some(g => g.includes(idx)));
-            document.getElementById('ungroupBtn').disabled = !hasGrouped;
-            document.getElementById('regroupBtn').disabled = !lastUngrouped;
-        }
-
-        function getBoxAt(worldX, worldY) {
-            for (let i = boxes.length - 1; i >= 0; i--) {
-                const b = boxes[i];
-                if (worldX >= b.x - b.w/2 && worldX <= b.x + b.w/2 && worldY >= b.y - b.h/2 && worldY <= b.y + b.h/2) return i;
-            }
-            return -1;
-        }
-
-        function getHandleAt(worldX, worldY) {
-            const bounds = getSelectionBounds();
-            if (!bounds) return null;
-            const pts = getHandlePoints(bounds);
-            const threshold = (HANDLE_SIZE / viewScale) * 1.5;
-            for (const key in pts) {
-                const p = pts[key];
-                if (Math.abs(worldX - p.x) < threshold && Math.abs(worldY - p.y) < threshold) return key;
-            }
-            return null;
-        }
-
-        // --- Interaction Handlers ---
-
-        canvas.addEventListener('wheel', (e) => {
-            e.preventDefault();
-            const factor = e.deltaY > 0 ? 0.9 : 1.1;
-            zoom(factor, e.clientX - canvas.getBoundingClientRect().left, e.clientY - canvas.getBoundingClientRect().top);
-        }, { passive: false });
-
-        canvas.addEventListener('contextmenu', (e) => e.preventDefault());
-
-        canvas.addEventListener('mousedown', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const sx = e.clientX - rect.left;
-            const sy = e.clientY - rect.top;
-            const worldPos = screenToWorld(sx, sy);
-
-            if (e.button === 1 || e.button === 2) {
-                isPanning = true;
-                dragOffset.x = sx; dragOffset.y = sy;
-                return;
-            }
-
-            // Check for handle first
-            const handle = getHandleAt(worldPos.x, worldPos.y);
-            if (handle) {
-                isResizing = true;
-                resizeHandle = handle;
-                initialBounds = getSelectionBounds();
-                initialBoxes = boxes.map(b => ({...b}));
-                dragOffset.x = worldPos.x;
-                dragOffset.y = worldPos.y;
-                return;
-            }
-
-            const hitIndex = getBoxAt(worldPos.x, worldPos.y);
-
-            if (currentMode === 'connect') {
-                if (hitIndex !== -1) {
-                    if (connectStartIndex === -1) connectStartIndex = hitIndex;
-                    else if (connectStartIndex !== hitIndex) {
-                        const types = ['straight', 'curved', 'manhattan'];
-                        connections.push({ from: connectStartIndex, to: hitIndex, type: types[connections.length % 3] });
-                        connectStartIndex = -1;
-                    }
-                }
-            } else {
-                if (hitIndex !== -1) {
-                    if (!shiftPressed && !selectedIndices.has(hitIndex)) selectedIndices.clear();
-                    selectedIndices.add(hitIndex);
-                    isDragging = true;
-                    dragTargetIndex = hitIndex;
-                    dragOffset.x = worldPos.x;
-                    dragOffset.y = worldPos.y;
-                } else {
-                    if (!shiftPressed) selectedIndices.clear();
-                    isMarquee = true;
-                    marqueeStart = worldPos;
-                    marqueeCurrent = worldPos;
-                }
-            }
-            updateUI();
-        });
-
-        window.addEventListener('mousemove', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const sx = e.clientX - rect.left;
-            const sy = e.clientY - rect.top;
-            const worldPos = screenToWorld(sx, sy);
-
-            if (isPanning) {
-                viewX += sx - dragOffset.x;
-                viewY += sy - dragOffset.y;
-                dragOffset.x = sx; dragOffset.y = sy;
-            } else if (isResizing) {
-                const dx = worldPos.x - dragOffset.x;
-                const dy = worldPos.y - dragOffset.y;
-
-                let b = initialBounds;
-                let newBounds = { ...b };
-
-                if (resizeHandle.includes('e')) newBounds.w = Math.max(MIN_SIZE, b.w + dx);
-                if (resizeHandle.includes('s')) newBounds.h = Math.max(MIN_SIZE, b.h + dy);
-                if (resizeHandle.includes('w')) {
-                    const newW = Math.max(MIN_SIZE, b.w - dx);
-                    newBounds.x = b.right - newW;
-                    newBounds.w = newW;
-                }
-                if (resizeHandle.includes('n')) {
-                    const newH = Math.max(MIN_SIZE, b.h - dy);
-                    newBounds.y = b.bottom - newH;
-                    newBounds.h = newH;
-                }
-
-                const scaleX = newBounds.w / b.w;
-                const scaleY = newBounds.h / b.h;
-
-                selectedIndices.forEach(idx => {
-                    const startBox = initialBoxes[idx];
-                    // Position relative to top-left of selection box
-                    const relX = (startBox.x - b.x) * scaleX;
-                    const relY = (startBox.y - b.y) * scaleY;
-                    boxes[idx].x = newBounds.x + relX;
-                    boxes[idx].y = newBounds.y + relY;
-                    boxes[idx].w = startBox.w * scaleX;
-                    boxes[idx].h = startBox.h * scaleY;
-                });
-
-            } else if (isDragging && dragTargetIndex !== -1) {
-                const dx = worldPos.x - dragOffset.x;
-                const dy = worldPos.y - dragOffset.y;
-                const g = groups.find(g => g.includes(dragTargetIndex));
-                const toMove = g ? new Set([...g, ...selectedIndices]) : selectedIndices;
-                toMove.forEach(idx => {
-                    boxes[idx].x += dx;
-                    boxes[idx].y += dy;
-                });
-                dragOffset.x = worldPos.x;
-                dragOffset.y = worldPos.y;
-            } else if (isMarquee) {
-                marqueeCurrent = worldPos;
-            }
-        });
-
-        window.addEventListener('mouseup', () => {
-            if (isMarquee) {
-                const x1 = Math.min(marqueeStart.x, marqueeCurrent.x);
-                const y1 = Math.min(marqueeStart.y, marqueeCurrent.y);
-                const x2 = Math.max(marqueeStart.x, marqueeCurrent.x);
-                const y2 = Math.max(marqueeStart.y, marqueeCurrent.y);
-                boxes.forEach((b, i) => {
-                    if (b.x - b.w/2 >= x1 && b.x + b.w/2 <= x2 && b.y - b.h/2 >= y1 && b.y + b.h/2 <= y2) selectedIndices.add(i);
-                });
-            }
-            isDragging = false; isMarquee = false; isPanning = false; isResizing = false;
-            dragTargetIndex = -1; resizeHandle = null;
-            updateUI();
-        });
-
-        canvas.addEventListener('dblclick', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const worldPos = screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
-            const hitIndex = getBoxAt(worldPos.x, worldPos.y);
-            if (hitIndex !== -1) {
-                const newLabel = prompt('Rename:', boxes[hitIndex].label);
-                if (newLabel !== null) boxes[hitIndex].label = newLabel;
-            }
-        });
-
-        // --- Drawing Logic ---
-
-        function drawBox(box, index) {
-            const isSelected = selectedIndices.has(index);
-            const left = box.x - box.w / 2, top = box.y - box.h / 2;
-            ctx.save();
-            ctx.strokeStyle = isSelected ? '#2563eb' : '#64748b';
-            ctx.lineWidth = (isSelected ? 2 : 1.5) / viewScale;
-            ctx.fillStyle = '#ffffff';
-            ctx.beginPath();
-            ctx.roundRect(left, top, box.w, box.h, 6);
-            ctx.fill(); ctx.stroke();
-            ctx.fillStyle = '#1e293b';
-            ctx.font = `bold 12px sans-serif`;
-            ctx.textAlign = 'center';
-            ctx.fillText(box.label, box.x, box.y + 4);
-            ctx.restore();
-        }
-
-        function drawSelectionOverlay() {
-            const bounds = getSelectionBounds();
-            if (!bounds) return;
-
-            ctx.save();
-            ctx.strokeStyle = '#2563eb';
-            ctx.lineWidth = 1 / viewScale;
-            ctx.setLineDash([5 / viewScale, 5 / viewScale]);
-            ctx.strokeRect(bounds.x, bounds.y, bounds.w, bounds.h);
-            ctx.setLineDash([]);
-
-            const pts = getHandlePoints(bounds);
-            const hSize = HANDLE_SIZE / viewScale;
-            ctx.fillStyle = '#2563eb';
-            for (const key in pts) {
-                const p = pts[key];
-                ctx.beginPath();
-                ctx.rect(p.x - hSize/2, p.y - hSize/2, hSize, hSize);
-                ctx.fill();
-                ctx.strokeStyle = '#fff';
-                ctx.lineWidth = 1 / viewScale;
-                ctx.stroke();
-            }
-            ctx.restore();
+            return { x: 0, y: 0 };
         }
 
         function getPathPoints(start, end, type) {
@@ -513,53 +193,267 @@
             return { x: points[2].x + (points[3].x - points[2].x) * ((t-0.66)/0.34), y: points[2].y };
         }
 
+        // --- Selection & Hit Detection ---
+        function getBoxAt(worldX, worldY) {
+            for (let i = boxes.length - 1; i >= 0; i--) {
+                const b = boxes[i];
+                if (worldX >= b.x - b.w/2 && worldX <= b.x + b.w/2 && worldY >= b.y - b.h/2 && worldY <= b.y + b.h/2) return i;
+            }
+            return -1;
+        }
+
+        function getHandleAt(worldX, worldY) {
+            const bounds = getSelectionBounds();
+            if (!bounds) return null;
+            const pts = getHandlePoints(bounds);
+            const threshold = (HANDLE_SIZE / viewScale) * 1.5;
+            for (const key in pts) {
+                if (dist({x: worldX, y: worldY}, pts[key]) < threshold) return key;
+            }
+            return null;
+        }
+
+        function getConnectionAt(worldX, worldY) {
+            const threshold = 10 / viewScale;
+            for (let i = 0; i < connections.length; i++) {
+                const conn = connections[i];
+                const p1 = getEndpointPos(conn.from);
+                const p2 = getEndpointPos(conn.to);
+                const pts = getPathPoints(p1, p2, conn.type);
+                for (let t = 0; t <= 1; t += 0.05) {
+                    const p = getPointOnPath(pts, t, conn.type);
+                    if (dist({x: worldX, y: worldY}, p) < threshold) return { id: i, t: t };
+                }
+            }
+            return null;
+        }
+
+        function getTargetAt(worldX, worldY) {
+            const boxIdx = getBoxAt(worldX, worldY);
+            if (boxIdx !== -1) return { type: 'box', id: boxIdx };
+            const connHit = getConnectionAt(worldX, worldY);
+            if (connHit) return { type: 'connection', id: connHit.id, t: connHit.t };
+            return null;
+        }
+
+        // --- Interaction Handlers ---
+        function setMode(mode) {
+            currentMode = mode;
+            document.getElementById('selectToolBtn').classList.toggle('active', mode === 'select');
+            document.getElementById('connectToolBtn').classList.toggle('active', mode === 'connect');
+        }
+
+        function addBox() {
+            const worldCenter = screenToWorld(width/2, height/2);
+            boxes.push({ x: worldCenter.x, y: worldCenter.y, w: 100, h: 60, label: 'New Node' });
+            updateUI();
+        }
+
+        function zoom(factor) {
+            const centerX = width / 2, centerY = height / 2;
+            const worldCenter = screenToWorld(centerX, centerY);
+            viewScale = Math.max(0.1, Math.min(viewScale * factor, 5));
+            viewX = centerX - worldCenter.x * viewScale; viewY = centerY - worldCenter.y * viewScale;
+        }
+
+        function resetView() { viewScale = 1; viewX = 0; viewY = 0; }
+
+        function groupSelected() {
+            if (selectedIndices.size < 2) return;
+            groups.push(Array.from(selectedIndices));
+            updateUI();
+        }
+
+        function ungroupSelected() {
+            groups = groups.filter(g => !g.some(idx => selectedIndices.has(idx)));
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('groupBtn').disabled = selectedIndices.size < 2;
+            document.getElementById('ungroupBtn').disabled = selectedIndices.size === 0;
+        }
+
+        canvas.addEventListener('wheel', (e) => { e.preventDefault(); zoom(e.deltaY > 0 ? 0.9 : 1.1); }, { passive: false });
+        canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const sx = e.clientX - rect.left, sy = e.clientY - rect.top;
+            const worldPos = screenToWorld(sx, sy);
+
+            if (e.button === 1 || e.button === 2) {
+                isPanning = true; dragOffset = { x: sx, y: sy };
+                return;
+            }
+
+            // Check Handles First (Resize)
+            const handle = getHandleAt(worldPos.x, worldPos.y);
+            if (handle) {
+                isResizing = true;
+                resizeHandle = handle;
+                initialBounds = getSelectionBounds();
+                initialBoxes = boxes.map(b => ({...b}));
+                dragOffset = worldPos;
+                return;
+            }
+
+            const target = getTargetAt(worldPos.x, worldPos.y);
+
+            if (currentMode === 'connect') {
+                if (target) {
+                    isConnDragging = true;
+                    connectStartDescriptor = target;
+                    floatingPoint = worldPos;
+                }
+            } else {
+                if (target && target.type === 'box') {
+                    if (!shiftPressed && !selectedIndices.has(target.id)) selectedIndices.clear();
+                    selectedIndices.add(target.id);
+                    isDragging = true; dragTargetIndex = target.id; dragOffset = worldPos;
+                } else {
+                    if (!shiftPressed) selectedIndices.clear();
+                    isMarquee = true; marqueeStart = worldPos; marqueeCurrent = worldPos;
+                }
+            }
+            updateUI();
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const sx = e.clientX - rect.left, sy = e.clientY - rect.top;
+            const worldPos = screenToWorld(sx, sy);
+
+            if (isPanning) {
+                viewX += sx - dragOffset.x; viewY += sy - dragOffset.y;
+                dragOffset = { x: sx, y: sy };
+            } else if (isResizing) {
+                const dx = worldPos.x - dragOffset.x, dy = worldPos.y - dragOffset.y;
+                let b = initialBounds, nb = { ...b };
+                if (resizeHandle.includes('e')) nb.w = Math.max(MIN_SIZE, b.w + dx);
+                if (resizeHandle.includes('s')) nb.h = Math.max(MIN_SIZE, b.h + dy);
+                if (resizeHandle.includes('w')) { let nw = Math.max(MIN_SIZE, b.w - dx); nb.x = b.right - nw; nb.w = nw; }
+                if (resizeHandle.includes('n')) { let nh = Math.max(MIN_SIZE, b.h - dy); nb.y = b.bottom - nh; nb.h = nh; }
+                const sw = nb.w / b.w, sh = nb.h / b.h;
+                selectedIndices.forEach(idx => {
+                    const sb = initialBoxes[idx];
+                    boxes[idx].x = nb.x + (sb.x - b.x) * sw;
+                    boxes[idx].y = nb.y + (sb.y - b.y) * sh;
+                    boxes[idx].w = sb.w * sw; boxes[idx].h = sb.h * sh;
+                });
+            } else if (isConnDragging) {
+                floatingPoint = worldPos;
+            } else if (isDragging && dragTargetIndex !== -1) {
+                const dx = worldPos.x - dragOffset.x, dy = worldPos.y - dragOffset.y;
+                const g = groups.find(g => g.includes(dragTargetIndex));
+                const toMove = g ? new Set([...g, ...selectedIndices]) : selectedIndices;
+                toMove.forEach(idx => { boxes[idx].x += dx; boxes[idx].y += dy; });
+                dragOffset = worldPos;
+            } else if (isMarquee) {
+                marqueeCurrent = worldPos;
+            }
+        });
+
+        window.addEventListener('mouseup', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const worldPos = screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
+
+            if (isConnDragging && connectStartDescriptor) {
+                const target = getTargetAt(worldPos.x, worldPos.y);
+                if (target && (target.type !== connectStartDescriptor.type || target.id !== connectStartDescriptor.id)) {
+                    const types = ['straight', 'curved', 'manhattan'];
+                    connections.push({ from: connectStartDescriptor, to: target, type: types[connections.length % 3] });
+                }
+            } else if (isMarquee) {
+                const x1 = Math.min(marqueeStart.x, marqueeCurrent.x), x2 = Math.max(marqueeStart.x, marqueeCurrent.x);
+                const y1 = Math.min(marqueeStart.y, marqueeCurrent.y), y2 = Math.max(marqueeStart.y, marqueeCurrent.y);
+                boxes.forEach((b, i) => {
+                    if (b.x >= x1 && b.x <= x2 && b.y >= y1 && b.y <= y2) selectedIndices.add(i);
+                });
+            }
+            isDragging = isMarquee = isPanning = isConnDragging = isResizing = false;
+            connectStartDescriptor = null; floatingPoint = null; resizeHandle = null;
+            updateUI();
+        });
+
+        // --- Drawing ---
+        function drawBox(box, index) {
+            const isSelected = selectedIndices.has(index);
+            ctx.save();
+            ctx.strokeStyle = isSelected ? '#2563eb' : '#64748b';
+            ctx.lineWidth = (isSelected ? 2 : 1.5) / viewScale;
+            ctx.fillStyle = '#fff';
+            ctx.beginPath(); ctx.roundRect(box.x - box.w/2, box.y - box.h/2, box.w, box.h, 6); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#1e293b'; ctx.font = `11px sans-serif`; ctx.textAlign = 'center';
+            ctx.fillText(box.label, box.x, box.y + 4);
+            ctx.restore();
+        }
+
+        function drawPath(conn) {
+            const p1 = getEndpointPos(conn.from);
+            const p2 = getEndpointPos(conn.to);
+            const pts = getPathPoints(p1, p2, conn.type);
+            ctx.save();
+            ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
+            if (conn.type === 'straight') ctx.lineTo(pts[1].x, pts[1].y);
+            else if (conn.type === 'curved') ctx.bezierCurveTo(pts[1].x, pts[1].y, pts[2].x, pts[2].y, pts[3].x, pts[3].y);
+            else { ctx.lineTo(pts[1].x, pts[1].y); ctx.lineTo(pts[2].x, pts[2].y); ctx.lineTo(pts[3].x, pts[3].y); }
+            ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2 / viewScale;
+            ctx.setLineDash([4/viewScale, 4/viewScale]);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function drawSelectionOverlay() {
+            const bounds = getSelectionBounds();
+            if (!bounds) return;
+            ctx.save();
+            ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 1 / viewScale;
+            ctx.setLineDash([5 / viewScale, 5 / viewScale]);
+            ctx.strokeRect(bounds.x, bounds.y, bounds.w, bounds.h);
+            ctx.setLineDash([]);
+            const pts = getHandlePoints(bounds), hSize = HANDLE_SIZE / viewScale;
+            ctx.fillStyle = '#2563eb';
+            for (const key in pts) {
+                ctx.beginPath(); ctx.rect(pts[key].x - hSize/2, pts[key].y - hSize/2, hSize, hSize); ctx.fill();
+                ctx.strokeStyle = '#fff'; ctx.lineWidth = 1 / viewScale; ctx.stroke();
+            }
+            ctx.restore();
+        }
+
         function animate(time) {
             ctx.clearRect(0, 0, width, height);
-            ctx.save();
-            ctx.translate(viewX, viewY);
-            ctx.scale(viewScale, viewScale);
+            ctx.save(); ctx.translate(viewX, viewY); ctx.scale(viewScale, viewScale);
 
-            connections.forEach(conn => {
-                const b1 = boxes[conn.from], b2 = boxes[conn.to];
-                if (!b1 || !b2) return;
-                const pts = getPathPoints({x: b1.x, y: b1.y}, {x: b2.x, y: b2.y}, conn.type);
-                ctx.beginPath();
-                ctx.moveTo(pts[0].x, pts[0].y);
-                if (conn.type === 'straight') ctx.lineTo(pts[1].x, pts[1].y);
-                else if (conn.type === 'curved') ctx.bezierCurveTo(pts[1].x, pts[1].y, pts[2].x, pts[2].y, pts[3].x, pts[3].y);
-                else { ctx.lineTo(pts[1].x, pts[1].y); ctx.lineTo(pts[2].x, pts[2].y); ctx.lineTo(pts[3].x, pts[3].y); }
-                ctx.strokeStyle = '#cbd5e1';
-                ctx.setLineDash([4 / viewScale, 4 / viewScale]);
-                ctx.lineWidth = 1.5 / viewScale;
-                ctx.stroke();
-                ctx.setLineDash([]);
-            });
+            // Connections
+            connections.forEach(drawPath);
+
+            // Active Drag Link
+            if (isConnDragging && connectStartDescriptor) {
+                const start = getEndpointPos(connectStartDescriptor);
+                ctx.beginPath(); ctx.moveTo(start.x, start.y); ctx.lineTo(floatingPoint.x, floatingPoint.y);
+                ctx.strokeStyle = '#2563eb'; ctx.setLineDash([2/viewScale, 2/viewScale]); ctx.stroke();
+            }
 
             boxes.forEach((box, i) => drawBox(box, i));
             drawSelectionOverlay();
 
             if (isMarquee) {
-                ctx.fillStyle = 'rgba(37, 99, 235, 0.05)';
-                ctx.strokeStyle = '#2563eb';
-                ctx.setLineDash([2 / viewScale, 2 / viewScale]);
-                ctx.strokeRect(Math.min(marqueeStart.x, marqueeCurrent.x), Math.min(marqueeStart.y, marqueeCurrent.y), Math.abs(marqueeCurrent.x - marqueeStart.x), Math.abs(marqueeCurrent.y - marqueeStart.y));
-                ctx.setLineDash([]);
+                ctx.fillStyle = 'rgba(37,99,235,0.05)'; ctx.strokeStyle = '#2563eb';
+                ctx.strokeRect(Math.min(marqueeStart.x, marqueeCurrent.x), Math.min(marqueeStart.y, marqueeCurrent.y), Math.abs(marqueeCurrent.x-marqueeStart.x), Math.abs(marqueeCurrent.y-marqueeStart.y));
             }
 
+            // Traveler
             if (connections.length > 0) {
                 const progress = (time % CYCLE_TIME) / CYCLE_TIME;
-                const segIdx = Math.floor(progress * connections.length);
-                const segT = (progress * connections.length) % 1;
+                const segIdx = Math.floor(progress * connections.length), segT = (progress * connections.length) % 1;
                 const conn = connections[segIdx];
-                if (boxes[conn.from] && boxes[conn.to]) {
-                    const pts = getPathPoints({x: boxes[conn.from].x, y: boxes[conn.from].y}, {x: boxes[conn.to].x, y: boxes[conn.to].y}, conn.type);
-                    const pos = getPointOnPath(pts, segT, conn.type);
-                    ctx.fillStyle = '#ef4444';
-                    ctx.beginPath(); ctx.arc(pos.x, pos.y, 6 / viewScale, 0, Math.PI * 2); ctx.fill();
-                }
+                const p1 = getEndpointPos(conn.from), p2 = getEndpointPos(conn.to);
+                const pts = getPathPoints(p1, p2, conn.type);
+                const pos = getPointOnPath(pts, segT, conn.type);
+                ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(pos.x, pos.y, 5/viewScale, 0, Math.PI*2); ctx.fill();
             }
-            ctx.restore();
-            requestAnimationFrame(animate);
+            ctx.restore(); requestAnimationFrame(animate);
         }
         requestAnimationFrame(animate);
     </script>
