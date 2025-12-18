@@ -3,459 +3,726 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Flow Visualization</title>
+    <title>Advanced Diagramming Engine</title>
     <style>
-        body {
+        :root {
+            --bg-color: #1a1a1a;
+            --panel-bg: rgba(45, 45, 45, 0.95);
+            --accent: #3b82f6;
+            --text: #e5e7eb;
+            --border: #4b5563;
+        }
+
+        body, html {
             margin: 0;
             padding: 0;
+            width: 100%;
+            height: 100%;
             overflow: hidden;
-            background-color: #f8fafc;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
+            background-color: var(--bg-color);
+            font-family: 'Inter', -apple-system, sans-serif;
         }
+
+        #canvas {
+            display: block;
+            cursor: crosshair;
+        }
+
         #toolbox {
-            width: 220px;
-            background: #ffffff;
-            border-right: 1px solid #e2e8f0;
-            padding: 20px;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            padding: 12px;
+            border-radius: 12px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            z-index: 10;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
-            overflow-y: auto;
+            gap: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+            user-select: none;
+            backdrop-filter: blur(8px);
         }
+
         .tool-btn {
-            padding: 10px;
-            background: #f1f5f9;
-            border: 1px solid #cbd5e1;
+            background: #374151;
+            border: none;
+            color: var(--text);
+            padding: 8px 12px;
             border-radius: 6px;
             cursor: pointer;
             font-size: 13px;
-            font-weight: 600;
-            color: #475569;
+            text-align: left;
             transition: all 0.2s;
-            text-align: center;
-            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        .tool-btn:hover { background: #e2e8f0; border-color: #94a3b8; }
-        .tool-btn.active { background: #2563eb; color: white; border-color: #1d4ed8; }
-        .tool-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        #canvas-container {
-            flex-grow: 1;
-            position: relative;
-            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
-            background-size: 20px 20px;
+
+        .tool-btn:hover {
+            background: #4b5563;
         }
-        canvas { display: block; touch-action: none; }
+
+        .tool-btn.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        .tool-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 4px 0;
+        }
+
         #info {
-            position: absolute; bottom: 20px; left: 20px; pointer-events: none;
-            font-size: 11px; color: #94a3b8; background: rgba(255,255,255,0.8);
-            padding: 5px 10px; border-radius: 4px;
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: var(--panel-bg);
+            color: #9ca3af;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            pointer-events: none;
         }
-        .zoom-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        h2 { margin: 0; font-size: 16px; color: #1e293b; }
-        p { font-size: 11px; color: #64748b; margin: 0; line-height: 1.4; }
+
+        kbd {
+            background: #374151;
+            padding: 2px 4px;
+            border-radius: 4px;
+            color: white;
+        }
     </style>
 </head>
 <body>
+
     <div id="toolbox">
-        <h2>Toolbox</h2>
-        <div class="tool-btn" onclick="addBox()">Add Rectangle</div>
-        <hr style="width: 100%; border: 0; border-top: 1px solid #e2e8f0;">
-        <div id="selectToolBtn" class="tool-btn active" onclick="setMode('select')">Select Tool</div>
-        <div id="connectToolBtn" class="tool-btn" onclick="setMode('connect')">Connect Tool</div>
-        <hr style="width: 100%; border: 0; border-top: 1px solid #e2e8f0;">
-        <div id="groupBtn" class="tool-btn" onclick="groupSelected()" disabled>Group Selected</div>
-        <div id="ungroupBtn" class="tool-btn" onclick="ungroupSelected()" disabled>Ungroup</div>
-        <hr style="width: 100%; border: 0; border-top: 1px solid #e2e8f0;">
-        <div class="zoom-controls">
-            <div class="tool-btn" onclick="zoom(1.2)">In</div>
-            <div class="tool-btn" onclick="zoom(0.8)">Out</div>
-        </div>
-        <div class="tool-btn" onclick="resetView()">Reset View</div>
-        <p>
-            <b>Connections:</b> Drag between boxes OR lines.<br><br>
-            <b>Resizing:</b> Drag handles around selected objects.
-        </p>
+        <button class="tool-btn" onclick="addBox()">Add Rectangle</button>
+        <div class="tool-divider"></div>
+        <button class="tool-btn active" id="btn-select" onclick="setTool('select')">Select & Move</button>
+        <button class="tool-btn" id="btn-connect" onclick="setTool('connect')">Connect Objects</button>
+        <div class="tool-divider"></div>
+        <button class="tool-btn" onclick="groupSelected()">Group Selected</button>
+        <button class="tool-btn" onclick="ungroupSelected()">Ungroup</button>
+        <div class="tool-divider"></div>
+        <div style="color: #9ca3af; font-size: 11px; margin-top: 4px;">Path Type:</div>
+        <button class="tool-btn active" id="btn-straight" onclick="setPathType('straight')">Straight</button>
+        <button class="tool-btn" id="btn-curved" onclick="setPathType('curved')">Curved</button>
+        <button class="tool-btn" id="btn-manhattan" onclick="setPathType('manhattan')">Manhattan</button>
     </div>
-    <div id="canvas-container">
-        <canvas id="canvas"></canvas>
-        <div id="info">Cycle time: 5s | Resize & Multi-target enabled</div>
+
+    <div id="info">
+        Scroll: Zoom | Right Click: Pan | Shift+Click: Multi-select | Double Click: Rename
     </div>
+
+    <canvas id="canvas"></canvas>
 
     <script>
+        /**
+         * CORE STATE
+         */
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
+
         let width, height;
-        const CYCLE_TIME = 5000;
-        const HANDLE_SIZE = 10;
-        const CONN_HANDLE_SIZE = 12;
-        const MIN_SIZE = 20;
+        let objects = [];
+        let connections = [];
+        let groups = [];
+        let selection = new Set();
 
-        // App State
-        let boxes = [
-            { x: 150, y: 150, w: 100, h: 60, label: 'Node A' },
-            { x: 450, y: 150, w: 100, h: 60, label: 'Node B' },
-            { x: 300, y: 350, w: 100, h: 60, label: 'Node C' }
-        ];
+        // Camera/Viewport state
+        let camera = { x: 0, y: 0, zoom: 1 };
+        let isPanning = false;
+        let lastMouse = { x: 0, y: 0 };
 
-        let connections = [
-            { from: {type: 'box', id: 0}, to: {type: 'box', id: 1}, type: 'straight' },
-            { from: {type: 'box', id: 1}, to: {type: 'box', id: 2}, type: 'curved' },
-            { from: {type: 'box', id: 2}, to: {type: 'box', id: 0}, type: 'manhattan' }
-        ];
+        // Interaction state
+        let tool = 'select'; // 'select', 'connect'
+        let pathType = 'straight'; // 'straight', 'curved', 'manhattan'
+        let dragTarget = null;
+        let dragMode = null; // 'move', 'resize', 'marquee', 'relink'
+        let resizeHandleIdx = -1;
+        let marqueeStart = null;
+        let marqueeEnd = null;
+        let connectStart = null;
 
-        // View State
-        let viewScale = 1, viewX = 0, viewY = 0;
-        let currentMode = 'select', selectedIndices = new Set(), groups = [];
-        let isDragging = false, isResizing = false, isMarquee = false, isPanning = false, isConnDragging = false;
-        let dragTargetIndex = -1, resizeHandle = null;
-        let dragOffset = { x: 0, y: 0 }, marqueeStart = { x: 0, y: 0 }, marqueeCurrent = { x: 0, y: 0 };
-        let connectStartDescriptor = null, floatingPoint = null, shiftPressed = false;
+        // Traveler state
+        let travelTime = 0;
+        const CYCLE_TIME = 5000; // 5 seconds
 
-        // Transform Snapshots
-        let initialBounds = null, initialBoxes = [];
-
-        function resizeCanvas() {
-            const container = canvas.parentElement;
-            width = container.clientWidth; height = container.clientHeight;
-            canvas.width = width * window.devicePixelRatio; canvas.height = height * window.devicePixelRatio;
-            canvas.style.width = width + 'px'; canvas.style.height = height + 'px';
-            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-        }
-        window.addEventListener('resize', resizeCanvas);
-        window.addEventListener('keydown', (e) => { if (e.key === 'Shift') shiftPressed = true; });
-        window.addEventListener('keyup', (e) => { if (e.key === 'Shift') shiftPressed = false; });
-        resizeCanvas();
-
-        // --- Math & Geometry Helpers ---
-        function screenToWorld(sx, sy) { return { x: (sx - viewX) / viewScale, y: (sy - viewY) / viewScale }; }
-        function dist(p1, p2) { return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2); }
-
-        function getSelectionBounds() {
-            if (selectedIndices.size === 0) return null;
-            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-            selectedIndices.forEach(idx => {
-                const b = boxes[idx];
-                minX = Math.min(minX, b.x - b.w / 2);
-                minY = Math.min(minY, b.y - b.h / 2);
-                maxX = Math.max(maxX, b.x + b.w / 2);
-                maxY = Math.max(maxY, b.y + b.h / 2);
-            });
-            return { x: minX, y: minY, w: maxX - minX, h: maxY - minY, right: maxX, bottom: maxY };
+        /**
+         * CLASSES
+         */
+        class Box {
+            constructor(x, y, label = "Node") {
+                this.id = Math.random().toString(36).substr(2, 9);
+                this.x = x;
+                this.y = y;
+                this.w = 120;
+                this.h = 60;
+                this.label = label;
+                this.groupId = null;
+            }
         }
 
-        function getHandlePoints(bounds) {
-            if (!bounds) return {};
-            const { x, y, w, h } = bounds;
+        class Connection {
+            constructor(from, to, type = 'straight') {
+                this.id = Math.random().toString(36).substr(2, 9);
+                this.from = from; // { type: 'box'|'conn', id: string, t: 0..1 }
+                this.to = to;
+                this.type = type;
+                this.label = "Link";
+                this.points = []; // Precomputed for path finding and drawing
+            }
+        }
+
+        class Group {
+            constructor(memberIds) {
+                this.id = Math.random().toString(36).substr(2, 9);
+                this.memberIds = memberIds;
+            }
+        }
+
+        /**
+         * INITIALIZATION
+         */
+        function init() {
+            window.addEventListener('resize', resize);
+            resize();
+
+            // Default content
+            const b1 = new Box(100, 100, "Start");
+            const b2 = new Box(400, 150, "Process");
+            const b3 = new Box(700, 100, "End");
+            objects.push(b1, b2, b3);
+
+            // Updated first connection to be 'straight' as requested
+            connections.push(new Connection(
+                { type: 'box', id: b1.id },
+                { type: 'box', id: b2.id },
+                'straight'
+            ));
+
+            connections.push(new Connection(
+                { type: 'box', id: b2.id },
+                { type: 'box', id: b3.id },
+                'manhattan'
+            ));
+
+            requestAnimationFrame(loop);
+        }
+
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+
+        /**
+         * COORDINATE MAPPING
+         */
+        function screenToWorld(x, y) {
             return {
-                nw: { x, y }, n: { x: x + w / 2, y }, ne: { x: x + w, y },
-                e: { x: x + w, y: y + h / 2 }, se: { x: x + w, y: y + h },
-                s: { x: x + w / 2, y: y + h }, sw: { x, y: y + h }, w: { x, y: y + h / 2 }
+                x: (x - width/2) / camera.zoom - camera.x,
+                y: (y - height/2) / camera.zoom - camera.y
             };
         }
 
-        function getEndpointPos(desc) {
-            if (desc.type === 'box') {
-                const b = boxes[desc.id];
-                return b ? { x: b.x, y: b.y } : { x: 0, y: 0 };
-            } else if (desc.type === 'connection') {
-                const conn = connections[desc.id];
-                if (!conn) return { x: 0, y: 0 };
-                const p1 = getEndpointPos(conn.from);
-                const p2 = getEndpointPos(conn.to);
-                const pts = getPathPoints(p1, p2, conn.type);
-                return getPointOnPath(pts, desc.t, conn.type);
+        function worldToScreen(x, y) {
+            return {
+                x: (x + camera.x) * camera.zoom + width/2,
+                y: (y + camera.y) * camera.zoom + height/2
+            };
+        }
+
+        /**
+         * HELPERS & CALCULATIONS
+         */
+        function getBox(id) { return objects.find(o => o.id === id); }
+        function getConnection(id) { return connections.find(c => c.id === id); }
+
+        function getPointOnConnection(connId, t) {
+            const conn = getConnection(connId);
+            if (!conn || conn.points.length < 2) return { x: 0, y: 0 };
+
+            // Linear interpolation across computed polyline
+            const totalLength = conn.totalLength || 0;
+            const targetDist = t * totalLength;
+            let currentDist = 0;
+
+            for (let i = 0; i < conn.points.length - 1; i++) {
+                const p1 = conn.points[i];
+                const p2 = conn.points[i+1];
+                const segmentDist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+
+                if (currentDist + segmentDist >= targetDist) {
+                    const localT = (targetDist - currentDist) / segmentDist;
+                    return {
+                        x: p1.x + (p2.x - p1.x) * localT,
+                        y: p1.y + (p2.y - p1.y) * localT
+                    };
+                }
+                currentDist += segmentDist;
+            }
+            return conn.points[conn.points.length - 1];
+        }
+
+        function resolveEndpoint(end) {
+            if (end.type === 'box') {
+                const b = getBox(end.id);
+                if (!b) return { x: 0, y: 0 };
+                return { x: b.x + b.w / 2, y: b.y + b.h / 2 };
+            } else if (end.type === 'conn') {
+                return getPointOnConnection(end.id, end.t);
             }
             return { x: 0, y: 0 };
         }
 
-        function getPathPoints(start, end, type) {
-            if (type === 'straight') return [start, end];
-            if (type === 'curved') return [start, {x: start.x, y: end.y}, {x: end.x, y: start.y}, end];
-            const midX = start.x + (end.x - start.x) / 2;
-            return [start, {x: midX, y: start.y}, {x: midX, y: end.y}, end];
-        }
+        function updateConnectionPaths() {
+            // Iterative resolution for connection branching dependencies
+            for (let i = 0; i < 2; i++) {
+                connections.forEach(conn => {
+                    const start = resolveEndpoint(conn.from);
+                    const end = resolveEndpoint(conn.to);
 
-        function getPointOnPath(points, t, type) {
-            if (type === 'straight') return { x: points[0].x + (points[1].x - points[0].x) * t, y: points[0].y + (points[1].y - points[0].y) * t };
-            if (type === 'curved') {
-                const [p0, p1, p2, p3] = points;
-                const invT = 1 - t;
-                return {
-                    x: Math.pow(invT, 3) * p0.x + 3 * Math.pow(invT, 2) * t * p1.x + 3 * invT * Math.pow(t, 2) * p2.x + Math.pow(t, 3) * p3.x,
-                    y: Math.pow(invT, 3) * p0.y + 3 * Math.pow(invT, 2) * t * p1.y + 3 * invT * Math.pow(t, 2) * p2.y + Math.pow(t, 3) * p3.y
-                };
+                    if (conn.type === 'straight') {
+                        conn.points = [start, end];
+                    } else if (conn.type === 'curved') {
+                        const cp1 = { x: start.x + (end.x - start.x) / 2, y: start.y };
+                        const cp2 = { x: start.x + (end.x - start.x) / 2, y: end.y };
+                        conn.points = [];
+                        for (let t = 0; t <= 1; t += 0.05) {
+                            const x = Math.pow(1 - t, 3) * start.x + 3 * Math.pow(1 - t, 2) * t * cp1.x + 3 * (1 - t) * Math.pow(t, 2) * cp2.x + Math.pow(t, 3) * end.x;
+                            const y = Math.pow(1 - t, 3) * start.y + 3 * Math.pow(1 - t, 2) * t * cp1.y + 3 * (1 - t) * Math.pow(t, 2) * cp2.y + Math.pow(t, 3) * end.y;
+                            conn.points.push({ x, y });
+                        }
+                    } else if (conn.type === 'manhattan') {
+                        const midX = start.x + (end.x - start.x) / 2;
+                        conn.points = [
+                            start,
+                            { x: midX, y: start.y },
+                            { x: midX, y: end.y },
+                            end
+                        ];
+                    }
+
+                    // Calc total length for traveler and mid-point logic
+                    let len = 0;
+                    for (let j = 0; j < conn.points.length - 1; j++) {
+                        len += Math.hypot(conn.points[j+1].x - conn.points[j].x, conn.points[j+1].y - conn.points[j].y);
+                    }
+                    conn.totalLength = len;
+                });
             }
-            if (t < 0.33) return { x: points[0].x + (points[1].x - points[0].x) * (t/0.33), y: points[0].y };
-            if (t < 0.66) return { x: points[1].x, y: points[1].y + (points[2].y - points[1].y) * ((t-0.33)/0.33) };
-            return { x: points[2].x + (points[3].x - points[2].x) * ((t-0.66)/0.34), y: points[2].y };
         }
 
-        // --- Selection & Hit Detection ---
-        function getBoxAt(worldX, worldY) {
-            for (let i = boxes.length - 1; i >= 0; i--) {
-                const b = boxes[i];
-                if (worldX >= b.x - b.w/2 && worldX <= b.x + b.w/2 && worldY >= b.y - b.h/2 && worldY <= b.y + b.h/2) return i;
+        /**
+         * INTERACTION LOGIC
+         */
+        function addBox() {
+            const worldCenter = screenToWorld(width/2, height/2);
+            objects.push(new Box(worldCenter.x - 60, worldCenter.y - 30));
+        }
+
+        function setTool(t) {
+            tool = t;
+            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`btn-${t}`).classList.add('active');
+        }
+
+        function setPathType(t) {
+            pathType = t;
+            document.getElementById('btn-straight').classList.remove('active');
+            document.getElementById('btn-curved').classList.remove('active');
+            document.getElementById('btn-manhattan').classList.remove('active');
+            document.getElementById(`btn-${t}`).classList.add('active');
+        }
+
+        function groupSelected() {
+            if (selection.size < 2) return;
+            const memberIds = Array.from(selection);
+            const g = new Group(memberIds);
+            groups.push(g);
+            memberIds.forEach(id => {
+                const b = getBox(id);
+                if (b) b.groupId = g.id;
+            });
+        }
+
+        function ungroupSelected() {
+            selection.forEach(id => {
+                const b = getBox(id);
+                if (b && b.groupId) {
+                    const gIdx = groups.findIndex(g => g.id === b.groupId);
+                    const members = groups[gIdx].memberIds;
+                    members.forEach(mId => {
+                        const mb = getBox(mId);
+                        if (mb) mb.groupId = null;
+                    });
+                    groups.splice(gIdx, 1);
+                }
+            });
+        }
+
+        function getHandle(box, worldX, worldY) {
+            const hs = 8 / camera.zoom;
+            const points = [
+                { x: box.x, y: box.y }, // TL
+                { x: box.x + box.w/2, y: box.y }, // T
+                { x: box.x + box.w, y: box.y }, // TR
+                { x: box.x + box.w, y: box.y + box.h/2 }, // R
+                { x: box.x + box.w, y: box.y + box.h }, // BR
+                { x: box.x + box.w/2, y: box.y + box.h }, // B
+                { x: box.x, y: box.y + box.h }, // BL
+                { x: box.x, y: box.y + box.h/2 } // L
+            ];
+            for (let i = 0; i < points.length; i++) {
+                if (Math.abs(worldX - points[i].x) < hs && Math.abs(worldY - points[i].y) < hs) return i;
             }
             return -1;
         }
 
-        function getHandleAt(worldX, worldY) {
-            const bounds = getSelectionBounds();
-            if (!bounds) return null;
-            const pts = getHandlePoints(bounds);
-            const threshold = (HANDLE_SIZE / viewScale) * 1.5;
-            for (const key in pts) {
-                if (dist({x: worldX, y: worldY}, pts[key]) < threshold) return key;
-            }
-            return null;
-        }
+        /**
+         * EVENT LISTENERS
+         */
+        canvas.addEventListener('mousedown', e => {
+            const world = screenToWorld(e.clientX, e.clientY);
+            lastMouse = { x: e.clientX, y: e.clientY };
 
-        function getConnectionAt(worldX, worldY) {
-            const threshold = 10 / viewScale;
-            for (let i = 0; i < connections.length; i++) {
-                const conn = connections[i];
-                const p1 = getEndpointPos(conn.from);
-                const p2 = getEndpointPos(conn.to);
-                const pts = getPathPoints(p1, p2, conn.type);
-                for (let t = 0; t <= 1; t += 0.05) {
-                    const p = getPointOnPath(pts, t, conn.type);
-                    if (dist({x: worldX, y: worldY}, p) < threshold) return { id: i, t: t };
+            if (e.button === 2 || e.button === 1) {
+                isPanning = true;
+                return;
+            }
+
+            if (selection.size === 1) {
+                const b = getBox(Array.from(selection)[0]);
+                const hIdx = getHandle(b, world.x, world.y);
+                if (hIdx !== -1) {
+                    dragMode = 'resize';
+                    dragTarget = b;
+                    resizeHandleIdx = hIdx;
+                    return;
                 }
             }
-            return null;
-        }
 
-        function getTargetAt(worldX, worldY) {
-            const boxIdx = getBoxAt(worldX, worldY);
-            if (boxIdx !== -1) return { type: 'box', id: boxIdx };
-            const connHit = getConnectionAt(worldX, worldY);
-            if (connHit) return { type: 'connection', id: connHit.id, t: connHit.t };
-            return null;
-        }
-
-        // --- Interaction Handlers ---
-        function setMode(mode) {
-            currentMode = mode;
-            document.getElementById('selectToolBtn').classList.toggle('active', mode === 'select');
-            document.getElementById('connectToolBtn').classList.toggle('active', mode === 'connect');
-        }
-
-        function addBox() {
-            const worldCenter = screenToWorld(width/2, height/2);
-            boxes.push({ x: worldCenter.x, y: worldCenter.y, w: 100, h: 60, label: 'New Node' });
-            updateUI();
-        }
-
-        function zoom(factor) {
-            const centerX = width / 2, centerY = height / 2;
-            const worldCenter = screenToWorld(centerX, centerY);
-            viewScale = Math.max(0.1, Math.min(viewScale * factor, 5));
-            viewX = centerX - worldCenter.x * viewScale; viewY = centerY - worldCenter.y * viewScale;
-        }
-
-        function resetView() { viewScale = 1; viewX = 0; viewY = 0; }
-
-        function groupSelected() {
-            if (selectedIndices.size < 2) return;
-            groups.push(Array.from(selectedIndices));
-            updateUI();
-        }
-
-        function ungroupSelected() {
-            groups = groups.filter(g => !g.some(idx => selectedIndices.has(idx)));
-            updateUI();
-        }
-
-        function updateUI() {
-            document.getElementById('groupBtn').disabled = selectedIndices.size < 2;
-            document.getElementById('ungroupBtn').disabled = selectedIndices.size === 0;
-        }
-
-        canvas.addEventListener('wheel', (e) => { e.preventDefault(); zoom(e.deltaY > 0 ? 0.9 : 1.1); }, { passive: false });
-        canvas.addEventListener('contextmenu', (e) => e.preventDefault());
-
-        canvas.addEventListener('mousedown', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const sx = e.clientX - rect.left, sy = e.clientY - rect.top;
-            const worldPos = screenToWorld(sx, sy);
-
-            if (e.button === 1 || e.button === 2) {
-                isPanning = true; dragOffset = { x: sx, y: sy };
-                return;
+            let hit = null;
+            for (let i = objects.length - 1; i >= 0; i--) {
+                const b = objects[i];
+                if (world.x >= b.x && world.x <= b.x + b.w && world.y >= b.y && world.y <= b.y + b.h) {
+                    hit = b;
+                    break;
+                }
             }
 
-            // Check Handles First (Resize)
-            const handle = getHandleAt(worldPos.x, worldPos.y);
-            if (handle) {
-                isResizing = true;
-                resizeHandle = handle;
-                initialBounds = getSelectionBounds();
-                initialBoxes = boxes.map(b => ({...b}));
-                dragOffset = worldPos;
-                return;
-            }
-
-            const target = getTargetAt(worldPos.x, worldPos.y);
-
-            if (currentMode === 'connect') {
-                if (target) {
-                    isConnDragging = true;
-                    connectStartDescriptor = target;
-                    floatingPoint = worldPos;
+            if (hit) {
+                if (tool === 'connect') {
+                    connectStart = { type: 'box', id: hit.id };
+                    dragMode = 'connect';
+                } else {
+                    if (!e.shiftKey && !selection.has(hit.id)) selection.clear();
+                    selection.add(hit.id);
+                    dragTarget = hit;
+                    dragMode = 'move';
                 }
             } else {
-                if (target && target.type === 'box') {
-                    if (!shiftPressed && !selectedIndices.has(target.id)) selectedIndices.clear();
-                    selectedIndices.add(target.id);
-                    isDragging = true; dragTargetIndex = target.id; dragOffset = worldPos;
+                let connHit = null;
+                connections.forEach(c => {
+                    for (let i = 0; i < c.points.length - 1; i++) {
+                        const dist = distToSegment(world, c.points[i], c.points[i+1]);
+                        if (dist < 10 / camera.zoom) {
+                            connHit = c;
+                            break;
+                        }
+                    }
+                });
+
+                if (connHit && tool === 'connect') {
+                    connectStart = { type: 'conn', id: connHit.id, t: 0.5 };
+                    dragMode = 'connect';
                 } else {
-                    if (!shiftPressed) selectedIndices.clear();
-                    isMarquee = true; marqueeStart = worldPos; marqueeCurrent = worldPos;
+                    if (!e.shiftKey) selection.clear();
+                    dragMode = 'marquee';
+                    marqueeStart = world;
+                    marqueeEnd = world;
                 }
             }
-            updateUI();
         });
 
-        window.addEventListener('mousemove', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const sx = e.clientX - rect.left, sy = e.clientY - rect.top;
-            const worldPos = screenToWorld(sx, sy);
+        function distToSegment(p, v, w) {
+            const l2 = Math.pow(v.x - w.x, 2) + Math.pow(v.y - w.y, 2);
+            if (l2 === 0) return Math.hypot(p.x - v.x, p.y - v.y);
+            let t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2;
+            t = Math.max(0, Math.min(1, t));
+            return Math.hypot(p.x - (v.x + t * (w.x - v.x)), p.y - (v.y + t * (w.y - v.y)));
+        }
+
+        window.addEventListener('mousemove', e => {
+            const world = screenToWorld(e.clientX, e.clientY);
+            const dx = (e.clientX - lastMouse.x) / camera.zoom;
+            const dy = (e.clientY - lastMouse.y) / camera.zoom;
 
             if (isPanning) {
-                viewX += sx - dragOffset.x; viewY += sy - dragOffset.y;
-                dragOffset = { x: sx, y: sy };
-            } else if (isResizing) {
-                const dx = worldPos.x - dragOffset.x, dy = worldPos.y - dragOffset.y;
-                let b = initialBounds, nb = { ...b };
-                if (resizeHandle.includes('e')) nb.w = Math.max(MIN_SIZE, b.w + dx);
-                if (resizeHandle.includes('s')) nb.h = Math.max(MIN_SIZE, b.h + dy);
-                if (resizeHandle.includes('w')) { let nw = Math.max(MIN_SIZE, b.w - dx); nb.x = b.right - nw; nb.w = nw; }
-                if (resizeHandle.includes('n')) { let nh = Math.max(MIN_SIZE, b.h - dy); nb.y = b.bottom - nh; nb.h = nh; }
-                const sw = nb.w / b.w, sh = nb.h / b.h;
-                selectedIndices.forEach(idx => {
-                    const sb = initialBoxes[idx];
-                    boxes[idx].x = nb.x + (sb.x - b.x) * sw;
-                    boxes[idx].y = nb.y + (sb.y - b.y) * sh;
-                    boxes[idx].w = sb.w * sw; boxes[idx].h = sb.h * sh;
+                camera.x += (e.clientX - lastMouse.x) / camera.zoom;
+                camera.y += (e.clientY - lastMouse.y) / camera.zoom;
+            } else if (dragMode === 'move' && dragTarget) {
+                let moveSet = new Set(selection);
+                selection.forEach(id => {
+                    const b = getBox(id);
+                    if (b.groupId) {
+                        const g = groups.find(gr => gr.id === b.groupId);
+                        g.memberIds.forEach(m => moveSet.add(m));
+                    }
                 });
-            } else if (isConnDragging) {
-                floatingPoint = worldPos;
-            } else if (isDragging && dragTargetIndex !== -1) {
-                const dx = worldPos.x - dragOffset.x, dy = worldPos.y - dragOffset.y;
-                const g = groups.find(g => g.includes(dragTargetIndex));
-                const toMove = g ? new Set([...g, ...selectedIndices]) : selectedIndices;
-                toMove.forEach(idx => { boxes[idx].x += dx; boxes[idx].y += dy; });
-                dragOffset = worldPos;
-            } else if (isMarquee) {
-                marqueeCurrent = worldPos;
+
+                moveSet.forEach(id => {
+                    const b = getBox(id);
+                    if (b) { b.x += dx; b.y += dy; }
+                });
+            } else if (dragMode === 'resize' && dragTarget) {
+                const b = dragTarget;
+                const h = resizeHandleIdx;
+                if (h === 0) { b.x += dx; b.y += dy; b.w -= dx; b.h -= dy; }
+                else if (h === 1) { b.y += dy; b.h -= dy; }
+                else if (h === 2) { b.y += dy; b.w += dx; b.h -= dy; }
+                else if (h === 3) { b.w += dx; }
+                else if (h === 4) { b.w += dx; b.h += dy; }
+                else if (h === 5) { b.h += dy; }
+                else if (h === 6) { b.x += dx; b.w -= dx; b.h += dy; }
+                else if (h === 7) { b.x += dx; b.w -= dx; }
+            } else if (dragMode === 'marquee') {
+                marqueeEnd = world;
+            } else if (dragMode === 'connect') {
+                marqueeEnd = world;
             }
+            lastMouse = { x: e.clientX, y: e.clientY };
         });
 
-        window.addEventListener('mouseup', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const worldPos = screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
-
-            if (isConnDragging && connectStartDescriptor) {
-                const target = getTargetAt(worldPos.x, worldPos.y);
-                if (target && (target.type !== connectStartDescriptor.type || target.id !== connectStartDescriptor.id)) {
-                    const types = ['straight', 'curved', 'manhattan'];
-                    connections.push({ from: connectStartDescriptor, to: target, type: types[connections.length % 3] });
+        window.addEventListener('mouseup', e => {
+            if (dragMode === 'marquee') {
+                const x1 = Math.min(marqueeStart.x, marqueeEnd.x);
+                const x2 = Math.max(marqueeStart.x, marqueeEnd.x);
+                const y1 = Math.min(marqueeStart.y, marqueeEnd.y);
+                const y2 = Math.max(marqueeStart.y, marqueeEnd.y);
+                objects.forEach(b => {
+                    if (b.x >= x1 && b.x + b.w <= x2 && b.y >= y1 && b.y + b.h <= y2) {
+                        selection.add(b.id);
+                    }
+                });
+            } else if (dragMode === 'connect') {
+                const world = screenToWorld(e.clientX, e.clientY);
+                let hit = null;
+                for (let i = objects.length - 1; i >= 0; i--) {
+                    const b = objects[i];
+                    if (world.x >= b.x && world.x <= b.x + b.w && world.y >= b.y && world.y <= b.y + b.h) {
+                        hit = { type: 'box', id: b.id };
+                        break;
+                    }
                 }
-            } else if (isMarquee) {
-                const x1 = Math.min(marqueeStart.x, marqueeCurrent.x), x2 = Math.max(marqueeStart.x, marqueeCurrent.x);
-                const y1 = Math.min(marqueeStart.y, marqueeCurrent.y), y2 = Math.max(marqueeStart.y, marqueeCurrent.y);
-                boxes.forEach((b, i) => {
-                    if (b.x >= x1 && b.x <= x2 && b.y >= y1 && b.y <= y2) selectedIndices.add(i);
-                });
+                if (!hit) {
+                    connections.forEach(c => {
+                        for (let i = 0; i < c.points.length - 1; i++) {
+                            if (distToSegment(world, c.points[i], c.points[i+1]) < 10 / camera.zoom) {
+                                hit = { type: 'conn', id: c.id, t: 0.5 };
+                            }
+                        }
+                    });
+                }
+                if (hit && hit.id !== connectStart.id) {
+                    connections.push(new Connection(connectStart, hit, pathType));
+                }
             }
-            isDragging = isMarquee = isPanning = isConnDragging = isResizing = false;
-            connectStartDescriptor = null; floatingPoint = null; resizeHandle = null;
-            updateUI();
+            isPanning = false;
+            dragMode = null;
+            dragTarget = null;
+            marqueeStart = null;
+            connectStart = null;
         });
 
-        // --- Drawing ---
-        function drawBox(box, index) {
-            const isSelected = selectedIndices.has(index);
-            ctx.save();
-            ctx.strokeStyle = isSelected ? '#2563eb' : '#64748b';
-            ctx.lineWidth = (isSelected ? 2 : 1.5) / viewScale;
-            ctx.fillStyle = '#fff';
-            ctx.beginPath(); ctx.roundRect(box.x - box.w/2, box.y - box.h/2, box.w, box.h, 6); ctx.fill(); ctx.stroke();
-            ctx.fillStyle = '#1e293b'; ctx.font = `11px sans-serif`; ctx.textAlign = 'center';
-            ctx.fillText(box.label, box.x, box.y + 4);
-            ctx.restore();
-        }
+        canvas.addEventListener('wheel', e => {
+            e.preventDefault();
+            const worldBefore = screenToWorld(e.clientX, e.clientY);
+            camera.zoom *= Math.pow(0.999, e.deltaY);
+            camera.zoom = Math.max(0.1, Math.min(5, camera.zoom));
+            const worldAfter = screenToWorld(e.clientX, e.clientY);
+            camera.x += (worldAfter.x - worldBefore.x);
+            camera.y += (worldAfter.y - worldBefore.y);
+        }, { passive: false });
 
-        function drawPath(conn) {
-            const p1 = getEndpointPos(conn.from);
-            const p2 = getEndpointPos(conn.to);
-            const pts = getPathPoints(p1, p2, conn.type);
-            ctx.save();
-            ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
-            if (conn.type === 'straight') ctx.lineTo(pts[1].x, pts[1].y);
-            else if (conn.type === 'curved') ctx.bezierCurveTo(pts[1].x, pts[1].y, pts[2].x, pts[2].y, pts[3].x, pts[3].y);
-            else { ctx.lineTo(pts[1].x, pts[1].y); ctx.lineTo(pts[2].x, pts[2].y); ctx.lineTo(pts[3].x, pts[3].y); }
-            ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2 / viewScale;
-            ctx.setLineDash([4/viewScale, 4/viewScale]);
-            ctx.stroke();
-            ctx.restore();
-        }
-
-        function drawSelectionOverlay() {
-            const bounds = getSelectionBounds();
-            if (!bounds) return;
-            ctx.save();
-            ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 1 / viewScale;
-            ctx.setLineDash([5 / viewScale, 5 / viewScale]);
-            ctx.strokeRect(bounds.x, bounds.y, bounds.w, bounds.h);
-            ctx.setLineDash([]);
-            const pts = getHandlePoints(bounds), hSize = HANDLE_SIZE / viewScale;
-            ctx.fillStyle = '#2563eb';
-            for (const key in pts) {
-                ctx.beginPath(); ctx.rect(pts[key].x - hSize/2, pts[key].y - hSize/2, hSize, hSize); ctx.fill();
-                ctx.strokeStyle = '#fff'; ctx.lineWidth = 1 / viewScale; ctx.stroke();
+        canvas.addEventListener('dblclick', e => {
+            const world = screenToWorld(e.clientX, e.clientY);
+            for (let b of objects) {
+                if (world.x >= b.x && world.x <= b.x + b.w && world.y >= b.y && world.y <= b.y + b.h) {
+                    const n = prompt("Rename Object:", b.label);
+                    if (n) b.label = n;
+                    return;
+                }
             }
-            ctx.restore();
+            for (let c of connections) {
+                if (c.points.length > 0) {
+                    const mid = getPointOnConnection(c.id, 0.5);
+                    if (Math.hypot(world.x - mid.x, world.y - mid.y) < 20 / camera.zoom) {
+                        const n = prompt("Rename Link:", c.label);
+                        if (n) c.label = n;
+                        return;
+                    }
+                }
+            }
+        });
+
+        canvas.oncontextmenu = (e) => e.preventDefault();
+
+        /**
+         * RENDER LOOP
+         */
+        function loop(timestamp) {
+            travelTime = timestamp % CYCLE_TIME;
+            updateConnectionPaths();
+            draw();
+            requestAnimationFrame(loop);
         }
 
-        function animate(time) {
+        function draw() {
             ctx.clearRect(0, 0, width, height);
-            ctx.save(); ctx.translate(viewX, viewY); ctx.scale(viewScale, viewScale);
-
-            // Connections
-            connections.forEach(drawPath);
-
-            // Active Drag Link
-            if (isConnDragging && connectStartDescriptor) {
-                const start = getEndpointPos(connectStartDescriptor);
-                ctx.beginPath(); ctx.moveTo(start.x, start.y); ctx.lineTo(floatingPoint.x, floatingPoint.y);
-                ctx.strokeStyle = '#2563eb'; ctx.setLineDash([2/viewScale, 2/viewScale]); ctx.stroke();
+            drawGrid();
+            ctx.save();
+            ctx.translate(width/2, height/2);
+            ctx.scale(camera.zoom, camera.zoom);
+            ctx.translate(camera.x, camera.y);
+            connections.forEach(drawConnection);
+            drawTraveler();
+            objects.forEach(drawBox);
+            if (dragMode === 'marquee') {
+                ctx.strokeStyle = 'rgba(59, 130, 246, 0.5)';
+                ctx.fillStyle = 'rgba(59, 130, 246, 0.1)';
+                ctx.beginPath();
+                ctx.rect(marqueeStart.x, marqueeStart.y, marqueeEnd.x - marqueeStart.x, marqueeEnd.y - marqueeStart.y);
+                ctx.fill();
+                ctx.stroke();
+            } else if (dragMode === 'connect') {
+                const start = resolveEndpoint(connectStart);
+                ctx.setLineDash([5, 5]);
+                ctx.strokeStyle = '#3b82f6';
+                ctx.beginPath();
+                ctx.moveTo(start.x, start.y);
+                ctx.lineTo(marqueeEnd.x, marqueeEnd.y);
+                ctx.stroke();
+                ctx.setLineDash([]);
             }
-
-            boxes.forEach((box, i) => drawBox(box, i));
-            drawSelectionOverlay();
-
-            if (isMarquee) {
-                ctx.fillStyle = 'rgba(37,99,235,0.05)'; ctx.strokeStyle = '#2563eb';
-                ctx.strokeRect(Math.min(marqueeStart.x, marqueeCurrent.x), Math.min(marqueeStart.y, marqueeCurrent.y), Math.abs(marqueeCurrent.x-marqueeStart.x), Math.abs(marqueeCurrent.y-marqueeStart.y));
-            }
-
-            // Traveler
-            if (connections.length > 0) {
-                const progress = (time % CYCLE_TIME) / CYCLE_TIME;
-                const segIdx = Math.floor(progress * connections.length), segT = (progress * connections.length) % 1;
-                const conn = connections[segIdx];
-                const p1 = getEndpointPos(conn.from), p2 = getEndpointPos(conn.to);
-                const pts = getPathPoints(p1, p2, conn.type);
-                const pos = getPointOnPath(pts, segT, conn.type);
-                ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(pos.x, pos.y, 5/viewScale, 0, Math.PI*2); ctx.fill();
-            }
-            ctx.restore(); requestAnimationFrame(animate);
+            ctx.restore();
         }
-        requestAnimationFrame(animate);
+
+        function drawGrid() {
+            const step = 50 * camera.zoom;
+            const offX = (camera.x * camera.zoom + width/2) % step;
+            const offY = (camera.y * camera.zoom + height/2) % step;
+            ctx.strokeStyle = '#2d2d2d';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for (let x = offX; x < width; x += step) {
+                ctx.moveTo(x, 0); ctx.lineTo(x, height);
+            }
+            for (let y = offY; y < height; y += step) {
+                ctx.moveTo(0, y); ctx.lineTo(width, y);
+            }
+            ctx.stroke();
+        }
+
+        function drawBox(b) {
+            const isSelected = selection.has(b.id);
+            if (isSelected) {
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = 'rgba(59, 130, 246, 0.5)';
+            }
+            ctx.fillStyle = b.groupId ? '#374151' : '#1f2937';
+            ctx.strokeStyle = isSelected ? '#3b82f6' : '#4b5563';
+            ctx.lineWidth = 2;
+            const r = 8;
+            ctx.beginPath();
+            ctx.moveTo(b.x + r, b.y);
+            ctx.lineTo(b.x + b.w - r, b.y);
+            ctx.quadraticCurveTo(b.x + b.w, b.y, b.x + b.w, b.y + r);
+            ctx.lineTo(b.x + b.w, b.y + b.h - r);
+            ctx.quadraticCurveTo(b.x + b.w, b.y + b.h, b.x + b.w - r, b.y + b.h);
+            ctx.lineTo(b.x + r, b.y + b.h);
+            ctx.quadraticCurveTo(b.x, b.y + b.h, b.x, b.y + b.h - r);
+            ctx.lineTo(b.x, b.y + r);
+            ctx.quadraticCurveTo(b.x, b.y, b.x + r, b.y);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#f3f4f6';
+            ctx.font = 'bold 14px Inter';
+            ctx.textAlign = 'center';
+            ctx.fillText(b.label, b.x + b.w/2, b.y + b.h/2 + 5);
+            if (isSelected) {
+                const hs = 6 / camera.zoom;
+                ctx.fillStyle = '#fff';
+                ctx.strokeStyle = '#3b82f6';
+                const points = [
+                    { x: b.x, y: b.y }, { x: b.x + b.w/2, y: b.y }, { x: b.x + b.w, y: b.y },
+                    { x: b.x + b.w, y: b.y + b.h/2 }, { x: b.x + b.w, y: b.y + b.h },
+                    { x: b.x + b.w/2, y: b.y + b.h }, { x: b.x, y: b.y + b.h }, { x: b.x, y: b.y + b.h/2 }
+                ];
+                points.forEach(p => {
+                    ctx.beginPath();
+                    ctx.rect(p.x - hs/2, p.y - hs/2, hs, hs);
+                    ctx.fill();
+                    ctx.stroke();
+                });
+            }
+        }
+
+        function drawConnection(c) {
+            if (c.points.length < 2) return;
+            ctx.strokeStyle = '#6b7280';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(c.points[0].x, c.points[0].y);
+            for (let i = 1; i < c.points.length; i++) {
+                ctx.lineTo(c.points[i].x, c.points[i].y);
+            }
+            ctx.stroke();
+
+            // Corrected label drawing: Use getPointOnConnection(0.5) to ensure centering for all path types
+            const mid = getPointOnConnection(c.id, 0.5);
+            ctx.font = '11px Inter';
+            const tw = ctx.measureText(c.label).width;
+            ctx.fillStyle = 'rgba(26, 26, 26, 0.8)';
+            ctx.fillRect(mid.x - tw/2 - 4, mid.y - 8, tw + 8, 16);
+            ctx.fillStyle = '#9ca3af';
+            ctx.textAlign = 'center';
+            ctx.fillText(c.label, mid.x, mid.y + 4);
+        }
+
+        function drawTraveler() {
+            if (connections.length === 0) return;
+            let totalLength = 0;
+            connections.forEach(c => totalLength += c.totalLength);
+            const t = travelTime / CYCLE_TIME;
+            const targetDistance = t * totalLength;
+            let currentDist = 0;
+            let travelerPos = null;
+            for (let c of connections) {
+                if (currentDist + c.totalLength >= targetDistance) {
+                    const localT = (targetDistance - currentDist) / c.totalLength;
+                    travelerPos = getPointOnConnection(c.id, localT);
+                    break;
+                }
+                currentDist += c.totalLength;
+            }
+            if (travelerPos) {
+                ctx.fillStyle = '#60a5fa';
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#60a5fa';
+                ctx.beginPath();
+                ctx.arc(travelerPos.x, travelerPos.y, 5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        init();
     </script>
 </body>
 </html>
