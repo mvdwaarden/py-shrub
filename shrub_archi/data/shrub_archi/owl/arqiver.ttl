@@ -1,0 +1,442 @@
+@prefix : <https://ontology.arqiver.com/model/2026/1/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <https://ontology.arqiver.com/model/2026/1/> .
+
+<https://ontology.arqiver.com/model/2026/1> rdf:type owl:Ontology .
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  http://www.w3.org/2002/07/owl#topObjectProperty
+owl:topObjectProperty rdfs:range :Data_Card .
+
+
+###  https://ontology.arqiver.com/model/2026/1#has_product
+:has_product rdf:type owl:ObjectProperty ;
+             rdfs:subPropertyOf owl:topObjectProperty ;
+             rdfs:domain :Dataspace ;
+             rdfs:range :Product .
+
+
+###  https://ontology.arqiver.com/model/2026/1#has_template
+:has_template rdf:type owl:ObjectProperty ;
+              rdfs:subPropertyOf owl:topObjectProperty ;
+              rdfs:domain :Dataspace ;
+              rdfs:range :Template .
+
+
+###  https://ontology.arqiver.com/model/2026/1/flows_to_product
+:flows_to_product rdf:type owl:ObjectProperty ;
+                  rdfs:domain :Stream ;
+                  rdfs:range :Product .
+
+
+###  https://ontology.arqiver.com/model/2026/1/has_audience
+:has_audience rdf:type owl:ObjectProperty ;
+              rdfs:domain :Product ;
+              rdfs:range :Audience .
+
+
+###  https://ontology.arqiver.com/model/2026/1/has_collection
+:has_collection rdf:type owl:ObjectProperty ;
+                rdfs:subPropertyOf owl:topObjectProperty ;
+                rdfs:domain :Workspace ;
+                rdfs:range :Collection .
+
+
+###  https://ontology.arqiver.com/model/2026/1/has_connection
+:has_connection rdf:type owl:ObjectProperty ;
+                rdfs:subPropertyOf owl:topObjectProperty ;
+                rdfs:domain :Stream ,
+                            :Template ;
+                rdfs:range :ArQiver_Connect .
+
+
+###  https://ontology.arqiver.com/model/2026/1/has_data_card
+:has_data_card rdf:type owl:ObjectProperty ;
+               rdfs:subPropertyOf owl:topObjectProperty ;
+               rdfs:domain :Template ;
+               rdfs:range :Data_Card .
+
+
+###  https://ontology.arqiver.com/model/2026/1/has_domain
+:has_domain rdf:type owl:ObjectProperty ;
+            rdfs:domain :Dataspace ;
+            rdfs:range :Domain .
+
+
+###  https://ontology.arqiver.com/model/2026/1/has_domain_team
+:has_domain_team rdf:type owl:ObjectProperty ;
+                 rdfs:subPropertyOf :has_team ;
+                 rdfs:domain :Domain ;
+                 rdfs:range :Domain_Team .
+
+
+###  https://ontology.arqiver.com/model/2026/1/has_file
+:has_file rdf:type owl:ObjectProperty ;
+          rdfs:subPropertyOf owl:topObjectProperty ;
+          rdfs:domain :Collection ;
+          rdfs:range :File .
+
+
+###  https://ontology.arqiver.com/model/2026/1/has_metadata
+:has_metadata rdf:type owl:ObjectProperty ;
+              rdfs:subPropertyOf owl:topObjectProperty ;
+              rdfs:domain :File ;
+              rdfs:range :Metadata .
+
+
+###  https://ontology.arqiver.com/model/2026/1/has_metadata_card
+:has_metadata_card rdf:type owl:ObjectProperty ;
+                   rdfs:subPropertyOf owl:topObjectProperty ;
+                   rdfs:domain :Stream ,
+                               :Template ;
+                   rdfs:range :Metadata_Card .
+
+
+###  https://ontology.arqiver.com/model/2026/1/has_operator
+:has_operator rdf:type owl:ObjectProperty ;
+              rdfs:domain :Stream ;
+              rdfs:range :Operator .
+
+
+###  https://ontology.arqiver.com/model/2026/1/has_records_management
+:has_records_management rdf:type owl:ObjectProperty ;
+                        rdfs:subPropertyOf owl:topObjectProperty ;
+                        rdfs:domain :Stream ,
+                                    :Template ;
+                        rdfs:range :Retention_Protocol .
+
+
+###  https://ontology.arqiver.com/model/2026/1/has_retentention_protocol
+:has_retentention_protocol rdf:type owl:ObjectProperty ;
+                           rdfs:subPropertyOf owl:topObjectProperty ;
+                           rdfs:domain :Stream ,
+                                       :Template ;
+                           rdfs:range :Retention_Protocol .
+
+
+###  https://ontology.arqiver.com/model/2026/1/has_role
+:has_role rdf:type owl:ObjectProperty ;
+          rdfs:subPropertyOf owl:topObjectProperty ;
+          rdfs:range :Role .
+
+
+###  https://ontology.arqiver.com/model/2026/1/has_storage_location
+:has_storage_location rdf:type owl:ObjectProperty ;
+                      rdfs:subPropertyOf owl:topObjectProperty ;
+                      rdfs:range :Storage_Location .
+
+
+###  https://ontology.arqiver.com/model/2026/1/has_stream
+:has_stream rdf:type owl:ObjectProperty ;
+            rdfs:subPropertyOf owl:topObjectProperty ;
+            rdfs:domain :Dataspace ;
+            rdfs:range :Stream .
+
+
+###  https://ontology.arqiver.com/model/2026/1/has_stream_team
+:has_stream_team rdf:type owl:ObjectProperty ;
+                 rdfs:subPropertyOf :has_team ;
+                 rdfs:domain :Template ;
+                 rdfs:range :Stream_Team .
+
+
+###  https://ontology.arqiver.com/model/2026/1/has_stream_team_role
+:has_stream_team_role rdf:type owl:ObjectProperty ;
+                      rdfs:subPropertyOf :has_role ;
+                      rdfs:domain :Stream_Team ;
+                      rdfs:range :Stream_Team_Role .
+
+
+###  https://ontology.arqiver.com/model/2026/1/has_team
+:has_team rdf:type owl:ObjectProperty ;
+          rdfs:subPropertyOf owl:topObjectProperty ,
+                             :is_defined_by .
+
+
+###  https://ontology.arqiver.com/model/2026/1/has_workspace
+:has_workspace rdf:type owl:ObjectProperty ;
+               rdfs:domain :Dataspace ;
+               rdfs:range :Workspace .
+
+
+###  https://ontology.arqiver.com/model/2026/1/is_defined_by
+:is_defined_by rdf:type owl:ObjectProperty ;
+               rdfs:subPropertyOf owl:topObjectProperty .
+
+
+###  https://ontology.arqiver.com/model/2026/1/is_defined_by_data_card
+:is_defined_by_data_card rdf:type owl:ObjectProperty ;
+                         rdfs:subPropertyOf :is_defined_by ;
+                         rdfs:domain :Data ;
+                         rdfs:range :Data_Card .
+
+
+###  https://ontology.arqiver.com/model/2026/1/is_defined_by_metadata_card
+:is_defined_by_metadata_card rdf:type owl:ObjectProperty ;
+                             rdfs:subPropertyOf :is_defined_by ;
+                             rdfs:domain :Metadata ;
+                             rdfs:range :Metadata_Card .
+
+
+#################################################################
+#    Classes
+#################################################################
+
+###  https://ontology.arqiver.com/model/2026/1/ArQiver_Connect
+:ArQiver_Connect rdf:type owl:Class ;
+                 rdfs:subClassOf :Connection .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Archive_Officer
+:Archive_Officer rdf:type owl:Class ;
+                 rdfs:subClassOf :Stream_Team_Role .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Audience
+:Audience rdf:type owl:Class .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Authorization
+:Authorization rdf:type owl:Class .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Automated_Eviction
+:Automated_Eviction rdf:type owl:Class ;
+                    rdfs:subClassOf :Records_Management ;
+                    owl:disjointWith :Manual_Eviction .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Business_Connection
+:Business_Connection rdf:type owl:Class ;
+                     rdfs:subClassOf :ArQiver_Connect .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Business_Relation_Audience
+:Business_Relation_Audience rdf:type owl:Class ;
+                            rdfs:subClassOf :Audience .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Business_and_Personal_Relation_Audience
+:Business_and_Personal_Relation_Audience rdf:type owl:Class ;
+                                         rdfs:subClassOf :Audience .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Collection
+:Collection rdf:type owl:Class .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Connection
+:Connection rdf:type owl:Class .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Data
+:Data rdf:type owl:Class .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Data_Card
+:Data_Card rdf:type owl:Class .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Dataspace
+:Dataspace rdf:type owl:Class .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Domain
+:Domain rdf:type owl:Class .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Domain_Owner
+:Domain_Owner rdf:type owl:Class ;
+              rdfs:subClassOf :Stream_Team_Role .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Domain_Team
+:Domain_Team rdf:type owl:Class ;
+             rdfs:subClassOf :Team ;
+             owl:disjointWith :Stream_Team .
+
+
+###  https://ontology.arqiver.com/model/2026/1/File
+:File rdf:type owl:Class .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Internal_Audience
+:Internal_Audience rdf:type owl:Class ;
+                   rdfs:subClassOf :Audience .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Internal_Connection
+:Internal_Connection rdf:type owl:Class ;
+                     rdfs:subClassOf :ArQiver_Connect .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Maintainance_Officer
+:Maintainance_Officer rdf:type owl:Class ;
+                      rdfs:subClassOf :Stream_Team_Role .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Manual_Eviction
+:Manual_Eviction rdf:type owl:Class ;
+                 rdfs:subClassOf :Records_Management .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Metadata
+:Metadata rdf:type owl:Class .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Metadata_Card
+:Metadata_Card rdf:type owl:Class .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Operator
+:Operator rdf:type owl:Class ;
+          rdfs:subClassOf :Person .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Person
+:Person rdf:type owl:Class .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Personal_Connection
+:Personal_Connection rdf:type owl:Class ;
+                     rdfs:subClassOf :ArQiver_Connect .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Personal_Relation_Audience
+:Personal_Relation_Audience rdf:type owl:Class ;
+                            rdfs:subClassOf :Audience .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Privacy_Officer
+:Privacy_Officer rdf:type owl:Class ;
+                 rdfs:subClassOf :Stream_Team_Role .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Product
+:Product rdf:type owl:Class .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Public_Connection
+:Public_Connection rdf:type owl:Class ;
+                   rdfs:subClassOf :ArQiver_Connect .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Records_Management
+:Records_Management rdf:type owl:Class .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Retention_Protocol
+:Retention_Protocol rdf:type owl:Class .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Role
+:Role rdf:type owl:Class .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Storage_Location
+:Storage_Location rdf:type owl:Class .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Stream
+:Stream rdf:type owl:Class .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Stream_Team
+:Stream_Team rdf:type owl:Class ;
+             rdfs:subClassOf :Team .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Stream_Team_Role
+:Stream_Team_Role rdf:type owl:Class ;
+                  rdfs:subClassOf :Role .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Team
+:Team rdf:type owl:Class .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Template
+:Template rdf:type owl:Class .
+
+
+###  https://ontology.arqiver.com/model/2026/1/Workspace
+:Workspace rdf:type owl:Class .
+
+
+#################################################################
+#    General axioms
+#################################################################
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :Archive_Officer
+                :Domain_Owner
+                :Maintainance_Officer
+                :Privacy_Officer
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :Authorization
+                :Collection
+                :Connection
+                :Data_Card
+                :Dataspace
+                :Domain
+                :File
+                :Metadata_Card
+                :Person
+                :Product
+                :Records_Management
+                :Retention_Protocol
+                :Role
+                :Storage_Location
+                :Stream
+                :Template
+                :Workspace
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :Authorization
+                :Data_Card
+                :Metadata_Card
+                :Person
+                :Product
+                :Records_Management
+                :Retention_Protocol
+                :Role
+                :Stream
+                :Template
+                :Workspace
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :Business_Connection
+                :Internal_Connection
+                :Personal_Connection
+                :Public_Connection
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :Business_Relation_Audience
+                :Business_and_Personal_Relation_Audience
+                :Internal_Audience
+                :Personal_Relation_Audience
+              )
+] .
+
+
+###  Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi
