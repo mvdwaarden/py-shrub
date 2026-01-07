@@ -16,18 +16,87 @@
 owl:topObjectProperty rdfs:range :Data_Card .
 
 
-###  https://ontology.arqiver.com/model/2026/1#has_product
-:has_product rdf:type owl:ObjectProperty ;
-             rdfs:subPropertyOf owl:topObjectProperty ;
-             rdfs:domain :Dataspace ;
-             rdfs:range :Product .
+###  https://ontology.arqiver.com/model/2026/1#based_on_template
+:based_on_template rdf:type owl:ObjectProperty ;
+                   rdfs:subPropertyOf owl:topObjectProperty ;
+                   rdfs:domain :Stream ;
+                   rdfs:range :Template .
 
 
-###  https://ontology.arqiver.com/model/2026/1#has_template
-:has_template rdf:type owl:ObjectProperty ;
-              rdfs:subPropertyOf owl:topObjectProperty ;
-              rdfs:domain :Dataspace ;
-              rdfs:range :Template .
+###  https://ontology.arqiver.com/model/2026/1#belongs_to_domain
+:belongs_to_domain rdf:type owl:ObjectProperty ;
+                   rdfs:subPropertyOf :based_on_template ;
+                   rdfs:domain :Stream ;
+                   rdfs:range :Domain .
+
+
+###  https://ontology.arqiver.com/model/2026/1#has_data_card_member
+:has_data_card_member rdf:type owl:ObjectProperty ;
+                      rdfs:subPropertyOf :has_member ;
+                      rdfs:domain :Data_Card ;
+                      rdfs:range :Data_Card_Member .
+
+
+###  https://ontology.arqiver.com/model/2026/1#has_domain_member
+:has_domain_member rdf:type owl:ObjectProperty ;
+                   rdfs:subPropertyOf :has_member ;
+                   rdfs:domain :Domain ;
+                   rdfs:range :Domain_Member .
+
+
+###  https://ontology.arqiver.com/model/2026/1#has_member
+:has_member rdf:type owl:ObjectProperty ;
+            rdfs:subPropertyOf owl:topObjectProperty .
+
+
+###  https://ontology.arqiver.com/model/2026/1#has_metadata_card_member
+:has_metadata_card_member rdf:type owl:ObjectProperty ;
+                          rdfs:subPropertyOf :has_member ;
+                          rdfs:domain :Metadata_Card ;
+                          rdfs:range :Metadata_Card_Member .
+
+
+###  https://ontology.arqiver.com/model/2026/1#has_storage_location
+:has_storage_location rdf:type owl:ObjectProperty ;
+                      rdfs:domain :Template ;
+                      rdfs:range :Storage_Location .
+
+
+###  https://ontology.arqiver.com/model/2026/1#has_stream_team_member
+:has_stream_team_member rdf:type owl:ObjectProperty ;
+                        rdfs:subPropertyOf :has_member ;
+                        rdfs:domain :Stream_Team ;
+                        rdfs:range :Stream_Team_Member .
+
+
+###  https://ontology.arqiver.com/model/2026/1#is_part_of_domain
+:is_part_of_domain rdf:type owl:ObjectProperty ;
+                   rdfs:subPropertyOf owl:topObjectProperty ;
+                   rdfs:domain :Data_Card ,
+                               :Metadata_Card ,
+                               :Product ,
+                               :Stream ,
+                               :Template ;
+                   rdfs:range :Domain .
+
+
+###  https://ontology.arqiver.com/model/2026/1/contains
+:contains rdf:type owl:ObjectProperty ;
+          rdfs:subPropertyOf owl:topObjectProperty .
+
+
+###  https://ontology.arqiver.com/model/2026/1/contains_data
+:contains_data rdf:type owl:ObjectProperty ;
+               rdfs:subPropertyOf :contains ;
+               rdfs:domain :Stream ;
+               rdfs:range :Data .
+
+
+###  https://ontology.arqiver.com/model/2026/1/contains_file
+:contains_file rdf:type owl:ObjectProperty ;
+               rdfs:subPropertyOf :contains ;
+               rdfs:domain :Stream ;
+               rdfs:range :File .
 
 
 ###  https://ontology.arqiver.com/model/2026/1/flows_to_product
@@ -105,12 +174,19 @@ owl:topObjectProperty rdfs:range :Data_Card .
               rdfs:range :Operator .
 
 
+###  https://ontology.arqiver.com/model/2026/1/has_product
+:has_product rdf:type owl:ObjectProperty ;
+             rdfs:subPropertyOf owl:topObjectProperty ;
+             rdfs:domain :Dataspace ;
+             rdfs:range :Product .
+
+
 ###  https://ontology.arqiver.com/model/2026/1/has_records_management
 :has_records_management rdf:type owl:ObjectProperty ;
                         rdfs:subPropertyOf owl:topObjectProperty ;
                         rdfs:domain :Stream ,
                                     :Template ;
-                        rdfs:range :Retention_Protocol .
+                        rdfs:range :Records_Management .
 
 
 ###  https://ontology.arqiver.com/model/2026/1/has_retentention_protocol
@@ -160,6 +236,13 @@ owl:topObjectProperty rdfs:range :Data_Card .
                              :is_defined_by .
 
 
+###  https://ontology.arqiver.com/model/2026/1/has_template
+:has_template rdf:type owl:ObjectProperty ;
+              rdfs:subPropertyOf owl:topObjectProperty ;
+              rdfs:domain :Dataspace ;
+              rdfs:range :Template .
+
+
 ###  https://ontology.arqiver.com/model/2026/1/has_workspace
 :has_workspace rdf:type owl:ObjectProperty ;
                rdfs:domain :Dataspace ;
@@ -189,9 +272,37 @@ owl:topObjectProperty rdfs:range :Data_Card .
 #    Classes
 #################################################################
 
+###  https://ontology.arqiver.com/model/2026/1#Card
+:Card rdf:type owl:Class .
+
+
+###  https://ontology.arqiver.com/model/2026/1#Card_Member
+:Card_Member rdf:type owl:Class ;
+             rdfs:subClassOf :Person .
+
+
+###  https://ontology.arqiver.com/model/2026/1#Data_Card_Member
+:Data_Card_Member rdf:type owl:Class ;
+                  rdfs:subClassOf :Card_Member .
+
+
+###  https://ontology.arqiver.com/model/2026/1#Domain_Member
+:Domain_Member rdf:type owl:Class ;
+               rdfs:subClassOf :Person .
+
+
+###  https://ontology.arqiver.com/model/2026/1#Metadata_Card_Member
+:Metadata_Card_Member rdf:type owl:Class ;
+                      rdfs:subClassOf :Card_Member .
+
+
+###  https://ontology.arqiver.com/model/2026/1#Stream_Team_Member
+:Stream_Team_Member rdf:type owl:Class ;
+                    rdfs:subClassOf :Person .
+
+
 ###  https://ontology.arqiver.com/model/2026/1/ArQiver_Connect
-:ArQiver_Connect rdf:type owl:Class ;
-                 rdfs:subClassOf :Connection .
+:ArQiver_Connect rdf:type owl:Class .
 
 
 ###  https://ontology.arqiver.com/model/2026/1/Archive_Officer
@@ -232,16 +343,13 @@ owl:topObjectProperty rdfs:range :Data_Card .
 :Collection rdf:type owl:Class .
 
 
-###  https://ontology.arqiver.com/model/2026/1/Connection
-:Connection rdf:type owl:Class .
-
-
 ###  https://ontology.arqiver.com/model/2026/1/Data
 :Data rdf:type owl:Class .
 
 
 ###  https://ontology.arqiver.com/model/2026/1/Data_Card
-:Data_Card rdf:type owl:Class .
+:Data_Card rdf:type owl:Class ;
+           rdfs:subClassOf :Workspace .
 
 
 ###  https://ontology.arqiver.com/model/2026/1/Dataspace
@@ -292,7 +400,8 @@ owl:topObjectProperty rdfs:range :Data_Card .
 
 
 ###  https://ontology.arqiver.com/model/2026/1/Metadata_Card
-:Metadata_Card rdf:type owl:Class .
+:Metadata_Card rdf:type owl:Class ;
+               rdfs:subClassOf :Card .
 
 
 ###  https://ontology.arqiver.com/model/2026/1/Operator
@@ -379,28 +488,6 @@ owl:topObjectProperty rdfs:range :Data_Card .
                 :Domain_Owner
                 :Maintainance_Officer
                 :Privacy_Officer
-              )
-] .
-
-
-[ rdf:type owl:AllDisjointClasses ;
-  owl:members ( :Authorization
-                :Collection
-                :Connection
-                :Data_Card
-                :Dataspace
-                :Domain
-                :File
-                :Metadata_Card
-                :Person
-                :Product
-                :Records_Management
-                :Retention_Protocol
-                :Role
-                :Storage_Location
-                :Stream
-                :Template
-                :Workspace
               )
 ] .
 

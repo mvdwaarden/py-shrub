@@ -432,15 +432,17 @@
 
                 const currentX = propPanelPos.x === -1 ? rect.width - 272 : propPanelPos.x;
                 const currentY = propPanelPos.y;
-
-                setDragState({
-                    isDragging: true,
-                    mode: 'panel_move',
-                    start: { x, y },
-                    current: { x, y },
-                    worldStart: { x: 0, y: 0 },
-                    panelStartPos: { x: currentX, y: currentY }
-                });
+                if (dragState) setDragState(null);
+                else {
+                    setDragState({
+                        isDragging: true,
+                        mode: 'panel_move',
+                        start: { x, y },
+                        current: { x, y },
+                        worldStart: { x: 0, y: 0 },
+                        panelStartPos: { x: currentX, y: currentY }
+                    });
+                }
             };
 
             const handlePointerMove = (e) => {

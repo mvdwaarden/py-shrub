@@ -2,6 +2,7 @@
     // Use IntelliSense to learn about possible attributes.
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    // Configurations for debugging py_shrub applications
     "version": "0.2.0",
     "configurations": [
         {
@@ -21,6 +22,7 @@
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/shrub_archi/src/shrub_archi/main.py",
+            // In the future possibly add qt parameter, to fix issues with PySide GUI
             //"qt": "pyside" ,
             "args": [
                 "-config-ini",
@@ -28,7 +30,20 @@
                 "-archi", "extract",
                 "-source", "${workspaceFolder}/shrub_archi/data/shrub_archi/templates/archi-empty-model.xml"
             ]
-
         },
+        {
+            "name": "Shrub Archi: Create Business Model From OWL",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/shrub_archi/src/shrub_archi/main.py",
+            // In the future possibly add qt parameter, to fix issues with PySide GUI
+            //"qt": "pyside" ,
+            "args": [
+                "-config-ini",
+                "${workspaceFolder}/shrub_archi/data/shrub_archi/config.ini",
+                "-owl", "export"
+            ]
+
+        }
     ]
 }
