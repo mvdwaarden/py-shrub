@@ -13,3 +13,4 @@
 **/temp.*
 **/logging.txt
 **/.idea/*
+**/*.bak
