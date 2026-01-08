@@ -284,6 +284,12 @@ def do_visualize_ontology(file_name: str):
 def do_export_ontology(file_name: str, folder: str):
     from shrub_archi.modeling.owl.owl_transformer import owl_read_ontology, owl_export_to_archi_csv
     import os
+    #select a file if None is specified
+    if file_name is None:
+        file_name = do_show_file_open_ui()
+    # select a folder if None is specified
+    if folder is None:
+        folder = do_show_file_open_ui(is_folder=True)
     # create path
     try:
         if not os.path.exists(folder):
@@ -391,7 +397,7 @@ if __name__ == "__main__":
 
         ArchiCsvGenerator().cleanup().write_elements_csv(it_risk.IT_RISKS_ISO_IEC_27001, ElementType.CONSTRAINT)
     elif ArchiFunction.is_operation(function_archi):
-        overriden_source =  do_show_file_open_ui(source)
+        overriden_source =  do_show_file_open_ui(path=source)
         if overriden_source is  not None:
             source = overriden_source
         if function_archi == ArchiFunction.OPP_MERGE.value:

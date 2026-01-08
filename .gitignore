@@ -4,3 +4,12 @@
 **/*.egg-info
 **/secrets.ini
 **/owl/arqiver/*
+**/music_profil*.json
+**/archi_screens.dat
+**/.cache
+**/*.log
+**/delete.me
+**/temp
+**/temp.*
+**/logging.txt
+**/.idea/*

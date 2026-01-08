@@ -1,6 +1,6 @@
-from PyQt6.QtCore import Qt, QAbstractItemModel, QModelIndex
+from PySide6.QtCore import Qt, QAbstractItemModel, QModelIndex
 import sys
-from PyQt6.QtWidgets import (
+from PySide6.QtWidgets import (
     QApplication,
     QMainWindow,
     QTreeView,
@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
     QWidget,
     QPushButton,
 )
-from PyQt6.QtCore import QDataStream, QIODevice, QByteArray, QMimeData
+from PySide6.QtCore import QDataStream, QIODevice, QByteArray, QMimeData
 
 
 class TreeItem:
@@ -213,7 +213,7 @@ class TreeModel(QAbstractItemModel):
         return Qt.DropAction.CopyAction | Qt.DropAction.MoveAction
 
 
-from PyQt6.QtWidgets import QTableWidget, QTableWidgetItem
+from PySide6.QtWidgets import QTableWidget, QTableWidgetItem
 
 
 def createTableWidget():

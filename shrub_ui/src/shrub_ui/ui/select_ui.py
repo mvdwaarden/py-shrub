@@ -4,8 +4,8 @@ from typing import List, Optional, Dict, Any, Tuple
 import os
 import yaml
 
-from PyQt6.QtCore import Qt, QAbstractTableModel, QModelIndex
-from PyQt6.QtWidgets import (
+from PySide6.QtCore import Qt, QAbstractTableModel, QModelIndex
+from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
     QLineEdit,
@@ -239,7 +239,7 @@ def do_show_select_ui(
     get_ui_app()
     widget = TableSelectUI(model=model, ok_text=ok_text, title=title)
     widget.show()
-    do_ui_execute( )
+    do_ui_execute()
     if widget.ok:
         return True, {row: selected for row, selected in model._tristate_data.items()}
     else:
