@@ -1,0 +1,170 @@
+@prefix ufx: <http://ontology.unfix.model/unfix#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://ontology.unfix.model/unfix> rdf:type owl:Ontology ;
+    rdfs:comment "An OWL ontology defining the unFIX organizational design model, incorporating principles of modularity and interaction modes for composable enterprises."@en ;
+    owl:versionInfo "1.0" .
+
+#################################################################
+#    Classes
+#################################################################
+
+###  http://ontology.unfix.model/unfix#OrganizationalUnit
+ufx:OrganizationalUnit rdf:type owl:Class ;
+    rdfs:comment "The base class for any structural element within unFIX."@en .
+
+###  http://ontology.unfix.model/unfix#Base
+ufx:Base rdf:type owl:Class ;
+    rdfs:subClassOf ufx:OrganizationalUnit ;
+    rdfs:comment "The primary container of an unFIX structure. A self-contained, versatile ecosystem, bounded by Dunbar's number (~150 people)."@en .
+
+###  http://ontology.unfix.model/unfix#Crew
+ufx:Crew rdf:type owl:Class ;
+    rdfs:subClassOf ufx:OrganizationalUnit ;
+    owl:disjointWith ufx:Forum ;
+    rdfs:comment "A small, autonomous, cross-functional team with a distinct purpose, mission, or value stream."@en .
+
+###  http://ontology.unfix.model/unfix#Forum
+ufx:Forum rdf:type owl:Class ;
+    rdfs:subClassOf ufx:OrganizationalUnit ;
+    rdfs:comment "A community of practice or functional group for sharing knowledge, standards, and peer support across different Crews (e.g., all Developers)."@en .
+
+###  http://ontology.unfix.model/unfix#Role
+ufx:Role rdf:type owl:Class ;
+    rdfs:comment "A defined leadership responsibility within an Organizational Unit."@en .
+
+###  http://ontology.unfix.model/unfix#Captain
+ufx:Captain rdf:type owl:Class ;
+    rdfs:subClassOf ufx:Role ;
+    owl:disjointWith ufx:Chair ;
+    rdfs:comment "The person who leads a Crew, focusing on the work, value delivery, and mission success."@en .
+
+###  http://ontology.unfix.model/unfix#Chair
+ufx:Chair rdf:type owl:Class ;
+    rdfs:subClassOf ufx:Role ;
+    rdfs:comment "The person who leads a Forum, focusing on competence development, skill standards, and people growth."@en .
+
+###  http://ontology.unfix.model/unfix#InteractionMode
+ufx:InteractionMode rdf:type owl:Class ;
+    rdfs:comment "A protocol defining how two Crews or units interact to minimize cognitive load."@en .
+
+#################################################################
+#    Subclasses of Crew (Mapping Team Types)
+#################################################################
+
+ufx:ValueStreamCrew rdf:type owl:Class ;
+    rdfs:subClassOf ufx:Crew ;
+    rdfs:comment "Owns an end-to-end customer value stream. Analogy to Microservice/PBC in Composable Enterprise."@en .
+
+ufx:PlatformCrew rdf:type owl:Class ;
+    rdfs:subClassOf ufx:Crew ;
+    rdfs:comment "An internal service provider focused on building an internal product (e.g., cloud platform, CI/CD) to lower the cognitive load of other Crews."@en .
+
+ufx:GovernanceCrew rdf:type owl:Class ;
+    rdfs:subClassOf ufx:Crew ;
+    rdfs:comment "Manages the system, strategy, and overall 'rules of the game' for the Base."@en .
+
+ufx:CapabilityCrew rdf:type owl:Class ;
+    rdfs:subClassOf ufx:Crew ;
+    rdfs:comment "A specialized team providing rare or deep expertise (e.g., cryptography, data science)."@en .
+
+ufx:FacilitationCrew rdf:type owl:Class ;
+    rdfs:subClassOf ufx:Crew ;
+    rdfs:comment "Enables other teams to improve their operational excellence (e.g., Agile Coaches, DevOps Enablers)."@en .
+
+ufx:ExperienceCrew rdf:type owl:Class ;
+    rdfs:subClassOf ufx:Crew ;
+    rdfs:comment "Ensures consistent customer journey across multiple value stream features."@en .
+
+ufx:AcquisitionCrew rdf:type owl:Class ;
+    rdfs:subClassOf ufx:Crew ;
+    rdfs:comment "Focused solely on attracting and onboarding new users/customers."@en .
+
+#################################################################
+#    Object Properties (Relationships)
+#################################################################
+
+###  ufx:containsUnit (Base -> OrganizationalUnit)
+ufx:containsUnit rdf:type owl:ObjectProperty ;
+    rdfs:domain ufx:Base ;
+    rdfs:range ufx:OrganizationalUnit ;
+    rdfs:comment "A Base contains multiple Crews and Forums."@en .
+
+###  ufx:ledBy (Crew/Forum -> Role)
+ufx:ledBy rdf:type owl:ObjectProperty ;
+    rdfs:domain [ rdf:type owl:Class ;
+                  owl:unionOf ( ufx:Crew ufx:Forum ) ] ;
+    rdfs:range ufx:Role ;
+    rdfs:comment "A Crew is ledBy a Captain; A Forum is ledBy a Chair."@en .
+
+###  ufx:interactsWith (Crew -> Crew)
+ufx:interactsWith rdf:type owl:ObjectProperty , owl:SymmetricProperty ;
+    rdfs:domain ufx:Crew ;
+    rdfs:range ufx:Crew ;
+    rdfs:comment "Defines a connection between two crews (bidirectional)."@en .
+
+###  ufx:usesInteractionMode (Crew Interaction Link)
+ufx:usesInteractionMode rdf:type owl:ObjectProperty ;
+    rdfs:domain ufx:Crew ;
+    rdfs:range ufx:InteractionMode ;
+    rdfs:comment "Defines the protocol used for a given interaction."@en .
+
+###  ufx:setsStrategyFor (GovernanceCrew -> Base)
+ufx:setsStrategyFor rdf:type owl:ObjectProperty ;
+    rdfs:domain ufx:GovernanceCrew ;
+    rdfs:range ufx:Base ;
+    rdfs:comment "The Governance Crew defines strategy and policy for the entire Base container."@en .
+
+###  ufx:providesServiceTo (PlatformCrew -> ValueStreamCrew)
+ufx:providesServiceTo rdf:type owl:ObjectProperty ;
+    rdfs:domain ufx:PlatformCrew ;
+    rdfs:range ufx:ValueStreamCrew ;
+    rdfs:comment "Specific case of X-as-a-Service relationship where Platform supports delivery."@en .
+
+###  ufx:mappedToComposableConcept
+ufx:mappedToComposableConcept rdf:type owl:ObjectProperty ;
+    rdfs:domain ufx:ValueStreamCrew ;
+    rdfs:comment "Links the unFIX modular human team to its equivalent technical concept (PBC or Microservice)."@en .
+
+#################################################################
+#    Instances (Specific data points from discussion)
+#################################################################
+
+### Interaction Modes
+ufx:CollaborationMode rdf:type ufx:InteractionMode ;
+    rdfs:comment "High-bandwidth, temporary interaction to discover or integrate (High Cognitive Load)."@en .
+
+ufx:XaaSMode rdf:type ufx:InteractionMode ;
+    rdfs:comment "One team provides a stable service/API, another consumes (Low Cognitive Load). The standard for Composability."@en .
+
+ufx:FacilitatingMode rdf:type ufx:InteractionMode ;
+    rdfs:comment "A coach-player relationship to close a knowledge gap."@en .
+
+#################################################################
+#    Updated Object Properties (The Missing Links)
+#################################################################
+
+### Link: Crew -> Captain
+ufx:hasCaptain rdf:type owl:ObjectProperty ;
+    rdfs:domain ufx:Crew ;
+    rdfs:range ufx:Captain ;
+    rdfs:comment "A Crew must be led by exactly one Captain who focuses on the mission."@en .
+
+### Link: Forum -> Chair
+ufx:hasChair rdf:type owl:ObjectProperty ;
+    rdfs:domain ufx:Forum ;
+    rdfs:range ufx:Chair ;
+    rdfs:comment "A Forum is moderated by a Chair who focuses on competence and people development."@en .
+
+#################################################################
+#    Logic Constraints (Functional Properties)
+#################################################################
+
+# This ensures a Crew can only have ONE Captain (No 'Too many cooks' problem)
+ufx:hasCaptain rdf:type owl:FunctionalProperty .
+
+# This ensures a Forum can only have ONE Chair
+ufx:hasChair rdf:type owl:FunctionalProperty .
