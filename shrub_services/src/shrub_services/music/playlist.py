@@ -302,6 +302,8 @@ class SpotifyApi(MusicServiceApi):
 
     def _get_spotify_handle(self) -> Spotify:
         if not self.sp_handle:
+            import os
+            os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
             self.sp_handle = Spotify(
                 auth_manager=SpotifyOAuth(client_id=self.client_id, client_secret=self.client_secret,
                                           redirect_uri=self.redirect_uri, scope=SpotifyApi.SCOPE))

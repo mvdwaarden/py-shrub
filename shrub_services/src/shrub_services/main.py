@@ -2,11 +2,12 @@ import shrub_util.core.logging as logging
 from shrub_util.core.arguments import Arguments
 from shrub_util.qotd.qotd import QuoteOfTheDay
 from shrub_util.core.config import Config
-from shrub_services.music.get_token import apple_get_dev_token
+from shrub_services.music.get_token import apple_get_dev_token, apple_get_user_token
 from shrub_services.music.playlist import SpotifyApi, Synchronizer, AppleMusicApi, MusicLocalViewReaderApi
 from shrub_services.music.model.music_model import MusicLocalView
 from shrub_services.music.writers.json_writer import music_write_json
 from shrub_services.music.readers.json_reader import music_read_json
+from shrub_services.music.playlist import PlayList, Artist, Song
 from enum import Enum
 import datetime
 
@@ -40,6 +41,7 @@ usage = """
 
 class KeyFunction(Enum):
     OPP_APPLE_DEV_TOKEN = "apple_dev_token"
+    OPP_APPLE_USER_TOKEN = "apple_user_token"
     OPP_SPOTIFY_DEV_TOKEN = "spotify_token"
     @staticmethod
     def is_operation(operation: str):
@@ -55,7 +57,6 @@ class SynchronizeFunction(Enum):
 logging.configure_console()
 Config.ENV_CONFIG_INI =  "SHRUB_CONFIG_INI"
 if __name__ == "__main__":
-
     def do_print_usage():
         qotd = QuoteOfTheDay().get_quote()
         print(usage + f"\n    {qotd['quote']} - {qotd['source']}")
@@ -63,6 +64,7 @@ if __name__ == "__main__":
     args = Arguments()
     func_help = args.has_arg("help")
     func_get_key = args.get_arg("get-key")
+    func_create_playlist = args.has_arg("create-playlist")
     func_synchronize = args.get_arg("synch")
 
     if func_help:
@@ -73,6 +75,11 @@ if __name__ == "__main__":
         path = args.get_arg("path")
         if KeyFunction.OPP_APPLE_DEV_TOKEN.value == func_get_key:
             apple_get_dev_token(team, key, path)
+        elif KeyFunction.OPP_APPLE_USER_TOKEN.value == func_get_key:
+            dev_token_file = args.get_arg("dev-token")
+            with open(dev_token_file, "r") as ifp:
+                dev_token = ifp.read()
+            apple_get_user_token(dev_token)
     elif SynchronizeFunction.is_operation(func_synchronize):
         if True or SynchronizeFunction.OPP_SYNCHRONIZE_PLAYLISTS.value == func_synchronize:
             profile = args.get_arg("profile")
@@ -109,5 +116,41 @@ if __name__ == "__main__":
             syncher = Synchronizer(source=src_service, target=target_service, dry_run=dry_run)
             syncher.synchronize_profile()
             music_write_json(src_service.local_view, f"music_profile_{datetime.datetime.now().strftime("%Y%m%d-%H:%M:%S")}")
+    elif func_create_playlist:
+        playlist_raw = """
+            Whip That Ghost
+            The Great Stash Robbery
+            The Gaia II Space Corps
+            Three Frightened Monkeys
+            Hell, Part 1-3
+            Upstairs-Downstairs
+            Lucifer, Bringer of Light
+            Manmower
+            The Other Fool
+            Kill Some Day
+            Gullible's Travails
+            Patterns
+            No Evil
+            Hey, Jane
+            Sinful, Wind-Borne
+            Plan #1
+        """
+        dev_token_file = args.get_arg("dev-token")
+        user_token_file = args.get_arg("user-token")
+        with open(dev_token_file, "r") as ifp:
+            dev_token = ifp.read()
+        with open(user_token_file, "r") as ifp:
+            user_token = ifp.read()
+        apple_provider = AppleMusicApi(dev_token=dev_token, user_token=user_token)
+        artist = apple_provider.search_artist(Artist(name="Motorpsycho"))
+        playlist = PlayList(name="Motorpsycho Live Effenaar BRIDGE Guitar Festival 2026-05-31")
+        for song_name in playlist_raw.splitlines():
+            song = apple_provider.search_song(name=song_name, artist=artist)
+            if song and song.id:
+                playlist.add_song(song)
+            else:
+                logging.get_logger().warning(f"could not find song [{song_name}] for artist [{artist.name}]")
+        apple_provider.create_or_update_playlist(playlist)
+
     else:
         pass
