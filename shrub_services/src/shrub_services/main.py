@@ -134,27 +134,33 @@ if __name__ == "__main__":
         music_provider : MusicServiceApi = apple_provider
 
         if CreatePlayListFunction.OPP_CREATE_PLAYLIST_FROM_SONGS.value == func_create_playlist:
-            artist = music_provider.search_artist(Artist(name="Motorpsycho"))
-            playlist = PlayList(name="Motorpsycho Live Effenaar BRIDGE Guitar Festival 2026-05-31")
+            artist = music_provider.search_artist(Artist(name="Nick Cave and The Bad Seeds"))
+            playlist = PlayList(name="Nick Cave and The Bad Seeds Antwerp Live is Live 2026")
             playlist_raw = """
-                        Whip That Ghost
-                        The Great Stash Robbery
-                        The Gaia II Space Corps
-                        Three Frightened Monkeys
-                        Hell, Part 1-3
-                        Upstairs-Downstairs
-                        Lucifer, Bringer of Light
-                        Manmower
-                        The Other Fool
-                        Kill Some Day
-                        Gullible's Travails
-                        Patterns
-                        No Evil
-                        Hey, Jane
-                        Sinful, Wind-Borne
-                        Plan #1
+                        Get Ready for Love
+                        From Her to Eternity
+                        Train Long-Suffering
+                        Wild God
+                        O Children
+                        Tupelo
+                        Carnage (Nick Cave & Warren Ellis cover)
+                        Joy
+                        Rings of Saturn
+                        Bright Horses
+                        Henry Lee
+                        The Mercy Seat
+                        Papa Won't Leave You, Henry
+                        Red Right Hand
+                        Jubilee Street
+                        Hiding All 
+                        White Elephant
+                        Hollywood
+                        City of Refuge
+                        The Weeping Song
+                        Wide Lovely Eyes
+                        Into My Arms
                     """
-            for song_name in playlist_raw.splitlines():
+            for song_name in [s.strip() for s in playlist_raw.splitlines() if s and len(s.strip()) > 0]:
                 song = music_provider.search_song(name=song_name, artist=artist)
                 if song and song.id:
                     playlist.add_song(song)
