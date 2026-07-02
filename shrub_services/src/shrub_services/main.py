@@ -124,14 +124,23 @@ if __name__ == "__main__":
             syncher.synchronize_profile()
             music_write_json(src_service.local_view, f"music_profile_{datetime.datetime.now().strftime("%Y%m%d-%H:%M:%S")}")
     elif CreatePlayListFunction.is_operation(func_create_playlist):
-        dev_token_file = args.get_arg("dev-token")
-        user_token_file = args.get_arg("user-token")
-        with open(dev_token_file, "r") as ifp:
-            dev_token = ifp.read()
-        with open(user_token_file, "r") as ifp:
-            user_token = ifp.read()
-        apple_provider = AppleMusicApi(dev_token=dev_token, user_token=user_token)
-        music_provider : MusicServiceApi = apple_provider
+        music_provider: MusicServiceApi = None
+        to_provider = args.get_arg("to","apple")
+        if to_provider == "apple":
+            dev_token_file = args.get_arg("dev-token")
+            user_token_file = args.get_arg("user-token")
+            with open(dev_token_file, "r") as ifp:
+                dev_token = ifp.read()
+            with open(user_token_file, "r") as ifp:
+                user_token = ifp.read()
+            apple_provider = AppleMusicApi(dev_token=dev_token, user_token=user_token)
+            music_provider : MusicServiceApi = apple_provider
+        else:
+            client_id = args.get_arg("client-id")
+            client_secret = args.get_arg("client-secret")
+            redirect_uri = args.get_arg("redirect-uri", "http://localhost:8888/callback/")
+            spotify_provider = SpotifyApi(client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri)
+            music_provider: MusicServiceApi = spotify_provider
 
         if CreatePlayListFunction.OPP_CREATE_PLAYLIST_FROM_SONGS.value == func_create_playlist:
             artist = music_provider.search_artist(Artist(name="Nick Cave and The Bad Seeds"))

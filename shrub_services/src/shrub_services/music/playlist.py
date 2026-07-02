@@ -334,7 +334,7 @@ class SpotifyApi(MusicServiceApi):
         result = None
         try:
             item = response['tracks']['items'][0]
-            result = self.local_view.resolve_song(Song(id=item['id'], name=item['name'],
+            result = self.local_view.resolve_song(Song(id=item['id'], name=item['name'], href=item['href'],
                                                        album=self.local_view.resolve_album(
                                                            Album(id=item["album"]["id"], name=item["album"]["name"],
                                                                  href=item["album"]["href"], artists=[
@@ -377,7 +377,18 @@ class SpotifyApi(MusicServiceApi):
         return result
 
     def get_album_songs(self, album: Album) -> List[Song]:
-        return []
+        result:List[Song] = []
+        response = self._get_spotify_handle().album_tracks(album_id=album.id)
+        try:
+            for item in response['items']:
+                song = self.local_view.resolve_song(
+                    Song(
+                        id=item['id'], name=item['name'], href=item["href"]))
+                result.append(song)
+                logging.getLogger().info(f"found song({song.name} on {album.artists[0].name}) -> id({song.id})")
+        except Exception as ex:
+            logging.getLogger().error(f"problem finding songs for album({album.name}) : error({ex})")
+        return result
 
     def get_playlists(self) -> List[PlayList]:
         playlists = []
@@ -468,10 +479,10 @@ class SpotifyApi(MusicServiceApi):
 
     def create_or_update_playlist(self, playlist: PlayList):
         user_id = self._get_spotify_handle().current_user()['id']
-        playlist = self._get_spotify_handle().user_playlist_create(user=user_id, name=playlist.name, public=False)
-        self._get_spotify_handle().playlist_add_items(playlist_id=playlist['id'],
-                                                      items=[song.href for song in playlist.songs])
-        logging.getLogger().info(f"Spotify playlist created: {playlist['external_urls']['spotify']}")
+        created_playlist = self._get_spotify_handle().user_playlist_create(user=user_id, name=playlist.name, public=False)
+        self._get_spotify_handle().playlist_add_items(playlist_id=created_playlist['id'],
+                                                      items=[song.id for song in playlist.songs])
+        logging.getLogger().info(f"Spotify playlist created: {created_playlist['external_urls']['spotify']}")
 
 
 class PlaylistSelectModel(TableSelectModel):
