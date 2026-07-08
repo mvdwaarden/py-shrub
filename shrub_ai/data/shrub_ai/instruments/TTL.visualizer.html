@@ -1,24 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Turtle / RDF-Star Visualizer</title>
     
-    <!-- Tailwind CSS for styling -->
+    <!-- Tailwind CSS voor styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- N3.js for parsing RDF and Turtle/RDF-star -->
+    <!-- N3.js voor het parsen van RDF en Turtle/RDF-star -->
     <script src="https://unpkg.com/n3/browser/n3.min.js"></script>
     
-    <!-- Vis.js for graph visualization -->
+    <!-- Vis.js voor graaf visualisatie -->
     <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
     
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
-        /* Ensure the canvas container takes full height minus headers */
+        /* Zorg ervoor dat de canvas container de volledige hoogte neemt min de headers */
         #network-container {
             height: calc(100vh - 12rem);
         }
@@ -41,75 +41,104 @@
             <h1 class="text-xl font-bold tracking-wide">RDF-Star (Turtle 1.2) Visualizer</h1>
         </div>
         <div class="text-sm font-medium bg-indigo-700 px-3 py-1 rounded-full text-indigo-100">
-            Powered by N3.js & Vis.js
+            Aangedreven door N3.js & Vis.js
         </div>
     </header>
 
-    <!-- Main Content -->
+    <!-- Hoofdinhoud -->
     <main class="flex-1 flex flex-col lg:flex-row w-full overflow-hidden">
         
-        <!-- Left Panel: Input -->
+        <!-- Linker Paneel: Invoer -->
         <section class="w-full lg:w-1/3 flex flex-col border-r border-gray-200 bg-white shadow-sm z-0">
             <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
                 <h2 class="font-semibold text-gray-700 flex items-center gap-2">
-                    <i data-lucide="code" class="w-4 h-4"></i> Input Data
+                    <i data-lucide="code" class="w-4 h-4"></i> Invoergegevens
                 </h2>
                 
-                <!-- File Upload -->
+                <!-- Bestand Uploaden -->
                 <div class="relative">
                     <input type="file" id="file-input" accept=".ttl,.txt" class="hidden" onchange="handleFileUpload(event)">
                     <label for="file-input" class="cursor-pointer text-sm bg-white border border-gray-300 text-gray-700 py-1.5 px-3 rounded-md hover:bg-gray-50 transition-colors flex items-center gap-1">
-                        <i data-lucide="upload" class="w-4 h-4"></i> Load File
+                        <i data-lucide="upload" class="w-4 h-4"></i> Bestand laden
                     </label>
                 </div>
             </div>
 
-            <!-- Text Area -->
-            <div class="flex-1 p-4 flex flex-col overflow-hidden relative">
-                <textarea id="turtle-input" class="w-full h-full p-3 font-mono text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none whitespace-pre overflow-auto" spellcheck="false">@prefix ex: <http://example.org/> .
-@prefix foaf: <http://xmlns.com/foaf/0.1/> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+            <!-- Standaard Prefixes Weergave (Nieuw: Selecteerbaar) -->
+            <div class="px-4 py-3 bg-indigo-50 border-b border-indigo-100 text-xs text-indigo-800 font-mono shrink-0">
+                <div class="font-bold mb-2 text-indigo-900"># Standaard prefixes (selecteerbaar):</div>
+                <div class="flex flex-wrap gap-4">
+                    <label class="flex items-center gap-1.5 cursor-pointer">
+                        <input type="checkbox" id="pref-rdf" checked class="rounded text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5" onchange="visualizeGraph()">
+                        rdf:
+                    </label>
+                    <label class="flex items-center gap-1.5 cursor-pointer">
+                        <input type="checkbox" id="pref-rdfs" checked class="rounded text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5" onchange="visualizeGraph()">
+                        rdfs:
+                    </label>
+                    <label class="flex items-center gap-1.5 cursor-pointer">
+                        <input type="checkbox" id="pref-owl" checked class="rounded text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5" onchange="visualizeGraph()">
+                        owl:
+                    </label>
+                    <label class="flex items-center gap-1.5 cursor-pointer">
+                        <input type="checkbox" id="pref-xsd" checked class="rounded text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5" onchange="visualizeGraph()">
+                        xsd:
+                    </label>
+                </div>
+            </div>
 
-# Standard RDF Triples
+            <!-- Tekstgebied -->
+            <div class="flex-1 p-4 flex flex-col overflow-hidden relative">
+                <div class="flex-1 flex overflow-hidden relative border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500 shadow-sm">
+                    <div id="line-numbers" class="w-10 bg-gray-100 border-r border-gray-200 text-right text-gray-400 font-mono text-sm py-3 px-2 overflow-hidden select-none leading-5">1</div>
+                    <textarea id="turtle-input" class="w-full h-full p-3 font-mono text-sm focus:outline-none resize-none whitespace-pre overflow-auto leading-5" spellcheck="false" onscroll="syncScroll()" oninput="updateLineNumbers()">@prefix ex: <http://example.org/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+# Standaard RDF Triples
 ex:alice foaf:name "Alice" .
 ex:bob foaf:name "Bob" .
 ex:charlie foaf:name "Charlie" .
+ex:alice rdf:type foaf:Person . # rdf: wordt automatisch herkend als aangevinkt!
 
-# RDF-Star nested triples (Triples as subjects)
+# RDF-Star geneste triples (Triples als subject)
 << ex:alice foaf:knows ex:bob >> ex:certainty 0.9 .
 << ex:alice foaf:knows ex:bob >> ex:source ex:sensor1 .
 
-# Nested triples as objects
+# Geneste triples als object
 ex:charlie ex:believes << ex:alice foaf:knows ex:bob >> .</textarea>
+                </div>
             </div>
 
-            <!-- Action Area -->
+            <!-- Actie Gebied -->
             <div class="p-4 bg-gray-50 border-t border-gray-200 shrink-0">
                 <button onclick="visualizeGraph()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-4 rounded-md shadow transition-colors flex justify-center items-center gap-2">
-                    <i data-lucide="play" class="w-4 h-4"></i> Visualize Graph
+                    <i data-lucide="play" class="w-4 h-4"></i> Visualiseer Graaf
                 </button>
             </div>
         </section>
 
-        <!-- Right Panel: Visualization -->
+        <!-- Rechter Paneel: Visualisatie -->
         <section class="w-full lg:w-2/3 flex flex-col bg-white relative">
             <div class="p-4 border-b border-gray-100 flex justify-between items-center shrink-0">
                 <h2 class="font-semibold text-gray-700 flex items-center gap-2">
-                    <i data-lucide="network" class="w-4 h-4"></i> Graph Visualization
+                    <i data-lucide="network" class="w-4 h-4"></i> Graaf Visualisatie
                 </h2>
-                <div class="flex gap-2">
-                    <button onclick="network.fit()" class="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 py-1.5 px-3 rounded-md transition-colors" title="Fit to screen">
+                <div class="flex items-center gap-4">
+                    <span class="text-xs text-gray-500 flex items-center gap-1">
+                        <i data-lucide="mouse-pointer-click" class="w-3 h-3"></i> Dubbelklik om te fixeren
+                    </span>
+                    <button onclick="network.fit()" class="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 py-1.5 px-3 rounded-md transition-colors" title="Passend maken op scherm">
                         <i data-lucide="maximize" class="w-4 h-4"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- Error Banner -->
+            <!-- Foutmelding Banner -->
             <div id="error-banner" class="hidden absolute top-16 left-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded z-20 shadow-lg">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <i data-lucide="alert-circle" class="w-5 h-5"></i>
-                        <span id="error-message" class="font-mono text-sm">Error message here</span>
+                        <span id="error-message" class="font-mono text-sm">Foutmelding hier</span>
                     </div>
                     <button onclick="document.getElementById('error-banner').classList.add('hidden')" class="text-red-700 hover:text-red-900">
                         <i data-lucide="x" class="w-4 h-4"></i>
@@ -117,39 +146,56 @@ ex:charlie ex:believes << ex:alice foaf:knows ex:bob >> .</textarea>
                 </div>
             </div>
 
-            <!-- Graph Canvas -->
+            <!-- Graaf Canvas -->
             <div id="network-container" class="w-full bg-gray-50/50 cursor-move"></div>
             
-            <!-- Legend -->
+            <!-- Legenda -->
             <div class="absolute bottom-4 left-4 bg-white/90 backdrop-blur border border-gray-200 p-3 rounded-md shadow-sm text-xs text-gray-600 pointer-events-none z-10">
-                <div class="flex items-center gap-2 mb-1"><div class="w-3 h-3 rounded-full bg-blue-200 border border-blue-400"></div> URI / Node</div>
-                <div class="flex items-center gap-2 mb-1"><div class="w-3 h-3 rounded-sm bg-green-200 border border-green-400"></div> Literal</div>
-                <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-md bg-amber-200 border border-amber-400"></div> RDF-Star Nested Triple</div>
+                <div class="flex items-center gap-2 mb-1"><div class="w-3 h-3 rounded-full bg-blue-200 border border-blue-400"></div> URI / Knooppunt</div>
+                <div class="flex items-center gap-2 mb-1"><div class="w-3 h-3 rounded-sm bg-green-200 border border-green-400"></div> Letterlijke waarde (Literal)</div>
+                <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-md bg-amber-200 border border-amber-400"></div> RDF-Star Geneste Triple</div>
             </div>
         </section>
 
     </main>
 
     <script>
-        // Initialize Lucide icons
+        // Initialiseer Lucide iconen
         lucide.createIcons();
 
-        // Vis.js Network instance
+        // Vis.js Netwerk variabelen en DataSets (globaal gemaakt voor fixeren)
         let network = null;
+        let nodesDataset = null;
+        let edgesDataset = null;
 
-        // Colors for different node types
+        // Kleuren voor verschillende knooppunttypes
         const styles = {
-            uri: { background: '#BFDBFE', border: '#60A5FA', shape: 'ellipse' },      // Blue
-            literal: { background: '#BBF7D0', border: '#4ADE80', shape: 'box' },    // Green
-            bnode: { background: '#E5E7EB', border: '#9CA3AF', shape: 'ellipse' },    // Gray
-            quad: { background: '#FDE68A', border: '#FBBF24', shape: 'box' }        // Yellow/Amber
+            uri: { background: '#BFDBFE', border: '#60A5FA', shape: 'ellipse' },      // Blauw
+            literal: { background: '#BBF7D0', border: '#4ADE80', shape: 'box' },    // Groen
+            bnode: { background: '#E5E7EB', border: '#9CA3AF', shape: 'ellipse' },    // Grijs
+            quad: { background: '#FDE68A', border: '#FBBF24', shape: 'box' }        // Geel/Amber
         };
 
-        // Initialize empty network on load
+        // Initialiseer leeg netwerk bij het laden
         window.addEventListener('load', () => {
             initNetwork([], []);
-            visualizeGraph(); // Visualize default text
+            updateLineNumbers();
+            visualizeGraph(); // Visualiseer standaard tekst
         });
+
+        // Regelnummers synchroniseren en updaten
+        function updateLineNumbers() {
+            const textarea = document.getElementById('turtle-input');
+            const lineNumbers = document.getElementById('line-numbers');
+            const lines = textarea.value.split('\n').length;
+            lineNumbers.innerHTML = Array(lines).fill(0).map((_, i) => i + 1).join('<br>');
+        }
+
+        function syncScroll() {
+            const textarea = document.getElementById('turtle-input');
+            const lineNumbers = document.getElementById('line-numbers');
+            lineNumbers.scrollTop = textarea.scrollTop;
+        }
 
         function handleFileUpload(event) {
             const file = event.target.files[0];
@@ -158,6 +204,7 @@ ex:charlie ex:believes << ex:alice foaf:knows ex:bob >> .</textarea>
             const reader = new FileReader();
             reader.onload = function(e) {
                 document.getElementById('turtle-input').value = e.target.result;
+                updateLineNumbers();
                 visualizeGraph();
             };
             reader.readAsText(file);
@@ -178,9 +225,12 @@ ex:charlie ex:believes << ex:alice foaf:knows ex:bob >> .</textarea>
         function initNetwork(nodesArray, edgesArray) {
             const container = document.getElementById('network-container');
             
+            nodesDataset = new vis.DataSet(nodesArray);
+            edgesDataset = new vis.DataSet(edgesArray);
+
             const data = {
-                nodes: new vis.DataSet(nodesArray),
-                edges: new vis.DataSet(edgesArray)
+                nodes: nodesDataset,
+                edges: edgesDataset
             };
 
             const options = {
@@ -212,16 +262,34 @@ ex:charlie ex:believes << ex:alice foaf:knows ex:bob >> .</textarea>
                 network.destroy();
             }
             network = new vis.Network(container, data, options);
+
+            // Event listener voor dubbelklikken om knooppunten te fixeren/ont-fixeren
+            network.on("doubleClick", function (params) {
+                if (params.nodes.length > 0) {
+                    const nodeId = params.nodes[0];
+                    const node = nodesDataset.get(nodeId);
+                    
+                    // Schakel de vastgezette (pinned) status om
+                    const isPinned = !node.pinned;
+                    
+                    nodesDataset.update({ 
+                        id: nodeId, 
+                        pinned: isPinned,
+                        physics: !isPinned, // Zet physics uit zodat de node op zijn plek blijft, maar je hem nog wel zelf kunt slepen
+                        borderWidth: isPinned ? 4 : 2, // Maak rand dikker als het gefixeerd is
+                    });
+                }
+            });
         }
 
-        // Helpers to shorten URIs using parsed prefixes
+        // Helpers om URI's in te korten met geparste prefixes
         function shortenIri(iri, prefixes) {
             for (const [prefix, uri] of Object.entries(prefixes)) {
                 if (iri.startsWith(uri)) {
                     return `${prefix}:${iri.slice(uri.length)}`;
                 }
             }
-            // Fallback: get the last part of the URI
+            // Fallback: pak het laatste deel van de URI
             try {
                 const url = new URL(iri);
                 const hash = url.hash;
@@ -233,7 +301,7 @@ ex:charlie ex:believes << ex:alice foaf:knows ex:bob >> .</textarea>
             }
         }
 
-        // Generate unique IDs for RDF terms (including nested RDF-Star Quads)
+        // Genereer unieke ID's voor RDF termen (inclusief geneste RDF-Star Quads)
         function getTermId(term) {
             if (term.termType === 'Quad') {
                 return `<<${getTermId(term.subject)} ${getTermId(term.predicate)} ${getTermId(term.object)}>>`;
@@ -241,7 +309,7 @@ ex:charlie ex:believes << ex:alice foaf:knows ex:bob >> .</textarea>
             return term.id || term.value;
         }
 
-        // Generate human-readable labels for nodes
+        // Genereer leesbare labels voor knooppunten
         function getTermLabel(term, prefixes) {
             if (term.termType === 'Quad') {
                 return `<< ${getTermLabel(term.subject, prefixes)} \n ${getTermLabel(term.predicate, prefixes)} \n ${getTermLabel(term.object, prefixes)} >>`;
@@ -262,28 +330,51 @@ ex:charlie ex:believes << ex:alice foaf:knows ex:bob >> .</textarea>
 
         function visualizeGraph() {
             hideError();
-            const rdfText = document.getElementById('turtle-input').value;
+            const userInput = document.getElementById('turtle-input').value;
             
-            if (!rdfText.trim()) {
+            if (!userInput.trim()) {
                 initNetwork([], []);
                 return;
             }
+
+            // Genereer de actieve prefixes op basis van checkboxes
+            let defaultPrefixesTTL = '\n';
+            let prefixLinesCount = 1;
+            const prefixMap = {
+                'pref-rdf': '@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n',
+                'pref-rdfs': '@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n',
+                'pref-owl': '@prefix owl: <http://www.w3.org/2002/07/owl#> .\n',
+                'pref-xsd': '@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n'
+            };
+
+            for (const [id, ttlLine] of Object.entries(prefixMap)) {
+                const checkbox = document.getElementById(id);
+                if (checkbox && checkbox.checked) {
+                    defaultPrefixesTTL += ttlLine;
+                    prefixLinesCount++;
+                }
+            }
+
+            // Voeg de actieve standaard prefixes toe voor de parser
+            const rdfText = defaultPrefixesTTL + userInput;
 
             const parser = new N3.Parser({ format: 'Turtle' });
             const quads = [];
             let prefixes = {};
 
-            // Parse the RDF text
+            // Parseer de RDF tekst
             parser.parse(rdfText, (error, quad, parsedPrefixes) => {
                 if (error) {
-                    showError(`Parse Error on line ${error.context?.line || '?'}: ${error.message}`);
+                    // Corrigeer het regelnummer voor de verborgen prefixes
+                    const lineInfo = error.context?.line ? (error.context.line - prefixLinesCount) : '?';
+                    showError(`Parseerfout op regel ${lineInfo}: ${error.message}`);
                     return;
                 }
 
                 if (quad) {
                     quads.push(quad);
                 } else {
-                    // Parsing finished
+                    // Parsen is klaar
                     if (parsedPrefixes) {
                         prefixes = parsedPrefixes;
                     }
@@ -312,24 +403,26 @@ ex:charlie ex:believes << ex:alice foaf:knows ex:bob >> .</textarea>
                     id: id,
                     label: label,
                     shape: style.shape,
+                    pinned: false, // Standaard niet vastgezet
+                    physics: true, // Standaard wel beïnvloed door zwaartekracht
                     color: {
                         background: style.background,
                         border: style.border,
                         highlight: { background: style.border, border: '#000' }
                     },
-                    title: term.termType === 'Quad' ? 'Nested Triple (RDF-Star)' : term.value // Tooltip
+                    title: term.termType === 'Quad' ? 'Geneste Triple (RDF-Star)' : term.value // Tooltip
                 });
                 
                 nodeIds.add(id);
                 return id;
             }
 
-            // Extract nodes and edges
+            // Haal nodes en edges (knooppunten en verbindingen) uit elkaar
             quads.forEach(quad => {
                 const subjectId = addNode(quad.subject);
                 const objectId = addNode(quad.object);
 
-                // Add the edge
+                // Voeg de verbinding toe
                 visEdges.push({
                     from: subjectId,
                     to: objectId,
@@ -338,7 +431,7 @@ ex:charlie ex:believes << ex:alice foaf:knows ex:bob >> .</textarea>
                 });
             });
 
-            // Re-initialize network with new data
+            // Re-initialiseer netwerk met nieuwe data
             initNetwork(visNodes, visEdges);
         }
     </script>
