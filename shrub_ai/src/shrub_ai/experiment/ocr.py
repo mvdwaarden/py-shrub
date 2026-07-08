@@ -74,14 +74,14 @@ try:
             'temperature': 0.1  # Keep temperature low for deterministic, accurate OCR text
         }
     )
-    total_time = datetime.datetime().now() - start_time
+    total_time = datetime.datetime.now() - start_time
     print(f"\n--- Processing Time ---")
-    print(f"Total time taken: {total_time:.2f} seconds")
+    print(f"Total time taken: {total_time:.2f}")
     # 4. Print the extracted OCR result
     print("\n--- Extracted Sketch Text ---")
     print(response.message.content)
-    now = datetime.now()
-    with open(f"{now.strftime('%y%m%d.%H%M%S')}.{TEST_NR}.txt", "w") as f:
+    now = datetime.datetime.now()
+    with open(f"./data/shrub_ai/ocr/{now.strftime('%y%m%d.%H%M%S')}.{TEST_NR}.txt", "w") as f:
         f.write(response.message.content)
 
 
