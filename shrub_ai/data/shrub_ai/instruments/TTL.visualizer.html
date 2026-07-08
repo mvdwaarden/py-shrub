@@ -387,6 +387,38 @@ ex:charlie ex:believes << ex:alice foaf:knows ex:bob >> .</textarea>
             const visNodes = [];
             const visEdges = [];
             const nodeIds = new Set();
+            
+            // --- Opschonen van rdf:reifies en blank nodes ---
+            const reifiesIri = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#reifies';
+            const reifiedMap = new Map();
+
+            // 1. Breng reification in kaart (koppel reifiers aan hun geneste triple)
+            quads.forEach(quad => {
+                if (quad.predicate.value === reifiesIri) {
+                    reifiedMap.set(quad.subject.id, quad.object);
+                }
+            });
+
+            // 2. Transformeer en filter quads
+            const cleanQuads = [];
+            quads.forEach(quad => {
+                // Verwijder de rdf:reifies relaties zelf
+                if (quad.predicate.value === reifiesIri) return;
+
+                let s = quad.subject;
+                let p = quad.predicate;
+                let o = quad.object;
+
+                // Vervang reifiers door de werkelijke geneste triple
+                if (reifiedMap.has(s.id)) s = reifiedMap.get(s.id);
+                if (reifiedMap.has(o.id)) o = reifiedMap.get(o.id);
+
+                // Verwijder expliciet alle overige triples die een blank node bevatten
+                if (s.termType === 'BlankNode' || o.termType === 'BlankNode') return;
+
+                cleanQuads.push({ subject: s, predicate: p, object: o });
+            });
+            // ------------------------------------------------
 
             function addNode(term) {
                 const id = getTermId(term);
@@ -411,29 +443,29 @@ ex:charlie ex:believes << ex:alice foaf:knows ex:bob >> .</textarea>
                         highlight: { background: style.border, border: '#000' }
                     },
                     title: term.termType === 'Quad' ? 'Geneste Triple (RDF-Star)' : term.value // Tooltip
-                });
-                
-                nodeIds.add(id);
-                return id;
-            }
-
-            // Haal nodes en edges (knooppunten en verbindingen) uit elkaar
-            quads.forEach(quad => {
-                const subjectId = addNode(quad.subject);
-                const objectId = addNode(quad.object);
-
-                // Voeg de verbinding toe
-                visEdges.push({
-                    from: subjectId,
-                    to: objectId,
-                    label: getTermLabel(quad.predicate, prefixes),
-                    arrows: 'to'
-                });
             });
-
-            // Re-initialiseer netwerk met nieuwe data
-            initNetwork(visNodes, visEdges);
+            
+            nodeIds.add(id);
+            return id;
         }
-    </script>
+
+        // Haal nodes en edges (knooppunten en verbindingen) uit elkaar op basis van opgeschoonde data
+        cleanQuads.forEach(quad => {
+            const subjectId = addNode(quad.subject);
+            const objectId = addNode(quad.object);
+
+            // Voeg de verbinding toe
+            visEdges.push({
+                from: subjectId,
+                to: objectId,
+                label: getTermLabel(quad.predicate, prefixes),
+                arrows: 'to'
+            });
+        });
+
+        // Re-initialiseer netwerk met nieuwe data
+        initNetwork(visNodes, visEdges);
+    }
+</script>
 </body>
 </html>
