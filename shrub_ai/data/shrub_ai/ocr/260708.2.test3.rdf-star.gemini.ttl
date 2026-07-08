@@ -1,0 +1,44 @@
+@prefix : <http://example.com/schema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+:system a :System ;
+         :hasComponent :kubectl ;
+         :hasComponent :resources ;
+         :hasComponent :service1 ;
+         :hasComponent :service2 ;
+         :hasComponent :profile ;
+         :hasComponent :minikube ;
+         :hasComponent :podman ;
+         :hasComponent :imageRepo ;
+         :hasComponent :machine .
+
+:kubectl a :Component ;
+          rdfs:label "kubectl" .
+
+:resources a :Component ;
+           rdfs:label "Resources" ;
+           :hasResource :rc1 ;
+           :hasResource :rc2 .
+
+:service1 a :Component ;
+           rdfs:label "Service1" .
+
+:service2 a :Component ;
+           rdfs:label "Service2" .
+
+:profile a :Component ;
+          rdfs:label "Profile" .
+
+:minikube a :Component ;
+           rdfs:label "Minikube" ;
+           :hasPodman :podman.
+           
+:podman a :Component ;
+         rdfs:label "podman" ;
+         :hasMachine :machine.
+         
+:imageRepo a :Component ;
+            rdfs:label "Image repo" .
+
+:machine a :Component ;
+          rdfs:label "machine" .

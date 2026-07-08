@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ollama
+  template:
+    metadata:
+      labels:
+        app: ollama
+    spec:
+      containers:
+      - name: ollama
+        image: docker.io/ollama/ollama:latest
+        imagePullPolicy: Never
+        env:
+        - name: OLLAMA_DEBUG
+          value: "1" # This turns on verbose logging
+        ports:
+        - containerPort: 11434
+          name: api
+        resources:
+          requests:
+            memory: "8Gi"
+            cpu: "2"
+          limits:
+            memory: "16Gi"
+            cpu: "4"
+        volumeMounts:
+        - name: ollama-storage
+          mountPath: /root/.ollama
+      volumes:
+      - name: ollama-storage
+        emptyDir: {} # Uses Minikube's ephemeral storage (wipes if cluster is deleted)
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ollama-service
+  namespace: default
+spec:
+  type: ClusterIP
+  ports:
+  - port: 11434
+    targetPort: 11434
+    protocol: TCP
+    name: api
+  selector:
+    app: ollama
+

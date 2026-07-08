@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic AI in the SDLC: Maturity & Market Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+            color: #f8fafc; /* Slate 50 */
+        }
+        /* Chart Container Standards */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 4px;
+        }
+    </style>
+    <!-- 
+    Palette Name: Electric Future
+    Colors: 
+    - Background: #0f172a (Deep Slate)
+    - Primary Blue: #3b82f6 (Electric Blue)
+    - Accent Pink: #ec4899 (Neon Pink)
+    - Success Teal: #14b8a6 (Bright Teal)
+    - Warning Purple: #8b5cf6 (Vivid Violet)
+    -->
+    <!-- 
+    Content Plan Summary:
+    1. Introduction: Definition of Agentic AI in SDLC.
+    2. Impact Analysis: Radar chart showing high impact areas (Coding/Testing) vs emerging areas (Architecture).
+    3. Maturity Framework: Bar chart showing Levels 0-4 (Manual to Autonomous).
+    4. Market Matrix: Scatter plot of major players (Execute vs Vision).
+    5. Variance Analysis: Bar chart comparing error rates (Raw LLM vs Agentic Loops).
+    6. Mitigation: HTML Cards showing the Actor-Critic pattern.
+    
+    Visualization Choices:
+    - SDLC Impact -> Radar Chart -> Shows multi-dimensional coverage best.
+    - Maturity -> Bar Chart -> Shows progressive steps clearly.
+    - Market Matrix -> Scatter Plot -> Standard for Quadrant analysis.
+    - Variance -> Grouped Bar -> Clear comparison of "Before/After" reliability.
+    
+    NO SVG USED. NO MERMAID USED.
+    -->
+</head>
+<body class="antialiased overflow-x-hidden">
+
+    <!-- Hero Section -->
+    <header class="bg-gradient-to-r from-blue-900 to-slate-900 border-b border-blue-500/30 p-8 mb-10">
+        <div class="max-w-7xl mx-auto text-center">
+            <h1 class="text-4xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 mb-4">
+                AGENTIC AI IN THE SDLC
+            </h1>
+            <p class="text-xl md:text-2xl text-slate-300 max-w-3xl mx-auto">
+                From Code Completion to Autonomous Engineering: A Strategic Maturity Framework & Market Analysis.
+            </p>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 md:px-8 space-y-20 pb-20">
+
+        <!-- Section 1: The Role of Agents -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div class="space-y-6">
+                <div class="flex items-center space-x-3 mb-2">
+                    <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-bold shadow-[0_0_10px_rgba(59,130,246,0.5)]">PHASE 1</span>
+                    <h2 class="text-3xl font-bold text-white">Impact Across the SDLC</h2>
+                </div>
+                <p class="text-slate-300 leading-relaxed text-lg">
+                    Agentic AI moves beyond simple "autocomplete." Agents are autonomous entities capable of reasoning, planning, and tool use. In the Software Development Life Cycle (SDLC), their impact is unevenly distributed. While **Coding** and **Testing** see immediate automation, **Architecture** and **Requirements** remain human-centric, requiring high-context reasoning.
+                </p>
+                <div class="bg-slate-800/50 p-6 rounded-xl border border-blue-500/20 shadow-lg">
+                    <h3 class="text-xl font-semibold text-blue-400 mb-2">Key Insight</h3>
+                    <p class="text-slate-400">Agents excel at deterministic tasks (writing unit tests, refactoring) but struggle with ambiguous strategic decisions (system design, user empathy). The "Sweet Spot" is currently in the execution phases.</p>
+                </div>
+            </div>
+            <div class="bg-slate-800 rounded-2xl p-6 shadow-2xl border border-slate-700">
+                <h3 class="text-center text-lg font-bold text-slate-200 mb-4">Agentic Impact Score by SDLC Phase</h3>
+                <div class="chart-container">
+                    <canvas id="sdlcRadarChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Maturity Framework -->
+        <section>
+            <div class="text-center mb-12">
+                <span class="bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-bold shadow-[0_0_10px_rgba(139,92,246,0.5)]">PHASE 2</span>
+                <h2 class="text-4xl font-bold text-white mt-4">The Agentic Maturity Framework</h2>
+                <p class="text-slate-300 mt-4 max-w-2xl mx-auto">
+                    Organizations do not jump straight to autonomy. This framework outlines the 5 levels of AI integration in software engineering.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Text Description Col -->
+                <div class="lg:col-span-1 space-y-6">
+                    <div class="bg-slate-800 p-6 rounded-xl border-l-4 border-slate-500">
+                        <h4 class="text-slate-200 font-bold text-lg">L1: The Copilot Era</h4>
+                        <p class="text-slate-400 text-sm mt-2">Human triggers AI. AI suggests code snippets. Responsibility is 100% Human.</p>
+                    </div>
+                    <div class="bg-slate-800 p-6 rounded-xl border-l-4 border-blue-500">
+                        <h4 class="text-blue-200 font-bold text-lg">L3: The Agentic Era</h4>
+                        <p class="text-slate-400 text-sm mt-2">AI plans multi-step tasks (e.g., "Fix this bug"). AI uses tools (terminal, file system). Human reviews the PR.</p>
+                    </div>
+                    <div class="bg-slate-800 p-6 rounded-xl border-l-4 border-pink-500">
+                        <h4 class="text-pink-200 font-bold text-lg">L5: The Autonomous Era</h4>
+                        <p class="text-slate-400 text-sm mt-2">AI manages entire features from spec to deploy. Human acts as Product Manager/Architect.</p>
+                    </div>
+                </div>
+                
+                <!-- Chart Col -->
+                <div class="lg:col-span-2 bg-slate-800 rounded-2xl p-6 shadow-2xl border border-slate-700 flex flex-col justify-center">
+                    <div class="chart-container" style="max-width: 800px;">
+                        <canvas id="maturityChart"></canvas>
+                    </div>
+                    <p class="text-center text-xs text-slate-500 mt-4">x-axis: Maturity Level | y-axis: Autonomy Score (0-100)</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Market Matrix -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+             <div class="bg-slate-800 rounded-2xl p-6 shadow-2xl border border-slate-700 order-2 lg:order-1">
+                <h3 class="text-center text-lg font-bold text-slate-200 mb-4">The Agentic Cloud Matrix</h3>
+                <div class="chart-container">
+                    <canvas id="marketMatrixChart"></canvas>
+                </div>
+                <div class="mt-4 grid grid-cols-2 gap-4 text-xs text-slate-400">
+                    <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-blue-500"></div> Microsoft/GitHub (Leader)</div>
+                    <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-teal-400"></div> Google (Challenger)</div>
+                    <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-orange-500"></div> AWS (Strong Performer)</div>
+                    <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-pink-500"></div> Sovereign/Open Source (Visionary)</div>
+                </div>
+            </div>
+
+            <div class="space-y-6 order-1 lg:order-2">
+                <div class="flex items-center space-x-3 mb-2">
+                    <span class="bg-teal-600 text-white px-3 py-1 rounded-full text-sm font-bold shadow-[0_0_10px_rgba(20,184,166,0.5)]">PHASE 3</span>
+                    <h2 class="text-3xl font-bold text-white">Market Analysis</h2>
+                </div>
+                <p class="text-slate-300 leading-relaxed text-lg">
+                    The race for Agentic SDLC dominance is heated. We map the main players based on their **Completeness of Vision** (Integration of planning, reasoning, multi-modal context) and **Ability to Execute** (Market share, developer adoption, infrastructure reliability).
+                </p>
+                
+                <ul class="space-y-4">
+                    <li class="bg-slate-800 p-4 rounded-lg border-l-4 border-blue-500">
+                        <strong class="text-blue-400 block">Microsoft (GitHub Copilot Workspace)</strong>
+                        <span class="text-slate-400 text-sm">Dominant execution due to GitHub/VS Code ecosystem. Moving fast towards "Copilot Workspace" for agentic workflows.</span>
+                    </li>
+                    <li class="bg-slate-800 p-4 rounded-lg border-l-4 border-teal-400">
+                        <strong class="text-teal-400 block">Google (Gemini Code Assist)</strong>
+                        <span class="text-slate-400 text-sm">Massive context windows (1M+ tokens) give them a vision advantage for analyzing massive codebases instantly.</span>
+                    </li>
+                    <li class="bg-slate-800 p-4 rounded-lg border-l-4 border-pink-500">
+                        <strong class="text-pink-400 block">Sovereign / Open Source</strong>
+                        <span class="text-slate-400 text-sm">Critical for regulated industries. High vision for data privacy and control, but requires significant self-managed infrastructure.</span>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 4: The Variance Challenge -->
+        <section class="bg-slate-900/50 rounded-3xl p-8 border border-slate-800">
+            <div class="text-center mb-10">
+                <span class="bg-pink-600 text-white px-3 py-1 rounded-full text-sm font-bold shadow-[0_0_10px_rgba(236,72,153,0.5)]">CRITICAL ANALYSIS</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-white mt-4">The Variance & Hallucination Problem</h2>
+                <p class="text-slate-300 mt-4 max-w-3xl mx-auto">
+                    LLMs are probabilistic, not deterministic. In an SDLC context, a 95% accuracy rate means 1 in 20 lines of code creates a bug. "Temperature 0" is not a silver bullet. The solution lies in **Agentic Loops** and **Retrieval Augmented Generation (RAG)**.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div class="bg-slate-800 rounded-2xl p-6 shadow-xl border border-slate-700">
+                    <h3 class="text-center text-white font-semibold mb-4">Error Reduction Strategies</h3>
+                    <div class="chart-container">
+                        <canvas id="varianceChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <h3 class="text-2xl font-bold text-white">Tackling Uncertainty</h3>
+                    <div class="grid grid-cols-1 gap-4">
+                        <div class="bg-slate-800 p-4 rounded-lg flex items-start gap-4">
+                            <div class="text-3xl">🎲</div>
+                            <div>
+                                <h4 class="font-bold text-pink-400">The Problem</h4>
+                                <p class="text-slate-400 text-sm">Stochastic outputs. The same prompt yields different code twice. Subtle bugs are introduced that "look" correct.</p>
+                            </div>
+                        </div>
+                        <div class="bg-slate-800 p-4 rounded-lg flex items-start gap-4">
+                            <div class="text-3xl">🛡️</div>
+                            <div>
+                                <h4 class="font-bold text-teal-400">The Solution: Actor-Critic</h4>
+                                <p class="text-slate-400 text-sm">Agent A generates code. Agent B (the Critic) reviews it against linting rules and requirements. Agent A fixes issues. Loop continues until verification passes.</p>
+                            </div>
+                        </div>
+                        <div class="bg-slate-800 p-4 rounded-lg flex items-start gap-4">
+                            <div class="text-3xl">📚</div>
+                            <div>
+                                <h4 class="font-bold text-blue-400">The Solution: Grounding (RAG)</h4>
+                                <p class="text-slate-400 text-sm">Never let the LLM hallucinate APIs. Force it to retrieve context from the actual codebase and documentation before generating.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="text-center text-slate-500 py-10 border-t border-slate-800">
+            <p>© 2024 SDLC Maturity Research. Generated by Canvas.</p>
+        </footer>
+
+    </main>
+
+    <script>
+        // Common Tooltip Configuration for Multi-line Labels
+        const tooltipConfig = {
+            callbacks: {
+                title: function(tooltipItems) {
+                    const item = tooltipItems[0];
+                    let label = item.chart.data.labels[item.dataIndex];
+                    if (Array.isArray(label)) {
+                        return label.join(' ');
+                    } else {
+                        return label;
+                    }
+                }
+            }
+        };
+
+        // Helper to wrap text
+        function wrapLabel(str, maxLen) {
+            if (str.length <= maxLen) return str;
+            const words = str.split(' ');
+            const lines = [];
+            let currentLine = words[0];
+
+            for (let i = 1; i < words.length; i++) {
+                if (currentLine.length + 1 + words[i].length <= maxLen) {
+                    currentLine += ' ' + words[i];
+                } else {
+                    lines.push(currentLine);
+                    currentLine = words[i];
+                }
+            }
+            lines.push(currentLine);
+            return lines;
+        }
+
+        // --- Chart 1: SDLC Radar Chart ---
+        const ctxRadar = document.getElementById('sdlcRadarChart').getContext('2d');
+        new Chart(ctxRadar, {
+            type: 'radar',
+            data: {
+                labels: ['Requirements Analysis', 'System Architecture', 'Code Generation', 'Unit Testing', 'Deployment Ops', 'Maintenance'],
+                datasets: [{
+                    label: 'Current AI Impact',
+                    data: [40, 50, 95, 90, 65, 75],
+                    fill: true,
+                    backgroundColor: 'rgba(59, 130, 246, 0.2)', // Blue
+                    borderColor: '#3b82f6',
+                    pointBackgroundColor: '#3b82f6',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#3b82f6'
+                }, {
+                    label: 'Human Necessity',
+                    data: [95, 90, 20, 30, 40, 50],
+                    fill: true,
+                    backgroundColor: 'rgba(236, 72, 153, 0.2)', // Pink
+                    borderColor: '#ec4899',
+                    pointBackgroundColor: '#ec4899',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#ec4899'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        pointLabels: {
+                            color: '#cbd5e1',
+                            font: { size: 12 }
+                        },
+                        ticks: { display: false, backdropColor: 'transparent' }
+                    }
+                },
+                plugins: {
+                    legend: { labels: { color: '#f8fafc' } },
+                    tooltip: tooltipConfig
+                }
+            }
+        });
+
+        // --- Chart 2: Maturity Model Bar Chart ---
+        const ctxMaturity = document.getElementById('maturityChart').getContext('2d');
+        
+        // Processing long labels
+        const maturityLabels = [
+            'L0: Manual Coding',
+            'L1: AI Assisted (Chat)',
+            'L2: AI Augmented (Inline)',
+            'L3: Semi-Autonomous (Agents)',
+            'L4: Fully Autonomous (Engineers)'
+        ].map(l => wrapLabel(l, 20));
+
+        new Chart(ctxMaturity, {
+            type: 'bar',
+            data: {
+                labels: maturityLabels,
+                datasets: [{
+                    label: 'Autonomy Level',
+                    data: [10, 30, 50, 75, 95],
+                    backgroundColor: [
+                        '#64748b', // Slate
+                        '#3b82f6', // Blue
+                        '#14b8a6', // Teal
+                        '#8b5cf6', // Violet
+                        '#ec4899'  // Pink
+                    ],
+                    borderWidth: 0,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        ticks: { color: '#94a3b8' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#cbd5e1', font: { size: 11 } }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: tooltipConfig
+                }
+            }
+        });
+
+        // --- Chart 3: Market Matrix Scatter Plot ---
+        const ctxMatrix = document.getElementById('marketMatrixChart').getContext('2d');
+        new Chart(ctxMatrix, {
+            type: 'scatter',
+            data: {
+                datasets: [
+                    {
+                        label: 'Microsoft / GitHub',
+                        data: [{x: 92, y: 95}],
+                        backgroundColor: '#3b82f6', // Blue
+                        pointRadius: 12,
+                        pointHoverRadius: 14
+                    },
+                    {
+                        label: 'Google Cloud',
+                        data: [{x: 90, y: 88}],
+                        backgroundColor: '#2dd4bf', // Teal
+                        pointRadius: 12,
+                        pointHoverRadius: 14
+                    },
+                    {
+                        label: 'AWS (Amazon Q)',
+                        data: [{x: 80, y: 85}],
+                        backgroundColor: '#f97316', // Orange
+                        pointRadius: 10,
+                        pointHoverRadius: 12
+                    },
+                    {
+                        label: 'Sovereign / Open Source',
+                        data: [{x: 85, y: 60}],
+                        backgroundColor: '#ec4899', // Pink
+                        pointRadius: 10,
+                        pointHoverRadius: 12
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        title: { display: true, text: 'Completeness of Vision', color: '#cbd5e1' },
+                        min: 50, max: 100,
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        ticks: { color: '#94a3b8' }
+                    },
+                    y: {
+                        title: { display: true, text: 'Ability to Execute', color: '#cbd5e1' },
+                        min: 50, max: 100,
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        ticks: { color: '#94a3b8' }
+                    }
+                },
+                plugins: {
+                    legend: { 
+                        display: false // Using custom HTML legend for better styling
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': Vision ' + context.raw.x + ', Exec ' + context.raw.y;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // --- Chart 4: Variance/Reliability Chart ---
+        const ctxVariance = document.getElementById('varianceChart').getContext('2d');
+        
+        const varianceLabels = ['Raw LLM (Zero-shot)', 'Prompt Engineering', 'RAG Integration', 'Agentic Loop (Actor-Critic)'].map(l => wrapLabel(l, 16));
+
+        new Chart(ctxVariance, {
+            type: 'bar',
+            data: {
+                labels: varianceLabels,
+                datasets: [{
+                    label: 'Code Error Rate (%)',
+                    data: [45, 25, 12, 4],
+                    backgroundColor: [
+                        '#ef4444', // Red (High Error)
+                        '#f97316', // Orange
+                        '#eab308', // Yellow
+                        '#10b981'  // Green (Low Error)
+                    ],
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y', // Horizontal bar chart for better label reading
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        ticks: { color: '#94a3b8' },
+                        title: { display: true, text: 'Probability of Critical Bugs / Hallucinations', color: '#cbd5e1' }
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: { color: '#cbd5e1', font: { size: 11 } }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: tooltipConfig
+                }
+            }
+        });
+    </script>
+</body>
+</html>

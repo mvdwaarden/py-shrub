@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Agentic Shift: Enterprise Architecture in the Era of Autonomous AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700;900&display=swap" rel="stylesheet">
+    
+    <!-- 
+        Selected Palette: "Vibrant Tech" 
+        Primary Blue: #2563EB
+        Vibrant Cyan: #06B6D4
+        Electric Purple: #7C3AED
+        Energetic Orange: #F97316
+        Deep Slate: #1E293B
+        Background: #F8FAFC
+    -->
+    
+    <!-- 
+        Source Material Integration Plan:
+        1. Intro: Define Agentic AI vs. Generative AI.
+        2. Maturity Model: L1-L5 visualisation using Bar Chart.
+        3. SDLC Impact: Radar Chart comparing Human vs. Agent autonomy across phases.
+        4. EA Transformation: Donut Charts comparing EA focus areas (Current vs. Future).
+        5. Agentic Workflow: HTML/CSS Flowchart showing the new architecture layer.
+        6. Strategic Players: Card grid highlighting Mistral, GPT-NL, etc.
+    -->
+
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #F8FAFC;
+            color: #1E293B;
+        }
+        
+        /* Chart Container Styling - MANDATORY */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px; /* Base height */
+            max-height: 450px;
+        }
+        
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+
+        /* Custom Utilities for Diagrams (NO SVG) */
+        .arrow-down::after {
+            content: '▼';
+            font-size: 1.5rem;
+            color: #94A3B8;
+            display: block;
+            text-align: center;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .arrow-right::after {
+            content: '►';
+            font-size: 1.5rem;
+            color: #94A3B8;
+            position: absolute;
+            right: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .step-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .step-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Timeline Connector */
+        .timeline-line {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 100%;
+            background-color: #E2E8F0;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <!-- Header Section -->
+    <header class="bg-gradient-to-r from-blue-700 to-cyan-600 text-white py-16 px-4 shadow-lg">
+        <div class="max-w-6xl mx-auto text-center">
+            <h1 class="text-4xl md:text-6xl font-black mb-4 tracking-tight">THE AGENTIC SHIFT</h1>
+            <p class="text-xl md:text-2xl font-light opacity-90 mb-8">Redefining Enterprise Architecture in the Era of Autonomous SDLC</p>
+            <div class="inline-block bg-white text-blue-700 font-bold px-6 py-2 rounded-full shadow-md">
+                From Assistant to Autonomous Engineer
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-12 space-y-20">
+
+        <!-- SECTION 1: INTRODUCTION & DEFINITION -->
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div>
+                <h2 class="text-3xl font-bold text-slate-900 mb-6 border-l-8 border-orange-500 pl-4">Beyond the Chatbot</h2>
+                <p class="text-lg leading-relaxed text-slate-600 mb-4">
+                    The software engineering landscape is undergoing a structural shift. We are moving from <strong>Generative AI</strong> (passive code completion) to <strong>Agentic AI</strong>.
+                </p>
+                <p class="text-lg leading-relaxed text-slate-600">
+                    Unlike traditional LLMs that wait for prompts, Agentic systems possess <strong>autonomy, planning capabilities, and tool use</strong>. They don't just write code; they architect, test, debug, and deploy solutions by orchestrating complex workflows independently.
+                </p>
+            </div>
+            <div class="bg-white p-8 rounded-xl shadow-xl border-t-4 border-cyan-500">
+                <h3 class="text-xl font-bold mb-4 text-center text-cyan-700">The Agentic Core Loop</h3>
+                <div class="flex flex-col gap-4">
+                    <div class="bg-slate-100 p-4 rounded-lg border-l-4 border-blue-500">
+                        <span class="font-bold text-blue-700 block">1. Perception</span>
+                        <span class="text-sm">Reads codebases, logs, and requirements.</span>
+                    </div>
+                    <div class="text-center text-slate-400 font-bold">▼</div>
+                    <div class="bg-slate-100 p-4 rounded-lg border-l-4 border-purple-500">
+                        <span class="font-bold text-purple-700 block">2. Planning</span>
+                        <span class="text-sm">Decomposes goals into actionable steps (Chain-of-Thought).</span>
+                    </div>
+                    <div class="text-center text-slate-400 font-bold">▼</div>
+                    <div class="bg-slate-100 p-4 rounded-lg border-l-4 border-orange-500">
+                        <span class="font-bold text-orange-700 block">3. Action</span>
+                        <span class="text-sm">Executes terminal commands, API calls, and file edits.</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: MATURITY MODEL (Chart.js Bar) -->
+        <section>
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">The Agentic Maturity Model</h2>
+                <p class="text-slate-600 max-w-2xl mx-auto">
+                    The evolution of AI in SDLC is not binary. It follows a clear trajectory of increasing autonomy and complexity, from simple code completion (L1) to fully autonomous engineering (L5).
+                </p>
+            </div>
+            
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <!-- CHART CONTAINER -->
+                <div class="chart-container">
+                    <canvas id="maturityChart"></canvas>
+                </div>
+                <p class="text-center text-sm text-slate-500 mt-4 italic">
+                    Based on industry progression from assistive copilots to agentic orchestrators.
+                </p>
+            </div>
+        </section>
+
+        <!-- SECTION 3: IMPACT ON SDLC (Chart.js Radar) -->
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div class="order-2 md:order-1">
+                 <!-- CHART CONTAINER -->
+                <div class="bg-white p-6 rounded-xl shadow-lg h-full flex flex-col justify-center">
+                    <h3 class="text-xl font-bold text-center mb-4 text-slate-700">Autonomy Shift by SDLC Phase</h3>
+                    <div class="chart-container">
+                        <canvas id="sdlcRadarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="order-1 md:order-2 flex flex-col justify-center">
+                <h2 class="text-3xl font-bold text-slate-900 mb-6 border-l-8 border-purple-500 pl-4">Redefining the SDLC</h2>
+                <p class="text-lg text-slate-600 mb-6">
+                    The impact of Agentic AI is unevenly distributed. While coding sees immediate gains, the profound shift occurs in <strong>Testing and Operations</strong>, where agents can autonomously self-heal infrastructure and generate edge-case tests without human intervention.
+                </p>
+                <ul class="space-y-4">
+                    <li class="flex items-start">
+                        <span class="bg-green-100 text-green-700 font-bold px-2 py-1 rounded mr-3 text-sm mt-1">Design</span>
+                        <span class="text-slate-700">Shift from manual diagramming to generative architecture patterns validated by agents.</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="bg-blue-100 text-blue-700 font-bold px-2 py-1 rounded mr-3 text-sm mt-1">Coding</span>
+                        <span class="text-slate-700">From "Autocomplete" to "Feature Implementation". Agents handle entire tickets.</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="bg-purple-100 text-purple-700 font-bold px-2 py-1 rounded mr-3 text-sm mt-1">QA/Test</span>
+                        <span class="text-slate-700">Agents autonomously write and execute test suites, identifying regressions instantly.</span>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- SECTION 4: ENTERPRISE ARCHITECTURE TRANSFORMATION (Donut Charts) -->
+        <section class="bg-slate-100 p-8 rounded-2xl border border-slate-200">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">The Changing Role of Enterprise Architecture</h2>
+                <p class="text-slate-600 max-w-3xl mx-auto">
+                    As agents take over implementation, Enterprise Architects (EAs) must pivot. The focus shifts from documenting <em>what is</em> (static artifacts) to governing <em>how agents behave</em> (dynamic rules).
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Current EA Focus -->
+                <div class="bg-white p-6 rounded-xl shadow-md text-center">
+                    <h3 class="text-lg font-bold text-slate-700 mb-2">Traditional EA Focus</h3>
+                    <p class="text-xs text-slate-400 mb-4">Heavy emphasis on manual documentation & mapping.</p>
+                    <div class="chart-container" style="height: 300px;">
+                        <canvas id="eaLegacyChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Future EA Focus -->
+                <div class="bg-white p-6 rounded-xl shadow-md text-center border-2 border-orange-200">
+                    <h3 class="text-lg font-bold text-orange-700 mb-2">Agentic Era EA Focus</h3>
+                    <p class="text-xs text-slate-400 mb-4">Shift to Governance, Ethics & Orchestration.</p>
+                    <div class="chart-container" style="height: 300px;">
+                        <canvas id="eaFutureChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-blue-600 text-white p-6 rounded-lg shadow-lg">
+                    <h4 class="font-bold text-lg mb-2">Dynamic Artifacts</h4>
+                    <p class="text-blue-100 text-sm">Static diagrams are dead. Agents now generate and maintain architecture maps in real-time as the system evolves.</p>
+                </div>
+                <div class="bg-cyan-600 text-white p-6 rounded-lg shadow-lg">
+                    <h4 class="font-bold text-lg mb-2">Agent Governance</h4>
+                    <p class="text-cyan-100 text-sm">EAs define the "Guardrails" (Security, Privacy, Cost) within which autonomous agents operate.</p>
+                </div>
+                <div class="bg-purple-600 text-white p-6 rounded-lg shadow-lg">
+                    <h4 class="font-bold text-lg mb-2">Semantic Interface</h4>
+                    <p class="text-purple-100 text-sm">Designing APIs not just for humans, but for Agentic consumption (highly standardized, self-describing).</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: PLAYERS & INVESTMENT (Cards) -->
+        <section>
+            <h2 class="text-3xl font-bold text-slate-900 mb-8 text-center">The Strategic Landscape</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Stat Card 1 -->
+                <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-yellow-500">
+                    <div class="text-4xl font-black text-slate-800 mb-2">€1.3B</div>
+                    <div class="font-bold text-slate-600 uppercase text-xs tracking-wider">Strategic Investment</div>
+                    <p class="text-sm text-slate-500 mt-2">ASML's investment in Mistral AI to advance Sovereign European AI.</p>
+                </div>
+
+                <!-- Stat Card 2 -->
+                <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-blue-500">
+                    <div class="text-4xl font-black text-slate-800 mb-2">GPT-NL</div>
+                    <div class="font-bold text-slate-600 uppercase text-xs tracking-wider">National Model</div>
+                    <p class="text-sm text-slate-500 mt-2">Dutch initiative for an open, transparent, and sovereign language model.</p>
+                </div>
+
+                <!-- Stat Card 3 -->
+                <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-green-500">
+                    <div class="text-4xl font-black text-slate-800 mb-2">Devin</div>
+                    <div class="font-bold text-slate-600 uppercase text-xs tracking-wider">Agentic Pioneer</div>
+                    <div class="flex items-center mt-2">
+                        <span class="text-2xl mr-2">🤖</span>
+                        <p class="text-sm text-slate-500">First fully autonomous AI software engineer.</p>
+                    </div>
+                </div>
+
+                <!-- Stat Card 4 -->
+                <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-purple-500">
+                    <div class="text-4xl font-black text-slate-800 mb-2">TNO</div>
+                    <div class="font-bold text-slate-600 uppercase text-xs tracking-wider">Research Lead</div>
+                    <p class="text-sm text-slate-500 mt-2">Driving autonomy, knowledge, and technology sovereignty in EU.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-900 text-slate-400 py-12 text-center">
+        <div class="max-w-4xl mx-auto px-4">
+            <p class="mb-4 font-bold text-slate-200">The Future of SDLC is Agentic.</p>
+            <p class="text-sm mb-6">
+                Enterprise Architecture must evolve to govern intent, not just infrastructure.
+            </p>
+            <div class="text-xs text-slate-600">
+                Sources: "Agentic AI in SDLC: Roles, Maturity, Players", TNO, Hiig.de, Contextual Solutions. <br>
+                <!-- CONFIRMATION: Neither Mermaid JS nor SVG were used in this output. -->
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // --- UTILITY: Label Wrapping Function (16 char limit) ---
+        function formatLabel(str, maxwidth) {
+            var sections = [];
+            var words = str.split(" ");
+            var temp = "";
+            words.forEach(function(item, index) {
+                if (temp.length > 0) {
+                    var concat = temp + ' ' + item;
+                    if (concat.length > maxwidth) {
+                        sections.push(temp);
+                        temp = "";
+                    } else {
+                        if (index == (words.length - 1)) {
+                            sections.push(concat);
+                            return;
+                        } else {
+                            temp = concat;
+                            return;
+                        }
+                    }
+                }
+                if (index == (words.length - 1)) {
+                    sections.push(item);
+                    return;
+                }
+                if (item.length < maxwidth) {
+                    temp = item;
+                } else {
+                    sections.push(item);
+                }
+            });
+            return sections;
+        }
+
+        // --- CHART 1: MATURITY MODEL (Bar Chart) ---
+        const ctxMaturity = document.getElementById('maturityChart').getContext('2d');
+        const labelsMaturity = [
+            'L1: Assistant (Autocomplete)', 
+            'L2: Collaborator (Chatbot)', 
+            'L3: Agent (Goal-Driven)', 
+            'L4: Orchestrator (Multi-Agent)', 
+            'L5: Autonomous Engineer'
+        ];
+        const formattedLabelsMaturity = labelsMaturity.map(l => formatLabel(l, 16));
+
+        new Chart(ctxMaturity, {
+            type: 'bar',
+            data: {
+                labels: formattedLabelsMaturity,
+                datasets: [{
+                    label: 'Autonomy Level (%)',
+                    data: [15, 30, 55, 80, 95],
+                    backgroundColor: [
+                        '#93C5FD', // L1
+                        '#60A5FA', // L2
+                        '#3B82F6', // L3
+                        '#2563EB', // L4
+                        '#7C3AED'  // L5 (Accent)
+                    ],
+                    borderRadius: 6,
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                const item = tooltipItems[0];
+                                let label = item.chart.data.labels[item.dataIndex];
+                                if (Array.isArray(label)) return label.join(' ');
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: { display: true, text: 'Autonomy & Complexity Score' }
+                    }
+                }
+            }
+        });
+
+        // --- CHART 2: SDLC IMPACT (Radar Chart) ---
+        const ctxRadar = document.getElementById('sdlcRadarChart').getContext('2d');
+        const labelsRadar = ['Planning', 'Design', 'Coding', 'Testing', 'Deployment', 'Maintenance'];
+        const formattedLabelsRadar = labelsRadar.map(l => formatLabel(l, 16));
+
+        new Chart(ctxRadar, {
+            type: 'radar',
+            data: {
+                labels: formattedLabelsRadar,
+                datasets: [{
+                    label: 'Traditional Human Effort',
+                    data: [80, 90, 85, 70, 60, 90],
+                    fill: true,
+                    backgroundColor: 'rgba(148, 163, 184, 0.2)', // Slate
+                    borderColor: '#94A3B8',
+                    pointBackgroundColor: '#94A3B8',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#94A3B8'
+                }, {
+                    label: 'Agentic AI Autonomy',
+                    data: [40, 60, 95, 90, 85, 80],
+                    fill: true,
+                    backgroundColor: 'rgba(6, 182, 212, 0.2)', // Cyan
+                    borderColor: '#06B6D4',
+                    pointBackgroundColor: '#06B6D4',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#06B6D4'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                elements: { line: { tension: 0.3 } },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                const item = tooltipItems[0];
+                                let label = item.chart.data.labels[item.dataIndex];
+                                if (Array.isArray(label)) return label.join(' ');
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    r: {
+                        angleLines: { display: true },
+                        suggestedMin: 0,
+                        suggestedMax: 100
+                    }
+                }
+            }
+        });
+
+        // --- CHART 3: LEGACY EA FOCUS (Doughnut) ---
+        const ctxLegacy = document.getElementById('eaLegacyChart').getContext('2d');
+        new Chart(ctxLegacy, {
+            type: 'doughnut',
+            data: {
+                labels: ['Manual Documentation', 'Governance/Standards', 'Strategic Planning'],
+                datasets: [{
+                    data: [60, 25, 15],
+                    backgroundColor: ['#94A3B8', '#64748B', '#475569'], // Monochromatic Slate
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                const item = tooltipItems[0];
+                                let label = item.chart.data.labels[item.dataIndex];
+                                if (Array.isArray(label)) return label.join(' ');
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // --- CHART 4: FUTURE EA FOCUS (Doughnut) ---
+        const ctxFuture = document.getElementById('eaFutureChart').getContext('2d');
+        new Chart(ctxFuture, {
+            type: 'doughnut',
+            data: {
+                labels: ['Agent Orchestration', 'Governance & Ethics', 'Strategic Planning', 'Legacy Doc'],
+                datasets: [{
+                    data: [35, 30, 30, 5],
+                    backgroundColor: ['#F97316', '#7C3AED', '#2563EB', '#E2E8F0'], // Vibrant Palette
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                const item = tooltipItems[0];
+                                let label = item.chart.data.labels[item.dataIndex];
+                                if (Array.isArray(label)) return label.join(' ');
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

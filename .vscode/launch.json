@@ -6,6 +6,26 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "OCR test",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/shrub_ai/src/shrub_ai/experiment/ocr.py",
+            "console": "integratedTerminal",
+            "args": [
+                "-config-ini",
+                "${workspaceFolder}/shrub_ai/data/shrub_archi/config.ini",
+                "-help"
+            ],
+            "cwd": "${workspaceFolder}/shrub_ai"
+        },
+        {
+            "name": "current file",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "args": []
+        },
+        {
             "name": "Shrub Archi: Help",
             "type": "debugpy",
             "request": "launch",
@@ -15,7 +35,24 @@
                 "${workspaceFolder}/shrub_archi/data/shrub_archi/config.ini",
                 "-help"
             ]
-
+        },
+        {
+            "name": "Shrub Archi: Clean XMI",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/shrub_archi/src/shrub_archi/main.py",
+            // In the future possibly add qt parameter, to fix issues with PySide GUI
+            //"qt": "pyside" ,
+            "args": [
+                "-config-ini",
+                "${workspaceFolder}/shrub_archi/data/shrub_archi/config.ini",
+                "-archi",
+                "extract",
+                "-source",
+                "/Users/mib/Library/CloudStorage/OneDrive-SopraSteria/Klanten/Rabo/FEC-Tech/fec.xml",
+                "-target",
+                "/Users/mib/Library/CloudStorage/OneDrive-SopraSteria/Klanten/Rabo/FEC-Tech/fec-cleaned.xml"
+            ]
         },
         {
             "name": "Shrub Archi: Extract",
@@ -27,8 +64,10 @@
             "args": [
                 "-config-ini",
                 "${workspaceFolder}/shrub_archi/data/shrub_archi/config.ini",
-                "-archi", "extract",
-                "-source", "${workspaceFolder}/shrub_archi/data/shrub_archi/templates/archi-empty-model.xml"
+                "-archi",
+                "extract",
+                "-source",
+                "${workspaceFolder}/shrub_archi/data/shrub_archi/templates/archi-empty-model.xml"
             ]
         },
         {
@@ -41,9 +80,18 @@
             "args": [
                 "-config-ini",
                 "${workspaceFolder}/shrub_archi/data/shrub_archi/config.ini",
-                "-owl", "export"
+                "-owl",
+                "export"
             ]
-
+        },
+        {
+            "name": "Shrub AI: discover OpenShift",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/shrub_ai/src/shrub_ai/discovery/discover_openshift.py",
+            // In the future possibly add qt parameter, to fix issues with PySide GUI
+            //"qt": "pyside" ,
+            "args": []
         }
     ]
 }

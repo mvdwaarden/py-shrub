@@ -1,0 +1,39 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix : <http://www.example.com/sketch#> .
+
+<http://www.example.com/sketch/>
+    a owl:Ontology ;
+    rdf:type owl:Ontology .
+
+:Bedrijf
+    a owl:NamedIndividual ;
+    owl:sameAs :Bedrijf ;
+    rdfs:label "Bedrijf"^^xsd:string ;
+    owl:equivalentClass [ a owl:Restriction ; owl:onProperty :gebruikt ; owl:someValuesFrom [ a owl:Restriction ; owl:onProperty :levert ; owl:someValuesFrom <http://www.example.com/sketch#Kuk> ] ] .
+
+:DeponeenService
+    a owl:NamedIndividual ;
+    owl:sameAs :DeponeenService ;
+    rdfs:label "Deponeen Service"^^xsd:string ;
+    owl:equivalentClass [ a owl:Restriction ; owl:onProperty :gebruikt ; owl:someValuesFrom <http://www.example.com/sketch#Bedrijf> ] .
+
+:Kuk
+    a owl:NamedIndividual ;
+    owl:sameAs :Kuk ;
+    rdfs:label "Kuk"^^xsd:string ;
+    owl:equivalentClass [ a owl:Restriction ; owl:onProperty :levert ; owl:someValuesFrom <http://www.example.com/sketch#DeponeenService> ] .
+
+<http://www.example.com/sketch#gebruikt>
+    a owl:ObjectProperty ;
+    rdfs:label "gebruikt"^^xsd:string ;
+    rdfs:domain :Bedrijf ;
+    rdfs:range [ a owl:Restriction ; owl:onProperty :levert ; owl:someValuesFrom <http://www.example.com/sketch#DeponeenService> ] .
+
+<http://www.example.com/sketch#levert>
+    a owl:ObjectProperty ;
+    rdfs:label "levert"^^xsd:string ;
+    rdfs:domain [ a owl:Restriction ; owl:onProperty :gebruikt ; owl:someValuesFrom <http://www.example.com/sketch#Bedrijf> ] ;
+    rdfs:range [ a owl:Restriction ; owl:onProperty :gebruikt ; owl:someValuesFrom <http://www.example.com/sketch#DeponeenService> ] .

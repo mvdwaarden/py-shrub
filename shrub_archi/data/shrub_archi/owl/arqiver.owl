@@ -1,0 +1,666 @@
+<?xml version="1.0"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+     xml:base="https://ontology.arqiver.com/model/2026/1"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     ontologyIRI="https://ontology.arqiver.com/model/2026/1">
+    <Prefix name="" IRI="https://ontology.arqiver.com/model/2026/1/"/>
+    <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+    <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
+    <Prefix name="xml" IRI="http://www.w3.org/XML/1998/namespace"/>
+    <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
+    <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
+    <Declaration>
+        <Class IRI="/ArQiver_Connect"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Archive_Officer"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Audience"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Authorization"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Automated_Eviction"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Business_Connection"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Business_Relation_Audience"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Business_and_Personal_Relation_Audience"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Collection"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Connection"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Data"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Data_Card"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Dataspace"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Domain"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Domain_Owner"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Domain_Team"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/File"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Internal_Audience"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Internal_Connection"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Maintainance_Officer"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Manual_Eviction"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Metadata"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Metadata_Card"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Operator"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Person"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Personal_Connection"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Personal_Relation_Audience"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Privacy_Officer"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Product"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Public_Connection"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Records_Management"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Retention_Protocol"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Role"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Storage_Location"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Stream"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Stream_Team"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Stream_Team_Role"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Team"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Template"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="/Workspace"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#contains"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#contains_data"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#contains_file"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="/flows_to_product"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="/has_audience"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="/has_collection"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="/has_connection"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="/has_data_card"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="/has_domain"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="/has_domain_team"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="/has_file"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="/has_metadata"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="/has_metadata_card"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="/has_operator"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="/has_product"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="/has_records_management"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="/has_retentention_protocol"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="/has_role"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="/has_storage_location"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="/has_stream"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="/has_stream_team"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="/has_stream_team_role"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="/has_team"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="/has_template"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="/has_workspace"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="/is_defined_by"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="/is_defined_by_data_card"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="/is_defined_by_metadata_card"/>
+    </Declaration>
+    <SubClassOf>
+        <Class IRI="/ArQiver_Connect"/>
+        <Class IRI="/Connection"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="/Archive_Officer"/>
+        <Class IRI="/Stream_Team_Role"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="/Automated_Eviction"/>
+        <Class IRI="/Records_Management"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="/Business_Connection"/>
+        <Class IRI="/ArQiver_Connect"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="/Business_Relation_Audience"/>
+        <Class IRI="/Audience"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="/Business_and_Personal_Relation_Audience"/>
+        <Class IRI="/Audience"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="/Domain_Owner"/>
+        <Class IRI="/Stream_Team_Role"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="/Domain_Team"/>
+        <Class IRI="/Team"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="/Internal_Audience"/>
+        <Class IRI="/Audience"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="/Internal_Connection"/>
+        <Class IRI="/ArQiver_Connect"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="/Maintainance_Officer"/>
+        <Class IRI="/Stream_Team_Role"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="/Manual_Eviction"/>
+        <Class IRI="/Records_Management"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="/Operator"/>
+        <Class IRI="/Person"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="/Personal_Connection"/>
+        <Class IRI="/ArQiver_Connect"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="/Personal_Relation_Audience"/>
+        <Class IRI="/Audience"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="/Privacy_Officer"/>
+        <Class IRI="/Stream_Team_Role"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="/Public_Connection"/>
+        <Class IRI="/ArQiver_Connect"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="/Stream_Team"/>
+        <Class IRI="/Team"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="/Stream_Team_Role"/>
+        <Class IRI="/Role"/>
+    </SubClassOf>
+    <DisjointClasses>
+        <Class IRI="/Archive_Officer"/>
+        <Class IRI="/Domain_Owner"/>
+        <Class IRI="/Maintainance_Officer"/>
+        <Class IRI="/Privacy_Officer"/>
+    </DisjointClasses>
+    <DisjointClasses>
+        <Class IRI="/Authorization"/>
+        <Class IRI="/Collection"/>
+        <Class IRI="/Connection"/>
+        <Class IRI="/Data_Card"/>
+        <Class IRI="/Dataspace"/>
+        <Class IRI="/Domain"/>
+        <Class IRI="/File"/>
+        <Class IRI="/Metadata_Card"/>
+        <Class IRI="/Person"/>
+        <Class IRI="/Product"/>
+        <Class IRI="/Records_Management"/>
+        <Class IRI="/Retention_Protocol"/>
+        <Class IRI="/Role"/>
+        <Class IRI="/Storage_Location"/>
+        <Class IRI="/Stream"/>
+        <Class IRI="/Template"/>
+        <Class IRI="/Workspace"/>
+    </DisjointClasses>
+    <DisjointClasses>
+        <Class IRI="/Authorization"/>
+        <Class IRI="/Data_Card"/>
+        <Class IRI="/Metadata_Card"/>
+        <Class IRI="/Person"/>
+        <Class IRI="/Product"/>
+        <Class IRI="/Records_Management"/>
+        <Class IRI="/Retention_Protocol"/>
+        <Class IRI="/Role"/>
+        <Class IRI="/Stream"/>
+        <Class IRI="/Template"/>
+        <Class IRI="/Workspace"/>
+    </DisjointClasses>
+    <DisjointClasses>
+        <Class IRI="/Automated_Eviction"/>
+        <Class IRI="/Manual_Eviction"/>
+    </DisjointClasses>
+    <DisjointClasses>
+        <Class IRI="/Business_Connection"/>
+        <Class IRI="/Internal_Connection"/>
+        <Class IRI="/Personal_Connection"/>
+        <Class IRI="/Public_Connection"/>
+    </DisjointClasses>
+    <DisjointClasses>
+        <Class IRI="/Business_Relation_Audience"/>
+        <Class IRI="/Business_and_Personal_Relation_Audience"/>
+        <Class IRI="/Internal_Audience"/>
+        <Class IRI="/Personal_Relation_Audience"/>
+    </DisjointClasses>
+    <DisjointClasses>
+        <Class IRI="/Domain_Team"/>
+        <Class IRI="/Stream_Team"/>
+    </DisjointClasses>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#contains"/>
+        <ObjectProperty abbreviatedIRI="owl:topObjectProperty"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#contains_data"/>
+        <ObjectProperty IRI="#contains"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#contains_file"/>
+        <ObjectProperty IRI="#contains"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="/has_collection"/>
+        <ObjectProperty abbreviatedIRI="owl:topObjectProperty"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="/has_connection"/>
+        <ObjectProperty abbreviatedIRI="owl:topObjectProperty"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="/has_data_card"/>
+        <ObjectProperty abbreviatedIRI="owl:topObjectProperty"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="/has_domain_team"/>
+        <ObjectProperty IRI="/has_team"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="/has_file"/>
+        <ObjectProperty abbreviatedIRI="owl:topObjectProperty"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="/has_metadata"/>
+        <ObjectProperty abbreviatedIRI="owl:topObjectProperty"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="/has_metadata_card"/>
+        <ObjectProperty abbreviatedIRI="owl:topObjectProperty"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="/has_product"/>
+        <ObjectProperty abbreviatedIRI="owl:topObjectProperty"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="/has_records_management"/>
+        <ObjectProperty abbreviatedIRI="owl:topObjectProperty"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="/has_retentention_protocol"/>
+        <ObjectProperty abbreviatedIRI="owl:topObjectProperty"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="/has_role"/>
+        <ObjectProperty abbreviatedIRI="owl:topObjectProperty"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="/has_storage_location"/>
+        <ObjectProperty abbreviatedIRI="owl:topObjectProperty"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="/has_stream"/>
+        <ObjectProperty abbreviatedIRI="owl:topObjectProperty"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="/has_stream_team"/>
+        <ObjectProperty IRI="/has_team"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="/has_stream_team_role"/>
+        <ObjectProperty IRI="/has_role"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="/has_team"/>
+        <ObjectProperty abbreviatedIRI="owl:topObjectProperty"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="/has_team"/>
+        <ObjectProperty IRI="/is_defined_by"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="/has_template"/>
+        <ObjectProperty abbreviatedIRI="owl:topObjectProperty"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="/is_defined_by"/>
+        <ObjectProperty abbreviatedIRI="owl:topObjectProperty"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="/is_defined_by_data_card"/>
+        <ObjectProperty IRI="/is_defined_by"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="/is_defined_by_metadata_card"/>
+        <ObjectProperty IRI="/is_defined_by"/>
+    </SubObjectPropertyOf>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#contains_data"/>
+        <Class IRI="/Stream"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#contains_file"/>
+        <Class IRI="/Stream"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="/flows_to_product"/>
+        <Class IRI="/Stream"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="/has_audience"/>
+        <Class IRI="/Product"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="/has_collection"/>
+        <Class IRI="/Workspace"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="/has_connection"/>
+        <Class IRI="/Stream"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="/has_connection"/>
+        <Class IRI="/Template"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="/has_data_card"/>
+        <Class IRI="/Template"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="/has_domain"/>
+        <Class IRI="/Dataspace"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="/has_domain_team"/>
+        <Class IRI="/Domain"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="/has_file"/>
+        <Class IRI="/Collection"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="/has_metadata"/>
+        <Class IRI="/File"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="/has_metadata_card"/>
+        <Class IRI="/Stream"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="/has_metadata_card"/>
+        <Class IRI="/Template"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="/has_operator"/>
+        <Class IRI="/Stream"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="/has_product"/>
+        <Class IRI="/Dataspace"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="/has_records_management"/>
+        <Class IRI="/Stream"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="/has_records_management"/>
+        <Class IRI="/Template"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="/has_retentention_protocol"/>
+        <Class IRI="/Stream"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="/has_retentention_protocol"/>
+        <Class IRI="/Template"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="/has_stream"/>
+        <Class IRI="/Dataspace"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="/has_stream_team"/>
+        <Class IRI="/Template"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="/has_stream_team_role"/>
+        <Class IRI="/Stream_Team"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="/has_template"/>
+        <Class IRI="/Dataspace"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="/has_workspace"/>
+        <Class IRI="/Dataspace"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="/is_defined_by_data_card"/>
+        <Class IRI="/Data"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="/is_defined_by_metadata_card"/>
+        <Class IRI="/Metadata"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="owl:topObjectProperty"/>
+        <Class IRI="/Data_Card"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#contains_data"/>
+        <Class IRI="/Data"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#contains_file"/>
+        <Class IRI="/File"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="/flows_to_product"/>
+        <Class IRI="/Product"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="/has_audience"/>
+        <Class IRI="/Audience"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="/has_collection"/>
+        <Class IRI="/Collection"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="/has_connection"/>
+        <Class IRI="/ArQiver_Connect"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="/has_data_card"/>
+        <Class IRI="/Data_Card"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="/has_domain"/>
+        <Class IRI="/Domain"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="/has_domain_team"/>
+        <Class IRI="/Domain_Team"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="/has_file"/>
+        <Class IRI="/File"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="/has_metadata"/>
+        <Class IRI="/Metadata"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="/has_metadata_card"/>
+        <Class IRI="/Metadata_Card"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="/has_operator"/>
+        <Class IRI="/Operator"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="/has_product"/>
+        <Class IRI="/Product"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="/has_records_management"/>
+        <Class IRI="/Retention_Protocol"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="/has_retentention_protocol"/>
+        <Class IRI="/Retention_Protocol"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="/has_role"/>
+        <Class IRI="/Role"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="/has_storage_location"/>
+        <Class IRI="/Storage_Location"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="/has_stream"/>
+        <Class IRI="/Stream"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="/has_stream_team"/>
+        <Class IRI="/Stream_Team"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="/has_stream_team_role"/>
+        <Class IRI="/Stream_Team_Role"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="/has_template"/>
+        <Class IRI="/Template"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="/has_workspace"/>
+        <Class IRI="/Workspace"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="/is_defined_by_data_card"/>
+        <Class IRI="/Data_Card"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="/is_defined_by_metadata_card"/>
+        <Class IRI="/Metadata_Card"/>
+    </ObjectPropertyRange>
+</Ontology>
+
+
+
+<!-- Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi -->
+
