@@ -1,86 +1,44 @@
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix : <http://example.com/schema#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix arch: <http://example.org/architecture/> .
 
-# ---------------------------------------------------------
-# Nodes: Shapes and Extracted Text
-# ---------------------------------------------------------
+:system a :System ;
+         :hasComponent :kubectl ;
+         :hasComponent :resources ;
+         :hasComponent :service1 ;
+         :hasComponent :service2 ;
+         :hasComponent :profile ;
+         :hasComponent :minikube ;
+         :hasComponent :podman ;
+         :hasComponent :imageRepo ;
+         :hasComponent :machine .
 
-arch:UserActor a arch:Actor ;
-    rdfs:label "User (Stick Figure)" .
+:kubectl a :Component ;
+          rdfs:label "kubectl" .
 
-arch:Kubectl a arch:Box ;
-    rdfs:label "kubectl" .
+:resources a :Component ;
+           rdfs:label "Resources" ;
+           :hasResource :rc1 ;
+           :hasResource :rc2 .
 
-arch:Resources a arch:Box ;
-    rdfs:label "Resources" .
+:service1 a :Component ;
+           rdfs:label "Service1" .
 
-arch:Rc1 a arch:Box ;
-    rdfs:label "rc1" .
+:service2 a :Component ;
+           rdfs:label "Service2" .
 
-arch:Rc2 a arch:Box ;
-    rdfs:label "rc2" .
+:profile a :Component ;
+          rdfs:label "Profile" .
 
-arch:MiniKube a arch:Box ;
-    rdfs:label "Mini Kube" .
+:minikube a :Component ;
+           rdfs:label "Minikube" ;
+           :hasPodman :podman.
+           
+:podman a :Component ;
+         rdfs:label "podman" ;
+         :hasMachine :machine.
+         
+:imageRepo a :Component ;
+            rdfs:label "Image repo" .
 
-arch:ImageRepo a arch:Box ;
-    rdfs:label "Image repo" .
-
-arch:Database a arch:Cylinder ;
-    rdfs:label "Database" .
-
-arch:Podman a arch:Box ;
-    rdfs:label "podman" .
-
-arch:Machine a arch:Box ;
-    rdfs:label "machine" .
-
-arch:Profile a arch:Box ;
-    rdfs:label "profile" .
-
-arch:Service1 a arch:Box ;
-    rdfs:label "service1" .
-
-arch:Service2 a arch:Box ;
-    rdfs:label "service2" .
-
-# ---------------------------------------------------------
-# Containment Relations
-# ---------------------------------------------------------
-
-# The "Resources" box visually encompasses "rc1" and "rc2"
-arch:Resources arch:contains arch:Rc1, arch:Rc2 .
-
-# ---------------------------------------------------------
-# Connections and Directionality (Annotated using RDF-star)
-# ---------------------------------------------------------
-
-# User is placed adjacent to kubectl
-<< arch:UserActor arch:interactsWith arch:Kubectl >> arch:connectionType "implied_proximity" .
-
-# Explicit arrows denoting directional flow
-<< arch:Kubectl arch:connectsTo arch:MiniKube >> arch:connectionType "directed_arrow" .
-
-<< arch:Rc1 arch:connectsTo arch:Service1 >> arch:connectionType "directed_arrow" .
-
-<< arch:Rc2 arch:connectsTo arch:Service2 >> arch:connectionType "directed_arrow" .
-
-<< arch:ImageRepo arch:connectsTo arch:MiniKube >> arch:connectionType "directed_arrow" .
-
-<< arch:Podman arch:connectsTo arch:ImageRepo >> arch:connectionType "directed_arrow" .
-
-<< arch:Podman arch:connectsTo arch:MiniKube >> arch:connectionType "directed_arrow" .
-
-<< arch:Podman arch:connectsTo arch:Machine >> arch:connectionType "directed_arrow" .
-
-<< arch:Machine arch:connectsTo arch:Profile >> arch:connectionType "directed_arrow" .
-
-<< arch:MiniKube arch:connectsTo arch:Profile >> arch:connectionType "directed_arrow" .
-
-# Solid lines without clear directional arrowheads
-<< arch:ImageRepo arch:connectsTo arch:Database >> arch:connectionType "solid_line" .
-
-<< arch:Profile arch:connectsTo arch:Service1 >> arch:connectionType "solid_line" .
-
-<< arch:Profile arch:connectsTo arch:Service2 >> arch:connectionType "solid_line" .
+:machine a :Component ;
+          rdfs:label "machine" .

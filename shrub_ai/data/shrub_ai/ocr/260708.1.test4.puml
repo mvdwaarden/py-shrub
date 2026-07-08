@@ -1,0 +1,16 @@
+@startuml
+
+' Define components
+component "Secure Data" as SecureData
+
+' Define the other shapes
+component "Other Shape 1" as otherShape1
+component "Other Shape 2" as otherShape2
+component "Other Shape 3" as otherShape3
+
+' Define relationships using arrows
+SecureData --> otherShape1 : cde
+SecureData --> otherShape2 : cde
+SecureData --> otherShape3 : dynamisch
+
+@enduml

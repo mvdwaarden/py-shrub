@@ -1,0 +1,53 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix arch: <http://example.org/architecture/> .
+
+# ---------------------------------------------------------
+# Schema / Property Definitions
+# ---------------------------------------------------------
+
+# Base property
+arch:connectsTo a rdf:Property .
+
+# Specialized sub-properties (replaces the need for RDF-star annotations)
+arch:hasArrow rdfs:subPropertyOf arch:connectsTo .
+arch:hasSolidLine rdfs:subPropertyOf arch:connectsTo .
+arch:hasProximity rdfs:subPropertyOf arch:connectsTo .
+
+# ---------------------------------------------------------
+# Nodes
+# ---------------------------------------------------------
+
+arch:UserActor a arch:Actor ; rdfs:label "User (Stick Figure)" .
+arch:Kubectl a arch:Box ; rdfs:label "kubectl" .
+arch:Resources a arch:Box ; rdfs:label "Resources" .
+arch:Rc1 a arch:Box ; rdfs:label "rc1" .
+arch:Rc2 a arch:Box ; rdfs:label "rc2" .
+arch:MiniKube a arch:Box ; rdfs:label "Mini Kube" .
+arch:ImageRepo a arch:Box ; rdfs:label "Image repo" .
+arch:Database a arch:Cylinder ; rdfs:label "Database" .
+arch:Podman a arch:Box ; rdfs:label "podman" .
+arch:Machine a arch:Box ; rdfs:label "machine" .
+arch:Profile a arch:Box ; rdfs:label "profile" .
+arch:Service1 a arch:Box ; rdfs:label "service1" .
+arch:Service2 a arch:Box ; rdfs:label "service2" .
+
+# ---------------------------------------------------------
+# Relations
+# ---------------------------------------------------------
+
+arch:Resources arch:contains arch:Rc1, arch:Rc2 .
+
+# Connections (using specific predicates instead of RDF-star)
+arch:UserActor arch:hasProximity arch:Kubectl .
+
+arch:Kubectl arch:hasArrow arch:MiniKube .
+arch:Rc1 arch:hasArrow arch:Service1 .
+arch:Rc2 arch:hasArrow arch:Service2 .
+arch:ImageRepo arch:hasArrow arch:MiniKube .
+arch:Podman arch:hasArrow arch:ImageRepo, arch:MiniKube, arch:Machine .
+arch:Machine arch:hasArrow arch:Profile .
+arch:MiniKube arch:hasArrow arch:Profile .
+
+arch:ImageRepo arch:hasSolidLine arch:Database .
+arch:Profile arch:hasSolidLine arch:Service1, arch:Service2 .

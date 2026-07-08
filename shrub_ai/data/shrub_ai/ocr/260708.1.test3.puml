@@ -1,0 +1,21 @@
+@startuml
+!define kubectl "kubectl"
+!define Resources "Resources (rc1, rc2)"
+!define Service1 "Service1"
+!define Service2 "Service2"
+!define Minc Kube "Minc Kube"
+!define profile "profile"
+!define Image_repo "Image repo"
+!define pod_man "pod man"
+!define machine "machine"
+
+kubectl -> Resources
+Resources -- rc1
+Resources -- rc2
+rc1 --> Service1
+rc2 --> Service2
+Minc_Kube --> profile
+Image_repo --> pod_man
+pod_man --> machine
+
+@enduml

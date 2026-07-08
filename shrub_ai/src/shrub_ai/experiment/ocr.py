@@ -2,7 +2,7 @@ import os
 from ollama import chat, Client
 
 # 1. Define your drawing file path and choice of model
-IMAGE_PATH = "./data/shrub_ai/ocr/test3.png" 
+IMAGE_PATH = "./data/shrub_ai/ocr/test4.png" 
 MODEL_NAME = "qwen2.5vl:7b"  # or 'llama3.2-vision' / 'glm-ocr'
 MINIKUBE_OLLAMA_URL = "http://localhost:11434"
 # Quick safety check
@@ -14,17 +14,44 @@ OWL_PROMPT_INSTRUCTION = (
     "Perform a highly accurate architectural OCR on this drawing sketch. "
     "Include connections between shapes, and the direction of the connection, and containment relations (shapes in shapes). Include handwritten texts inside boxes and near lines."
     "Present the extracted data cleanly as OWL DL 2.0 in the format RDF turtle file according to the 1.2 specification (RDF STAR)." \
-    "Make sure that all used prefixes are present in the output."
+    "Make sure that all used prefixes are present in the header."
 )
-RDF_START_PROMPT_INSTRUCTION = (
+
+RDF_STAR_PROMPT_INSTRUCTION = (
     "Perform a highly accurate architectural OCR on this drawing sketch. "
     "Include connections between shapes, and the direction of the connection, and containment relations (shapes in shapes). Include handwritten texts inside boxes and near lines."
     "Present the extracted data cleanly in a RDF turtle file according to the 1.2 specification (RDF STAR)." \
-    "Make sure that all used prefixes are present in the output."
+    "Make sure that all used prefixes are present in the header."
 )
 
+RDF_PROMPT_INSTRUCTION = (
+    "Perform a highly accurate architectural OCR on this drawing sketch. "
+    "Include connections between shapes, and the direction of the connection, and containment relations (shapes in shapes). Include handwritten texts inside boxes and near lines."
+    "Present the extracted data cleanly in a RDF compliant turtle file" \
+    "Make sure that all used prefixes are present in the header."
+)
 
-prompt_instructions = RDF_START_PROMPT_INSTRUCTION
+UPDATED_GEMINI_INSTRUCTION = """
+    Perform a highly accurate architectural OCR on this drawing sketch.
+    Instructions for RDF representation:
+    1) Identify entities: Extract all shapes (with their labels) and containment relations (e.g., arch:contains).
+    2) Model connections semantically: Instead of using RDF-star quoted triples (<< s p o >>) to describe connection types, use a property hierarchy.
+    3) Define a base property arch:connectsTo.
+    4) Create sub-properties for specific connection types (e.g., arch:hasArrow, arch:hasSolidLine, arch:hasProximity).
+    5) Use these sub-properties to represent the edges between nodes directly.
+    Format: Present the data in a clean RDF Turtle file. Include all necessary prefixes in the header.
+    Goal: Minimize redundancy by avoiding unnecessary metadata triples; rely on the schema hierarchy to define relationship characteristics."""
+
+PLANT_UML_INSTRUCTION = """
+    Perform a highly accurate architectural OCR on this drawing sketch.
+    1) Identify entities: Extract all shapes (with their labels) and containment relations.
+    2) Identify other relations between the entities based on lines between the shapes and text near the line.
+    3) The entities are the nodes and the relations are the vertices.
+    4) Identity which plant UML diagram is the most appropriate for the extracted data (class, sequence, use case, component, state, activity, object, deployment, timing, communication).
+    5) Present the extracted data cleanly as a Plant UML diagram in the appropriate format   
+"""
+
+prompt_instructions = PLANT_UML_INSTRUCTION  # Choose the appropriate prompt based on your needs
 
 print(f"🔄 Processing image with local model '{MODEL_NAME}'...")
 
