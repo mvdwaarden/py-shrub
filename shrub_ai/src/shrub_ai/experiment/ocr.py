@@ -61,28 +61,36 @@ try:
     client = Client(host=MINIKUBE_OLLAMA_URL)
     
     # 3. Call the Ollama Python client
-    response = client.chat(
-        model=MODEL_NAME,
-        messages=[
-            {
-                'role': 'user',
-                'content': prompt_instructions,
-                'images': [IMAGE_PATH]  # Pass the file path directly in the list
+    if True:
+        response = client.chat(
+            model=MODEL_NAME,
+            messages=[
+                {
+                    'role': 'user',
+                    'content': prompt_instructions,
+                    'images': [IMAGE_PATH]  # Pass the file path directly in the list
+                }
+            ],
+            options={
+                'temperature': 0.1  # Keep temperature low for deterministic, accurate OCR text
             }
-        ],
-        options={
-            'temperature': 0.1  # Keep temperature low for deterministic, accurate OCR text
-        }
-    )
+        )
+    else:
+        response = None
     total_time = datetime.datetime.now() - start_time
     print(f"\n--- Processing Time ---")
-    print(f"Total time taken: {total_time:.2f}")
+    print(f"Total time taken: {total_time}")
     # 4. Print the extracted OCR result
+
+    response_content = response.message.content if response else "No response received from the model."
     print("\n--- Extracted Sketch Text ---")
-    print(response.message.content)
+    print(response_content)
     now = datetime.datetime.now()
-    with open(f"./data/shrub_ai/ocr/{now.strftime('%y%m%d.%H%M%S')}.{TEST_NR}.txt", "w") as f:
-        f.write(response.message.content)
+    file_name = f"./data/shrub_ai/ocr/{now.strftime('%y%m%d.%H%M%S')}.{TEST_NR}.txt"
+    print("\n--- File Name ---")
+    print(file_name)
+    with open(f"{file_name}.txt", "w") as f:
+        f.write(response_content)
 
 
 except Exception as e:
