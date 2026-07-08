@@ -23,6 +23,9 @@ class MusicServiceApi:
     def search_album(self, album: Album) -> Album:
         ...
 
+    def get_album_songs(self, album: Album) -> List[Song]:
+        ...
+
     def search_artist(self, artist: Artist) -> Artist:
         ...
 
@@ -78,6 +81,22 @@ class AppleMusicApi(MusicServiceApi):
         self.user_token = user_token
         self.api_page_size = 50
 
+    def get_album_songs(self, album: Album) -> List[Song]:
+        result: List[Song] = []
+        response = requests.get(url=f"{self.APPLE_MUSIC_API_BASE}/{self.VERSION}/catalog/us/albums/{album.id}/tracks",
+                                headers=self._get_headers())
+        try:
+            results = response.json()
+            for item in results["data"]:
+                result.append(
+                    Song(id=item["id"], artist=item["attributes"]["artistName"], name=item["attributes"]["name"],                         href=item["href"], album=item["attributes"]["albumName"])
+                )
+            logging.getLogger().info(f"found songs for album({album.name}), total ({len(result)})")
+        except Exception as ex:
+            logging.getLogger().error(f"problem finding songs for album ({album.name}) : error({ex}), {response.text}, code({response.status_code})")
+
+        return result
+
     def search_song(self, name, artist) -> Song:
         query = f"{name} {artist.name}"
         response = requests.get(url=f"{self.APPLE_MUSIC_API_BASE}/{self.VERSION}/catalog/us/search",
@@ -122,7 +141,7 @@ class AppleMusicApi(MusicServiceApi):
             item = results["results"]["albums"]["data"][0]
             result = self.local_view.resolve_album(
                 Album(id=item["id"], name=item["attributes"]["name"], href=item["href"],
-                      artist=self.local_view.resolve_artist(Artist(name=item["attributes"]["albumName"]))))
+                      artist=self.local_view.resolve_artist(Artist(name=item["attributes"]["name"]))))
             logging.getLogger().info(f"found album({album.name} from {album.artists[0].name}) -> id({result.id})")
         except Exception as ex:
             logging.getLogger().error(
@@ -302,6 +321,8 @@ class SpotifyApi(MusicServiceApi):
 
     def _get_spotify_handle(self) -> Spotify:
         if not self.sp_handle:
+            import os
+            os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
             self.sp_handle = Spotify(
                 auth_manager=SpotifyOAuth(client_id=self.client_id, client_secret=self.client_secret,
                                           redirect_uri=self.redirect_uri, scope=SpotifyApi.SCOPE))
@@ -313,7 +334,7 @@ class SpotifyApi(MusicServiceApi):
         result = None
         try:
             item = response['tracks']['items'][0]
-            result = self.local_view.resolve_song(Song(id=item['id'], name=item['name'],
+            result = self.local_view.resolve_song(Song(id=item['id'], name=item['name'], href=item['href'],
                                                        album=self.local_view.resolve_album(
                                                            Album(id=item["album"]["id"], name=item["album"]["name"],
                                                                  href=item["album"]["href"], artists=[
@@ -353,6 +374,20 @@ class SpotifyApi(MusicServiceApi):
             logging.getLogger().info(f"found album({album.name} from {album.artists[0].name}) -> id({result.id})")
         except Exception as ex:
             logging.getLogger().error(f"problem finding album({album.name}) from {album.artists[0].name}: error({ex})")
+        return result
+
+    def get_album_songs(self, album: Album) -> List[Song]:
+        result:List[Song] = []
+        response = self._get_spotify_handle().album_tracks(album_id=album.id)
+        try:
+            for item in response['items']:
+                song = self.local_view.resolve_song(
+                    Song(
+                        id=item['id'], name=item['name'], href=item["href"]))
+                result.append(song)
+                logging.getLogger().info(f"found song({song.name} on {album.artists[0].name}) -> id({song.id})")
+        except Exception as ex:
+            logging.getLogger().error(f"problem finding songs for album({album.name}) : error({ex})")
         return result
 
     def get_playlists(self) -> List[PlayList]:
@@ -444,10 +479,10 @@ class SpotifyApi(MusicServiceApi):
 
     def create_or_update_playlist(self, playlist: PlayList):
         user_id = self._get_spotify_handle().current_user()['id']
-        playlist = self._get_spotify_handle().user_playlist_create(user=user_id, name=playlist.name, public=False)
-        self._get_spotify_handle().playlist_add_items(playlist_id=playlist['id'],
-                                                      items=[song.href for song in playlist.songs])
-        logging.getLogger().info(f"Spotify playlist created: {playlist['external_urls']['spotify']}")
+        created_playlist = self._get_spotify_handle().user_playlist_create(user=user_id, name=playlist.name, public=False)
+        self._get_spotify_handle().playlist_add_items(playlist_id=created_playlist['id'],
+                                                      items=[song.id for song in playlist.songs])
+        logging.getLogger().info(f"Spotify playlist created: {created_playlist['external_urls']['spotify']}")
 
 
 class PlaylistSelectModel(TableSelectModel):
