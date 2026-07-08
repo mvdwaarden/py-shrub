@@ -91,21 +91,57 @@
             <div class="flex-1 p-4 flex flex-col overflow-hidden relative">
                 <div class="flex-1 flex overflow-hidden relative border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500 shadow-sm">
                     <div id="line-numbers" class="w-10 bg-gray-100 border-r border-gray-200 text-right text-gray-400 font-mono text-sm py-3 px-2 overflow-hidden select-none leading-5">1</div>
-                    <textarea id="turtle-input" class="w-full h-full p-3 font-mono text-sm focus:outline-none resize-none whitespace-pre overflow-auto leading-5" spellcheck="false" onscroll="syncScroll()" oninput="updateLineNumbers()">@prefix ex: <http://example.org/> .
-@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+                    <textarea id="turtle-input" class="w-full h-full p-3 font-mono text-sm focus:outline-none resize-none whitespace-pre overflow-auto leading-5" spellcheck="false" onscroll="syncScroll()" oninput="updateLineNumbers()">@prefix : <http://example.com/schema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
 
-# Standaard RDF Triples
-ex:alice foaf:name "Alice" .
-ex:bob foaf:name "Bob" .
-ex:charlie foaf:name "Charlie" .
-ex:alice rdf:type foaf:Person . # rdf: wordt automatisch herkend als aangevinkt!
-
-# RDF-Star geneste triples (Triples als subject)
-<< ex:alice foaf:knows ex:bob >> ex:certainty 0.9 .
-<< ex:alice foaf:knows ex:bob >> ex:source ex:sensor1 .
-
-# Geneste triples als object
-ex:charlie ex:believes << ex:alice foaf:knows ex:bob >> .</textarea>
+:system a owl:Ontology ;
+    rdfs:label "System Architecture" ;
+    :hasComponent [
+        :name "kubectl";
+        :type "Tool"
+    ] ;
+    :hasComponent [
+        :name "Resources";
+        :type "Container";
+        :hasComponent [
+            :name "rc1";
+            :type "Resource"
+        ];
+        :hasComponent [
+            :name "rc2";
+            :type "Resource"
+        ]
+    ] ;
+    :hasComponent [
+        :name "Service1";
+        :type "Service"
+    ] ;
+    :hasComponent [
+        :name "Service2";
+        :type "Service"
+    ] ;
+    :hasComponent [
+        :name "Minc Kube";
+        :type "Container";
+        :hasComponent [
+            :name "profile";
+            :type "Profile"
+        ];
+        :hasComponent [
+            :name "pod man";
+            :type "Container";
+            :hasComponent [
+                :name "machine";
+                :type "Machine"
+            ]
+        ]
+    ] ;
+    :hasComponent [
+        :name "Image repo";
+        :type "Repository"
+    ] .</textarea>
                 </div>
             </div>
 
@@ -153,6 +189,7 @@ ex:charlie ex:believes << ex:alice foaf:knows ex:bob >> .</textarea>
             <div class="absolute bottom-4 left-4 bg-white/90 backdrop-blur border border-gray-200 p-3 rounded-md shadow-sm text-xs text-gray-600 pointer-events-none z-10">
                 <div class="flex items-center gap-2 mb-1"><div class="w-3 h-3 rounded-full bg-blue-200 border border-blue-400"></div> URI / Knooppunt</div>
                 <div class="flex items-center gap-2 mb-1"><div class="w-3 h-3 rounded-sm bg-green-200 border border-green-400"></div> Letterlijke waarde (Literal)</div>
+                <div class="flex items-center gap-2 mb-1"><div class="w-3 h-3 rounded-full bg-gray-200 border border-gray-400"></div> Blank Node (Anoniem)</div>
                 <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-md bg-amber-200 border border-amber-400"></div> RDF-Star Geneste Triple</div>
             </div>
         </section>
@@ -414,9 +451,9 @@ ex:charlie ex:believes << ex:alice foaf:knows ex:bob >> .</textarea>
                 if (reifiedMap.has(s.id)) s = reifiedMap.get(s.id);
                 if (reifiedMap.has(o.id)) o = reifiedMap.get(o.id);
 
-                // Verwijder expliciet alle overige triples die een blank node bevatten
-                if (s.termType === 'BlankNode' || o.termType === 'BlankNode') return;
-
+                // OPMERKING: De algemene uitsluiting van álle Blank Nodes is verwijderd,
+                // omdat constructies zoals [ :name "..." ] standaard Blank Nodes genereren.
+                
                 cleanQuads.push({ subject: s, predicate: p, object: o });
             });
             // ------------------------------------------------
