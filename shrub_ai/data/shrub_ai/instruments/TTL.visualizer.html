@@ -387,6 +387,7 @@ ex:charlie ex:believes << ex:alice foaf:knows ex:bob >> .</textarea>
             const visNodes = [];
             const visEdges = [];
             const nodeIds = new Set();
+            const quadConstituents = new Map(); // Map om bij te houden welke nodes in welke quad zitten
             
             // --- Opschonen van rdf:reifies en blank nodes ---
             const reifiesIri = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#reifies';
@@ -427,7 +428,15 @@ ex:charlie ex:believes << ex:alice foaf:knows ex:bob >> .</textarea>
                 let style = styles.uri;
                 if (term.termType === 'Literal') style = styles.literal;
                 else if (term.termType === 'BlankNode') style = styles.bnode;
-                else if (term.termType === 'Quad') style = styles.quad;
+                else if (term.termType === 'Quad') {
+                    style = styles.quad;
+                    // Sla de componenten van de quad op
+                    quadConstituents.set(id, {
+                        subject: term.subject,
+                        predicate: term.predicate,
+                        object: term.object
+                    });
+                }
 
                 const label = getTermLabel(term, prefixes);
 
@@ -443,29 +452,64 @@ ex:charlie ex:believes << ex:alice foaf:knows ex:bob >> .</textarea>
                         highlight: { background: style.border, border: '#000' }
                     },
                     title: term.termType === 'Quad' ? 'Geneste Triple (RDF-Star)' : term.value // Tooltip
+                });
+                
+                nodeIds.add(id);
+                return id;
+            }
+
+            // Haal nodes en edges (knooppunten en verbindingen) uit elkaar op basis van opgeschoonde data
+            cleanQuads.forEach(quad => {
+                const subjectId = addNode(quad.subject);
+                const objectId = addNode(quad.object);
+
+                // Voeg de verbinding toe
+                visEdges.push({
+                    from: subjectId,
+                    to: objectId,
+                    label: getTermLabel(quad.predicate, prefixes),
+                    arrows: 'to'
+                });
             });
-            
-            nodeIds.add(id);
-            return id;
+
+            // Voeg speciale verbindingen toe van quads naar hun componenten
+            quadConstituents.forEach((components, quadId) => {
+                const subjectId = addNode(components.subject);
+                const predicateId = addNode(components.predicate);
+                const objectId = addNode(components.object);
+
+                const edgeStyle = { 
+                    dashes: true, 
+                    color: { color: '#9CA3AF', highlight: '#6366F1', opacity: 0.6 },
+                    font: { size: 10, color: '#6B7280', background: 'transparent', strokeWidth: 0 }
+                };
+
+                visEdges.push({
+                    from: quadId,
+                    to: subjectId,
+                    label: 'heeft subject',
+                    arrows: 'to',
+                    ...edgeStyle
+                });
+                visEdges.push({
+                    from: quadId,
+                    to: predicateId,
+                    label: 'heeft predicaat',
+                    arrows: 'to',
+                    ...edgeStyle
+                });
+                visEdges.push({
+                    from: quadId,
+                    to: objectId,
+                    label: 'heeft object',
+                    arrows: 'to',
+                    ...edgeStyle
+                });
+            });
+
+            // Re-initialiseer netwerk met nieuwe data
+            initNetwork(visNodes, visEdges);
         }
-
-        // Haal nodes en edges (knooppunten en verbindingen) uit elkaar op basis van opgeschoonde data
-        cleanQuads.forEach(quad => {
-            const subjectId = addNode(quad.subject);
-            const objectId = addNode(quad.object);
-
-            // Voeg de verbinding toe
-            visEdges.push({
-                from: subjectId,
-                to: objectId,
-                label: getTermLabel(quad.predicate, prefixes),
-                arrows: 'to'
-            });
-        });
-
-        // Re-initialiseer netwerk met nieuwe data
-        initNetwork(visNodes, visEdges);
-    }
-</script>
+    </script>
 </body>
 </html>
