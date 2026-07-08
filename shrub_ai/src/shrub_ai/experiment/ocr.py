@@ -1,8 +1,10 @@
-import os
+import datetime
+import os, time
 from ollama import chat, Client
 
 # 1. Define your drawing file path and choice of model
-IMAGE_PATH = "./data/shrub_ai/ocr/test4.png" 
+TEST_NR = 5
+IMAGE_PATH = f"./data/shrub_ai/ocr/test{TEST_NR}.png" 
 MODEL_NAME = "qwen2.5vl:7b"  # or 'llama3.2-vision' / 'glm-ocr'
 MINIKUBE_OLLAMA_URL = "http://localhost:11434"
 # Quick safety check
@@ -54,7 +56,7 @@ PLANT_UML_INSTRUCTION = """
 prompt_instructions = PLANT_UML_INSTRUCTION  # Choose the appropriate prompt based on your needs
 
 print(f"🔄 Processing image with local model '{MODEL_NAME}'...")
-
+start_time = datetime.datetime.now()
 try:
     client = Client(host=MINIKUBE_OLLAMA_URL)
     
@@ -72,10 +74,16 @@ try:
             'temperature': 0.1  # Keep temperature low for deterministic, accurate OCR text
         }
     )
-
+    total_time = datetime.datetime().now() - start_time
+    print(f"\n--- Processing Time ---")
+    print(f"Total time taken: {total_time:.2f} seconds")
     # 4. Print the extracted OCR result
     print("\n--- Extracted Sketch Text ---")
     print(response.message.content)
+    now = datetime.now()
+    with open(f"{now.strftime('%y%m%d.%H%M%S')}.{TEST_NR}.txt", "w") as f:
+        f.write(response.message.content)
+
 
 except Exception as e:
     print(f" An error occurred during processing: {e}")
