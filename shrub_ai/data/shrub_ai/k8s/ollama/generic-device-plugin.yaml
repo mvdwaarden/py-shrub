@@ -25,9 +25,10 @@ spec:
         args:
         - --device
         - |
-          name: virtio-gpu
+          name: virtio-gpu          
           groups:
-            - paths:
+            - count: 4
+              paths:
                 - path: /dev/dri/renderD128
         name: generic-device-plugin
         resources:
