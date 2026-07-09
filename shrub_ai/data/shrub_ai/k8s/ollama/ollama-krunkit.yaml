@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama-gpu-deployment
+  labels:
+    app: ollama
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ollama
+  template:
+    metadata:
+      labels:
+        app: ollama
+    spec:
+      containers:
+      - name: llama-engine
+        # Specialized image containing the virtio-gpu / Metal translation layers
+        #image: quay.io/ramalama/ramalama:latest
+        image: docker.io/ollama/ollama:latest
+        imagePullPolicy: Never # Forces the use of your pre-cached local Podman image
+        command: [
+          "llama-server",
+          "--host", "0.0.0.0",
+          "--port", "11434",
+          # Points directly to the Mac folder passed through by minikube --mount-string
+          "--model", "/mnt/models/qwen2.5-vl-7b-instruct-q4_K_M.gguf", 
+          "-ngl", "999", # Shunts all layers directly to your Mac's GPU cores
+          "--threads", "6"
+        ]
+        ports:
+        - containerPort: 11434
+          name: ollama-port
+        resources:
+          limits:
+            # Tells the cluster plugin to hook this pod onto the virtualized Mac GPU layer
+            generic.device.plugin/virtio-gpu: "1"
+        volumeMounts:
+        - name: mac-models-dir
+          mountPath: /mnt/models
+      volumes:
+      - name: mac-models-dir
+        hostPath:
+          path: /mnt/models # Reads directly from the Minikube Linux node's mount path
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ollama-gpu-service
+spec:
+  type: ClusterIP
+  ports:
+  - port: 11434
+    targetPort: 11434
+    protocol: TCP
+  selector:
+    app: ollama
