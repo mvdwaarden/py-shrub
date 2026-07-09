@@ -1,11 +1,12 @@
 import datetime
 import os, time
-from ollama import chat, Client
+from shrub_ai.experiment.llm_chat import OllamaChat, OpenAiChat
 
 # 1. Define your drawing file path and choice of model
 TEST_NR = 5
 IMAGE_PATH = f"./data/shrub_ai/ocr/test{TEST_NR}.png" 
-MODEL_NAME = "qwen2.5vl:7b"  # or 'llama3.2-vision' / 'glm-ocr'
+#MODEL_NAME = "qwen2.5vl:7b"  # or 'llama3.2-vision' / 'glm-ocr'
+MODEL_NAME = "qwen2.5-vl-7b-instruct-q4_K_M.gguf"
 MINIKUBE_OLLAMA_URL = "http://localhost:11434"
 # Quick safety check
 if not os.path.exists(IMAGE_PATH):
@@ -53,43 +54,50 @@ PLANT_UML_INSTRUCTION = """
     5) Present the extracted data cleanly as a Plant UML diagram in the appropriate format   
 """
 
-prompt_instructions = PLANT_UML_INSTRUCTION  # Choose the appropriate prompt based on your needs
+CLASSIFICATION_INSTRUCTION = """
+    Perform a highly accurate OCR of this drawing sketch to find out which of the following representations formats is most suitable. Score each of these formats:
+    - BPMN (business process modelling)
+    - UML Use Case Diagram
+    - UML Class Diagram
+    - UML Sequence Diagram
+    - ERD (entity relationship diagram)
+    - FBM (fact based modeling)
+    - Ontology Web Language 
+"""
+
+GENERIC_INSTRUCTION = """
+    Perform a highly accurate OCR on this drawing sketch to create a {TYPE} model in turtle format compliant with RDF 1.2 (RDF*).
+"""
+
+
+# Choose the appropriate prompt based on your needs
+prompt_instructions = GENERIC_INSTRUCTION.format(
+    TYPE="BPMN"
+)  
 
 print(f"🔄 Processing image with local model '{MODEL_NAME}'...")
 start_time = datetime.datetime.now()
 try:
-    client = Client(host=MINIKUBE_OLLAMA_URL)
+    client = OpenAiChat(url=MINIKUBE_OLLAMA_URL)
     
     # 3. Call the Ollama Python client
     if True:
-        response = client.chat(
-            model=MODEL_NAME,
-            messages=[
-                {
-                    'role': 'user',
-                    'content': prompt_instructions,
-                    'images': [IMAGE_PATH]  # Pass the file path directly in the list
-                }
-            ],
-            options={
-                'temperature': 0.1  # Keep temperature low for deterministic, accurate OCR text
-            }
+        response_content = client.chat(
+            model_name=MODEL_NAME,
+            prompt_instructions=prompt_instructions,
+            images=[IMAGE_PATH]  # Pass the file path directly in the list            
         )
     else:
-        response = None
+        response_content = None
     total_time = datetime.datetime.now() - start_time
     print(f"\n--- Processing Time ---")
     print(f"Total time taken: {total_time}")
     # 4. Print the extracted OCR result
-
-    response_content = response.message.content if response else "No response received from the model."
     print("\n--- Extracted Sketch Text ---")
     print(response_content)
     now = datetime.datetime.now()
-    file_name = f"./data/shrub_ai/ocr/{now.strftime('%y%m%d.%H%M%S')}.{TEST_NR}.txt"
-    print("\n--- File Name ---")
-    print(file_name)
-    with open(f"{file_name}.txt", "w") as f:
+    file_name = f"./data/shrub_ai/ocr/{now.strftime('%y%m%d.%H%M%S')}.{TEST_NR}.raw"
+    with open(f"{file_name}", "w") as f:
         f.write(response_content)
 
 
