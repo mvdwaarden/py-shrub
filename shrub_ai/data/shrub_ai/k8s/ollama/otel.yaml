@@ -8,35 +8,55 @@ metadata:
 data:
   config.yaml: |
     receivers:
+      # 1. Your existing container log scraper
       filelog:
         include:
           - /var/log/pods/*/*/*.log
         exclude:
           - /var/log/pods/*_otel-collector-*/*/*.log
         start_at: end
-        # --- ADD THESE OPERATORS TO PARSE THE LOGS ---
         operators:
-          # This regex parses standard CRI-O/containerd log formats
           - type: regex_parser
             regex: '^(?P<time>[^ Z]+Z)\s+(?P<stream>stdout|stderr)\s+(?P<logtag>[^ ]*)\s+(?P<log>.*)$'
             timestamp:
               parse_from: attributes.time
               layout: '%Y-%m-%dT%H:%M:%S.%LZ'
-          # This operator moves the clean log message back into the main Body
           - type: move
             from: attributes.log
             to: body
+
+      # 2. ADD THIS: The network catcher for the injected OTel SDK data
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317   # Listens for high-performance traces/metrics
+          http:
+            endpoint: 0.0.0.0:4318   # Listens for standard web-protocol traffic
+
     processors:
-      batch: {} # Batches logs before sending them
+      batch: {}
 
     exporters:
       debug:
-        verbosity: detailed # Prints the captured logs to stdout
+        verbosity: detailed # Keep this detailed to see all the new structural data in stdout
 
     service:
       pipelines:
+        # Your existing log pipeline, now accepting both raw log files AND native OTel logs
         logs:
-          receivers: [filelog]
+          receivers: [filelog, otlp]
+          processors: [batch]
+          exporters: [debug]
+
+        # ADD THIS: A dedicated pipeline to handle the RamaLama tracing data
+        traces:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [debug]
+
+        # ADD THIS: A dedicated pipeline to handle the performance metrics
+        metrics:
+          receivers: [otlp]
           processors: [batch]
           exporters: [debug]
 
