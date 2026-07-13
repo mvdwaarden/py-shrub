@@ -11,6 +11,8 @@ spec:
       app: ramalama
   template:
     metadata:
+      annotations:
+        instrumentation.opentelemetry.io/inject-python: "true"
       labels:
         app: ramalama
     spec:
