@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ollama-gpu-deployment
+  name: ramalama-deployment
   labels:
-    app: ollama
+    app: ramalama
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: ollama
+      app: ramalama
   template:
     metadata:
       labels:
-        app: ollama
+        app: ramalama
     spec:
       containers:
       - name: llama-engine
@@ -31,7 +31,7 @@ spec:
         ]
         ports:
         - containerPort: 11434
-          name: ollama-port
+          name: ramalama-port
         resources:
           limits:
             # Tells the cluster plugin to hook this pod onto the virtualized Mac GPU layer
@@ -47,7 +47,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: ollama-gpu-service
+  name: ramalama-service
 spec:
   type: ClusterIP
   ports:
@@ -55,4 +55,4 @@ spec:
     targetPort: 11434
     protocol: TCP
   selector:
-    app: ollama
+    app: ramalama
