@@ -1,20 +1,20 @@
 # ─── 1. THE INSTRUMENTATION CRD ───
 # This must exist in the namespace FIRST so the webhook knows where to route data
-apiVersion: opentelemetry.io/v1alpha1
-kind: Instrumentation
-metadata:
-  name: ramalama-autoinstrumentation
-  namespace: default
-spec:
-  exporter:
-    # Routes telemetry straight to your OTel Collector Service
-    endpoint: http://otel-collector.default.svc.cluster.local:4317 
-  python:
-    env:
-      - name: OTEL_METRICS_EXPORTER
-        value: "otlp"
-      - name: OTEL_LOGS_EXPORTER
-        value: "otlp"
+# apiVersion: opentelemetry.io/v1alpha1
+# kind: Instrumentation
+# metadata:
+#   name: ramalama-autoinstrumentation
+#   namespace: default
+# spec:
+#   exporter:
+#     # Routes telemetry straight to your OTel Collector Service
+#     endpoint: http://otel-collector.default.svc.cluster.local:4317 
+#   python:
+#     env:
+#       - name: OTEL_METRICS_EXPORTER
+#         value: "otlp"
+#       - name: OTEL_LOGS_EXPORTER
+#         value: "otlp"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -43,12 +43,18 @@ spec:
           "llama-server",
           "--host", "0.0.0.0",
           "--port", "11434",
+          #"--metrics", 
           # Points directly to the Mac folder passed through by minikube --mount-string
           "--model", "/mnt/models/qwen2.5-vl-7b-instruct-q4_K_M.gguf", 
           "--mmproj", "/mnt/models/Qwen2.5-VL-7B-Instruct-F16.gguf", 
           "-ngl", "999", # Shunts all layers directly to your Mac's GPU cores
           "--threads", "6"
         ]
+        env:
+          - name: LLAMA_ARG_ENDPOINT_METRICS
+            value: "true"
+          - name: LLAMA_ARG_METRICS
+            value: "true"
         ports:
         - containerPort: 11434
           name: ramalama-port
