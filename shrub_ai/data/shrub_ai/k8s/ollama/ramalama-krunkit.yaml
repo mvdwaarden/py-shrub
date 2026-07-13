@@ -1,3 +1,21 @@
+# ─── 1. THE INSTRUMENTATION CRD ───
+# This must exist in the namespace FIRST so the webhook knows where to route data
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: ramalama-autoinstrumentation
+  namespace: default
+spec:
+  exporter:
+    # Routes telemetry straight to your OTel Collector Service
+    endpoint: http://otel-collector.default.svc.cluster.local:4317 
+  python:
+    env:
+      - name: OTEL_METRICS_EXPORTER
+        value: "otlp"
+      - name: OTEL_LOGS_EXPORTER
+        value: "otlp"
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:

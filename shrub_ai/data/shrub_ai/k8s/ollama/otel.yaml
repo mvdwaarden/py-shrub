@@ -36,12 +36,8 @@ data:
         exclude: [/var/log/pods/*_otel-collector-*/*/*.log]
         start_at: end
         operators:
-          - type: regex_parser
-            regex: '^(?P<time>[^ Z]+Z)\s+(?P<stream>stdout|stderr)\s+(?P<logtag>[^ ]*)\s+(?P<log>.*)$'
-            timestamp: { parse_from: attributes.time, layout: '%Y-%m-%dT%H:%M:%S.%LZ' }
-          - type: move
-            from: attributes.log
-            to: body
+          - type: container
+            id: container-parser
       otlp:
         protocols:
           grpc: { endpoint: 0.0.0.0:4317 }
