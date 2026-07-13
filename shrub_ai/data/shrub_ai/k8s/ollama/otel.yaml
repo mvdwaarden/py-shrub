@@ -1,3 +1,26 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector
+  namespace: default # Make sure this matches the namespace of your collector pod
+spec:
+  selector:
+    # CRITICAL: This must exactly match the labels on your OTel Collector pod
+    app: otel-collector 
+  ports:
+    - name: otlp-grpc
+      protocol: TCP
+      port: 4317
+      targetPort: 4317
+    - name: otlp-http
+      protocol: TCP
+      port: 4318
+      targetPort: 4318
+    - name: prometheus
+      protocol: TCP
+      port: 8889
+      targetPort: 8889
+  type: ClusterIP # Standard internal cluster networking
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -8,57 +31,50 @@ metadata:
 data:
   config.yaml: |
     receivers:
-      # 1. Your existing container log scraper
       filelog:
-        include:
-          - /var/log/pods/*/*/*.log
-        exclude:
-          - /var/log/pods/*_otel-collector-*/*/*.log
+        include: [/var/log/pods/*/*/*.log]
+        exclude: [/var/log/pods/*_otel-collector-*/*/*.log]
         start_at: end
         operators:
           - type: regex_parser
             regex: '^(?P<time>[^ Z]+Z)\s+(?P<stream>stdout|stderr)\s+(?P<logtag>[^ ]*)\s+(?P<log>.*)$'
-            timestamp:
-              parse_from: attributes.time
-              layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+            timestamp: { parse_from: attributes.time, layout: '%Y-%m-%dT%H:%M:%S.%LZ' }
           - type: move
             from: attributes.log
             to: body
-
-      # 2. ADD THIS: The network catcher for the injected OTel SDK data
       otlp:
         protocols:
-          grpc:
-            endpoint: 0.0.0.0:4317   # Listens for high-performance traces/metrics
-          http:
-            endpoint: 0.0.0.0:4318   # Listens for standard web-protocol traffic
+          grpc: { endpoint: 0.0.0.0:4317 }
+          http: { endpoint: 0.0.0.0:4318 }
 
     processors:
       batch: {}
 
+    # ─── ADD THESE EXPORTERS TO SHIP DATA OUT ───
     exporters:
       debug:
-        verbosity: detailed # Keep this detailed to see all the new structural data in stdout
+        verbosity: detailed # Re-adding this so you have somewhere valid to send logs
+      prometheus:
+        endpoint: "0.0.0.0:8889"
+      otlp/jaeger:
+        endpoint: "host.minikube.internal:4317" 
+        tls:
+          insecure: true
 
     service:
       pipelines:
-        # Your existing log pipeline, now accepting both raw log files AND native OTel logs
         logs:
           receivers: [filelog, otlp]
           processors: [batch]
-          exporters: [debug]
-
-        # ADD THIS: A dedicated pipeline to handle the RamaLama tracing data
+          exporters: [debug] # Logs metrics can be read by Prometheus
         traces:
           receivers: [otlp]
           processors: [batch]
-          exporters: [debug]
-
-        # ADD THIS: A dedicated pipeline to handle the performance metrics
+          exporters: [otlp/jaeger] # Traces go straight to Jaeger
         metrics:
           receivers: [otlp]
           processors: [batch]
-          exporters: [debug]
+          exporters: [prometheus] # App metrics go to Prometheus
 
 ---
 apiVersion: apps/v1
@@ -82,6 +98,16 @@ spec:
           image: docker.io/otel/opentelemetry-collector-contrib:latest
           args:
             - "--config=/etc/otelcol-contrib/config.yaml"
+          ports:
+            - name: prometheus
+              containerPort: 8889
+              protocol: TCP
+            - name: otlp-grpc
+              containerPort: 4317
+              protocol: TCP
+            - name: otlp-http
+              containerPort: 4318
+              protocol: TCP
           volumeMounts:
             # Mount the host's log directories so the collector can read them
             - name: varlog
