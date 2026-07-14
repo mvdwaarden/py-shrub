@@ -7,7 +7,8 @@ TEST_NR = 5
 IMAGE_PATH = f"./data/shrub_ai/ocr/test{TEST_NR}.png" 
 #MODEL_NAME = "qwen2.5vl:7b"  # or 'llama3.2-vision' / 'glm-ocr'
 MODEL_NAME = "qwen2.5-vl-7b-instruct-q4_K_M.gguf"
-MINIKUBE_OLLAMA_URL = "http://localhost:11434"
+MINIKUBE_RAMALAMA_URL = "http://localhost:8081"
+OLLAMA_URL = "http://localhost:11434"
 # Quick safety check
 if not os.path.exists(IMAGE_PATH):
     raise FileNotFoundError(f"Could not find the sketch image at: {IMAGE_PATH}")
@@ -78,7 +79,7 @@ prompt_instructions = GENERIC_INSTRUCTION.format(
 print(f"🔄 Processing image with local model '{MODEL_NAME}'...")
 start_time = datetime.datetime.now()
 try:
-    client = OpenAiChat(url=MINIKUBE_OLLAMA_URL)
+    client = OpenAiChat(url=MINIKUBE_RAMALAMA_URL)
     
     # 3. Call the Ollama Python client
     if True:

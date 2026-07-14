@@ -43,7 +43,7 @@ spec:
         command: [
           "llama-server",
           "--host", "0.0.0.0",
-          "--port", "11434",
+          "--port", "8081",
           #"--metrics", 
           # Points directly to the Mac folder passed through by minikube --mount-string
           "--model", "/mnt/models/qwen2.5-vl-7b-instruct-q4_K_M.gguf", 
@@ -57,7 +57,7 @@ spec:
           - name: LLAMA_ARG_METRICS
             value: "true"
         ports:
-        - containerPort: 11434
+        - containerPort: 8081
           name: ramalama-port
         resources:
           limits:
@@ -79,8 +79,8 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - port: 11434
-    targetPort: 11434
+  - port: 8081
+    targetPort: 8081
     protocol: TCP
   selector:
     app: ramalama
