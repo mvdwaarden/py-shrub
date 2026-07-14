@@ -1,8 +1,13 @@
 apiVersion: v1
+kind: Namespace
+metadata:
+  name: observability
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: otel-collector
-  namespace: default # Make sure this matches the namespace of your collector pod
+  namespace: observability # Make sure this matches the namespace of your collector pod
 spec:
   selector:
     # CRITICAL: This must exactly match the labels on your OTel Collector pod
@@ -26,6 +31,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: otel-collector-conf
+  namespace: observability # Make sure this matches the namespace of your collector pod
   labels:
     app: otel-collector
 data:
@@ -50,7 +56,7 @@ data:
               scrape_interval: 10s
               metrics_path: '/metrics' # llama-server serves Prometheus metrics here natively
               static_configs:
-                - targets: ['ramalama-service:11434']
+                - targets: ['ramalama-service.default.svc.cluster.local:11434']
     processors:
       batch: {}
 
@@ -85,6 +91,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: otel-collector
+  namespace: observability # Make sure this matches the namespace of your collector pod
   labels:
     app: otel-collector
 spec:

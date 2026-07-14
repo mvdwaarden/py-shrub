@@ -8,7 +8,7 @@
 # spec:
 #   exporter:
 #     # Routes telemetry straight to your OTel Collector Service
-#     endpoint: http://otel-collector.default.svc.cluster.local:4317 
+#     endpoint: http://otel-collector.observability.svc.cluster.local:4317 
 #   python:
 #     env:
 #       - name: OTEL_METRICS_EXPORTER
@@ -20,6 +20,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ramalama-deployment
+  namespace: default
   labels:
     app: ramalama
 spec:
@@ -74,6 +75,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: ramalama-service
+  namespace: default
 spec:
   type: ClusterIP
   ports:
