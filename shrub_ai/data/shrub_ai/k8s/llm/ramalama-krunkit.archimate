@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<archimate:model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:archimate="http://www.archimatetool.com/archimate" name="RamaLama Orchestrated AI Deployment Model" id="id-ramalama-k8s-architecture-model" version="5.0.0">
+  <folder name="Strategy" id="id-c2c8ad96b39545d5958f350fd088bd5b" type="strategy"/>
+  <folder name="Business" id="id-fea5f25b3b9647aeb0999a082bcdedef" type="business"/>
+  <folder name="Application" id="id-547b026412ff42048cd729a7625266dd" type="application">
+    <element xsi:type="archimate:ApplicationComponent" name="llama-engine (RamaLama)" id="elem-llama-engine">
+      <documentation>llama-server processing engine with Vulkan-accelerated Venus driver translation logic.</documentation>
+      <property key="Kubernetes Namespace" value="default"/>
+      <property key="Container Image" value="quay.io/ramalama/ramalama:latest"/>
+      <property key="Command Arguments" value="llama-server --host 0.0.0.0 --port 11434 --model /mnt/models/qwen2.5-vl-7b-instruct-q4_K_M.gguf -ngl 999 --threads 6"/>
+      <property key="Environment Variables" value="LLAMA_ARG_ENDPOINT_METRICS=true, LLAMA_ARG_METRICS=true"/>
+      <property key="Resource Request/Limits" value="devic.es/virtio-gpu: 1"/>
+    </element>
+    <element xsi:type="archimate:ApplicationComponent" name="OpenTelemetry Collector Contrib" id="elem-otel-collector">
+      <documentation>Dynamic telemetry pipeline consolidating logs, scraping Prometheus context endpoints, and exporting OTLP streams.</documentation>
+      <property key="Kubernetes Namespace" value="observability"/>
+      <property key="Container Image" value="docker.io/otel/opentelemetry-collector-contrib:latest"/>
+      <property key="Command Arguments" value="--config=/etc/otelcol-contrib/config.yaml"/>
+    </element>
+    <element xsi:type="archimate:ApplicationComponent" name="cert-manager Webhook" id="elem-cm-webhook">
+      <documentation>Admission webhook verifying custom resources and injecting root-CA validation structures.</documentation>
+      <property key="Kubernetes Namespace" value="cert-manager"/>
+      <property key="Version / Tag" value="v1.16.1"/>
+    </element>
+    <element xsi:type="archimate:ApplicationComponent" name="cert-manager Controller" id="elem-cm-controller">
+      <documentation>Core engine controller orchestrating cryptographic certificate generation and lifecycle verification.</documentation>
+      <property key="Kubernetes Namespace" value="cert-manager"/>
+      <property key="Version / Tag" value="v1.16.1"/>
+    </element>
+    <element xsi:type="archimate:ApplicationInterface" name="llama-server HTTP API" id="elem-llama-api">
+      <documentation>Direct REST and model metrics interface endpoint.</documentation>
+      <property key="Container Port" value="11434"/>
+    </element>
+  </folder>
+  <folder name="Technology &amp; Physical" id="id-8571b53707bd4e01aed4356e5d7561e1" type="technology">
+    <element xsi:type="archimate:Node" name="Minikube Virtual Host" id="elem-host-node">
+      <documentation>Local QEMU/Hyperkit VM hypervisor representing the host node running on macOS (Apple Silicon).</documentation>
+    </element>
+    <element xsi:type="archimate:Device" name="virtio-gpu (Render Node)" id="elem-host-gpu">
+      <documentation>Direct rendering manager (DRM) node passed down from the macOS host into the virtualized hypervisor.</documentation>
+      <property key="Mounted Host Path / Port" value="/dev/dri/renderD128"/>
+    </element>
+    <element xsi:type="archimate:Path" name="Host Models Directory" id="elem-host-models">
+      <documentation>Physical host path containing local GGUF/GGML models exposed via Minikube file-sharing.</documentation>
+      <property key="Mounted Host Path / Port" value="/mnt/models"/>
+    </element>
+    <element xsi:type="archimate:Path" name="Host Container Logs Spool" id="elem-host-logs">
+      <documentation>Direct mount path on the host VM filesystem containing output buffers from container standard out.</documentation>
+      <property key="Mounted Host Path / Port" value="/var/log/pods"/>
+    </element>
+    <element xsi:type="archimate:Node" name="default Namespace" id="elem-ns-default">
+      <documentation>Kubernetes boundary hosting core LLM workloads and application execution engines.</documentation>
+    </element>
+    <element xsi:type="archimate:Node" name="kube-system Namespace" id="elem-ns-kube-system">
+      <documentation>Namespace holding hardware orchestration, drivers, and VM physical integrations.</documentation>
+    </element>
+    <element xsi:type="archimate:Node" name="observability Namespace" id="elem-ns-observability">
+      <documentation>Logical segment containing log shippers, scrapers, and local diagnostic telemetry targets.</documentation>
+    </element>
+    <element xsi:type="archimate:Node" name="cert-manager Namespace" id="elem-ns-cert-manager">
+      <documentation>Dynamic PKI validation controller and CA injector boundary.</documentation>
+    </element>
+    <element xsi:type="archimate:SystemSoftware" name="generic-device-plugin" id="elem-device-plugin">
+      <documentation>DaemonSet scanning and exposing host render paths as schedulable virtual cluster GPU resources.</documentation>
+      <property key="Kubernetes Namespace" value="kube-system"/>
+      <property key="Container Image" value="squat/generic-device-plugin:latest"/>
+      <property key="Resource Request/Limits" value="CPU: 50m, Memory: 10Mi (Requests) / 20Mi (Limits)"/>
+    </element>
+    <element xsi:type="archimate:Artifact" name="GGUF Model Weights" id="elem-gguf-weights">
+      <documentation>Local quantized weights file loaded in system memory during engine boot sequence.</documentation>
+      <property key="Command Arguments" value="qwen2.5-vl-7b-instruct-q4_K_M.gguf, Qwen2.5-VL-7B-Instruct-F16.gguf"/>
+    </element>
+    <element xsi:type="archimate:Artifact" name="OTel ConfigMap" id="elem-otel-config">
+      <documentation>The pipeline settings YAML. Handles filelog tailing and pipelines to OTLP exporter destinations.</documentation>
+      <property key="Kubernetes Namespace" value="observability"/>
+      <property key="Version / Tag" value="otel-collector-conf"/>
+    </element>
+    <element xsi:type="archimate:TechnologyInterface" name="OTel Collector gRPC Receiver" id="elem-otel-grpc-port">
+      <property key="Container Port" value="4317"/>
+    </element>
+    <element xsi:type="archimate:TechnologyInterface" name="OTel Collector HTTP Receiver" id="elem-otel-http-port">
+      <property key="Container Port" value="4318"/>
+    </element>
+    <element xsi:type="archimate:TechnologyService" name="otel-collector Service" id="elem-otel-service">
+      <documentation>Cluster Service routing internal workloads telemetry streams over gRPC and HTTP ports.</documentation>
+      <property key="Kubernetes Namespace" value="observability"/>
+    </element>
+    <element xsi:type="archimate:TechnologyService" name="Host Jaeger Endpoint" id="elem-jaeger-endpoint">
+      <documentation>Diagnostic host application acting as an external target for collector spans.</documentation>
+      <property key="Mounted Host Path / Port" value="host.minikube.internal:4317"/>
+    </element>
+  </folder>
+  <folder name="Motivation" id="id-177201c949294b179d83ba5aaf8f1f8c" type="motivation"/>
+  <folder name="Implementation &amp; Migration" id="id-5cb00e385cb9488a93d0e914ddf7393f" type="implementation_migration"/>
+  <folder name="Other" id="id-15b1b1ebf2564baba362dc3e002bbf53" type="other"/>
+  <folder name="Relations" id="id-5efda20c813f49dfb9e24b754a225e30" type="relations">
+    <element xsi:type="archimate:AssignmentRelationship" id="rel-plugin-in-namespace" source="elem-ns-kube-system" target="elem-device-plugin"/>
+    <element xsi:type="archimate:AssignmentRelationship" id="rel-rama-in-default" source="elem-ns-default" target="elem-llama-engine"/>
+    <element xsi:type="archimate:AssignmentRelationship" id="rel-otel-in-obs" source="elem-ns-observability" target="elem-otel-collector"/>
+    <element xsi:type="archimate:AssignmentRelationship" id="rel-cm-webhook-in-cm" source="elem-ns-cert-manager" target="elem-cm-webhook"/>
+    <element xsi:type="archimate:AssignmentRelationship" id="rel-cm-ctrl-in-cm" source="elem-ns-cert-manager" target="elem-cm-controller"/>
+    <element xsi:type="archimate:ServingRelationship" id="rel-host-gpu-serves-plugin" source="elem-host-gpu" target="elem-device-plugin"/>
+    <element xsi:type="archimate:ServingRelationship" id="rel-plugin-serves-llama" source="elem-device-plugin" target="elem-llama-engine"/>
+    <element xsi:type="archimate:ServingRelationship" id="rel-models-serves-llama" source="elem-host-models" target="elem-llama-engine"/>
+    <element xsi:type="archimate:CompositionRelationship" id="rel-rama-composes-api" source="elem-llama-engine" target="elem-llama-api"/>
+    <element xsi:type="archimate:CompositionRelationship" id="rel-otel-composes-grpc" source="elem-otel-collector" target="elem-otel-grpc-port"/>
+    <element xsi:type="archimate:CompositionRelationship" id="rel-otel-composes-http" source="elem-otel-collector" target="elem-otel-http-port"/>
+    <element xsi:type="archimate:RealizationRelationship" id="rel-svc-realizes-grpc" source="elem-otel-service" target="elem-otel-grpc-port"/>
+    <element xsi:type="archimate:RealizationRelationship" id="rel-svc-realizes-http" source="elem-otel-service" target="elem-otel-http-port"/>
+    <element xsi:type="archimate:AccessRelationship" id="rel-llama-reads-weights" source="elem-llama-engine" target="elem-gguf-weights"/>
+    <element xsi:type="archimate:AccessRelationship" id="rel-otel-reads-config" source="elem-otel-collector" target="elem-otel-config"/>
+    <element xsi:type="archimate:ServingRelationship" id="rel-logs-serves-otel" source="elem-host-logs" target="elem-otel-collector"/>
+    <element xsi:type="archimate:AccessRelationship" id="rel-otel-scrapes-llama" source="elem-otel-collector" target="elem-llama-api"/>
+    <element xsi:type="archimate:FlowRelationship" id="rel-llama-to-otel-svc" source="elem-llama-engine" target="elem-otel-service"/>
+    <element xsi:type="archimate:FlowRelationship" id="rel-otel-to-jaeger" source="elem-otel-collector" target="elem-jaeger-endpoint"/>
+  </folder>
+  <folder name="Views" id="id-62bbf8c96ccc4ee5a9515c5af0aa8f33" type="diagrams">
+    <element xsi:type="archimate:ArchimateDiagramModel" name="New ArchiMate View" id="id-a77cd6c034fb47cea5e47018aff22873">
+      <child xsi:type="archimate:DiagramObject" id="id-e1d016b798bb4c9199c674b8b7f75f55" targetConnections="id-2e614f40a5714d008a2691a5ff06112a" archimateElement="elem-cm-controller">
+        <bounds x="170" y="290" width="120" height="55"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-1942f2c5b54b4915bd7826112deb73ba" targetConnections="id-3734213f58f94052b83ba93ef8bee6e4" archimateElement="elem-cm-webhook">
+        <bounds x="320" y="290" width="120" height="55"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-6be0b3f0015b4694b0520168c63a4f26" targetConnections="id-f4ef1b9c03f941ad88b2a7cca4f68dd8 id-dcfa07dd25e0486e8e9b951b5f6e6d9e id-782ae0a3a79d413ab58a2cd29a49c72b" archimateElement="elem-llama-engine">
+        <bounds x="479" y="290" width="120" height="55"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-96a3810be7344342a1ee775c92d1a20b" source="id-6be0b3f0015b4694b0520168c63a4f26" target="id-df187c908d324f8a82674aca0e82183c" archimateRelationship="rel-rama-composes-api"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-4e097ce5c7734eafa1dff7e6bcc6a7dc" source="id-6be0b3f0015b4694b0520168c63a4f26" target="id-3c21302967104b59836b3214985f34b3" archimateRelationship="rel-llama-reads-weights"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-c454d9c0f93741d6bd83d5bc816b9ab4" source="id-6be0b3f0015b4694b0520168c63a4f26" target="id-cc33bebbcfeb442882efeb1412c7033f" archimateRelationship="rel-llama-to-otel-svc"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-df187c908d324f8a82674aca0e82183c" targetConnections="id-96a3810be7344342a1ee775c92d1a20b id-ecf0776a3bc14905964da2c19ec54ec2" archimateElement="elem-llama-api">
+        <bounds x="657" y="290" width="120" height="55"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-c8e1a41610d34efabc2654b315b0e960" targetConnections="id-e250e424a8414c86b8a0b69613524b8c id-47297dee552e41f1b855fac0568930ea" archimateElement="elem-otel-collector">
+        <bounds x="861" y="290" width="292" height="55"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-ecf0776a3bc14905964da2c19ec54ec2" source="id-c8e1a41610d34efabc2654b315b0e960" target="id-df187c908d324f8a82674aca0e82183c" archimateRelationship="rel-otel-scrapes-llama"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-9595926f4ad244f5b887109e63868350" source="id-c8e1a41610d34efabc2654b315b0e960" target="id-a44635993e164e078b0e1946673b130a" archimateRelationship="rel-otel-to-jaeger"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-10c837e9c8de4c52b20c29ecd104e026" source="id-c8e1a41610d34efabc2654b315b0e960" target="id-3a7b8af91a634d3fa059a9e7d0bd2a74" archimateRelationship="rel-otel-composes-grpc"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-787842db20624640b991bc0a5750f8c5" source="id-c8e1a41610d34efabc2654b315b0e960" target="id-e927fbcb88ef4fa79e9f49b3acdad247" archimateRelationship="rel-otel-composes-http"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-4e3ccfa75f614d05aa983792efb96d2e" source="id-c8e1a41610d34efabc2654b315b0e960" target="id-31a92048fe5045bca11289d24396e0d0" archimateRelationship="rel-otel-reads-config"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-84e10f89af6642659b5ba36a07cf6614" archimateElement="elem-ns-cert-manager">
+        <bounds x="241" y="180" width="120" height="55"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-3734213f58f94052b83ba93ef8bee6e4" source="id-84e10f89af6642659b5ba36a07cf6614" target="id-1942f2c5b54b4915bd7826112deb73ba" archimateRelationship="rel-cm-webhook-in-cm"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-2e614f40a5714d008a2691a5ff06112a" source="id-84e10f89af6642659b5ba36a07cf6614" target="id-e1d016b798bb4c9199c674b8b7f75f55" archimateRelationship="rel-cm-ctrl-in-cm"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-bb048457ba814b3d9d4639c8d13229b8" archimateElement="elem-ns-default">
+        <bounds x="552" y="180" width="120" height="55"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-f4ef1b9c03f941ad88b2a7cca4f68dd8" source="id-bb048457ba814b3d9d4639c8d13229b8" target="id-6be0b3f0015b4694b0520168c63a4f26" archimateRelationship="rel-rama-in-default"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-4533de46370c478e90ee303c65865f4f" targetConnections="id-bd03a755076d47199779b130e10ecca9 id-de1168a3c6114cfc9c3c4fbb9e85038a" archimateElement="elem-device-plugin">
+        <bounds x="408" y="504" width="120" height="55"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-dcfa07dd25e0486e8e9b951b5f6e6d9e" source="id-4533de46370c478e90ee303c65865f4f" target="id-6be0b3f0015b4694b0520168c63a4f26" archimateRelationship="rel-plugin-serves-llama"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-3c21302967104b59836b3214985f34b3" targetConnections="id-4e097ce5c7734eafa1dff7e6bcc6a7dc" archimateElement="elem-gguf-weights">
+        <bounds x="564" y="504" width="120" height="55"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-832859b5cddb45839b540502b51fbe53" archimateElement="elem-host-logs">
+        <bounds x="766" y="396" width="120" height="55"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-e250e424a8414c86b8a0b69613524b8c" source="id-832859b5cddb45839b540502b51fbe53" target="id-c8e1a41610d34efabc2654b315b0e960" archimateRelationship="rel-logs-serves-otel"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-a44635993e164e078b0e1946673b130a" targetConnections="id-9595926f4ad244f5b887109e63868350" archimateElement="elem-jaeger-endpoint">
+        <bounds x="1065" y="492" width="120" height="55"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-d241eafc4b054741bb5c1f177df132e1" archimateElement="elem-host-models">
+        <bounds x="493" y="672" width="120" height="55"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-782ae0a3a79d413ab58a2cd29a49c72b" source="id-d241eafc4b054741bb5c1f177df132e1" target="id-6be0b3f0015b4694b0520168c63a4f26" archimateRelationship="rel-models-serves-llama"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-6d31b174f2464a5599828bdbe25082ca" archimateElement="elem-ns-kube-system">
+        <bounds x="408" y="180" width="120" height="55"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-bd03a755076d47199779b130e10ecca9" source="id-6d31b174f2464a5599828bdbe25082ca" target="id-4533de46370c478e90ee303c65865f4f" archimateRelationship="rel-plugin-in-namespace"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-b871cdd21d8747108b1fe230d73ce809" archimateElement="elem-host-node">
+        <bounds x="693" y="672" width="120" height="55"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-4a601a1de07a46499757747071162279" archimateElement="elem-ns-observability">
+        <bounds x="885" y="180" width="120" height="55"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-47297dee552e41f1b855fac0568930ea" source="id-4a601a1de07a46499757747071162279" target="id-c8e1a41610d34efabc2654b315b0e960" archimateRelationship="rel-otel-in-obs"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-3a7b8af91a634d3fa059a9e7d0bd2a74" targetConnections="id-8c144c191fee46d7821089ed203e4270 id-10c837e9c8de4c52b20c29ecd104e026" archimateElement="elem-otel-grpc-port">
+        <bounds x="960" y="588" width="120" height="55"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-e927fbcb88ef4fa79e9f49b3acdad247" targetConnections="id-787842db20624640b991bc0a5750f8c5 id-7706a719a37b4d7fb6cfb90f42e07684" archimateElement="elem-otel-http-port">
+        <bounds x="885" y="492" width="120" height="55"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-cc33bebbcfeb442882efeb1412c7033f" targetConnections="id-c454d9c0f93741d6bd83d5bc816b9ab4" archimateElement="elem-otel-service">
+        <bounds x="693" y="492" width="120" height="151"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-8c144c191fee46d7821089ed203e4270" source="id-cc33bebbcfeb442882efeb1412c7033f" target="id-3a7b8af91a634d3fa059a9e7d0bd2a74" archimateRelationship="rel-svc-realizes-grpc"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-7706a719a37b4d7fb6cfb90f42e07684" source="id-cc33bebbcfeb442882efeb1412c7033f" target="id-e927fbcb88ef4fa79e9f49b3acdad247" archimateRelationship="rel-svc-realizes-http"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-31a92048fe5045bca11289d24396e0d0" targetConnections="id-4e3ccfa75f614d05aa983792efb96d2e" archimateElement="elem-otel-config">
+        <bounds x="1200" y="290" width="120" height="55"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-d7ea0e29bc8e4eda840ecea64d25fb1d" archimateElement="elem-host-gpu">
+        <bounds x="336" y="672" width="120" height="55"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-de1168a3c6114cfc9c3c4fbb9e85038a" source="id-d7ea0e29bc8e4eda840ecea64d25fb1d" target="id-4533de46370c478e90ee303c65865f4f" archimateRelationship="rel-host-gpu-serves-plugin"/>
+      </child>
+    </element>
+  </folder>
+  <purpose>Highly detailed structural representation of a local Kubernetes environment running hardware-accelerated Vulkan/Metal inference, secured by cert-manager PKI, and scraped by an OpenTelemetry Collector.</purpose>
+</archimate:model>
