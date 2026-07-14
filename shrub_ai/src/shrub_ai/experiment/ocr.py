@@ -4,11 +4,13 @@ from shrub_ai.experiment.llm_chat import OllamaChat, OpenAiChat
 
 # 1. Define your drawing file path and choice of model
 TEST_NR = 5
-IMAGE_PATH = f"./data/shrub_ai/ocr/test{TEST_NR}.png" 
+IMAGE_PATH = "/Users/mando/Documents/projects/py-shrub/shrub_ai/data/shrub_ai/ocr/test5.png"
+#IMAGE_PATH = f"./data/shrub_ai/ocr/test{TEST_NR}.png" 
 #MODEL_NAME = "qwen2.5vl:7b"  # or 'llama3.2-vision' / 'glm-ocr'
-MODEL_NAME = "qwen2.5-vl-7b-instruct-q4_K_M.gguf"
+MINIKUBE_RAMALAMA_MODEL_NAME = "qwen2.5-vl-7b-instruct-q4_K_M.gguf"
 MINIKUBE_RAMALAMA_URL = "http://localhost:8081"
 OLLAMA_URL = "http://localhost:11434"
+OLLAMA_MODEL_NAME = "qwen2.5"
 # Quick safety check
 if not os.path.exists(IMAGE_PATH):
     raise FileNotFoundError(f"Could not find the sketch image at: {IMAGE_PATH}")
@@ -71,20 +73,25 @@ GENERIC_INSTRUCTION = """
 """
 
 
-# Choose the appropriate prompt based on your needs
-prompt_instructions = GENERIC_INSTRUCTION.format(
-    TYPE="BPMN"
-)  
-
-print(f"🔄 Processing image with local model '{MODEL_NAME}'...")
 start_time = datetime.datetime.now()
 try:
-    client = OpenAiChat(url=MINIKUBE_RAMALAMA_URL)
-    
-    # 3. Call the Ollama Python client
+    if True:
+        client = OpenAiChat(url=MINIKUBE_RAMALAMA_URL)
+        model_name = MINIKUBE_RAMALAMA_MODEL_NAME
+    else:
+        client = OllamaChat(url=OLLAMA_URL)
+        model_name = OLLAMA_MODEL_NAME
+
+    # Choose the appropriate prompt based on your needs
+    prompt_instructions = GENERIC_INSTRUCTION.format(
+        TYPE="BPMN"
+    )  
+
+    print(f"🔄 Processing image with local model '{model_name}'...")
+
     if True:
         response_content = client.chat(
-            model_name=MODEL_NAME,
+            model_name=model_name,
             prompt_instructions=prompt_instructions,
             images=[IMAGE_PATH]  # Pass the file path directly in the list            
         )
